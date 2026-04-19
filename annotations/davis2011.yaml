@@ -1,0 +1,577 @@
+# =====================================================================
+#  Davis et al. 2011 — "TTC21B contributes both causal and modifying
+#  alleles across the ciliopathy spectrum" (Nature Genetics)
+#
+#  Annotation source: manual (human curator). 34 PDF annotations
+#  (33 highlights + 1 callout) plus a summary-table row from the
+#  corpus annotator.
+#
+#  Ground truth; AI transformations flagged.
+# =====================================================================
+
+publication:
+  id: "PMID:21258341"
+  doi: "10.1038/ng.756"
+  citation: "Davis EE, Zhang Q, Liu Q, et al. Nat Genet 2011;43:189-196"
+  title: "TTC21B contributes both causal and modifying alleles across the ciliopathy spectrum"
+
+provenance:
+  curation_context:
+    program: "Brigham Genetic Medicine (BGM), Undiagnosed Diseases Network (UDN)"
+    scope: >
+      Curation performed in the context of a clinical-genomics program
+      focused on causal and candidate gene identification in undiagnosed
+      patients.
+  annotator: "Vladimir Seplyarskiy"
+  annotator_style_note: >
+    This annotator emphasises numerical claims, effect sizes, and
+    methodological critique rather than slot-labelling of phenotype
+    passages. Curator style differs from the annotator of Jossin
+    ("alico"), whose callouts explicitly labelled phenotype/mechanism
+    slots. Relevant for cross-paper coverage-rate comparisons.
+
+# =====================================================================
+#  Model extensions surfaced by this paper
+# =====================================================================
+model_extensions_surfaced:
+  - id: ME-D1
+    dimension: knowledge_domain_priority
+    description: >
+      Annotator's summary used a compound value with explicit priority:
+      "Model Organism (primary) Human Genetics Functional (somewhat)".
+      This is stronger than Jossin's compound value: it declares an
+      ordering, not just a set. Proposed: knowledge_domain remains
+      multi-valued, with optional priority_rank: 1,2,3,... attached per
+      value, or an explicit primary_knowledge_domain scalar field
+      (analogous to primary_method introduced for Jossin).
+  - id: ME-D2
+    dimension: variant_ascertainment
+    description: >
+      The paper studies two populations of variants with different
+      epistemic status: (a) variants observed in patients (~14 in
+      pedigrees / 38 heterozygous cases), and (b) variants tested
+      functionally regardless of patient observation (40 total in
+      zebrafish; 17 in mIMCD3; 6 in rat retina). The current model has
+      no way to distinguish "variant discovered in patients" from
+      "variant tested because it was in a SNP database" or "variant
+      found in controls." Annotator explicitly flagged this issue in
+      Special Considerations #5. Proposed values:
+      OBSERVED_IN_CASES | OBSERVED_IN_CONTROLS | FROM_DATABASE | SYNTHETIC.
+  - id: ME-D3
+    dimension: curator_critique_on_assertion
+    description: >
+      The one callout on this paper is a methodological critique of an
+      assertion, not a slot-label. The current model has no structured
+      way to attach a curator's concern to a specific publication-level
+      assertion. Proposed: curator_critique sub-block on
+      GeneticEvidenceAssertion with raised_by / concern / status fields.
+
+# =====================================================================
+#  GeneticEvidence items
+# =====================================================================
+# Per the annotator's Special Consideration #5, in vivo/in vitro
+# functional testing is treated as separate evidence items from the
+# patient-variant pedigree evidence, even though the paper interleaves
+# them. Decomposition:
+#   GE-1: Case-control resequencing + enrichment statistics
+#   GE-2: Zebrafish in vivo complementation of 40 variants
+#   GE-3: mIMCD3 in vitro cilia-length rescue of 17 variants
+#   GE-4: Rat retinal in vivo electroporation of 6 variants
+#   GE-5: Pedigree segregation evidence (6 families)
+#   GE-6: Founder haplotype analysis of p.Pro209Leu
+# =====================================================================
+
+evidence:
+
+  # --------------------------------------------------------------------
+  - id: GE-1
+    label: "Case-control resequencing of TTC21B and pathogenic-allele enrichment"
+    source: manual_annotation
+    knowledge_domain: [POPULATION_GENETICS, HUMAN_GENETICS]
+    primary_knowledge_domain: POPULATION_GENETICS
+    method: [STATISTICAL_GENETICS, CLINICAL_EVIDENCE]
+    target_type: GENE
+    target: "TTC21B"
+    resolution: GENE
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    model_extension_proposed: ME-D2
+    credibility: HIGH
+    credibility_comment: >
+      Per annotator summary: "Characterizations of in vivo and in vitro
+      effects of genetic variants looks very solid." The enrichment
+      result itself is supported by permutation analysis.
+    special_considerations:
+      - key: "cohort_composition"
+        value: >
+          753 clinically diverse ciliopathy cases (NPHP, JBTS, BBS, JATD,
+          MKS); 398 unaffected controls. No preselection for known
+          ciliopathy gene mutations or linkage data.
+      - key: "variant_yield"
+        value: >
+          48 distinct previously unreported variants in TTC21B coding
+          sequence (2 frameshifts, 2 nonsense, 4 splice junction,
+          40 missense).
+      - key: "ancestry_stratification"
+        value: >
+          Enrichment statistics computed on northern European subcohort
+          only (cases n=1110 chromosomes, controls n=610 chromosomes)
+          to exclude bias from ethnicity / consanguinity.
+    assertions:
+      - id: GE-1.A1
+        statement: "Overall nucleotide change frequency is similar in cases vs controls"
+        source_span:
+          page: 7
+          text: >
+            "we noted no significant difference in the frequency of
+            newly discovered nucleotide changes per chromosome analyzed
+            in the coding regions of TTC21B (cases = 3.4% (38 out of
+            1,110), controls = 2.0% (12 out of 610), P = 0.06)"
+        callout: null
+      - id: GE-1.A2
+        statement: "Pathogenic variants are significantly enriched in cases vs controls"
+        source_span:
+          page: 7
+          text: >
+            "upon consideration of pathogenic changes only, we observed
+            a significant enrichment of pathogenic variants in northern
+            European cases versus controls (cases = 2.5% (28 out of
+            1,110), controls = 0.06% (4 out of 610), P = 0.003)"
+        callout: null
+        supporting_detail: "Reproduced upon permutation analysis."
+      - id: GE-1.A3
+        statement: "8 of 11 benign alleles were detected exclusively in controls"
+        source_span:
+          page: 3
+          text: >
+            "3 out of 11 alleles were detected in similar frequencies in
+            cases and controls and 8 out of 11 alleles were detected
+            exclusively in controls"
+        callout:
+          page: 3
+          text: >
+            "Looks unrealistic, they have twice as many cases, so any
+            neutral variants have higher chance to be observed in
+            'case' group"
+        curator_critique:
+          raised_by: "Vladimir Seplyarskiy"
+          concern: >
+            Annotator notes that with ~1110 case chromosomes vs ~610
+            control chromosomes (roughly 2:1 case-to-control ratio in
+            the resequenced northern European subcohort), random
+            neutral variants have higher prior probability of
+            appearing in the case group simply by sampling. Finding
+            that 8/11 benign alleles are "exclusively in controls"
+            may therefore understate the expected baseline.
+          status: >
+            Unresolved. Does not invalidate the main pathogenic-allele
+            enrichment result (GE-1.A2, which uses proper permutation
+            testing), but weakens the informal corroborating claim in
+            GE-1.A3.
+          model_extension_proposed: ME-D3
+
+  # --------------------------------------------------------------------
+  - id: GE-2
+    label: "Zebrafish in vivo complementation of 40 TTC21B missense variants"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [IN_VIVO_EXPERIMENT]
+    target_type: VARIANT
+    resolution: VARIANT
+    organism: "Vertebrate (zebrafish, Danio rerio)"
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS, FROM_DATABASE]
+    model_extension_proposed: ME-D2
+    measurement_target: [LOCALIZATION, EXISTENCE, ACTIVITY]
+    reviewer_query:
+      issue: >
+        The 40 variants tested include: newly discovered variants from
+        the 753-case cohort AND from the 398-control cohort AND 4 SNPs
+        from HapMap. The functional testing is therefore blind to
+        patient observation — a design choice the authors highlight
+        explicitly. Current model lacks a dimension for this. See
+        ME-D2 in model_extensions_surfaced.
+    credibility: HIGH
+    credibility_comment: >
+      Sample size (n=71-180 embryos per injection, masked scoring),
+      two independent morpholinos, and explicit exclusion of mRNA
+      toxicity all support the credibility assessment.
+    special_considerations:
+      - key: "variant_count_by_class"
+        value: >
+          40 nonsynonymous variants tested. Classifications: 18
+          hypomorphic, 11 null, 11 benign.
+      - key: "ortholog_reciprocity"
+        value: >
+          Single zebrafish ortholog (68% identity, 84% similarity).
+          Reciprocal BLAST confirmed. Reduces concern about paralog
+          ambiguity.
+      - key: "rescue_validation"
+        value: >
+          tb-MO and sb-MO gave comparable rescue efficiency;
+          mutant-mRNA-alone toxicity excluded.
+    assertions:
+      - id: GE-2.A1
+        statement: "18 of 40 TTC21B variants are functionally hypomorphic in zebrafish rescue"
+        source_span:
+          page: 3
+          text: >
+            "nearly half of TTC21B variants (n = 18 out of 40) were
+            significantly worse than wildtype rescue but were
+            significantly better than tb-MO alone (P < 0.05 for each
+            comparison), indicating they were likely hypomorphic alleles"
+        callout: null
+      - id: GE-2.A2
+        statement: "11 of 40 TTC21B variants are functionally null"
+        source_span:
+          page: 3
+          text: >
+            "functionally null alleles (n = 11; not significantly
+            improved from tb-MO alone)"
+        callout: null
+      - id: GE-2.A3
+        statement: "11 of 40 TTC21B variants are functionally benign"
+        source_span:
+          page: 3
+          text: >
+            "The remaining alleles were scored as benign (n = 11; not
+            significantly exacerbated in comparison to wildtype rescue)"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-3
+    label: "mIMCD3 in vitro rescue of cilia length defects"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [IN_VITRO_EXPERIMENT]
+    target_type: VARIANT
+    resolution: VARIANT
+    measurement_target: [LOCALIZATION, EXISTENCE, STABILITY]
+    normalization_note:
+      original_annotator_value: "Localization and protein expression"
+      normalized_to: ["LOCALIZATION", "EXISTENCE"]
+      additional_ai_inferred: "STABILITY"
+      ai_rationale: >
+        Annotator's summary table gave "Localization and protein
+        expression". The paper measures cilia length rescue
+        (activity-like readout), localization (immunofluorescence),
+        and protein stability (protein blot with Na+/K+-ATPase
+        loading control, plus RT-PCR for transcript level).
+        STABILITY added by AI reviewer; flagged for confirmation.
+      type: ai_inferred_addition
+      reviewer_confirmation_requested: true
+    credibility: HIGH
+    special_considerations:
+      - key: "cell_line"
+        value: "mIMCD3 (mouse inner medullary collecting duct)"
+      - key: "variants_tested"
+        value: >
+          17 variants: the same 15 tested morphometrically in zebrafish
+          plus p.Leu1002Val and p.Asp1041Asn.
+      - key: "measurements"
+        value: >
+          Cilia length (n=85-155 cilia per construct); cellular
+          localization; protein level by western blot; transcript
+          level by RT-PCR.
+    assertions:
+      - id: GE-3.A1
+        statement: "4 variants functionally null in mIMCD3 assay (fail to rescue)"
+        source_span:
+          page: 4
+          text: >
+            "four variants were indistinguishable from mIMCD3-Ttc21b
+            shRNA cells alone (p.Met280Val, p.Pro753Leu, p.Arg939Trp
+            and p.Ile1208Ser), suggesting that they are functional
+            nulls in this assay"
+        callout: null
+      - id: GE-3.A2
+        statement: >
+          p.Leu795Pro is the only variant expressed normally and
+          localized correctly; its effect is inferred to be biochemical
+        source_span:
+          page: 4
+          text: >
+            "The p.Leu795Pro mutant protein was the only variant that
+            was expressed at normal levels and localized correctly to
+            the basal body, suggesting that its effect probably lies
+            in the biochemical function of TTC21B"
+        callout: null
+      - id: GE-3.A3
+        statement: "Zebrafish and mIMCD3 classifications are fully concordant"
+        source_span:
+          page: 4
+          text: >
+            "these results are fully concordant with our in vivo
+            zebrafish scoring results"
+        callout: null
+        note: >
+          Inter-assay consistency claim — a meta-assertion about the
+          relationship between two GeneticEvidence items (GE-2, GE-3).
+
+  # --------------------------------------------------------------------
+  - id: GE-4
+    label: "Rat retinal in vivo electroporation of mutant TTC21B"
+    source: manual_annotation
+    knowledge_domain: [MODEL_ORGANISM]
+    method: [IN_VIVO_EXPERIMENT]
+    target_type: VARIANT
+    resolution: VARIANT
+    organism: "Mammal (rat)"
+    reviewer_disagreement:
+      issue: >
+        Annotator summary listed Organism = "Mammal (mouse) Vertebrate
+        (zebra fish)". This omits rat, which is used specifically for
+        the retinal photoreceptor experiments. AI reviewer adds RAT to
+        the organism set.
+      original_annotator_value: ["mouse", "zebrafish"]
+      ai_proposed_value: ["mouse", "rat", "zebrafish"]
+      severity: minor
+      type: ai_correction_for_confirmation
+    measurement_target: [LOCALIZATION, EXISTENCE]
+    credibility: HIGH
+    special_considerations:
+      - key: "tissue"
+        value: "neonatal rat retina (photoreceptor sensory cilia)"
+      - key: "rationale"
+        value: >
+          Ttc21b-null mice die at E18.5, precluding study of postnatal
+          phenotypes. Rat retinal electroporation chosen to access
+          photoreceptor phenotypes relevant to the human ciliopathy
+          cohort's retinal degeneration.
+      - key: "variants_tested"
+        value: "6 variants (subset of the zebrafish panel)"
+    assertions:
+      - id: GE-4.A1
+        statement: >
+          Ttc21b localizes specifically to the transition zone of the
+          mouse photoreceptor sensory cilium
+        source_span:
+          page: 4
+          text: >
+            "it localizes specifically to the transition zone of the
+            mouse photoreceptor sensory cilia, as evidenced by
+            localization just proximal to endogenous murine retinitis
+            pigmentosa 1 (Rp1)"
+        callout: null
+      - id: GE-4.A2
+        statement: >
+          5 of 6 mutant proteins mislocalize partially in rat
+          photoreceptor cells (hypomorph signature)
+        source_span:
+          page: 5
+          text: >
+            "the p.Pro209Leu, p.Arg411Gly, p.Leu1002Val, p.Thr1103Arg
+            and p.Asp1041Asn mutant proteins mislocalized partially in
+            the photoreceptor, consistent with the notion that they
+            are hypomorphic alleles in vivo"
+        callout: null
+      - id: GE-4.A3
+        statement: >
+          p.Ile1208Ser protein is undetectable in transfected
+          photoreceptors (null signature)
+        source_span:
+          page: 5
+          text: >
+            "the p.Ile1208Ser protein is undetectable in transfected
+            photoreceptor cells, which recapitulates both the in vitro
+            protein analyses and completely fails to rescue ciliary
+            length in vitro, suggesting it is functionally null"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-5
+    label: "Pedigree segregation — 6 families with biallelic TTC21B variants"
+    source: manual_annotation
+    knowledge_domain: [HUMAN_GENETICS]
+    method: [CLINICAL_EVIDENCE, STATISTICAL_GENETICS]
+    target_type: VARIANT
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    model_extension_proposed: ME-D2
+    mode_of_inheritance: AUTOSOMAL_RECESSIVE
+    mendelian_segregation: true
+    exact_variant: true
+    subdomain: "Candidate Gene Study"
+    environmental_factors:
+      annotated_as: not_applicable_or_omitted
+      annotator_note: "Not described"
+    penetrance:
+      value: incomplete
+      annotator_comment: >
+        "In introduction authors mention that variants not completely
+        penetrant. It is impossible to make a conclusion about
+        penetrance from the provided pedigree data." (Special
+        Consideration #1.)
+    genetic_background_considered: true
+    credibility: HIGH
+    credibility_comment: >
+      Per annotator: "Credibility for the effect of p.Pro209Leu is very
+      high, however this is not true for other variants." (Special
+      Consideration #4.) Fewer pedigrees per non-Pro209Leu variant
+      limits evidence strength for those alleles individually.
+    special_considerations:
+      - key: "family_structure"
+        value: >
+          6 families total: 1 JATD (biallelic nonsense + hypomorphic
+          missense), 3 NPHP+extrarenal (compound heterozygotes),
+          2 NPHP (Pro209Leu homozygotes).
+      - key: "variant_observation_asymmetry"
+        value: >
+          Per annotator Special Consideration #5: patient observation
+          covers only a small subset of variants (~14) while
+          functional testing covers 40. GE-5 captures only the
+          patient-observed subset.
+    assertions:
+      - id: GE-5.A1
+        statement: >
+          Six pedigrees show biallelic TTC21B variants segregating
+          with ciliopathy under AR model
+        source_span:
+          page: 5
+          text: >
+            "In six pedigrees, we detected two pathogenic mutations
+            that segregated under an autosomal recessive model"
+        callout: null
+      - id: GE-5.A2
+        statement: >
+          JATD family 3 carries compound heterozygous nonsense +
+          hypomorphic p.Leu795Pro
+        source_span:
+          page: 5
+          text: >
+            "JATD family 3 carried a heterozygous nonsense mutation and
+            a heterozygous nonsynonymous mutation encoding a highly
+            conserved p.Leu795Pro change shown [to] be hypomorphic by
+            in vivo testing"
+        callout: null
+      - id: GE-5.A3
+        statement: >
+          Two families show p.Pro209Leu homozygosity causing isolated
+          NPHP
+        source_span:
+          page: 7
+          text: "p.Pro209Leu homozygotes"
+        callout: null
+        note: "Short span; fuller context is earlier on p.5."
+
+  # --------------------------------------------------------------------
+  - id: GE-6
+    label: "Founder haplotype analysis of p.Pro209Leu"
+    source: manual_annotation
+    knowledge_domain: [POPULATION_GENETICS, HUMAN_GENETICS]
+    primary_knowledge_domain: POPULATION_GENETICS
+    method: [STATISTICAL_GENETICS]
+    target_type: VARIANT
+    target: "p.Pro209Leu"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    credibility: HIGH
+    special_considerations:
+      - key: "approach"
+        value: >
+          Haplotype inspection across coding regions spanning the TTC21B
+          locus in all p.Pro209Leu homozygotes.
+    assertions:
+      - id: GE-6.A1
+        statement: >
+          p.Pro209Leu is a likely founder allele (identical haplotype
+          in all homozygotes)
+        source_span:
+          page: 7
+          text: >
+            "the Leu209-encoding variant is a likely founder allele, as
+            we observed the same haplotype at the coding regions
+            spanning the locus in all p.Pro209Leu homozygotes"
+        callout: null
+
+# =====================================================================
+#  Dimensions the annotator considered and deliberately omitted
+# =====================================================================
+annotator_omitted_dimensions:
+  - dimension: hpo_terms
+    rationale_inferred: >
+      Not populated; paper covers heterogeneous ciliopathy spectrum
+      (NPHP, JBTS, BBS, JATD, MKS)
+    reviewer_suggestion:
+      candidate_terms:
+        - "HP:0000090 (Nephronophthisis)"
+        - "HP:0001320 (Cerebellar vermis hypoplasia — JBTS)"
+        - "HP:0008678 (Renal cyst)"
+        - "HP:0001159 (Syndactyly)"
+      note: >
+        Not added to ground truth. Each sub-phenotype would attach to
+        a different pedigree / evidence item.
+  - dimension: accuracy_of_mapping_to_phenotype
+    rationale_inferred: >
+      Sub-dimensions left blank in summary; ciliopathies have broad
+      phenotypic heterogeneity
+  - dimension: degree_of_overlap
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: severity_of_phenotype
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: indirection
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+
+# =====================================================================
+#  Summary-level crosswalk to the annotator's summary table
+# =====================================================================
+summary_table_crosswalk:
+  original_row:
+    knowledge_domain: "Model Organism (primary) Human Genetics Functional (somewhat)"
+    credibility: "High"
+    credibility_comment: >
+      Characterizations of in vivo and in vitro effects of genetic
+      variants looks very solid
+    resolution: "Variant"
+    target_type: "Variant"
+    mode_of_inheritance: "Autosomal recessive"
+    mendelian_segregation: "True"
+    subdomain: "Candidate Gene Study"
+    environmental_factors: "Not described"
+    penetrance: "False"
+    genetic_background: "True"
+    method: "In Vitro"
+    measurement_target: "Localization and protein expression"
+    organism_in_vivo: "Mammal (mouse) Vertebral (zebra fish)"
+    specificity_of_phenotype: "SNV"
+  transformation_notes:
+    - >
+      Compound knowledge_domain with explicit priority ranking surfaced
+      ME-D1 (priority-weighted multi-valued dimensions).
+    - >
+      Typo 'Vertebral' -> 'Vertebrate' applied silently (obvious
+      orthographic error, no semantic ambiguity).
+    - >
+      Organism set extended with 'rat' per GE-4 reviewer_disagreement —
+      rat retinal electroporation is explicitly described in the paper.
+    - >
+      Decomposed into 6 GeneticEvidence items reflecting the paper's
+      distinct epistemic shapes. Annotator's single summary row is
+      preserved here for traceability.
+    - >
+      Paper contains both variant-cohort (patient-observed, ~14
+      variants) and variant-panel (functional testing, 40 variants)
+      evidence types. ME-D2 (variant_ascertainment dimension) proposed
+      to represent this distinction explicitly.
+    - >
+      'Penetrance = False' in summary table corresponds to 'incomplete
+      penetrance documented but not quantifiable from pedigree data'
+      per annotator Special Consideration #1.
+  reviewer_queries:
+    - >
+      'Specificity_of_phenotype = SNV' in the summary table does not
+      fit the Specificity of phenotype dimension semantically — SNV is
+      a variant type, not a phenotype-specificity descriptor. Flagged
+      as probable mis-placement rather than silently corrected. Curator
+      to confirm intended slot.
+
+# =====================================================================
+#  Reviewer flag summary
+# =====================================================================
+reviewer_flag_summary:
+  queries: 2           # measurement_target STABILITY inclusion; specificity_of_phenotype=SNV
+  suggestions: 1       # HPO term candidates for GE-5
+  disagreements: 1     # organism set (rat omitted from summary table)
+  curator_critiques: 1 # GE-1.A3 statistical concern (from annotator callout)
+  model_extensions_proposed: 3
+    # ME-D1: knowledge_domain priority ranking
+    # ME-D2: variant_ascertainment dimension
+    # ME-D3: curator_critique-on-assertion field

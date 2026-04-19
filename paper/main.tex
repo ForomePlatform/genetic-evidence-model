@@ -21,6 +21,9 @@
 \usepackage{xcolor}
 \usepackage{amsmath,amssymb}
 \usepackage{todonotes}        % \todo{...} and \todo[inline]{...} for draft notes
+\usepackage{lipsum}           % placeholder text; remove before final submission
+\usepackage{morefloats}       % raises the unprocessed-float limit for draft builds
+\usepackage[section]{placeins} % flushes floats at every \section boundary
 \usepackage{hyperref}         % load near last
 \usepackage{cleveref}         % load after hyperref; \cref{} auto-adds "Figure"/"Table"/etc.
 
@@ -76,6 +79,8 @@
 \newcommand{\dimval}[1]{\textsc{\lowercase{#1}}}
 
 % ---------- front matter ----------
+\begin{document}
+
 \title{A Semantic Model of Genetic Evidence for AI-Ready Variant Interpretation}
 % TODO: revise title before submission — current version picks up the ICBO 2026
 % "AI-ready" and "trustworthy AI" theme keywords; alternatives worth considering
@@ -176,11 +181,11 @@ existing standards. (To be completed.)}
 \toprule
 Our dimension & FHIR Evidence & ECO/SEPIO & GA4GH GKS & IAO/OBI \\
 \midrule
-Knowledge Domain     & \todo{} & \todo{} & \todo{} & \todo{} \\
-Method               & \todo{} & ECO:0000\ldots (inference types) & \todo{} & OBI:0000\ldots (assay) \\
-Target / Resolution  & \todo{} & \todo{} & VRS / Statement & \todo{} \\
-Credibility          & \todo{} & SEPIO provenance & \todo{} & \todo{} \\
-Mode of inheritance  & \todo{} & \todo{} & \todo{} & HP:\ldots / HPO \\
+Knowledge Domain     & --- & --- & --- & --- \\
+Method               & --- & ECO:0000\ldots (inference types) & --- & OBI:0000\ldots (assay) \\
+Target / Resolution  & --- & --- & VRS / Statement & --- \\
+Credibility          & --- & SEPIO provenance & --- & --- \\
+Mode of inheritance  & --- & --- & --- & HP:\ldots / HPO \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -329,7 +334,7 @@ block. This is the positive example — shows the model handling a
 textbook GWAS cleanly.}
 
 \begin{lstlisting}[language=yaml, caption={Partial \GeneticEvidence{} annotation for Duerr et al.\ 2006, discovery of the IL23R association in Crohn's disease.}, label={lst:duerr}]
-# Placeholder — full annotation from Section 4 goes here.
+# Placeholder -- full annotation from Section 4 goes here.
 publication:
   citation: "Duerr RH et al., Science 2006;314:1461-3"
 evidence:
@@ -403,7 +408,6 @@ information about its own coverage.}
 contribution and land on the ICBO theme one more time.}
 
 % =====================================================================
-\bibliographystyle{plainurl}
 \bibliography{references}
 % =====================================================================
 
