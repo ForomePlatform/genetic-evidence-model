@@ -1,0 +1,410 @@
+% =====================================================================
+%  A Semantic Model of Genetic Evidence
+%  ICBO 2026 submission — skeleton
+%
+%  Target: Full paper, 8–12 pages (CEUR single-column).
+%  CEUR releases an ICBO-2026-specific .cls late; this skeleton uses the
+%  standard ceurart class which is what ICBO will converge on. If they
+%  release a custom class, change only the \documentclass line.
+% =====================================================================
+
+\documentclass[sigconf,natbib=true]{ceurart}
+
+% ---------- core packages ----------
+\usepackage[T1]{fontenc}
+\usepackage{microtype}        % better typography; load early
+\usepackage{graphicx}
+\usepackage{booktabs}         % nicer tables (\toprule, \midrule, \bottomrule)
+\usepackage{tabularx}         % auto-width columns
+\usepackage{array}
+\usepackage{listings}         % code/YAML listings — chosen over minted for portability
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage{todonotes}        % \todo{...} and \todo[inline]{...} for draft notes
+\usepackage{hyperref}         % load near last
+\usepackage{cleveref}         % load after hyperref; \cref{} auto-adds "Figure"/"Table"/etc.
+
+% ---------- listings setup for YAML annotations ----------
+% Define a lightweight YAML "language" for listings.
+\definecolor{yamlKey}{RGB}{0,90,156}
+\definecolor{yamlStr}{RGB}{163,21,21}
+\definecolor{yamlComment}{RGB}{0,128,0}
+\definecolor{listingBg}{RGB}{248,248,248}
+
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null},
+  keywordstyle=\color{yamlKey}\bfseries,
+  sensitive=true,
+  comment=[l]{\#},
+  commentstyle=\color{yamlComment}\itshape,
+  stringstyle=\color{yamlStr},
+  morestring=[b]',
+  morestring=[b]",
+  moredelim=[l][\color{yamlKey}]{-\ },
+}
+
+\lstset{
+  language=yaml,
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{listingBg},
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{listingBg},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  showstringspaces=false,
+  columns=fullflexible,
+  breaklines=true,
+  breakatwhitespace=true,
+  captionpos=b,
+}
+
+% ---------- typography commands for our model's core terms ----------
+% Using \textsc for the abstract classes so they stand out as technical terms
+% without being as loud as monospace.
+\newcommand{\ScientificEvidence}{\textsc{ScientificEvidence}}
+\newcommand{\EvidenceVariable}{\textsc{EvidenceVariable}}
+\newcommand{\EvidenceAssertion}{\textsc{EvidenceAssertion}}
+\newcommand{\GeneticEvidence}{\textsc{GeneticEvidence}}
+\newcommand{\GeneticEvidenceVariable}{\textsc{GeneticEvidenceVariable}}
+\newcommand{\GeneticEvidenceAssertion}{\textsc{GeneticEvidenceAssertion}}
+
+% For categorical values of dimensions (e.g., STATISTICAL GENETICS), we use
+% small caps so they are visually distinct from prose but not as heavy as code.
+\newcommand{\dimval}[1]{\textsc{\lowercase{#1}}}
+
+% ---------- front matter ----------
+\title{A Semantic Model of Genetic Evidence for AI-Ready Variant Interpretation}
+% TODO: revise title before submission — current version picks up the ICBO 2026
+% "AI-ready" and "trustworthy AI" theme keywords; alternatives worth considering
+% are in the project notes.
+
+% Authors — fill in ORCIDs and emails per CEUR footer requirements.
+\author[1]{Author One}[
+  orcid=0000-0000-0000-0000,
+  email=one@example.org
+]
+\author[1]{Author Two}[
+  orcid=0000-0000-0000-0000,
+  email=two@example.org
+]
+\address[1]{Affiliation, City, Country}
+
+% CEUR requires a conference footnote on the first page. Fill in exact wording
+% from the ICBO 2026 camera-ready template when available.
+\conference{ICBO 2026: 17th International Conference on Biological and
+Biomedical Ontology, July 15--17, 2026, Washington, D.C.}
+
+\begin{abstract}
+% ~200 words. Write last. Structure: (1) the gap, (2) the proposal,
+% (3) contributions, (4) evaluation approach.
+\todo[inline]{Abstract — write last. Target ~200 words. Name the gap
+(existing standards do not fully support basic/pre-clinical genetic evidence),
+state the contribution (semantic model with core + conditional dimensions,
+evaluated via human--AI annotation), and land on the ICBO 2026 theme
+(AI-ready infrastructure for trustworthy variant interpretation).}
+\end{abstract}
+
+\begin{keywords}
+  genetic evidence \sep
+  variant interpretation \sep
+  ontology \sep
+  FHIR \sep
+  ECO \sep
+  SEPIO \sep
+  GA4GH \sep
+  AI-ready data
+\end{keywords}
+
+\maketitle
+
+% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+% =====================================================================
+
+\todo[inline]{Introduction — adapt existing draft. Key moves: (1) establish
+the gap between clinical-trial-oriented standards and basic/preclinical
+genetic evidence, (2) state the two core challenges (Relevance/Specificity
+and Confidence), (3) close with explicit contributions list.}
+
+% Placeholder text — replace with revised version of the existing intro.
+\lipsum[1-2] % remove \lipsum and this line in final draft
+
+\paragraph{Contributions.}
+This paper makes the following contributions:
+\begin{itemize}
+  \item A domain-analysis-driven semantic model for genetic evidence,
+        comprising a small set of core classes
+        (\ScientificEvidence, \EvidenceVariable, \EvidenceAssertion)
+        and their genetic specializations, together with a compact
+        dimensional vocabulary structured by a conditional-activation
+        mechanism.
+  \item A worked mapping of the model to six published genetic-evidence
+        papers spanning human, population, model-organism, and polygenic-score
+        genetics, demonstrating coverage across heterogeneous evidence types.
+  \item A human--AI collaborative annotation workflow, using the model
+        as schema, together with an evaluation of the workflow against
+        manually curated ground-truth annotations.
+  \item An alignment sketch between the model and existing standards
+        (FHIR Evidence, ECO, SEPIO, GA4GH GKS, IAO/OBI, PROV-O).
+\end{itemize}
+
+% =====================================================================
+\section{Background and Related Work}
+\label{sec:background}
+% =====================================================================
+
+\todo[inline]{Background — lightly revise existing draft. Add explicit
+mapping paragraph pointing forward to Table~\ref{tab:standards-mapping}.
+Cite IAO, OBI, and PROV-O in addition to the existing citations.}
+
+% --- subsections if you want them; optional ---
+% \subsection{FHIR Evidence Resources}
+% \subsection{ECO and SEPIO}
+% \subsection{GA4GH Genomic Knowledge Standards}
+% \subsection{ACMG/AMP Variant Interpretation Guidelines}
+
+\begin{table*}[t]
+\centering
+\caption{Alignment sketch between dimensions of the proposed model and
+existing standards. (To be completed.)}
+\label{tab:standards-mapping}
+\begin{tabularx}{\textwidth}{@{}lXXXX@{}}
+\toprule
+Our dimension & FHIR Evidence & ECO/SEPIO & GA4GH GKS & IAO/OBI \\
+\midrule
+Knowledge Domain     & \todo{} & \todo{} & \todo{} & \todo{} \\
+Method               & \todo{} & ECO:0000\ldots (inference types) & \todo{} & OBI:0000\ldots (assay) \\
+Target / Resolution  & \todo{} & \todo{} & VRS / Statement & \todo{} \\
+Credibility          & \todo{} & SEPIO provenance & \todo{} & \todo{} \\
+Mode of inheritance  & \todo{} & \todo{} & \todo{} & HP:\ldots / HPO \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+% =====================================================================
+\section{A Semantic Model of Genetic Evidence}
+\label{sec:model}
+% =====================================================================
+
+\todo[inline]{Model section — reorganize the existing Tables 1 and 2 into
+a single consolidated table (Table~\ref{tab:dimensions}). Add a class
+diagram (Figure~\ref{fig:class-diagram}). Add one SHACL or OWL-Manchester
+snippet for a conditional-dimension activation rule, to give the section
+a formal anchor.}
+
+\subsection{Core Classes}
+
+We define three abstract classes:
+
+\begin{description}
+  \item[\ScientificEvidence] A unit of evidence, typically linked to a
+    publication or dataset, described by a set of dimensions
+    (\cref{tab:dimensions}).
+  \item[\EvidenceVariable] A variable extracted from one or more
+    \ScientificEvidence{} items (for example, \emph{gnomAD AF for variant
+    V}, or \emph{LOD score in family F}), also annotated by relevant
+    dimensions.
+  \item[\EvidenceAssertion] A formal statement or predicate over one or
+    more \EvidenceVariable{} instances, intended to be machine-checkable
+    and composable in decision workflows.
+\end{description}
+
+Specialising these to genetics yields \GeneticEvidence, \GeneticEvidenceVariable,
+and \GeneticEvidenceAssertion.
+
+% ---- class diagram placeholder ----
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5cm][c]{0.8\linewidth}{\centering
+  \emph{Class diagram placeholder}\\[0.5em]
+  \ScientificEvidence{} $\leftarrow$ \GeneticEvidence\\
+  \EvidenceVariable{} $\leftarrow$ \GeneticEvidenceVariable\\
+  \EvidenceAssertion{} $\leftarrow$ \GeneticEvidenceAssertion\\[0.5em]
+  with dimension attachments and conditional activation
+}}
+\caption{Core classes of the model and their genetic specialisations.
+To be replaced with a proper UML/TikZ diagram.}
+\label{fig:class-diagram}
+\end{figure}
+
+\subsection{Dimensions}
+
+\todo[inline]{Consolidated dimension table goes here. Merge current
+Tables 1 (value types) and 2 (dimensions) into one. Columns: Dimension,
+Value type, Cardinality, Objectivity, Activation condition, Required/Optional.
+Fill every cell.}
+
+\begin{table*}[t]
+\centering
+\caption{Dimensions of the \GeneticEvidence{} model. Conditional
+dimensions are activated only when their activation condition holds.}
+\label{tab:dimensions}
+\small
+\begin{tabularx}{\textwidth}{@{}lllllX@{}}
+\toprule
+Dimension & Value type & Cardinality & Objectivity & Activation & Notes \\
+\midrule
+Knowledge Domain & categorical & single & objective & always & \dimval{Human Genetics}, \dimval{Population Genetics}, \dimval{Model Organism}, \dimval{Gene Function}, \ldots \\
+Method           & categorical & single & objective & always & \dimval{Statistical Genetics}, \dimval{In Vivo}, \dimval{In Vitro}, \dimval{Clinical Evidence}, \ldots \\
+Target type      & categorical & single & objective & always & \dimval{Gene}, \dimval{Variant}, \dimval{Region}, \ldots \\
+Resolution       & categorical or interval & single & objective & always & \\
+Credibility      & fuzzy key/value & multiple & subjective & always & \\
+Mode of inheritance & categorical & single & objective & Knowledge~Domain~=~\dimval{Human Genetics} \textbf{and} Target~=~\dimval{Gene} & \\
+Mendelian segregation & boolean & single & objective & \textit{(same)} & \\
+Measurement target & categorical & multiple & objective & Knowledge~Domain~=~\dimval{Gene Function} & \\
+Organism         & categorical & single & objective & Method~=~\dimval{In Vivo} \textbf{or} Knowledge~Domain~=~\dimval{Model Organism} & \\
+Knockout Type    & categorical & single & objective & Knowledge~Domain~=~\dimval{Model Organism} & \dimval{Conditional}, \dimval{Unconditional} \\
+\bottomrule
+\end{tabularx}
+% This table is abbreviated. Full set of dimensions (including sub-dimensions
+% of "Accuracy of mapping to phenotype") goes in the final draft.
+\end{table*}
+
+\subsection{Conditional Dimension Activation}
+
+\todo[inline]{Add one SHACL shape (preferred) or OWL Manchester snippet
+showing how a conditional activation condition is formalised. Use "Mode
+of inheritance is required when Knowledge Domain = Human Genetics and
+Target = Gene" as the example, because it's referenced elsewhere in the
+paper.}
+
+\begin{lstlisting}[language=yaml, caption={Conditional activation rule expressed as a SHACL-like constraint (sketch).}, label={lst:shacl}]
+# When knowledge_domain is HUMAN_GENETICS and target_type is GENE,
+# mode_of_inheritance must be present.
+- id: GeneticEvidenceShape_MoI
+  targetClass: GeneticEvidence
+  condition:
+    and:
+      - path: knowledge_domain
+        hasValue: HUMAN_GENETICS
+      - path: target_type
+        hasValue: GENE
+  requires:
+    path: mode_of_inheritance
+    minCount: 1
+\end{lstlisting}
+
+% =====================================================================
+\section{Worked Examples from the Literature}
+\label{sec:examples}
+% =====================================================================
+
+\todo[inline]{Worked examples. Summary table (Table~\ref{tab:corpus})
+listing all six annotated papers. Then two featured examples in prose,
+each with its YAML annotation as a listing: (1) Duerr 2006 as the clean
+GWAS exemplar, (2) Davis 2011 as the breadth exemplar. Keep Jossin,
+Nelson, Gupta, Inouye as summary-table-only, pointing to the supplementary
+material.}
+
+\begin{table*}[t]
+\centering
+\caption{The six annotated publications and the epistemic shape each
+exercises. Manual annotations are treated as ground truth; AI-drafted
+annotations are evaluated against them and against expert review.}
+\label{tab:corpus}
+\small
+\begin{tabularx}{\textwidth}{@{}llllX@{}}
+\toprule
+Paper & Knowledge Domain(s) & Method(s) & Target & Role \\
+\midrule
+Jossin 2017 (Llgl1)   & Model Organism, Gene Function & In vivo, In vitro        & Gene          & molecular mechanism \\
+Davis 2011 (TTC21B)   & Human, Population, Model Org. & Multi-modal              & Variant/Gene  & breadth exemplar \\
+Nelson 1992 (CD18)    & Human Genetics                & Clinical, In vitro       & Variant       & classical molecular genetics \\
+Gupta 2015 (ATP6AP2)  & Human Genetics                & Clinical, In silico      & Variant       & low-credibility edge case \\
+Duerr 2006 (IL23R)    & Population Genetics           & GWAS, family-based       & Variant       & clean GWAS exemplar \\
+Inouye 2018 (metaGRS) & Population Genetics           & Polygenic prediction     & Score         & model-extension case \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{A Classical Genome-Wide Association Study: Duerr et al. 2006}
+\label{sec:ex-duerr}
+
+\todo[inline]{Prose introduction (~1 paragraph) and the YAML annotation
+block. This is the positive example — shows the model handling a
+textbook GWAS cleanly.}
+
+\begin{lstlisting}[language=yaml, caption={Partial \GeneticEvidence{} annotation for Duerr et al.\ 2006, discovery of the IL23R association in Crohn's disease.}, label={lst:duerr}]
+# Placeholder — full annotation from Section 4 goes here.
+publication:
+  citation: "Duerr RH et al., Science 2006;314:1461-3"
+evidence:
+  - id: GE-1
+    knowledge_domain: POPULATION_GENETICS
+    method: STATISTICAL_GENETICS
+    target_type: VARIANT
+    resolution: VARIANT
+    # ... (abridged in main text; full version in supplementary material)
+\end{lstlisting}
+
+\subsection{A Polygenic Risk Score: Inouye et al.\ 2018}
+\label{sec:ex-inouye}
+
+\todo[inline]{Prose paragraph and the YAML annotation block. This is the
+stress-test example — where the model strains and where we report model
+extensions as findings in the Discussion.}
+
+% =====================================================================
+\section{Human--AI Annotation Workflow and Evaluation}
+\label{sec:workflow}
+% =====================================================================
+
+\todo[inline]{This is the ICBO-2026-theme hook section. Structure:
+(1) workflow description with explicit protocol for manual-ground-truth
+vs AI-drafted-then-reviewed papers; (2) agreement / coverage metrics;
+(3) disagreement taxonomy (reviewer\_query / reviewer\_suggestion /
+reviewer\_disagreement). Keep honest about the small corpus —
+"feasibility study, not benchmark".}
+
+\subsection{Protocol}
+
+\todo{Describe: (a) for Jossin, Davis, Nelson, Gupta, manual highlights
+were transformed into the schema with explicit flags where mapping was
+uncertain; (b) for Duerr and Inouye, the annotation was AI-drafted then
+reviewed.}
+
+\subsection{Coverage and Agreement}
+
+\todo{Report per-dimension population rate across the six papers; report
+curator--AI agreement rate on Duerr and Inouye; report the three categories
+of disagreement with worked examples.}
+
+% =====================================================================
+\section{Discussion}
+\label{sec:discussion}
+% =====================================================================
+
+\todo[inline]{Discussion. Structure: (1) summary of what the model does
+and for whom; (2) alignment with ICBO 2026 theme explicitly; (3) subsection
+"Model extensions identified through annotation" listing the five gaps
+surfaced by the Inouye paper (Score target type, genome-wide resolution,
+measurement-target vocabulary, cohort descriptors, derived artifacts);
+(4) limitations — small corpus, schema not yet formalised in OWL,
+evaluation setting is not a clinical deployment; (5) future work —
+full OWL/SHACL formalisation, larger corpus, ClinGen integration.}
+
+\subsection{Model Extensions Surfaced by Annotation}
+
+\todo{Enumerate the five extensions from the Inouye annotation as
+findings of the methodology working correctly. Frame as: the model
+does what a good semantic framework should do — it yields diagnostic
+information about its own coverage.}
+
+% =====================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% =====================================================================
+
+\todo[inline]{Tight conclusion — three to four sentences. Recap the
+contribution and land on the ICBO theme one more time.}
+
+% =====================================================================
+\bibliographystyle{plainurl}
+\bibliography{references}
+% =====================================================================
+
+\end{document}

@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use this schema or the annotation corpus, please cite the accompanying ICBO 2026 paper."
+title: "A Semantic Model of Genetic Evidence for AI-Ready Variant Interpretation"
+abstract: >
+  A semantic model for scientific and genetic evidence from the biomedical
+  literature, designed to support variant interpretation and AI-ready clinical
+  infrastructure. The repository provides the schema (SHACL shapes), an
+  annotation corpus of six publications spanning human, population,
+  model-organism and polygenic-score genetics, and the extraction pipeline
+  used to transform PDF-level annotations into structured YAML.
+authors:
+  - family-names: "TODO"
+    given-names: "TODO"
+    affiliation: "TODO"
+    # Replace with actual author list before pushing.
+repository-code: "https://github.com/TODO/genetic-evidence-model"
+license: CC-BY-4.0
+# Code within extraction/ and schema/ is released under a permissive code
+# license (see LICENSE-CODE). Content elsewhere is under CC-BY-4.0 unless
+# otherwise noted.
+keywords:
+  - genetic evidence
+  - variant interpretation
+  - ontology
+  - FHIR
+  - ECO
+  - SEPIO
+  - GA4GH
+  - AI-ready data
+  - ICBO
+preferred-citation:
+  type: conference-paper
+  title: "A Semantic Model of Genetic Evidence for AI-Ready Variant Interpretation"
+  authors:
+    - family-names: "TODO"
+      given-names: "TODO"
+  year: 2026
+  conference:
+    name: "17th International Conference on Biological and Biomedical Ontology"
+    location: "Washington, D.C., USA"
+    date-start: 2026-07-15
+    date-end: 2026-07-17
+  # DOI and pages will be filled in post-acceptance.
