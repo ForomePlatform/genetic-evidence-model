@@ -6,11 +6,14 @@
 #  (51 highlights + 9 callouts) plus a summary-table row from the
 #  corpus annotator.
 #
-#  This listing is the ground truth for this paper. AI transformation
-#  of highlights -> schema is declared here as `source: manual_annotation`.
-#  Where the AI reviewer had questions, suggestions, or disagreements,
-#  these are surfaced inline as reviewer_* fields rather than silently
-#  applied. Ground truth is not overwritten.
+#  Ground truth; AI transformations of highlights -> schema are
+#  declared as `source: manual_annotation`. Reviewer disagreements,
+#  queries, and suggestions are surfaced inline rather than silently
+#  applied.
+#
+#  Extension promotion rule: a candidate extension is promoted to the
+#  schema when a second independent paper exercises the same gap. On
+#  first occurrence, gaps are recorded in `candidate_extensions` below.
 # =====================================================================
 
 publication:
@@ -26,8 +29,7 @@ provenance:
       Curation performed in the context of a clinical-genomics program
       focused on identifying causal and candidate genes in patients with
       undiagnosed diseases of suspected genetic etiology. Evidence is
-      weighted for its relevance to diagnostic variant interpretation
-      rather than to basic-science mechanism discovery.
+      weighted for its relevance to diagnostic variant interpretation.
   annotator: "alico"
   curator_editorial_notes:
     - page: 6
@@ -37,20 +39,45 @@ provenance:
         relevant to BGM people."
       interpretation: >
         Annotator's in-scope/out-of-scope judgment for the BGM/UDN program;
-        not a schema value. Retained as evidence-relevance provenance — see
-        Discussion section on context-dependent relevance.
+        not a schema value. Retained as evidence-relevance provenance.
+
+# =====================================================================
+#  Candidate extensions — single-paper gaps awaiting independent
+#  confirmation. If a later paper in the corpus exercises the same
+#  gap, it is promoted to the schema.
+# =====================================================================
+candidate_extensions:
+  - id: CE-J1
+    dimension: resolution_protein_subdomain
+    description: >
+      The paper maps the LLGL1-N-cadherin interaction to the WD14
+      (primarily) and WD10 domains of LLGL1, and to the beta-catenin-
+      binding region of N-cadherin. This is finer than the current
+      Resolution enumeration (WINDOW | GENE | FUNCTIONAL_ELEMENT |
+      POSITION | VARIANT). Candidate value: PROTEIN_SUBDOMAIN.
+    location_in_this_annotation: "GE-4 and GE-5"
+  - id: CE-J2
+    dimension: target_type_interaction_or_complex
+    description: >
+      The in vivo dominant-negative rescue experiment targets the
+      LLGL1-N-cadherin *interaction*, not a gene. The paper also
+      documents a tripartite LLGL1-N-cadherin-beta-catenin complex.
+      Candidate target_type values: INTERACTION and COMPLEX.
+    location_in_this_annotation: "GE-6"
+  - id: CE-J3
+    dimension: gene_relation_binding_and_trafficking
+    description: >
+      The Gene relation enumeration currently has
+      X_has_same_function_as_Y, X_regulates_Y, X_inhibits_Y. It does
+      not cover physical binding or trafficking regulation, both of
+      which are central claims of this paper. Candidate values:
+      X_physically_binds_Y and X_regulates_trafficking_of_Y.
+    location_in_this_annotation: "GE-4 (binding), GE-5 (trafficking)"
 
 # =====================================================================
 #  GeneticEvidence items
-# =====================================================================
 #
-#  The annotator's summary table treated the paper as a single row.
-#  The PDF highlights + callouts reveal that the paper actually contains
-#  several distinct evidence items at different scales and with different
-#  methods. Per user guidance (Q1), we represent these as separate
-#  GeneticEvidence items rather than a single structured one.
-#
-#  Item overview:
+#  Decomposition per natural-claim granularity. Item overview:
 #    GE-1: Organismal phenotype of Llgl1 cKO (gross anatomy, behavior)
 #    GE-2: Histological phenotype (ectopic gray matter composition)
 #    GE-3: Cellular phenotype (ENSC layer disruption, AJC loss)
@@ -72,16 +99,7 @@ evidence:
     resolution: GENE
     organism: "Mammal (mouse)"
     knockout_type: CONDITIONAL
-    # --- phenotype_scale: proposed new dimension (user Q1) ---
     phenotype_scale: ORGANISMAL
-    model_extension_proposed:
-      dimension: phenotype_scale
-      rationale: >
-        The annotator's three "phenotype" callouts mark passages at
-        distinct scales (cellular, histological, clinical/organismal).
-        The current model has Resolution for genetic scale but no
-        analogue for phenotype scale. Proposed enumeration:
-        MOLECULAR | CELLULAR | HISTOLOGICAL | ORGANISMAL | CLINICAL.
     credibility: VERY_HIGH
     credibility_comment: >
       Per annotator summary: "Very accurate, detailed paper."
@@ -93,8 +111,6 @@ evidence:
       - key: "cre_driver"
         value: "Nestin-Cre, expressed in CNS ENSCs from E10.5"
     hpo_terms:
-      # Not populated by annotator (summary left blank).
-      # Per protocol: annotated_as_not_applicable_or_omitted.
       annotated_as: not_applicable_or_omitted
       reviewer_suggestion:
         candidate_terms:
@@ -108,34 +124,25 @@ evidence:
         statement: "Llgl1 cKO mice develop completely penetrant periventricular heterotopia"
         source_span:
           page: 3
-          text: >
-            "completely penetrant disorganization of cerebral cortices
-            where an ectopic second layer of gray matter was formed
-            between the white matter and the lateral ventricle"
+          key_phrase: "completely penetrant disorganization of cerebral cortices"
         callout: null
       - id: GE-1.A2
         statement: "Llgl1 cKO adult mice exhibit sporadic seizures"
         source_span:
           page: 3
-          text: >
-            "Llgl1 cKO adult mice exhibited sporadic seizures associated
-            with falls and convulsions"
+          key_phrase: "sporadic seizures associated with falls and convulsions"
         callout: null
       - id: GE-1.A3
         statement: "MCC phenotype resembles severe human periventricular heterotopia"
         source_span:
           page: 3
-          text: >
-            "The MCC in Llgl1 cKO brains is strikingly similar to MCC in
-            human patients suffering from severe PH"
+          key_phrase: "strikingly similar to MCC in human patients suffering from severe PH"
         callout: {page: 3, text: "phenotype"}
       - id: GE-1.A4
         statement: "Growth delayed but brains approximately normal size at birth"
         source_span:
           page: 3
-          text: >
-            "growth of mutant pups was delayed, their brains were
-            approximately normal size (Figures 1C and 1D)"
+          key_phrase: "growth of mutant pups was delayed, their brains were approximately normal size"
         callout: null
 
   # --------------------------------------------------------------------
@@ -153,33 +160,26 @@ evidence:
     reviewer_query:
       issue: >
         The annotator's summary gave Measurement target = "Binding activity"
-        for this paper as a whole, but this specific GeneticEvidence item
-        (immunostaining for NeuroN/GFAP cell-type markers) measures
-        cellular composition, not binding. Using LOCALIZATION + EXISTENCE
-        from the Measurement target enumeration as an AI-inferred value.
-        Please confirm or override.
+        for the paper as a whole, but this item (immunostaining for
+        NeuroN/GFAP cell-type markers) measures cellular composition,
+        not binding. Using LOCALIZATION + EXISTENCE from the
+        Measurement target enumeration as an AI-inferred value. Please
+        confirm or override.
     credibility: VERY_HIGH
     assertions:
       - id: GE-2.A1
         statement: >
-          Ectopic gray matter in Llgl1 cKO brains is composed predominantly
-          of differentiated neurons, not astrocytes
+          Ectopic gray matter is composed predominantly of differentiated
+          neurons, not astrocytes
         source_span:
           page: 3
-          text: >
-            "but the ectopic gray matter also contained predominantly
-            NeuroN+ cells and few GFAP+ astrocytes"
+          key_phrase: "predominantly NeuroN+ cells and few GFAP+ astrocytes"
         callout: {page: 3, text: "phenotype on histological level"}
       - id: GE-2.A2
-        statement: >
-          Ectopic neurons are predominantly late-born (E16.5) rather than
-          early-born (E13.5)
+        statement: "Ectopic neurons are predominantly late-born (E16.5) rather than early-born (E13.5)"
         source_span:
           page: 3
-          text: >
-            "late stages of neurogenesis and express appropriate stage-
-            specific markers, while the layering of the primary cortical
-            plate is not [grossly altered]"
+          key_phrase: "late stages of neurogenesis and express appropriate stage-specific markers"
         callout: null
 
   # --------------------------------------------------------------------
@@ -188,7 +188,7 @@ evidence:
     source: manual_annotation
     knowledge_domain: [MODEL_ORGANISM, GENE_FUNCTION]
     method: [IN_VIVO_EXPERIMENT, IN_VITRO_EXPERIMENT]
-    primary_method: IN_VIVO_EXPERIMENT  # annotator hierarchy convention (Q2)
+    primary_method: IN_VIVO_EXPERIMENT
     target_type: GENE
     target: "Llgl1 (mouse)"
     resolution: GENE
@@ -207,48 +207,31 @@ evidence:
         statement: "ENSC layer becomes discontinuous by E14.5 in Llgl1 cKO"
         source_span:
           page: 4
-          text: >
-            "While Nestin+ ENSCs were located normally at the edge of the
-            ventricle in E12.5 Llgl1 cKO brains, by E14.5 the ENSC layer
-            was discontinuous, and small beta-Tubulin III+ neuronal
-            nodules formed at the ventricular surface"
+          key_phrase: "by E14.5 the ENSC layer was discontinuous"
         callout: null
       - id: GE-3.A2
         statement: "Neurogenic surface area significantly increased in mutant"
         source_span:
           page: 4
-          text: >
-            "The total length of the neurogenic region was also noticeably
-            increased in mutant brains, suggesting a significant increase
-            in area of the neurogenic surface"
+          key_phrase: "significant increase in area of the neurogenic surface"
         callout: null
       - id: GE-3.A3
         statement: "AJCs focally disrupted at E14.5, before ENSC mislocalization"
         source_span:
           page: 6
-          text: >
-            "immunostaining for the AJC markers N-cadherin and alpha-catenin
-            revealed focal disruption of AJCs in Llgl1 cKO ENSCs at E14.5,
-            the time point immediately before the disruption of ENSC
-            niches and mislocalization of ENSCs takes place"
+          key_phrase: "focal disruption of AJCs in Llgl1 cKO ENSCs at E14.5"
         callout: null
       - id: GE-3.A4
         statement: "Complete AJC loss in short cortical fragments; cells protrude into ventricle"
         source_span:
           page: 6
-          text: >
-            "Short fragments of E14.5 Llgl1 cKO cortices displayed
-            complete loss of AJCs... Cells in these areas protruded into
-            the ventricular space"
+          key_phrase: "complete loss of AJCs... Cells in these areas protruded into the ventricular space"
         callout: null
       - id: GE-3.A5
         statement: "N-cadherin-containing AJCs disorganized even where ventricular wall is intact"
         source_span:
           page: 8
-          text: >
-            "disorganization of N-cadherin-containing AJCs in E14.5 Llgl1
-            cKO cortices, even in the areas that maintained the integrity
-            of the ventricular wall"
+          key_phrase: "disorganization of N-cadherin-containing AJCs in E14.5 Llgl1 cKO cortices"
         callout: null
 
   # --------------------------------------------------------------------
@@ -257,72 +240,57 @@ evidence:
     source: manual_annotation
     knowledge_domain: [GENE_FUNCTION]
     method: [IN_VITRO_EXPERIMENT, IN_VIVO_EXPERIMENT]
-    primary_method: IN_VIVO_EXPERIMENT  # per annotator hierarchy (Q2)
+    primary_method: IN_VIVO_EXPERIMENT
     method_detail: >
       In vitro: GST pull-down from bacterially purified proteins,
       co-immunoprecipitation in HEK293. In vivo: endogenous co-IP from
       E14.5 mouse brain extracts.
     target_type: GENE
     target: "LLGL1 / N-cadherin"
-    resolution: PROTEIN_SUBDOMAIN
-    reviewer_suggestion:
-      issue: >
-        The paper maps the interaction to the WD14 (and partially WD10)
-        domain of LLGL1 and to the beta-catenin-binding region of
-        N-cadherin. This is finer than the current Resolution enumeration
-        (WINDOW | GENE | FUNCTIONAL_ELEMENT | POSITION | VARIANT).
-        Proposed extension: PROTEIN_SUBDOMAIN, or reuse FUNCTIONAL_ELEMENT
-        with a sub-qualifier. Annotator summary left this unspecified.
+    resolution: GENE
+    candidate_extension_exercised: CE-J1  # PROTEIN_SUBDOMAIN would be preferred
+    candidate_extension_note: >
+      Paper resolves the interaction to the WD14 domain of LLGL1 —
+      finer than GENE but no enumeration value exists. Using GENE with
+      candidate-extension flag.
     phenotype_scale: MOLECULAR
     measurement_target: [BINDING]
     normalization_note:
       original_annotator_value: "Binding activity"
       normalized_to: "BINDING"
       type: ai_normalization
-    gene_relation: "X has the same function as Y"  # placeholder — see query
+    gene_relation: null
+    candidate_extension_for_gene_relation: CE-J3  # would be X_physically_binds_Y
     reviewer_query:
       issue: >
-        Gene relation enumeration (per Table 1) includes "X has the same
-        function as Y", "X regulates Y", "X inhibits Y". The relation
-        LLGL1<->N-cadherin is physical binding / trafficking regulation,
-        which doesn't cleanly fit any current enumerated value. Proposed
-        extension: "X physically binds Y" and/or "X regulates trafficking of Y".
-        Leaving as placeholder pending curator decision.
+        Gene relation LLGL1<->N-cadherin is physical binding, which
+        doesn't fit any current enumerated value. Left null pending
+        candidate extension CE-J3 promotion.
     credibility: VERY_HIGH
     assertions:
       - id: GE-4.A1
         statement: "LLGL1 and N-cadherin form a complex in mouse brain"
         source_span:
           page: 10
-          text: >
-            "[co-immunoprecipitation revealed association between
-            endogenous LLGL1 and] N-cadherin in E14.5 brains
-            (Figures 6A and 6B)"
+          key_phrase: "co-immunoprecipitation... endogenous LLGL1 and N-cadherin in E14.5 brains"
         callout: {page: 10, text: "Molecular function of a protein"}
       - id: GE-4.A2
         statement: "LLGL1 preferentially binds N-cadherin over beta-catenin"
         source_span:
           page: 10
-          text: >
-            "LLGL1 preferentially bound to N-cadherin (Figure 6C)"
+          key_phrase: "LLGL1 preferentially bound to N-cadherin"
         callout: null
       - id: GE-4.A3
         statement: "The C-terminal WD14 (and partially WD10) domain of LLGL1 mediates N-cadherin binding"
         source_span:
           page: 10
-          text: >
-            "C-terminal WD14 domain of LLGL1 and, to a lesser degree, the
-            fragment containing the WD10 domain were responsible for
-            interaction with N-cadherin"
+          key_phrase: "C-terminal WD14 domain of LLGL1... responsible for interaction with N-cadherin"
         callout: {page: 10, text: "mapping part of protein involved in interaction with cadherin"}
       - id: GE-4.A4
-        statement: "N-cadherin, LLGL1, and beta-catenin form a tripartite complex; N-cadherin is required for LLGL1-beta-catenin interaction"
+        statement: "N-cadherin, LLGL1, and beta-catenin form a tripartite complex"
         source_span:
           page: 10
-          text: >
-            "LLGL1, N-cadherin, and beta-catenin form tripartite complex,
-            and N-cadherin is necessary for interaction between LLGL1 and
-            beta-catenin"
+          key_phrase: "LLGL1, N-cadherin, and beta-catenin form tripartite complex"
         callout: null
 
   # --------------------------------------------------------------------
@@ -336,22 +304,17 @@ evidence:
     resolution: POSITION  # the 5 serine sites
     phenotype_scale: MOLECULAR
     measurement_target: [BINDING, ACTIVITY]
-    gene_relation: "X inhibits Y"
+    gene_relation: X_inhibits_Y
     gene_relation_detail: "aPKC inhibits LLGL1-N-cadherin interaction via phosphorylation of 5 conserved serines"
     credibility: VERY_HIGH
     assertions:
       - id: GE-5.A1
         statement: >
-          Co-expression of constitutively active aPKC decreases
-          wild-type LLGL1 binding to N-cadherin, but not 5SA-mutant
-          (unphosphorylatable) LLGL1
+          Constitutively active aPKC decreases wild-type LLGL1 binding
+          to N-cadherin, but not 5SA-mutant (unphosphorylatable) LLGL1
         source_span:
           page: 10
-          text: >
-            "Co-expression of constitutively active aPKC decreased the
-            binding between wild-type LLGL1 and N-cadherin, while
-            interaction between the 5SA mutant LLGL1 and N-cadherin was
-            not affected"
+          key_phrase: "Co-expression of constitutively active aPKC decreased the binding between wild-type LLGL1 and N-cadherin"
         callout: {page: 10, text: "Regulation via phosporilation"}
 
   # --------------------------------------------------------------------
@@ -366,21 +329,17 @@ evidence:
       phospho-LLGL1); rescue by 5SA-LLGL1.
     target_type: GENE
     target: "LLGL1-N-cadherin interaction"
+    candidate_extension_exercised: CE-J2  # would be INTERACTION or COMPLEX
+    candidate_extension_note: >
+      This evidence is about a protein-protein interaction, not a
+      gene. Current enumeration has no matching value. Using GENE
+      with candidate-extension flag.
+    resolution: GENE
+    organism: "Rat (embryonic cortex)"
     reviewer_query:
       issue: >
-        This evidence is about an *interaction*, not a gene or variant.
-        Target type enumeration (Gene | Related Gene | Variant | Segment
-        | Interval | Transcript) has no value for "molecular complex"
-        or "protein-protein interaction". Proposed extension:
-        INTERACTION / COMPLEX. Using GENE as the closest fit with this
-        caveat.
-    resolution: PROTEIN_SUBDOMAIN
-    organism: "Rat (embryonic cortex)"
-    reviewer_query_2:
-      issue: >
         Annotator summary gave Organism = "Mammal (mouse)" for the
-        paper. This specific experiment uses rat (not mouse) — in utero
-        electroporation into wild-type rat embryonic cortex. Flagging
+        paper. This specific experiment uses rat, not mouse. Flagging
         for curator review. Multiple organisms appear in the paper's
         experimental program.
     phenotype_scale: ORGANISMAL
@@ -391,24 +350,17 @@ evidence:
         statement: "Disruption of LLGL1-N-cadherin interaction causes neuronal heterotopia in vivo"
         source_span:
           page: 12
-          text: >
-            "[in utero electroporation phenotype] was rescued by
-            simultaneous expression of full-length, but not C-terminally
-            truncated, unable to bind to N-cadherin human LLGL1 (Figure 7B)"
+          key_phrase: "rescued by... full-length, but not C-terminally truncated, unable to bind to N-cadherin human LLGL1"
         callout: null
       - id: GE-6.A2
         statement: "Aberrant (constitutive) aPKC activity mimics the shLlgl1 heterotopia phenotype"
         source_span:
           page: 12
-          text: >
-            "activation and plasma membrane targeting of aPKC can mimic
-            the shLlgl1 phenotype"
+          key_phrase: "activation and plasma membrane targeting of aPKC can mimic the shLlgl1 phenotype"
         callout: {page: 12, text: "aberrant phosphorylation cause phenotype"}
 
 # =====================================================================
 #  Dimensions the annotator considered and deliberately omitted
-#  (per user protocol Q1 — these are NOT null; they are "not applicable
-#  or not populated by choice")
 # =====================================================================
 annotator_omitted_dimensions:
   - dimension: accuracy_of_mapping_to_phenotype
@@ -446,19 +398,16 @@ summary_table_crosswalk:
   transformation_notes:
     - "Knowledge Domain 'Model Organism Functional' expanded to set {MODEL_ORGANISM, GENE_FUNCTION}; cardinality upgraded to multiple per user confirmation."
     - "Method cardinality upgraded to multiple; primary_method field retains annotator's hierarchy convention (IN_VIVO preferred)."
-    - "Measurement target 'Binding activity' normalized to BINDING, applied only to the GE items where binding is actually measured (GE-4, GE-5)."
+    - "Measurement target 'Binding activity' normalized to BINDING, applied only to GE items where binding is measured (GE-4, GE-5)."
     - "Specificity_of_phenotype 'periventricular heterotopia' preserved as a free-text special_consideration under GE-1 rather than a dedicated dimension."
-    - "Organism: one experiment (in utero electroporation) uses rat, not mouse. Flagged as reviewer_query_2 under GE-6."
+    - "Organism: one experiment (in utero electroporation) uses rat, not mouse. Flagged under GE-6 reviewer_query."
 
 # =====================================================================
-#  Summary of reviewer flags for curator attention
+#  Reviewer flag summary
 # =====================================================================
 reviewer_flag_summary:
   queries: 3
-  suggestions: 2
+  suggestions: 1
   disagreements: 0
-  model_extensions_proposed: 4
-    # 1. phenotype_scale (new dimension)
-    # 2. PROTEIN_SUBDOMAIN value for Resolution enumeration
-    # 3. INTERACTION / COMPLEX value for Target type enumeration
-    # 4. "X physically binds Y" + "X regulates trafficking of Y" for Gene relation enumeration
+  candidate_extensions: 3    # CE-J1, CE-J2, CE-J3 (single-paper gaps)
+  promoted_dimensions_applied: 1  # phenotype_scale, promoted after Jossin

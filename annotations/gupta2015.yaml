@@ -1,0 +1,276 @@
+# =====================================================================
+#  Gupta HV, Vengoechea J, Sahaya K, Virmani T (2015)
+#  "A splice site mutation in ATP6AP2 causes X-linked intellectual
+#  disability, epilepsy, and parkinsonism"
+#  Parkinsonism & Related Disorders 21(12):1473-1475
+#
+#  Annotation source: manual (human curator). 13 PDF annotations
+#  (10 highlights + 3 callouts) plus a summary-table row from the
+#  training-set annotator document.
+#
+#  This paper serves as the LOW-CREDIBILITY EDGE CASE in the corpus.
+#  Short clinical correspondence (2 pages); small pedigree (2 affected
+#  siblings, obligate carrier mother, 2 unaffected maternal uncles);
+#  no functional validation beyond in silico splice prediction.
+#
+#  Ground truth; AI transformations flagged.
+# =====================================================================
+
+publication:
+  id: "PMID:26467489"
+  doi: "10.1016/j.parkreldis.2015.10.001"
+  citation: "Gupta HV, Vengoechea J, Sahaya K, Virmani T. Parkinsonism Relat Disord 2015;21:1473-1475"
+  title: >
+    A splice site mutation in ATP6AP2 causes X-linked intellectual
+    disability, epilepsy, and parkinsonism
+
+provenance:
+  curation_context:
+    program: "Brigham Genetic Medicine (BGM), Undiagnosed Diseases Network (UDN)"
+    scope: >
+      Curation performed in the context of a clinical-genomics program
+      focused on causal and candidate gene identification in undiagnosed
+      patients.
+  annotator: "alico"
+  annotator_summary_source: "training set"
+
+# =====================================================================
+#  Candidate extensions surfaced by this paper
+# =====================================================================
+# None. The paper's evidence shape is well-accommodated by the current
+# schema. This is itself a useful observation: the 2-papers promotion
+# rule correctly distinguishes schema-stretching papers (Jossin, Davis)
+# from schema-fitting papers (Gupta, Nelson). Reported in the
+# cross-paper summary.
+candidate_extensions: []
+
+# =====================================================================
+#  GeneticEvidence items
+#
+#  Per natural-claim granularity: two GE items.
+#    GE-1: Clinical / pedigree evidence for the X-linked recessive
+#          variant in two affected siblings
+#    GE-2: In silico splice prediction corroborating pathogenicity
+# =====================================================================
+
+evidence:
+
+  # --------------------------------------------------------------------
+  - id: GE-1
+    label: "X-linked recessive variant ATP6AP2 c.168+6T>A segregating in two affected brothers"
+    source: manual_annotation
+    knowledge_domain: [HUMAN_GENETICS]
+    method: [CLINICAL_EVIDENCE]
+    target_type: VARIANT
+    target: "ATP6AP2 c.168+6T>A (intronic, six nucleotides downstream of exon 2)"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    phenotype_scale: CLINICAL
+    mode_of_inheritance: X_LINKED_RECESSIVE
+    mendelian_segregation: true
+    exact_variant: true
+    subdomain: "Candidate Gene Study"
+    environmental_factors:
+      annotated_as: not_applicable_or_omitted
+      annotator_note: "Not described"
+    penetrance:
+      value: unknown
+      annotator_comment: >
+        Per annotator: "not enough data" to determine penetrance.
+        Only two affected individuals observed.
+    genetic_background_considered: true
+    genetic_background_note: >
+      Per annotator summary: "Presence of term: 'Genetic background' = True."
+      The paper explicitly describes family studies (heterozygous in
+      unaffected mother, absent in two unaffected maternal uncles),
+      which implicitly address some genetic background considerations.
+    credibility: LOW
+    credibility_comment: >
+      Per annotator summary: "X-linked variant present in two affected
+      brothers and absent in two their maternal uncles." Small pedigree
+      (n=2 affected, n=2 unaffected informative males, n=1 obligate
+      carrier mother) provides limited statistical support for
+      pathogenicity. No functional validation in this paper; only in
+      silico splice prediction (captured separately in GE-2).
+    special_considerations:
+      - key: "pedigree_size"
+        value: >
+          Very small: 2 affected brothers (ages 20 and 31), 1 obligate
+          carrier mother (heterozygous, unaffected), 2 unaffected
+          maternal uncles. No other family members tested.
+      - key: "phenotype_heterogeneity_between_siblings"
+        value: >
+          Clinically notable asymmetry: older brother (31) has
+          intellectual disability, psychomotor delay, and childhood-onset
+          generalized epilepsy but no parkinsonism. Younger brother
+          (20) has intellectual disability, global developmental delay,
+          and adult-onset (age 18) parkinsonism but no epilepsy
+          reported. The paper argues this variable expressivity unifies
+          what had been described as two distinct X-linked disorders.
+      - key: "detection_method"
+        value: >
+          "X-linked mental retardation panel including 81 genes" —
+          targeted gene-panel sequencing, not whole-exome or
+          whole-genome. Other potentially relevant loci not assessed.
+    hpo_terms:
+      annotated_as: not_applicable_or_omitted
+      reviewer_suggestion:
+        candidate_terms:
+          - "HP:0001249 (Intellectual disability)"
+          - "HP:0001250 (Seizure)"
+          - "HP:0001300 (Parkinsonism)"
+          - "HP:0001263 (Global developmental delay)"
+        note: >
+          Explicit clinical phenotypes in the paper, each highlighted
+          by the annotator with "phenotype" callouts. Not added to
+          ground truth per annotator's omission.
+    assertions:
+      - id: GE-1.A1
+        statement: >
+          The younger affected brother exhibits intellectual disability,
+          global developmental delay, and adult-onset parkinsonism
+        source_span:
+          page: 1
+          key_phrase: >
+            "20 year old male... global developmental delay and
+            intellectual disability. At age 18 he developed tremor and
+            instability"
+        callout: {page: 1, text: "phenotype"}
+      - id: GE-1.A2
+        statement: >
+          The older affected brother exhibits intellectual disability,
+          psychomotor delay, and childhood-onset generalized epilepsy,
+          but no parkinsonism
+        source_span:
+          page: 1
+          key_phrase: >
+            "31 year old male... intellectual disability and psychomotor
+            delay. At the age of 1 year, he developed seizures"
+        callout: {page: 1, text: "phenotype"}
+      - id: GE-1.A3
+        statement: >
+          ATP6AP2 c.168+6T>A is hemizygous in both affected brothers,
+          heterozygous in the unaffected mother, absent in two
+          unaffected maternal uncles
+        source_span:
+          page: 1
+          key_phrase: >
+            "present in both siblings... heterozygous in their unaffected
+            mother and absent in two unaffected maternal uncles"
+        callout: {page: 1, text: "X-linked mutation"}
+
+  # --------------------------------------------------------------------
+  - id: GE-2
+    label: "In silico splice-effect prediction for ATP6AP2 c.168+6T>A"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [BIOINFORMATICS_PREDICTION]
+    target_type: VARIANT
+    target: "ATP6AP2 c.168+6T>A"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    phenotype_scale: MOLECULAR
+    measurement_target: [EXISTENCE]
+    ai_inferred_measurement_target_rationale: >
+      Annotator's summary did not populate measurement_target for this
+      paper (sole Method value was CLINICAL_EVIDENCE / annotator wrote
+      no Method under Gene Function). The in silico splice prediction
+      asserts whether normal splicing *exists* — EXISTENCE is the
+      closest enumeration value.
+    credibility: LOW
+    credibility_comment: >
+      In silico predictions only. Two tools agree (Human Splicing Finder
+      and BDGP Splice Site Predictor), but no experimental validation.
+      No RT-PCR or minigene assay performed.
+    special_considerations:
+      - key: "tools_used"
+        value: >
+          Human Splicing Finder (Aix Marseille University) and
+          Berkeley Drosophila Genome Project (BDGP) splice site
+          predictor.
+      - key: "prediction_agreement"
+        value: >
+          Both tools concur that c.168+6T>A affects splicing at the
+          exon 2 donor site.
+    assertions:
+      - id: GE-2.A1
+        statement: >
+          In silico tools predict that c.168+6T>A alters the wild-type
+          splice donor site of exon 2
+        source_span:
+          page: 2
+          key_phrase: >
+            "alteration of the wild type splice donor site, most
+            probably affecting splicing"
+        callout: null
+
+# =====================================================================
+#  Dimensions the annotator considered and deliberately omitted
+# =====================================================================
+annotator_omitted_dimensions:
+  - dimension: accuracy_of_mapping_to_phenotype
+    rationale_inferred: "Sub-dimensions left blank in summary"
+  - dimension: degree_of_overlap
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: severity_of_phenotype
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: indirection
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: hpo_terms
+    rationale_inferred: "Not populated; see reviewer_suggestion under GE-1"
+
+# =====================================================================
+#  Summary-level crosswalk to the annotator's summary table
+# =====================================================================
+summary_table_crosswalk:
+  original_row:
+    knowledge_domain: "Human Genetics"
+    credibility: "Low"
+    credibility_comment: "X-linked variant present in two affected brothers and absent in two their maternal uncles"
+    resolution: "Variant"
+    target_type: "Variant"
+    mode_of_inheritance: "X-linked, recessive"
+    environmental_factors: "Not described"
+    penetrance: "not enough data"
+    genetic_background: "True"
+    special_considerations: "None"
+  transformation_notes:
+    - >
+      Knowledge Domain 'Human Genetics' applied to GE-1 (clinical /
+      pedigree evidence). GE-2 (in silico splice prediction) is
+      GENE_FUNCTION with BIOINFORMATICS_PREDICTION method. The
+      annotator's single summary row merges these two epistemic
+      shapes.
+    - >
+      Mode of inheritance 'X-linked, recessive' normalised to
+      X_LINKED_RECESSIVE.
+    - >
+      Penetrance 'not enough data' normalised to unknown with
+      annotator's reasoning preserved as free-text.
+    - >
+      Annotator wrote Special Considerations = 'None', but annotator
+      also wrote three callouts on the paper itself (two 'phenotype'
+      and one 'X-linked mutation'). These were not transferred to the
+      summary document because they are slot-labels, not paper-level
+      special considerations. Preserved in the YAML as callout
+      pointers on individual assertions.
+    - >
+      variant_ascertainment applied uniformly. This is the third
+      independent paper exercising the PROMOTED variant_ascertainment
+      dimension.
+    - >
+      This paper surfaced NO candidate extensions — the model
+      accommodates it cleanly. This is a useful signal that the
+      promotion rule correctly distinguishes schema-stretching papers
+      from schema-fitting ones.
+  reviewer_queries: []
+
+# =====================================================================
+#  Reviewer flag summary
+# =====================================================================
+reviewer_flag_summary:
+  queries: 0
+  suggestions: 1       # HPO terms for GE-1
+  disagreements: 0
+  candidate_extensions: 0
+  promoted_dimensions_applied: 2  # phenotype_scale, variant_ascertainment

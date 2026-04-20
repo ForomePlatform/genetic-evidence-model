@@ -1,0 +1,408 @@
+# =====================================================================
+#  Inouye, Abraham, Nelson et al. 2018 — "Genomic Risk Prediction of
+#  Coronary Artery Disease in 480,000 Adults: Implications for Primary
+#  Prevention"
+#  J Am Coll Cardiol 72(16):1883-1893
+#
+#  Annotation source: AI-drafted. NOT ground truth.
+#
+#  This paper serves as the MODEL-EXTENSION STRESS TEST in the corpus.
+#  It is expected to surface more candidate extensions than any other
+#  paper, because polygenic risk scores (metaGRS) are epistemically
+#  distinct from the variant-level evidence the model was initially
+#  designed for.
+# =====================================================================
+
+publication:
+  id: "PMID:30309464"
+  doi: "10.1016/j.jacc.2018.07.079"
+  citation: "Inouye M, Abraham G, Nelson CP, et al. J Am Coll Cardiol 2018;72:1883-1893"
+  title: "Genomic Risk Prediction of Coronary Artery Disease in 480,000 Adults: Implications for Primary Prevention"
+
+provenance:
+  drafting_context: >
+    Drafted by AI from the paper as uploaded. No prior curator summary
+    table exists. This paper was selected at the outset of the project
+    as the deliberate stress test for the model — polygenic risk
+    scores are not variant-level claims and were expected to surface
+    multiple model gaps. Awaiting human reviewer evaluation.
+  annotator: "AI assistant (Claude, Opus 4.7 Adaptive)"
+  annotation_date: "2026-04-20"
+
+# =====================================================================
+#  Candidate extensions surfaced by this paper
+# =====================================================================
+candidate_extensions:
+  - id: CE-IN1
+    dimension: target_type_score
+    description: >
+      The metaGRS is neither gene nor variant nor segment — it is a
+      derived composite predictor spanning 1,745,180 variants weighted
+      by effect size. Current Target type enumeration has no matching
+      value. Candidate: add SCORE (and possibly more granular values
+      like POLYGENIC_SCORE, COMPOSITE_SCORE) to the enumeration.
+    location_in_this_annotation: "GE-1 through GE-5 (all Inouye evidence items)"
+  - id: CE-IN2
+    dimension: resolution_whole_genome_aggregate
+    description: >
+      The metaGRS spans the entire genome non-contiguously. Current
+      Resolution enumeration (WINDOW | GENE | FUNCTIONAL_ELEMENT |
+      POSITION | VARIANT) presupposes a contiguous or pointwise
+      target. Proposed candidate value: WHOLE_GENOME_AGGREGATE
+      (chosen over GENOME_WIDE to avoid collision with
+      genome-wide-significance terminology, and over INDIVIDUAL_GENOME
+      to avoid implying one person's sequence).
+    location_in_this_annotation: "GE-1 through GE-5"
+  - id: CE-IN3
+    dimension: target_composition
+    description: >
+      Orthogonal to Resolution: does the Target refer to a single entity
+      (a variant, a gene) or an aggregate/composite of many? The
+      metaGRS target is an aggregate; your conventional variant or
+      gene is SINGLE. Proposed: new dimension target_composition with
+      values SINGLE | AGGREGATE | COMPOSITE. This would cleanly
+      separate "how precisely is each constituent located" (Resolution)
+      from "is the target one thing or many" (target_composition).
+      Either this or CE-IN2 resolves the same practical gap; they are
+      complementary framings of the same decision.
+    location_in_this_annotation: "GE-1 through GE-5"
+  - id: CE-IN4
+    dimension: measurement_target_epidemiological
+    description: >
+      Current measurement_target enumeration (EXISTENCE, EXPRESSION,
+      STABILITY, BINDING, LOCALIZATION, ACTIVITY, CATALYSIS) is
+      oriented toward molecular-biology assays. Population-genetics
+      evidence has a different natural vocabulary: hazard ratios, odds
+      ratios, C-index, area under the precision-recall curve, AUROC,
+      cumulative incidence, positive predictive value. Candidate:
+      extend the enumeration with epidemiological values, activated
+      when Knowledge Domain contains POPULATION_GENETICS. Proposed
+      values: HAZARD_RATIO, ODDS_RATIO, C_INDEX, AUROC, CUMULATIVE_INCIDENCE,
+      POSITIVE_PREDICTIVE_VALUE, PRECISION_RECALL_AREA.
+    location_in_this_annotation: "GE-2 through GE-5"
+  - id: CE-IN5
+    dimension: cohort_descriptor_structured
+    description: >
+      Credibility of population-genetics evidence depends heavily on
+      cohort properties that currently live in free-text
+      special_considerations: sample size, ancestry composition,
+      follow-up duration, ascertainment bias, age distribution.
+      Candidate: a structured Cohort sub-block with standard fields
+      (n_total, n_cases, n_controls, mean_followup, ancestry_pct,
+      age_range, ascertainment_source). Would be reusable across
+      Duerr, Davis, and future GWAS or cohort studies.
+    location_in_this_annotation: "GE-2 (UKB validation cohort)"
+  - id: CE-IN6
+    dimension: derived_artifact_evidence
+    description: >
+      The metaGRS is a human construction, not a natural entity. The
+      evidence items in this paper are about *the score's behavior*
+      (HR, C-index, risk stratification), not about nature directly.
+      Analogous to evidence about clinical tools, imaging biomarkers,
+      or ML classifiers. Current model treats all Targets as natural
+      kinds. Candidate: a boolean `derived_artifact` flag on Target,
+      or a distinct target_nature dimension with values NATURAL /
+      DERIVED. This connects to broader philosophy-of-evidence
+      literature and may warrant its own Discussion paragraph.
+    location_in_this_annotation: "all Inouye GE items"
+
+# =====================================================================
+#  GeneticEvidence items
+#
+#  Item overview:
+#    GE-1: Construction and internal weighting of the metaGRS
+#    GE-2: External validation in UK Biobank — hazard ratios, C-index
+#    GE-3: Independence of metaGRS from conventional risk factors
+#    GE-4: Age-stratified cumulative risk by metaGRS quintile
+#    GE-5: metaGRS performance in medicated individuals
+# =====================================================================
+
+evidence:
+
+  # --------------------------------------------------------------------
+  - id: GE-1
+    label: "Construction and internal weighting of the metaGRS"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE  # placeholder — see CE-IN1; actually would be SCORE
+    candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN6]
+    candidate_extension_note: >
+      Target type = SCORE (CE-IN1). Resolution spans the full genome
+      (CE-IN2). Target composition = AGGREGATE (CE-IN3). Target is a
+      derived artifact (CE-IN6). Using GENE as the least-wrong placeholder
+      from the current enumeration.
+    target: "metaGRS (meta-genomic risk score for CAD)"
+    resolution: GENE  # placeholder — CE-IN2 proposes WHOLE_GENOME_AGGREGATE
+    variant_ascertainment: [FROM_DATABASE]
+    phenotype_scale: CLINICAL
+    subdomain: "Polygenic Score / Meta-analysis"
+    credibility: HIGH
+    credibility_comment: >
+      Meta-score combining three prior GRS, weighted via a small
+      training set (n=3000) from UKB. The 1.7M constituent variants
+      themselves derive from the largest previous CARDIoGRAMplusC4D
+      and Metabochip studies. Training/validation separation is clean
+      (3,000 train vs 482,629 external validation).
+    special_considerations:
+      - key: "constituent_scores"
+        value: >
+          GRS46K (46,000 SNPs from Metabochip, Abraham et al. 2016);
+          FDR202 (202 SNPs from CARDIoGRAMplusC4D meta-analysis, FDR<0.05);
+          1000Genomes polygenic score derived from the same GWAS
+      - key: "n_variants"
+        value: "1,745,180"
+      - key: "heritability_captured"
+        value: "26.8% of CAD heritability (per paper's reporting)"
+      - key: "training_set"
+        value: "3,000 UKB individuals held out from the main analysis"
+    assertions:
+      - id: GE-1.A1
+        statement: "The metaGRS comprises 1,745,180 genetic variants and explains 26.8% of CAD heritability"
+        source_span:
+          page: 4
+          key_phrase: "metaGRS comprising 1,745,180 genetic variants, themselves explaining 26.8% of CAD heritability"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-2
+    label: "External validation of metaGRS in UK Biobank"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE  # placeholder — see CE-IN1
+    candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4, CE-IN5, CE-IN6]
+    target: "metaGRS"
+    resolution: GENE  # placeholder
+    variant_ascertainment: [FROM_DATABASE]
+    phenotype_scale: CLINICAL
+    measurement_target:
+      annotated_as: not_applicable_or_omitted
+      candidate_extension_proposed: CE-IN4
+      ai_assumption:
+        note: >
+          Epidemiological measurement targets (HR, OR, C-index, AUROC)
+          are encoded as assertions below, but none of the current
+          measurement_target enumeration values fits. Intentionally left
+          as annotated_as: not_applicable_or_omitted to highlight the
+          gap rather than force-fit.
+    credibility: HIGH
+    credibility_comment: >
+      Prospective cohort, very large (482,629 individuals), independent
+      of the training set, and reports both discrimination (C-index,
+      AUROC) and calibration-adjacent (HR) metrics. The small fraction
+      of non-European ancestry (<5%) limits generalisability —
+      acknowledged by the authors.
+    special_considerations:
+      # Candidate: this whole block would be a structured Cohort object
+      # per CE-IN5. Listing as free-text special_considerations for now.
+      - key: "cohort"
+        value: "UK Biobank"
+      - key: "n_total"
+        value: "482,629 (22,242 CAD cases + 460,387 noncases)"
+      - key: "mean_followup"
+        value: "6.2 years"
+      - key: "population_composition"
+        value: ">95% European ancestry; <5% other ancestries"
+      - key: "ascertainment"
+        value: "Volunteer cohort; known to be healthier than UK general population (Fry et al. 2017)"
+      - key: "endpoint_definition"
+        value: "Fatal/non-fatal MI (ICD-9 410-412, ICD-10 I21-I24 or I25.2), PTCA, or CABG"
+    assertions:
+      - id: GE-2.A1
+        statement: "Hazard ratio per standard deviation of metaGRS is 1.71 (95% CI 1.68-1.73)"
+        source_span:
+          page: 1
+          key_phrase: "hazard ratio (HR) for CAD was 1.71 (95% confidence interval [CI]: 1.68 to 1.73) per SD increase in metaGRS"
+        callout: null
+        measurement_type: HAZARD_RATIO  # per CE-IN4
+      - id: GE-2.A2
+        statement: "Top vs bottom quintile HR = 4.17 (95% CI 3.97-4.38)"
+        source_span:
+          page: 1
+          key_phrase: "top 20% of metaGRS distribution having an HR of 4.17 (95% CI: 3.97 to 4.38)"
+        callout: null
+        measurement_type: HAZARD_RATIO  # per CE-IN4
+      - id: GE-2.A3
+        statement: "metaGRS C-index (0.623) exceeds every individual conventional risk factor tested"
+        source_span:
+          page: 1
+          key_phrase: "higher C-index (C = 0.623; 95% CI: 0.615 to 0.631) for incident CAD than any of 6 conventional factors"
+        callout: null
+        measurement_type: C_INDEX  # per CE-IN4
+
+  # --------------------------------------------------------------------
+  - id: GE-3
+    label: "Independence of metaGRS from conventional risk factors"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE  # placeholder — see CE-IN1
+    candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4, CE-IN6]
+    target: "metaGRS"
+    resolution: GENE
+    variant_ascertainment: [FROM_DATABASE]
+    phenotype_scale: CLINICAL
+    credibility: HIGH
+    credibility_comment: >
+      Attenuation of HR after adjustment is modest (1.58 -> 1.48 after
+      adjustment for 6 conventional risk factors), supporting the
+      claim of partial-to-large independence. No significant
+      interactions except weak interaction with log(BMI).
+    assertions:
+      - id: GE-3.A1
+        statement: >
+          HR per SD attenuates only modestly (1.58 -> 1.48) after
+          adjustment for 6 conventional risk factors
+        source_span:
+          page: 5
+          key_phrase: "HR: 1.58... adjusting for family history; HR: 1.48... adjustment for 6 other risk factors"
+        callout: null
+        measurement_type: HAZARD_RATIO
+      - id: GE-3.A2
+        statement: >
+          No significant metaGRS x risk-factor interactions except weak
+          interaction with log(BMI) (p=0.0052)
+        source_span:
+          page: 5
+          key_phrase: "no strong evidence of statistical interactions... some evidence for interaction with log BMI"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-4
+    label: "Age-stratified cumulative CAD risk by metaGRS quintile"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE
+    candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4, CE-IN6]
+    target: "metaGRS"
+    resolution: GENE
+    variant_ascertainment: [FROM_DATABASE]
+    phenotype_scale: CLINICAL
+    credibility: HIGH
+    credibility_comment: >
+      Sex-stratified, age-as-time-scale Cox regression is the standard
+      approach; the cumulative-risk curves are the clinically intuitive
+      framing. Strong sex effect noted: ~80% of women in UKB never
+      reach 10% cumulative CAD risk by age 75, even in top metaGRS
+      quintile without conventional RFs. Authors acknowledge this may
+      motivate sex-specific screening thresholds.
+    assertions:
+      - id: GE-4.A1
+        statement: >
+          Men in the top metaGRS quintile reach 10% cumulative CAD
+          risk approximately 13 years earlier than men in the bottom
+          quintile (61 vs >75 years)
+        source_span:
+          page: 6
+          key_phrase: "highest metaGRS quintile began exponentially increasing shortly after age 40 years, reaching a threshold of 10% cumulative risk by 61 years"
+        callout: null
+        measurement_type: CUMULATIVE_INCIDENCE
+      - id: GE-4.A2
+        statement: >
+          Men in top quintile with >=3 conventional risk factors reach
+          10% cumulative risk by age 48
+        source_span:
+          page: 8
+          key_phrase: "10% cumulative incidence of CAD... by age 48 years"
+        callout: null
+        measurement_type: CUMULATIVE_INCIDENCE
+      - id: GE-4.A3
+        statement: >
+          Approximately 80% of women in UKB do not reach 10%
+          cumulative CAD risk by age 75, even with 2 conventional risk
+          factors, due to compensation by low or moderate metaGRS
+        source_span:
+          page: 8
+          key_phrase: "79% of women did not reach 10% CAD risk before age 75 years"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-5
+    label: "metaGRS predictive performance in individuals on CAD therapies"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE
+    candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4, CE-IN6]
+    target: "metaGRS"
+    resolution: GENE
+    variant_ascertainment: [FROM_DATABASE]
+    phenotype_scale: CLINICAL
+    credibility: MEDIUM
+    credibility_comment: >
+      The HRs are real (1.42-1.46 per SD in medicated subgroups), but
+      the authors themselves flag reverse causation as a concern:
+      people on lipid-lowering or antihypertensive therapy are likely
+      already at higher CAD risk by the time they started medication.
+      The paper acknowledges this explicitly as a limitation.
+      Downgraded from HIGH to MEDIUM for this reason.
+    special_considerations:
+      - key: "limitation_flagged_by_authors"
+        value: >
+          "Susceptible to reverse causation, with those on medication
+          likely already at higher CAD risk" (paper's Discussion).
+    assertions:
+      - id: GE-5.A1
+        statement: >
+          metaGRS retains substantial predictive power among medicated
+          individuals (HR per SD 1.42-1.46)
+        source_span:
+          page: 8
+          key_phrase: "HRs of 1.44... 1.46... and 1.42... for those individuals on lipid-lowering, antihypertensive, or both treatments"
+        callout: null
+        measurement_type: HAZARD_RATIO
+      - id: GE-5.A2
+        statement: >
+          Top-vs-bottom metaGRS quintile HR remains 2.55-2.81 even
+          among medicated individuals
+        source_span:
+          page: 9
+          key_phrase: "HRs of 2.71... 2.81... and 2.55 for those individuals on lipid-lowering, antihypertensive, or both treatments"
+        callout: null
+        measurement_type: HAZARD_RATIO
+
+# =====================================================================
+#  Paper-level meta-assertions
+# =====================================================================
+meta_assertions:
+  - id: MA-1
+    statement: >
+      The metaGRS has potential utility as an early-life screening tool
+      for primary prevention of CAD, complementing rather than
+      replacing conventional risk factors
+    support: "GE-2 through GE-5 jointly"
+    rationale: >
+      Discrimination metric (GE-2) + independence from conventional
+      factors (GE-3) + age-stratified risk trajectories (GE-4) + retained
+      predictive power under current therapies (GE-5) together motivate
+      the paper's clinical-application claim.
+
+  - id: MA-2
+    statement: >
+      The metaGRS predicts residual CAD risk under current standard-of-care
+      therapies, motivating development of additional therapies for
+      high-genomic-risk individuals
+    support: "GE-5"
+
+# =====================================================================
+#  Limitations reported by the authors
+# =====================================================================
+author_reported_limitations:
+  - "UKB has no lipid/biochemistry measurements at time of analysis; Framingham-style risk scores cannot be compared directly"
+  - "UKB minimum enrolment age of 40 excludes early CAD events from analysis"
+  - "UKB participants healthier than UK general population (volunteer bias)"
+  - "<5% non-European ancestry limits generalisability"
+  - "Medicated-subgroup analysis susceptible to reverse causation"
+
+# =====================================================================
+#  Reviewer flag summary
+# =====================================================================
+reviewer_flag_summary:
+  ai_uncertainties: 0
+  ai_assumptions: 2
+    # GE-2: measurement_target left empty pending CE-IN4
+    # GE-2.A1: key phrase extraction for HR per SD
+  candidate_extensions: 6   # CE-IN1 through CE-IN6
+  promoted_dimensions_applied: 2  # phenotype_scale, variant_ascertainment

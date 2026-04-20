@@ -1,0 +1,362 @@
+# =====================================================================
+#  Nelson, Rabb, Arnaout 1992 — "Genetic Cause of Leukocyte Adhesion
+#  Molecule Deficiency: Abnormal Splicing and a Missense Mutation in a
+#  Conserved Region of CD18 Impair Cell Surface Expression of β₂
+#  Integrins" (Journal of Biological Chemistry)
+#
+#  Annotation source: manual (human curator). 21 PDF annotations
+#  (20 highlights + 1 callout) plus a summary-table row from the
+#  corpus annotator's *test set* (separate document from the training
+#  set used for Jossin, Davis, Gupta).
+#
+#  Ground truth; AI transformations flagged.
+# =====================================================================
+
+publication:
+  id: "PMID:1737790"
+  citation: "Nelson C, Rabb H, Arnaout MA. J Biol Chem 1992;267:3351-3357"
+  title: >
+    Genetic Cause of Leukocyte Adhesion Molecule Deficiency: Abnormal
+    Splicing and a Missense Mutation in a Conserved Region of CD18
+    Impair Cell Surface Expression of β2 Integrins
+
+provenance:
+  curation_context:
+    program: "Brigham Genetic Medicine (BGM), Undiagnosed Diseases Network (UDN)"
+    scope: >
+      Curation performed in the context of a clinical-genomics program
+      focused on causal and candidate gene identification in undiagnosed
+      patients.
+  annotator: "Vladimir Seplyarskiy"
+  annotator_summary_source: "test set (separate from training set)"
+
+# =====================================================================
+#  Candidate extensions surfaced by this paper
+# =====================================================================
+candidate_extensions:
+  - id: CE-N1
+    dimension: variant_description_coordinate_level
+    description: >
+      Annotator Special Consideration #1 notes: the 12-bp insertion
+      (P247_E248insPSSQ at protein level / c.739-12C>A at splice level /
+      rs5030670 on genomic DNA) is an insertion at the cDNA level but
+      a single-nucleotide substitution at the genomic DNA level. The
+      splice alteration creates the apparent cDNA insertion. The
+      annotator writes: "tool to convert description to real SNPs
+      seemed useful." Current model's Resolution = VARIANT assumes
+      single-level variant description and does not distinguish
+      genomic / transcript / protein coordinates.
+      RESOLUTION: This is well-covered by HGVS nomenclature and the
+      GA4GH VRS model. Rather than propose a new dimension, the paper
+      should reference VRS / HGVS as the canonical vocabulary for
+      variant description, and the model's target value for a variant
+      should be a VRS-compatible identifier rather than an unstructured
+      string.
+    status: observation_for_discussion_section
+    location_in_this_annotation: "GE-1 and paper-level"
+
+# =====================================================================
+#  GeneticEvidence items
+#
+#  Per natural-claim granularity (user decision 6c from protocol
+#  adjustment): three functional-assay GE items, one per variant.
+#  The patient pedigree and inheritance tracing are acknowledged as
+#  CONTEXT but not extracted as separate GeneticEvidence items,
+#  because the annotator classified the Knowledge Domain as
+#  "Functional" only — the paper's EVIDENCE is the COS-cell assay
+#  output, not the pedigree segregation.
+#
+#    GE-1: Functional effect of the 12-bp insertion / rs5030670 allele
+#    GE-2: Functional effect of R586W (c.C1756T)
+#    GE-3: Functional effect of N351S (c.A1052G)
+# =====================================================================
+
+evidence:
+
+  # --------------------------------------------------------------------
+  - id: GE-1
+    label: "Functional effect of the 12-bp insertion allele (rs5030670)"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [IN_VITRO_EXPERIMENT]
+    target_type: VARIANT
+    target: >
+      Protein: P247_E248insPSSQ.
+      cDNA: 12-bp insertion between P247 and E248.
+      gDNA: rs5030670 (single nucleotide substitution creating aberrant
+      splice acceptor site 12 bp upstream of the normal acceptor).
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    phenotype_scale: MOLECULAR
+    measurement_target: [EXISTENCE, LOCALIZATION]
+    normalization_note:
+      original_annotator_value: "Presence of the protein on leucocyte surface – localization"
+      normalized_to: ["EXISTENCE", "LOCALIZATION"]
+      type: ai_normalization
+      ai_rationale: >
+        Annotator's free-text describes both *whether* the protein
+        reaches the surface (EXISTENCE at that location) and *where*
+        on/in the cell it is detected (LOCALIZATION). Normalized to
+        both enumeration values.
+    credibility: MEDIUM
+    credibility_comment: >
+      Per annotator summary: "Techniques are old and we do not even
+      know about presence of additional mutations." The 1992 methods
+      (Sanger sequencing, COS cells, western blot) are appropriate for
+      the era and the claims made; the confidence-reducing factor is
+      that only CD18 was sequenced, so additional modifying variants
+      elsewhere in the genome are unknown.
+    genetic_background_considered: false
+    reviewer_suggestion:
+      field: genetic_background_considered
+      suggested_value: false
+      rationale: >
+        The annotator's Credibility comment ("we do not even know about
+        presence of additional mutations") precisely matches this
+        dimension, which was left blank in the summary. AI reviewer
+        suggests populating as false. Flagged for curator confirmation.
+    special_considerations:
+      - key: "cell_system"
+        value: "COS M6 monkey kidney cells (cell culture, in vitro)"
+      - key: "variant_detection_note"
+        value: >
+          Per annotator Special Consideration #1: insertion description
+          is cDNA-level; the underlying genomic change is a single
+          nucleotide substitution (rs5030670). cDNA-level and
+          gDNA-level descriptions of the same variant are non-trivially
+          different. See candidate extension CE-N1.
+      - key: "allele_origin"
+        value: "Maternal (paper's pedigree analysis; context only, not evidence)"
+    assertions:
+      - id: GE-1.A1
+        statement: "The 12-bp insertion allele results in near-zero CD18 surface expression"
+        source_span:
+          page: 4
+          key_phrase: "no cell surface expression of CD18 INS (with or without the R/W substitution)"
+        callout: null
+      - id: GE-1.A2
+        statement: >
+          The insertion arose by a single nucleotide C→A transversion
+          in the intron 12 bp upstream of the normal splice acceptor,
+          generating an aberrant splice acceptor site
+        source_span:
+          page: 3
+          key_phrase: "single A→C nucleotide transversion... 12-bp 5' to the normal splice acceptor site and generated an aberrant splice acceptor"
+        callout: null
+        note: >
+          This assertion bridges genotype and transcript — the
+          "aberrant splicing" mechanism. Directly relevant to
+          candidate extension CE-N1.
+
+  # --------------------------------------------------------------------
+  - id: GE-2
+    label: "Functional effect of R586W (c.C1756T)"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [IN_VITRO_EXPERIMENT]
+    target_type: VARIANT
+    target: "R586W (c.C1756T); heterozygous with the insertion on maternal allele"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    phenotype_scale: MOLECULAR
+    measurement_target: [EXISTENCE, LOCALIZATION]
+    credibility: MEDIUM
+    credibility_comment: >
+      Per annotator: effect description is consistent across assays
+      (75% of wild-type), but same caveat about unknown modifying
+      variants elsewhere applies.
+    genetic_background_considered: false
+    special_considerations:
+      - key: "allele_frequency_note"
+        value: >
+          Paper notes that R586W alone has minor effect, consistent
+          with a polymorphic variant or a minor-effect mutation. Per
+          annotator Special Consideration #3: "C1756>T decrease
+          expression of the protein on the surface to 80% of wt."
+          Authors also flag this.
+      - key: "allele_origin"
+        value: "Co-inherited with the insertion on the maternal allele"
+    assertions:
+      - id: GE-2.A1
+        statement: "R586W alone decreases CD18 surface expression to ~75-80% of wild-type"
+        source_span:
+          page: 4
+          key_phrase: "Expression of CD18 containing CD18 R/W alone was 75% of normal levels"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-3
+    label: "Functional effect of N351S (c.A1052G)"
+    source: manual_annotation
+    knowledge_domain: [GENE_FUNCTION]
+    method: [IN_VITRO_EXPERIMENT]
+    target_type: VARIANT
+    target: "N351S (c.A1052G); de novo"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    phenotype_scale: MOLECULAR
+    measurement_target: [EXISTENCE, LOCALIZATION]
+    credibility: MEDIUM
+    credibility_comment: >
+      Effect measurement is clear (0-22% of wt, epitope-dependent), but
+      same unknown-modifier caveat applies.
+    genetic_background_considered: false
+    special_considerations:
+      - key: "allele_origin"
+        value: >
+          De novo — not present in either parent. Paper considers and
+          excludes (via HLA/ABO typing) the possibility that the
+          sample was mislabeled.
+      - key: "epitope_dependence"
+        value: >
+          Surface expression level measured as 0% with mAb TS18 and
+          22% with mAb 60.3, suggesting the variant disrupts or masks
+          the TS18 epitope specifically.
+    assertions:
+      - id: GE-3.A1
+        statement: >
+          N351S decreases CD18 surface expression to 0-22% of wild-type,
+          with detection efficiency depending on the antibody used
+        source_span:
+          page: 4
+          key_phrase: >
+            "TS18 mAb showed no expression of CD18 N/S, the 60.3 mAb
+            revealed a 22% expression"
+        callout: null
+      - id: GE-3.A2
+        statement: "N351S is a de novo mutation, not present in either parent"
+        source_span:
+          page: 3
+          key_phrase: >
+            "A-to-G nucleotide transition not present in either parent
+            which resulted in an N351→S substitution"
+        callout: null
+
+# =====================================================================
+#  Paper-level contextual information not extracted as evidence
+# =====================================================================
+context_not_extracted:
+  rationale: >
+    The annotator classified Knowledge Domain as "Functional" only.
+    Context below is acknowledged as present in the paper but not
+    treated as GeneticEvidence items per the annotator's scoping.
+  items:
+    - category: "pedigree / inheritance tracing"
+      description: >
+        S1 nuclease protection analysis showed the insertion is
+        heterozygous in the mother and patient, absent in the father.
+        R586W is co-inherited with the insertion on the maternal
+        allele. N351S is de novo. HLA and ABO blood group typing
+        confirm paternity.
+      why_not_extracted: >
+        The annotator judged these as context establishing variant
+        identity, not as independent evidence. The FUNCTIONAL claims
+        (COS-cell surface expression) are where the paper's evidential
+        weight lies per this curation.
+    - category: "paralogous sequence caution"
+      description: >
+        Annotator's sole callout (p.1) reads "Be carefull with
+        paralogous sequence" next to a passage stating that β-integrin
+        subunits have 40-48% amino acid identity.
+      why_not_extracted: >
+        Not an assertion about the specific evidence in this paper,
+        but a general methodological reminder for the annotator's own
+        future work. Retained in provenance as curator's working
+        note.
+      curator_working_note:
+        page: 1
+        callout: "Be carefull with paralogous sequence"
+
+# =====================================================================
+#  Dimensions the annotator considered and deliberately omitted
+# =====================================================================
+annotator_omitted_dimensions:
+  - dimension: accuracy_of_mapping_to_phenotype
+    rationale_inferred: >
+      Not populated. Knowledge Domain = Functional, so patient
+      phenotype mapping is outside the evidence scope (clinical
+      phenotype is context).
+  - dimension: degree_of_overlap
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: severity_of_phenotype
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: indirection
+    rationale_inferred: "Cascades from accuracy_of_mapping omission"
+  - dimension: hpo_terms
+    rationale_inferred: >
+      Not populated. Paper's clinical phenotype (leukocyte adhesion
+      deficiency, recurrent bacterial infections) is context, not
+      evidence.
+    reviewer_suggestion:
+      candidate_terms:
+        - "HP:0001875 (Neutrophilia)"
+        - "HP:0002721 (Immunodeficiency)"
+      note: >
+        Not added to ground truth. Attaches to the patient description
+        in the paper, which the annotator classified as context.
+  - dimension: mode_of_inheritance
+    rationale_inferred: >
+      Not populated by annotator. Paper explicitly states autosomally
+      recessive disease (p.1 highlight: "This autosomally recessive
+      disease"). AI reviewer suggests populating; flagged below.
+    reviewer_suggestion:
+      field: mode_of_inheritance
+      suggested_value: AUTOSOMAL_RECESSIVE
+      rationale: >
+        Paper explicitly characterizes the disease as autosomally
+        recessive, and the annotator highlighted this phrase. However,
+        the conditional-dimension rule activates this only when
+        Knowledge Domain contains HUMAN_GENETICS, which is not the
+        case here (Knowledge Domain = Gene Function only per
+        annotator). Left unpopulated to respect the annotator's
+        Knowledge Domain scoping; flagged for curator decision on
+        whether the dimension should activate for Functional-domain
+        papers that nonetheless reference human inheritance.
+
+# =====================================================================
+#  Summary-level crosswalk to the annotator's summary table
+# =====================================================================
+summary_table_crosswalk:
+  original_row:
+    knowledge_domain: "Functional"
+    credibility: "Medium"
+    credibility_comment: "Techniques are old and we do not even know about presence of additional mutations"
+    resolution: "Variant"
+    target_type: "Variant"
+    special_considerations: "Present"
+    method: "In Vitro"
+    measurement_target: "Presence of the protein on leucocyte surface – localization"
+  transformation_notes:
+    - >
+      Knowledge Domain 'Functional' mapped to GENE_FUNCTION (the
+      model's enumeration value). The term 'Functional' appears to be
+      annotator shorthand for Gene Function.
+    - >
+      Credibility = MEDIUM. The annotator's reasoning about unknown
+      modifying variants maps to the genetic_background_considered
+      dimension, which was left blank in the summary but surfaced as
+      a reviewer_suggestion per GE-1.
+    - >
+      Single summary row applies to the paper as a whole; decomposed
+      into 3 GeneticEvidence items (one per variant) per
+      natural-claim granularity.
+    - >
+      variant_ascertainment = OBSERVED_IN_CASES applied uniformly;
+      this is the second independent paper exercising the PROMOTED
+      variant_ascertainment dimension (Davis was the first).
+    - >
+      Special Consideration #1 (cDNA vs gDNA variant description
+      discrepancy) surfaced candidate extension CE-N1. Resolution
+      proposal is to reference HGVS/VRS rather than add a model
+      dimension.
+  reviewer_queries: []
+
+# =====================================================================
+#  Reviewer flag summary
+# =====================================================================
+reviewer_flag_summary:
+  queries: 0
+  suggestions: 3       # genetic_background_considered; HPO terms; mode_of_inheritance
+  disagreements: 0
+  candidate_extensions: 1   # CE-N1 (cDNA/gDNA variant description)
+  promoted_dimensions_applied: 2  # phenotype_scale, variant_ascertainment

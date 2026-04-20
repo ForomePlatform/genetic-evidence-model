@@ -1,0 +1,183 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix gem:  <https://w3id.org/genetic-evidence-model/> .
+
+# =====================================================================
+#  SHACL shapes for the Genetic Evidence Model
+#
+#  This file encodes (a) the top-level class hierarchy, (b) the
+#  dimension enumerations, and (c) the conditional-activation rules.
+#  It is incremental: not every dimension in the paper is shaped here
+#  yet. The file grows as the annotation corpus grows.
+#
+#  Namespace note: `gem:` is a placeholder. Register a persistent
+#  w3id redirect before the paper goes to camera-ready.
+# =====================================================================
+
+# ---------- top-level classes ----------
+
+gem:ScientificEvidence   a rdfs:Class .
+gem:EvidenceVariable     a rdfs:Class .
+gem:EvidenceAssertion    a rdfs:Class .
+
+gem:GeneticEvidence          rdfs:subClassOf gem:ScientificEvidence .
+gem:GeneticEvidenceVariable  rdfs:subClassOf gem:EvidenceVariable  .
+gem:GeneticEvidenceAssertion rdfs:subClassOf gem:EvidenceAssertion .
+
+# ---------- enumeration of knowledge domain values ----------
+
+gem:KnowledgeDomain       a rdfs:Class .
+gem:HUMAN_GENETICS        a gem:KnowledgeDomain .
+gem:ANIMAL_GENETICS       a gem:KnowledgeDomain .
+gem:POPULATION_GENETICS   a gem:KnowledgeDomain .
+gem:COMPARATIVE_GENOMICS  a gem:KnowledgeDomain .
+gem:EPIGENETICS           a gem:KnowledgeDomain .
+gem:GENE_FUNCTION         a gem:KnowledgeDomain .
+gem:MODEL_ORGANISM        a gem:KnowledgeDomain .
+
+# ---------- enumeration of method values ----------
+
+gem:Method                    a rdfs:Class .
+gem:CLINICAL_EVIDENCE         a gem:Method .
+gem:STATISTICAL_GENETICS      a gem:Method .
+gem:BIOINFORMATICS_PREDICTION a gem:Method .
+gem:IN_VIVO_EXPERIMENT        a gem:Method .
+gem:IN_VITRO_EXPERIMENT       a gem:Method .
+gem:POPULATION_DATA           a gem:Method .
+gem:EPIGENETICS_DATA          a gem:Method .
+
+# ---------- enumeration of target-type values ----------
+
+gem:TargetType        a rdfs:Class .
+gem:GENE              a gem:TargetType .
+gem:RELATED_GENE      a gem:TargetType .
+gem:VARIANT           a gem:TargetType .
+gem:SEGMENT           a gem:TargetType .
+gem:INTERVAL          a gem:TargetType .
+gem:TRANSCRIPT        a gem:TargetType .
+# Candidate extensions (not yet promoted; require second paper confirmation):
+# gem:INTERACTION    a gem:TargetType .  (source: Jossin 2017)
+# gem:COMPLEX        a gem:TargetType .  (source: Jossin 2017)
+
+# ---------- enumeration of phenotype_scale values (PROMOTED) ----------
+
+gem:PhenotypeScale    a rdfs:Class .
+gem:MOLECULAR         a gem:PhenotypeScale .
+gem:CELLULAR          a gem:PhenotypeScale .
+gem:HISTOLOGICAL      a gem:PhenotypeScale .
+gem:ORGANISMAL        a gem:PhenotypeScale .
+gem:CLINICAL          a gem:PhenotypeScale .
+
+# ---------- enumeration of variant_ascertainment values (PROMOTED) ----------
+
+gem:VariantAscertainment   a rdfs:Class .
+gem:OBSERVED_IN_CASES      a gem:VariantAscertainment .
+gem:OBSERVED_IN_CONTROLS   a gem:VariantAscertainment .
+gem:FROM_DATABASE          a gem:VariantAscertainment .
+gem:SYNTHETIC              a gem:VariantAscertainment .
+
+# ---------- base shape: every GeneticEvidence requires these ----------
+
+gem:GeneticEvidenceShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+
+  # knowledge_domain: required, at least one value, must be from the
+  # enumeration.
+  sh:property [
+    sh:path gem:knowledgeDomain ;
+    sh:minCount 1 ;
+    sh:class gem:KnowledgeDomain ;
+    sh:message "GeneticEvidence must declare at least one knowledge_domain from the enumeration."
+  ] ;
+
+  # method: required, at least one value, must be from the enumeration.
+  sh:property [
+    sh:path gem:method ;
+    sh:minCount 1 ;
+    sh:class gem:Method ;
+    sh:message "GeneticEvidence must declare at least one method from the enumeration."
+  ] ;
+
+  # target_type: required, exactly one value.
+  sh:property [
+    sh:path gem:targetType ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:TargetType ;
+    sh:message "GeneticEvidence must declare exactly one target_type."
+  ] ;
+
+  # phenotype_scale: required, exactly one value (PROMOTED dimension).
+  sh:property [
+    sh:path gem:phenotypeScale ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:PhenotypeScale ;
+    sh:message "GeneticEvidence must declare exactly one phenotype_scale."
+  ] .
+
+# ---------- optional shape: variant_ascertainment ----------
+# Multi-valued; required only when target_type is VARIANT (enforced by
+# the conditional shape below). Outside that context it may be absent.
+
+gem:VariantAscertainmentShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:variantAscertainment ;
+    sh:class gem:VariantAscertainment ;
+    sh:message "variant_ascertainment values must come from the enumeration."
+  ] .
+
+# ---------- conditional-activation rule: variant_ascertainment ----------
+#
+# variant_ascertainment is required (at least one value) when
+# target_type = VARIANT. PROMOTED dimension per Davis 2011 annotation.
+
+gem:VariantAscertainmentConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When target_type is VARIANT, variant_ascertainment is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        $this gem:targetType gem:VARIANT .
+        FILTER NOT EXISTS { $this gem:variantAscertainment ?v }
+      }
+    """
+  ] .
+
+# ---------- conditional-activation rule: mode_of_inheritance ----------
+#
+# Mode of inheritance is required exactly when knowledge_domain contains
+# HUMAN_GENETICS AND target_type is GENE.
+
+gem:ModeOfInheritanceConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When knowledge_domain contains HUMAN_GENETICS and target_type is GENE, mode_of_inheritance is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        $this gem:knowledgeDomain gem:HUMAN_GENETICS .
+        $this gem:targetType      gem:GENE .
+        FILTER NOT EXISTS { $this gem:modeOfInheritance ?moi }
+      }
+    """
+  ] .
+
+# ---------- further shapes follow as the corpus grows ----------
+# TODOs:
+#   - enumerate measurement_target values
+#   - enumerate organism values
+#   - shape for assertion.source_span (require page + text)
+#   - shape for reviewer_* flag fields

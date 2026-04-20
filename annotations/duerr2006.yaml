@@ -1,0 +1,391 @@
+# =====================================================================
+#  Duerr, Taylor, Brant et al. 2006 — "A Genome-Wide Association Study
+#  Identifies IL23R as an Inflammatory Bowel Disease Gene"
+#  Science 314(5804):1461-1463
+#
+#  Annotation source: AI-drafted. NOT ground truth.
+#
+#  This paper serves as the CLEAN GWAS EXEMPLAR in the corpus. The
+#  model is expected to accommodate its evidence shape cleanly; any
+#  candidate extensions surfaced here are genuine gaps rather than
+#  idiosyncrasies of this particular paper.
+# =====================================================================
+
+publication:
+  id: "PMID:17068223"
+  doi: "10.1126/science.1135245"
+  citation: "Duerr RH, Taylor KD, Brant SR, et al. Science 2006;314:1461-1463"
+  title: "A Genome-Wide Association Study Identifies IL23R as an Inflammatory Bowel Disease Gene"
+
+provenance:
+  drafting_context: >
+    Drafted by AI from the paper as uploaded. No prior curator summary
+    table exists for this paper; the annotation is therefore AI-inferred
+    from the PDF text alone. Awaiting human reviewer evaluation.
+    The AI reviewer's judgments are surfaced as ai_uncertainty or
+    ai_assumption fields where appropriate, rather than asserted as
+    ground truth.
+  annotator: "AI assistant (Claude, Opus 4.7 Adaptive)"
+  annotation_date: "2026-04-20"
+
+# =====================================================================
+#  Candidate extensions surfaced by this paper
+# =====================================================================
+candidate_extensions:
+  - id: CE-DU1
+    dimension: direction_of_effect
+    description: >
+      The paper reports a *protective* allele (Gln at rs11209026,
+      OR=0.26 in non-Jewish cases, OR=0.45 in Jewish cases). Current
+      model stores this via the numeric OR value in the assertion, but
+      there is no first-class Direction dimension distinguishing
+      "risk-conferring" from "protective." ACMG-AMP explicitly
+      separates BP (benign supporting) from PM (pathogenic moderate)
+      evidence, so this distinction matters for downstream clinical
+      reasoning. Candidate: a Direction dimension with values
+      RISK_CONFERRING / PROTECTIVE / NEUTRAL / UNKNOWN, OR keep it
+      implicit via OR<1 vs OR>1. The annotation preserves the OR
+      numerically; flagging only the dimension question.
+    location_in_this_annotation: "GE-1 (primary discovery)"
+
+# =====================================================================
+#  GeneticEvidence items
+#
+#  Decomposition per natural-claim granularity. Item overview:
+#    GE-1: GWAS discovery in non-Jewish ileal CD cohort
+#    GE-2: Case-control replication in Jewish ileal CD cohort
+#    GE-3: Family-based transmission disequilibrium (TDT via FBAT)
+#    GE-4: Conditional analysis — multiple independent IL23R signals
+#    GE-5: Negative association at IL12RB1/IL23A/IL12B (pathway genes)
+#    GE-6: Cited mouse-model and functional support (external)
+# =====================================================================
+
+evidence:
+
+  # --------------------------------------------------------------------
+  - id: GE-1
+    label: "GWAS discovery — rs11209026 (Arg381Gln) in IL23R associated with ileal CD"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: VARIANT
+    target: "rs11209026 (c.1142G>A, p.Arg381Gln) in IL23R"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    phenotype_scale: CLINICAL
+    mode_of_inheritance:
+      annotated_as: not_applicable_or_omitted
+      ai_assumption:
+        rationale: >
+          Complex-disease association study; no Mendelian mode applies.
+          The conditional rule (activates for HUMAN_GENETICS + GENE) is
+          not triggered here because target_type is VARIANT and
+          knowledge_domain is POPULATION_GENETICS. Dimension correctly
+          inactive. Recorded for clarity.
+    subdomain: "GWAS"
+    credibility: HIGH
+    credibility_comment: >
+      Genome-wide significance after Bonferroni correction
+      (corrected P = 1.56e-3). Effect size is large (OR = 0.26).
+      Confidence interval is wide (0.15-0.43) because the allele is
+      uncommon in cases (MAF 1.9%). Independent replication follows in
+      GE-2.
+    special_considerations:
+      - key: "cohort_size_initial"
+        value: "567 non-Jewish European-ancestry cases with ileal CD; 571 non-Jewish controls"
+      - key: "cohort_size_post_QC"
+        value: "547 cases, 548 controls after genotype-completion filter"
+      - key: "platform"
+        value: "Illumina HumanHap300 BeadChip (308,332 autosomal SNPs)"
+      - key: "multiple_testing"
+        value: "Bonferroni correction across all 308,332 tested SNPs"
+      - key: "ancestry_restriction"
+        value: "European ancestry, non-Jewish; chosen to minimise population stratification"
+    ai_uncertainty:
+      issue: >
+        The paper's design — GWAS discovery — fits Knowledge Domain =
+        POPULATION_GENETICS straightforwardly. But rs11209026 is a
+        *coding* variant (Arg381Gln), and its functional interpretation
+        in the paper straddles population genetics (the association
+        test) and human genetics (the Mendelian-style reasoning about
+        the protective allele). AI did not add HUMAN_GENETICS to the
+        Knowledge Domain set; human reviewer should confirm whether
+        this is correct scoping.
+    candidate_extension_exercised: CE-DU1  # direction of effect
+    assertions:
+      - id: GE-1.A1
+        statement: "rs11209026 (Arg381Gln) is genome-wide significantly associated with ileal Crohn's disease"
+        source_span:
+          page: 1
+          key_phrase: "rs11209026 (P = 5.05 x 10-9, corrected P = 1.56 x 10-3)"
+        callout: null
+      - id: GE-1.A2
+        statement: "The Gln allele is protective (OR = 0.26, 95% CI 0.15-0.43)"
+        source_span:
+          page: 2
+          key_phrase: "glutamine allele appears to protect against development of CD"
+        callout: null
+        note: >
+          Candidate extension CE-DU1 (direction of effect) is
+          exercised here. Numerically encoded via OR<1.
+      - id: GE-1.A3
+        statement: "The Gln allele has MAF 1.9% in ileal CD cases vs 7.0% in controls"
+        source_span:
+          page: 2
+          key_phrase: "allelic frequency of 1.9% in the non-Jewish patients with ileal CD and 7.0% in non-Jewish controls"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-2
+    label: "Case-control replication in Jewish ileal CD cohort"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: VARIANT
+    target: "rs11209026"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    phenotype_scale: CLINICAL
+    subdomain: "GWAS"
+    credibility: HIGH
+    credibility_comment: >
+      Independent cohort, independent ancestry group, consistent
+      direction of effect. Combined Cochran-Mantel-Haenszel P = 3.55e-11.
+    special_considerations:
+      - key: "cohort"
+        value: "401 Jewish-ancestry ileal CD cases; 433 Jewish-ancestry controls"
+      - key: "rationale_for_ancestry_stratification"
+        value: >
+          Known higher baseline IBD prevalence in Ashkenazi Jewish
+          populations motivates a separate replication cohort rather
+          than merging.
+    assertions:
+      - id: GE-2.A1
+        statement: "rs11209026 association replicates in the Jewish cohort (P = 7.95e-4)"
+        source_span:
+          page: 2
+          key_phrase: "rs11209026_p_value_Jewish: 7.95e-4"
+        callout: null
+        ai_assumption:
+          note: >
+            Paper table and inline text both report the same value;
+            combined analysis also reported (P = 3.55e-11 by
+            Cochran-Mantel-Haenszel). Key phrase from paper Table 1.
+      - id: GE-2.A2
+        statement: "Direction of effect is preserved across ancestries (Jewish OR = 0.45, 95% CI 0.27-0.73)"
+        source_span:
+          page: 3
+          key_phrase: "Jewish [OR = 0.45, 95% CI (0.27 to 0.73)]"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-3
+    label: "Family-based transmission disequilibrium — Gln undertransmitted to affected offspring"
+    source: ai_drafted
+    knowledge_domain: [HUMAN_GENETICS, POPULATION_GENETICS]
+    candidate_primary_knowledge_domain: HUMAN_GENETICS
+    method: [STATISTICAL_GENETICS, CLINICAL_EVIDENCE]
+    target_type: VARIANT
+    target: "rs11209026"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES]
+    phenotype_scale: CLINICAL
+    mode_of_inheritance: COMPLEX
+    mendelian_segregation: false
+    exact_variant: true
+    subdomain: "GWAS"
+    ai_assumption:
+      field: mode_of_inheritance
+      value_used: COMPLEX
+      rationale: >
+        The paper does not model Mendelian inheritance but uses
+        transmission disequilibrium to test association. Existing
+        enumeration does not include COMPLEX explicitly (current values
+        are autosomal dominant/recessive, X-linked etc.). Using
+        COMPLEX as placeholder; flag to human reviewer. Candidate
+        extension not raised because mode_of_inheritance already
+        permits extension via curator-defined values per protocol.
+      ai_uncertainty: true
+    credibility: HIGH
+    credibility_comment: >
+      Family-based design controls for population stratification, a
+      complementary source of evidence to the case-control analyses in
+      GE-1/GE-2. 883 nuclear families, 1119 affected offspring. Combined
+      case-control + family-based P = 6.62e-19 for IBD phenotype.
+    special_considerations:
+      - key: "software"
+        value: "FBAT with empirical variance estimator"
+      - key: "family_structure"
+        value: >
+          883 families (518 non-Jewish CD, 215 non-Jewish UC, 77 Jewish
+          CD, 80 Jewish UC); 1119 affected offspring total
+      - key: "striking_null_result"
+        value: >
+          No association of Arg381Gln in Jewish UC families (P = 0.49).
+          May reflect subtype- or subpopulation-specific effect; paper
+          does not resolve.
+    assertions:
+      - id: GE-3.A1
+        statement: "Gln allele is significantly undertransmitted from heterozygous parents to IBD-affected offspring"
+        source_span:
+          page: 2
+          key_phrase: "transmitted:non-transmitted = 45:130, P = 1.32e-10 for the IBD phenotype in all 883 families"
+        callout: null
+      - id: GE-3.A2
+        statement: "Association replicates for CD and UC in non-Jewish families, and for CD in Jewish families, but not for UC in Jewish families"
+        source_span:
+          page: 2
+          key_phrase: "no evidence for association of Arg381Gln or other IL23R region markers in the Jewish UC families"
+        callout: null
+        note: >
+          Phenotype-stratified negative result within a replication —
+          itself informative. Highlighted here but not raised as a
+          candidate extension.
+
+  # --------------------------------------------------------------------
+  - id: GE-4
+    label: "Conditional analysis reveals multiple independent IL23R signals"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: VARIANT
+    target: "rs7517847 (intronic, r^2 = 0.03 with rs11209026)"
+    resolution: VARIANT
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    phenotype_scale: CLINICAL
+    credibility: HIGH
+    credibility_comment: >
+      Conditional analysis is a standard method for disentangling
+      LD-correlated signals. rs7517847 has the most significant
+      combined P (3.36e-13) and is not in LD with the coding variant,
+      supporting at least two independent IL23R association signals.
+      The paper speculates that differential splicing (IL23R has six
+      known alternative splice variants) could underlie the multiple
+      signals, but the mechanism remains speculative in this paper.
+    special_considerations:
+      - key: "approach"
+        value: "Conditional association testing stratified on rs11209026 genotypes"
+      - key: "LD_context"
+        value: >
+          rs11465804 has r^2 = 0.84 with rs11209026 (not independent);
+          rs7517847 has r^2 = 0.03 (independent)
+    assertions:
+      - id: GE-4.A1
+        statement: "rs7517847 remains significantly associated after conditioning on rs11209026 genotype"
+        source_span:
+          page: 3
+          key_phrase: "multiple residual association signals throughout IL23R, indicating that there are multiple risk variants in the region"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-5
+    label: "Negative association at IL-23 pathway genes other than IL23R"
+    source: ai_drafted
+    knowledge_domain: [POPULATION_GENETICS]
+    method: [STATISTICAL_GENETICS]
+    target_type: GENE
+    target: "IL12RB1, IL23A, IL12B (pathway genes)"
+    resolution: GENE
+    variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+    phenotype_scale: CLINICAL
+    subdomain: "GWAS"
+    credibility: HIGH
+    credibility_comment: >
+      The null result is informative: it sharpens the IL23R-specific
+      signal and argues against a generic IL-12/23 pathway effect.
+      Same genotyping platform, same cohort, same analysis pipeline,
+      so the contrast is internally controlled.
+    special_considerations:
+      - key: "genes_tested"
+        value: "IL12RB1 (second IL-23 receptor subunit), IL23A (p19), IL12B (p40)"
+    assertions:
+      - id: GE-5.A1
+        statement: "No significant association at IL12RB1, IL23A, or IL12B in the same cohort"
+        source_span:
+          page: 3
+          key_phrase: "no evidence for association... with the IL12RB1 gene... or the IL23A and IL12B genes"
+        callout: null
+
+  # --------------------------------------------------------------------
+  - id: GE-6
+    label: "Cited mouse-model and functional support for IL-23 in colitis"
+    source: ai_drafted
+    knowledge_domain: [MODEL_ORGANISM, GENE_FUNCTION]
+    method: [IN_VIVO_EXPERIMENT, IN_VITRO_EXPERIMENT]
+    target_type: GENE
+    target: "IL-23 pathway"
+    resolution: GENE
+    organism: "Mouse (various colitis, EAE, and arthritis models)"
+    phenotype_scale: ORGANISMAL
+    evidence_origin: cited_prior_literature
+    credibility: HIGH
+    ai_uncertainty:
+      issue: >
+        This GE item is NOT generated by the Duerr paper. It is a set
+        of citations to prior mouse-model work (refs 13-15, 18) that
+        the Discussion leverages to motivate IL23R as a therapeutic
+        target. There is no model-provided dimension distinguishing
+        "evidence produced by this paper" from "evidence cited by this
+        paper." Flagged as ai_uncertainty because extracting cited
+        evidence blurs the boundary of which publication an evidence
+        item belongs to. Human reviewer to decide whether GE-6 belongs
+        in this annotation at all, or should be dropped with a note
+        that citation chains require a separate annotation layer.
+    special_considerations:
+      - key: "evidence_status"
+        value: >
+          Prior literature cited in the Discussion, not generated by
+          this paper's original data. Credibility inherited from the
+          cited works.
+    assertions:
+      - id: GE-6.A1
+        statement: >
+          IL-23 is required for murine colitis, experimental autoimmune
+          encephalomyelitis, and collagen-induced arthritis
+        source_span:
+          page: 3
+          key_phrase: "requirement for IL-23 in murine colitis, experimental autoimmune encephalitis, and collagen-induced arthritis"
+        callout: null
+      - id: GE-6.A2
+        statement: >
+          Transgenic IL-23 p19 overexpression causes severe systemic
+          inflammation including small and large intestine
+        source_span:
+          page: 3
+          key_phrase: "transgenic expression of IL-23 subunit p19 results in severe systemic inflammation"
+        callout: null
+
+# =====================================================================
+#  Paper-level contextual information — meta-assertions
+# =====================================================================
+meta_assertions:
+  - id: MA-1
+    statement: >
+      The IL23R pathway is a rational therapeutic target in inflammatory
+      bowel disease
+    support: "GE-1 through GE-6 jointly"
+    rationale: >
+      Genetic-evidence association (GE-1-GE-4) + pathway specificity
+      (GE-5) + mechanistic plausibility from cited mouse work (GE-6)
+      together motivate the therapeutic claim. Each GE is individually
+      insufficient; the combination is the paper's central argument.
+    ai_assumption:
+      issue: >
+        Model lacks a structured representation for meta-assertions
+        that combine multiple GeneticEvidence items into a higher-level
+        claim. Current MA-1 is inline. Not raising as candidate
+        extension pending second-paper confirmation.
+
+# =====================================================================
+#  Reviewer flag summary
+# =====================================================================
+reviewer_flag_summary:
+  ai_uncertainties: 3
+    # GE-1: HUMAN_GENETICS in knowledge_domain scoping
+    # GE-3: mode_of_inheritance = COMPLEX (enumeration question)
+    # GE-6: cited-vs-generated evidence boundary
+  ai_assumptions: 2
+    # GE-2.A1: key phrase source
+    # GE-3: mode_of_inheritance placeholder
+  candidate_extensions: 1   # CE-DU1 only (CE-DU2 withdrawn — EvidenceAssertion is a predicate, polarity already handled by predicate nature)
+  promoted_dimensions_applied: 2  # phenotype_scale, variant_ascertainment

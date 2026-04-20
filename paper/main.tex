@@ -48,6 +48,9 @@
 
 \lstset{
   language=yaml,
+  inputencoding=utf8,
+  extendedchars=true,
+  literate={—}{{---}}1 {–}{{--}}1,
   basicstyle=\ttfamily\small,
   backgroundcolor=\color{listingBg},
   frame=single,
@@ -73,6 +76,16 @@
 \newcommand{\GeneticEvidence}{\textsc{GeneticEvidence}}
 \newcommand{\GeneticEvidenceVariable}{\textsc{GeneticEvidenceVariable}}
 \newcommand{\GeneticEvidenceAssertion}{\textsc{GeneticEvidenceAssertion}}
+
+% \todo{} is illegal inside floats (table*, figure) because it uses \marginpar.
+% Use \tbd{} in table cells instead — it renders identically in the margin
+% outside floats and falls back to coloured text inside floats.
+\makeatletter
+\newcommand{\tbd}[1][]{%
+  \@ifundefined{@captype}%
+    {\todo[#1]{}}%
+    {\textcolor{orange}{\textbf{[?]}}}}
+\makeatother
 
 % For categorical values of dimensions (e.g., STATISTICAL GENETICS), we use
 % small caps so they are visually distinct from prose but not as heavy as code.
@@ -181,11 +194,11 @@ existing standards. (To be completed.)}
 \toprule
 Our dimension & FHIR Evidence & ECO/SEPIO & GA4GH GKS & IAO/OBI \\
 \midrule
-Knowledge Domain     & --- & --- & --- & --- \\
-Method               & --- & ECO:0000\ldots (inference types) & --- & OBI:0000\ldots (assay) \\
-Target / Resolution  & --- & --- & VRS / Statement & --- \\
-Credibility          & --- & SEPIO provenance & --- & --- \\
-Mode of inheritance  & --- & --- & --- & HP:\ldots / HPO \\
+Knowledge Domain     & \tbd{} & \tbd{} & \tbd{} & \tbd{} \\
+Method               & \tbd{} & ECO:0000\ldots (inference types) & \tbd{} & OBI:0000\ldots (assay) \\
+Target / Resolution  & \tbd{} & \tbd{} & VRS / Statement & \tbd{} \\
+Credibility          & \tbd{} & SEPIO provenance & \tbd{} & \tbd{} \\
+Mode of inheritance  & \tbd{} & \tbd{} & \tbd{} & HP:\ldots / HPO \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -334,7 +347,7 @@ block. This is the positive example — shows the model handling a
 textbook GWAS cleanly.}
 
 \begin{lstlisting}[language=yaml, caption={Partial \GeneticEvidence{} annotation for Duerr et al.\ 2006, discovery of the IL23R association in Crohn's disease.}, label={lst:duerr}]
-# Placeholder -- full annotation from Section 4 goes here.
+# Placeholder — full annotation from Section 4 goes here.
 publication:
   citation: "Duerr RH et al., Science 2006;314:1461-3"
 evidence:
@@ -408,6 +421,7 @@ information about its own coverage.}
 contribution and land on the ICBO theme one more time.}
 
 % =====================================================================
+% \bibliographystyle is set by ceurart natbib=true; do not add another one here.
 \bibliography{references}
 % =====================================================================
 
