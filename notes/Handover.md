@@ -67,13 +67,16 @@ genetic-evidence-model/
 │
 ├── paper/
 │   ├── main.tex                           LaTeX skeleton (ceurart class)
-│   └── references.bib                     seed bibliography
+│   ├── references.bib                     seed bibliography
+│   └── sections/                          drafted sections, included via \input{}
+│       ├── 03_model.tex                   §3 Model (drafted 2026-04-20)
+│       └── 04_examples.tex                §4 Worked Examples (drafted 2026-04-20)
 │
 ├── schema/
 │   ├── genetic_evidence.shacl.ttl         SHACL shapes, 82 triples as of Gupta
 │   └── dimensions.md                      human-readable enumeration reference
 │
-├── annotations/                           4 of 6 annotations complete as of handover
+├── annotations/                           all 6 annotations complete
 │   ├── jossin2017.yaml                    manual (ground truth)
 │   ├── jossin2017.raw.json                raw PDF extraction
 │   ├── davis2011.yaml                     manual (ground truth)
@@ -81,7 +84,9 @@ genetic-evidence-model/
 │   ├── nelson1992.yaml                    manual (ground truth)
 │   ├── nelson1992.raw.json
 │   ├── gupta2015.yaml                     manual (ground truth)
-│   └── gupta2015.raw.json
+│   ├── gupta2015.raw.json
+│   ├── duerr2006.yaml                     AI-drafted, awaiting review
+│   └── inouye2018.yaml                    AI-drafted, awaiting review
 │
 ├── extraction/
 │   ├── extract_annotations.py             PyMuPDF-based (recommended)
@@ -261,23 +266,35 @@ User asked about Avro for other projects. Decision:
 
 ## 5. Current state of key artefacts
 
-### 5.1 `paper/main.tex`
+### 5.1 `paper/main.tex` and `paper/sections/`
 
-User-provided version of the skeleton includes:
-- `ceurart` with `sigconf,natbib=true` options
+User-provided skeleton with:
+- `ceurart` class, `sigconf,natbib=true`
 - Author block placeholders (needs real ORCIDs/emails)
 - Abstract placeholder (write last)
 - Section structure with `\todo[inline]{}` notes
-- Tables: standards-mapping (empty), dimensions table (partially filled),
-  corpus table (filled for all six papers)
+- Tables: standards-mapping (still empty), corpus table (filled for all six papers)
 - Two YAML listings as placeholders (Duerr, Inouye)
 - Bibliography stub with 17 entries in `references.bib`
+- `\tbd{}` macro for placeholders inside floats (`\todo{}` illegal there)
+- Unicode dash `literate=` clause in `\lstset`
 
-**The paper is NOT written yet.** Only the skeleton with todo notes.
+**Drafted sections so far (included via \input):**
+- **§3 Model** — `paper/sections/03_model.tex` (drafted 2026-04-20).
+  Contains dimensions table (now including the two promoted dimensions)
+  and two SHACL conditional-activation examples.
+- **§4 Worked Examples** — `paper/sections/04_examples.tex` (drafted
+  2026-04-20). Corpus table + Duerr and Inouye featured examples
+  with 20-22 line YAML excerpts each.
+
+All other sections remain `\todo` placeholders in `main.tex` pending
+drafting. The paper still does not compile to a complete document — it
+compiles, but with extensive placeholders marked by `\todo` margin
+notes and `\lipsum[1-2]` filler in §1.
 
 ### 5.2 `schema/genetic_evidence.shacl.ttl`
 
-82 RDF triples. Declares:
+88 RDF triples. Declares:
 - Top-level classes (ScientificEvidence, EvidenceVariable, EvidenceAssertion
   + genetic specialisations)
 - Enumerations for KnowledgeDomain, Method, TargetType, PhenotypeScale,
@@ -287,6 +304,9 @@ User-provided version of the skeleton includes:
   - `variant_ascertainment` required when `target_type = VARIANT`
   - `mode_of_inheritance` required when `knowledge_domain contains
     HUMAN_GENETICS` AND `target_type = GENE`
+  - `organism` required when `method contains IN_VIVO_EXPERIMENT` OR
+    `knowledge_domain contains MODEL_ORGANISM` (added 2026-04-20 to
+    match the second SHACL example in §3 of the paper)
 
 **Not yet shaped:** measurement_target enumeration, organism enumeration,
 shape for `source_span`, shape for reviewer flag fields.
@@ -351,12 +371,25 @@ patch the respective YAMLs.
 
 Order of composition (decided 2026-04-20; Abstract last):
 
-1. **§3 Model** — core classes, dimension table, conditional-activation
-   rule. Writing first because other sections reference it.
-2. **§4 Worked Examples** — corpus table, Duerr + Davis featured
-   excerpts as prose with inline YAML listings (~15-25 lines each).
-   The other four annotations are summary-table-only with a GitHub
-   pointer.
+1. **§3 Model** — **DRAFTED 2026-04-20.** See
+   `paper/sections/03_model.tex`. Contains core-class definitions,
+   consolidated dimension table (14 rows including the two promoted
+   dimensions), and the conditional-activation mechanism with two
+   SHACL examples (mode_of_inheritance with AND-conjunction;
+   organism with OR-disjunction and cross-axis activation). The
+   EvidenceAssertion description explicitly notes that assertions
+   are predicates of any polarity, per user's CE-DU2 correction.
+2. **§4 Worked Examples** — **DRAFTED 2026-04-20.** See
+   `paper/sections/04_examples.tex`. Contains the six-paper corpus
+   table and two featured examples: Duerr (clean GWAS) with a 20-line
+   YAML excerpt showing GE-1 (the primary discovery), and Inouye
+   (model-extension stress test) with a 22-line YAML excerpt showing
+   GE-2 (UK Biobank validation) including inline candidate-extension
+   tags. Pointer to GitHub for the other four annotations.
+   Featured-pair decision: Duerr + Inouye (positive + stress-test)
+   rather than Duerr + Davis (positive + breadth). Duerr+Inouye gives
+   a stronger ICBO-theme narrative because Inouye's six candidate
+   extensions concentrate the methodology findings.
 3. **§5 Workflow & Evaluation** — ICBO-theme hook. Protocol,
    coverage/agreement metrics, disagreement taxonomy. Note the CE-DU2
    retraction as an example of the review process working.

@@ -1,0 +1,340 @@
+% =====================================================================
+%  §5 — Human-AI Annotation Workflow and Evaluation
+%
+%  The ICBO-theme hook section. Describes the two-track workflow
+%  (manual ground truth vs AI-drafted), coverage and agreement
+%  metrics computed from the six YAMLs, the flag taxonomy with
+%  worked examples, and the extension-promotion rule with the
+%  CE-DU2 retraction as a positive example.
+%
+%  Honest about the small corpus: called a "feasibility study" in
+%  §5.4 not a benchmark.
+% =====================================================================
+
+\section{Human--AI Annotation Workflow and Evaluation}
+\label{sec:workflow}
+
+The model is a schema, but a schema is only as useful as the
+annotations it supports. We designed and piloted an annotation
+workflow whose central commitment is that every annotation be
+\emph{auditable}: an assertion anchored to the specific text that
+justifies it, a dimension value justifiable against the schema's
+activation conditions, and a reviewer flag on any judgment call that
+a downstream consumer might contest. The same commitment extends to
+AI assistance: when an AI system drafts an annotation, its
+uncertainties and assumptions are not silently absorbed but recorded
+alongside the annotation for curator review.
+
+This section describes the protocol (\cref{sec:workflow-protocol}),
+reports coverage and flag statistics from the six-paper pilot
+(\cref{sec:workflow-coverage,sec:workflow-flags}), and examines the
+extension-promotion rule that determines when a candidate schema
+extension becomes first-class (\cref{sec:workflow-promotion}). We
+treat the pilot as a \emph{feasibility study} rather than a
+benchmark: six papers and one annotator are not enough to make
+claims about inter-annotator agreement or generalisability. What the
+pilot does show is that the workflow's epistemic commitments are
+practical to meet and that the schema's strain points are surfaced
+rather than hidden.
+
+\subsection{Protocol}
+\label{sec:workflow-protocol}
+
+Annotations are authored in two tracks.
+
+\paragraph{Manual track.}
+For four of the six publications (Jossin, Davis, Nelson, Gupta) a
+human curator read the paper and marked the relevant passages
+directly in the PDF as highlights and sticky-note callouts. A short
+extraction script (provided in the project repository) pulls the
+highlights and callouts into a structured JSON record. The curator's
+judgements---expressed as a summary table of dimension values and
+as free-text callouts attached to specific passages---are then
+transformed into a YAML annotation that conforms to the schema. Where
+the transformation requires a judgment that the curator did not
+make explicit (for example, normalising the free-text value
+``localisation and protein expression'' to the enumeration values
+\dimval{Localization} and \dimval{Existence}), the transformation is
+recorded inline as a \texttt{normalization\_note} with a
+\texttt{type} tag (\texttt{ai\_normalization}, in this case) so that
+the curator can audit the transformation later.
+
+\paragraph{AI-drafted track.}
+For two publications (Duerr, Inouye) the annotation was drafted
+directly by an AI assistant\footnote{Claude Opus 4.7 Adaptive.}
+working from the PDF text. The AI was given the schema (as
+\texttt{dimensions.md}), the ground-truth annotations of the four
+manual papers for reference, and the PDFs themselves. It produced
+YAML annotations in the same format. Where the AI judged that a
+mapping was uncertain or that a judgement call ought to be verified
+by a human reviewer, it recorded the uncertainty inline (see
+\cref{sec:workflow-flags}). The curator then reviewed each AI-drafted
+annotation assertion-by-assertion, flagging any that misrepresented
+the paper or misused the schema.
+
+\paragraph{Source anchoring.}
+In both tracks, every
+\GeneticEvidenceAssertion{} carries a \texttt{source\_span} pointing
+to a specific page of the publication and a short key phrase
+(typically under fifteen words) from the underlying text. The phrase
+is chosen to be long enough that a reader can locate the passage by
+search and short enough to stay within fair-use norms for
+copyrighted publisher material. Source anchoring is not optional:
+an annotation without source spans is rejected at validation time.
+Across the six-paper pilot, 65 of 65 assertions (100\%) are
+source-anchored; this is by construction, not by observation.
+
+\subsection{Coverage}
+\label{sec:workflow-coverage}
+
+\Cref{tab:coverage} reports, for each schema dimension, the
+fraction of applicable \GeneticEvidence{} items in which the
+dimension is populated with a real value. The denominator is the
+number of items where the dimension's activation condition holds;
+for the always-required dimensions the denominator is always 28
+(the total number of \GeneticEvidence{} items produced across the
+corpus).
+
+\begin{table}[tbp]
+\centering
+\caption{Dimension population rates across 28 \GeneticEvidence{}
+items from six papers. The denominator for each conditional
+dimension is the number of items whose activation condition holds.
+A rate of 100\% indicates that every applicable item has the
+dimension populated.}
+\label{tab:coverage}
+\small
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Dimension              & Class        & Populated & Applicable \\
+\midrule
+Knowledge Domain       & always       & 28        & 28 \\
+Method                 & always       & 28        & 28 \\
+Target Type            & always       & 28        & 28 \\
+Resolution             & always       & 28        & 28 \\
+Credibility            & always       & 28        & 28 \\
+Phenotype Scale        & always       & 28        & 28 \\
+Variant Ascertainment  & cond.\ on TT & 21        & 21 \\
+\midrule
+Mode of Inheritance    & cond.        & 0         & 1 \\
+Mendelian Segregation  & cond.        & 0         & 1 \\
+Penetrance             & cond.        & 2         & 4 \\
+Measurement Target     & cond.        & 10        & 11 \\
+Gene Relation          & cond.        & 1         & 11 \\
+Organism               & cond.        & 7         & 8 \\
+Knockout Type          & cond.        & 1         & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The always-required dimensions are fully populated, which is by
+construction: the schema rejects annotations that leave them empty.
+The conditional-dimension population rates are more informative.
+Three patterns are worth remarking on.
+
+First, \emph{high-population} dimensions (Measurement Target at
+10/11, Organism at 7/8) indicate that the corresponding activation
+condition is well-calibrated: when the rule says the dimension
+should apply, it almost always does. Second, \emph{zero-population}
+dimensions (Mode of Inheritance at 0/1, Mendelian Segregation at
+0/1) indicate boundary cases. The single applicable item for each
+is Duerr's family-based transmission disequilibrium analysis, which
+is a complex-trait genetic study; the annotator recorded explicit
+uncertainty about whether the enumeration value \dimval{Complex}
+ought to be a first-class member of the Mode-of-Inheritance
+enumeration (\cref{sec:workflow-flags}, \textit{ai\_uncertainty} on
+Duerr GE-3). Third, \emph{low-but-nonzero} dimensions (Gene
+Relation at 1/11) reveal schema shortcomings: in the eleven
+\dimval{Gene Function} evidence items, only one had a gene relation
+that fit the current three-value enumeration
+(\dimval{X regulates Y}, \dimval{X inhibits Y},
+\dimval{X has same function as Y}); the remaining ten mostly
+involved physical binding or trafficking, which the enumeration
+does not cover. This observation motivates the candidate extension
+CE-J3 surfaced in the Jossin annotation
+(\cref{sec:discussion}).
+
+These coverage statistics are internally consistent with the
+activation rules: no dimension is populated where the rule says it
+should not be, and the few places where a rule-required dimension
+is left empty are each accompanied by an explicit flag. Coverage
+alone does not tell us whether the annotations are \emph{correct}
+(that would require a second annotator), only whether the schema's
+structural requirements are met.
+
+\subsection{Flag Taxonomy}
+\label{sec:workflow-flags}
+
+The two tracks use different flag vocabularies because they
+represent different epistemic situations.
+
+\paragraph{Manual track: three flag types.}
+When a curator-authored annotation diverges from the curator's own
+summary table, or when an AI reviewer pass over the manual
+annotation detected a mapping issue, we record one of three flag
+types. A \texttt{reviewer\_disagreement} marks a clear factual
+correction: in the Davis 2011 annotation, the curator's summary
+listed the organism set as \{mouse, zebrafish\}, but the paper's
+rat-retinal electroporation experiment was passed over in the
+summary, and the AI reviewer proposed adding \dimval{Rat} to the
+set. A \texttt{reviewer\_suggestion} marks an optional addition
+whose inclusion depends on curator preference: HPO terms for
+patient phenotypes are a recurring case, flagged in Davis, Nelson,
+and Gupta. A \texttt{reviewer\_query} marks a case where the
+mapping itself is unclear and curator input is needed: the Nelson
+2011 summary table gave
+\texttt{specificity\_of\_phenotype = SNV}, which is semantically
+odd (SNV is a variant type, not a phenotype-specificity
+descriptor), and the annotation preserves the original value with
+a query rather than silently correcting it.
+
+\paragraph{AI-drafted track: two flag types.}
+When no prior ground truth exists, an AI-drafted annotation has
+nothing to \emph{disagree} with. The AI track therefore uses a
+narrower vocabulary: an \texttt{ai\_uncertainty} marks a case where
+the AI was unsure about a schema mapping and would prefer human
+input (Duerr's \dimval{Complex} value for Mode of Inheritance,
+above, is one); an \texttt{ai\_assumption} marks a judgement call
+the AI made without strong evidence, which the reviewer should
+verify. An example of the latter is Duerr's GE-6, which collects
+citations to prior mouse-model work that the paper's Discussion
+leverages to motivate the therapeutic claim; the AI drafted this
+as a \GeneticEvidence{} item but flagged that it is not clear
+whether evidence \emph{cited} by a paper belongs in the annotation
+of \emph{that} paper, or whether citation chains require a
+separate representational layer. This is a judgment call we think
+worth recording but not resolving silently.
+
+\Cref{tab:flags} summarises the flag counts across the six
+annotations.
+
+\begin{table}[tbp]
+\centering
+\caption{Reviewer and AI flags across the six-paper pilot. Each
+cell is a count per paper. Manual-track flags (query, suggestion,
+disagreement) apply to the four manually curated papers; AI-track
+flags (uncertainty, assumption) apply to the two AI-drafted papers.
+Em dashes indicate inapplicable flag--paper combinations.}
+\label{tab:flags}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Paper      & Query & Suggestion & Disagree & AI unc. & AI assum. \\
+\midrule
+Jossin     & 3     & 1          & 0        & ---      & ---        \\
+Davis      & 2     & 1          & 1        & ---      & ---        \\
+Nelson     & 0     & 3          & 0        & ---      & ---        \\
+Gupta      & 0     & 1          & 0        & ---      & ---        \\
+Duerr      & ---   & ---        & ---      & 3        & 2          \\
+Inouye     & ---   & ---        & ---      & 0        & 2          \\
+\midrule
+Total      & 5     & 6          & 1        & 3        & 4          \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The totals themselves are less informative than the distribution.
+Disagreements are rare (one across the four manual papers), which
+is expected given that the annotator also authored the summary
+being compared against. Suggestions and queries are the workhorses:
+six of each, typically for edge cases (HPO-term candidates,
+knockout-type vs.\ mode-of-inheritance scoping, ``SNV in the
+phenotype slot'') where human judgement beyond the schema is
+needed. For the AI-drafted papers, Duerr generated three
+uncertainties (knowledge-domain scoping for GE-1, mode-of-inheritance
+enumeration for GE-3, the cited-vs-generated boundary for GE-6) and
+two assumptions (source-phrase selection and the placeholder choice
+for GE-3); Inouye generated no uncertainties at all (the AI
+identified each stress-test point as a candidate-extension
+rather than an uncertain mapping) and two assumptions about
+measurement-target encoding.
+
+\subsection{The Extension-Promotion Rule}
+\label{sec:workflow-promotion}
+
+The workflow's most substantive methodological commitment is its
+rule for when a candidate schema extension becomes a first-class
+part of the model. The rule is simple and deliberately
+conservative: a gap surfaced in exactly one paper is recorded in
+that paper's \texttt{candidate\_extensions} block but does not
+change the schema; a gap surfaced \emph{independently} in a second
+paper is promoted to a first-class dimension or enumeration
+value. The rationale is that the biomedical literature is
+heterogeneous enough that any given paper can surface
+idiosyncrasies that do not generalise, and the schema should only
+grow in response to convergent evidence.
+
+In the six-paper pilot the rule has fired twice. \emph{Phenotype
+Scale} was first proposed by the Jossin annotation (to
+distinguish the paper's three ``phenotype'' callouts at molecular,
+histological, and organismal scales) and then independently
+exercised by Davis, Nelson, and all subsequent papers; it was
+promoted to the always-required set and is now part of
+\cref{tab:dimensions-core}. \emph{Variant Ascertainment} was first
+proposed by the Davis annotation (to distinguish variants observed
+in patients from variants tested because they appeared in a
+database) and then independently exercised by Nelson, Duerr,
+and Inouye; it was promoted conditionally on
+\mbox{\dimval{Target Type}~=~\dimval{Variant}} and is also now
+in \cref{tab:dimensions-core}. Thirteen candidate extensions
+remain unpromoted, pending either a second encounter or an
+explicit curator decision.
+
+A complementary positive finding from the pilot is a candidate
+extension that the rule \emph{correctly} blocked. The Duerr
+annotation initially proposed a new dimension for handling
+negative-polarity assertions (GE-5 asserts ``no significant
+association at IL12RB1, IL23A, or IL12B''), on the reasoning
+that the schema seemed oriented toward positive claims. On
+review the curator noted that an \EvidenceAssertion{} is a
+predicate, and a predicate can state the absence of something
+just as readily as its presence; no new dimension was needed.
+The candidate was retracted before any schema change occurred.
+This is the kind of false-positive extension that a
+conservative promotion rule is designed to catch: had the rule
+permitted single-paper promotion, the schema would now carry
+a redundant polarity field that would never have been exercised
+again. The retraction is preserved in the project repository
+for methodological completeness.
+
+\subsection{Discussion of Methodology}
+\label{sec:workflow-discussion}
+
+Three features of the workflow are worth making explicit before
+we turn to broader implications in \cref{sec:discussion}.
+
+First, the workflow treats schema gaps as \emph{data} rather than
+as problems to be hidden. When an AI-drafted annotation cannot fit
+a claim into the existing enumeration, it records the strain
+inline with a candidate-extension tag and continues. When a
+curator-authored annotation finds the summary-table value at odds
+with the schema, the disagreement is preserved alongside the
+resolution. The alternative---silently forcing the claim into the
+nearest available enumeration value, or quietly extending the
+enumeration without marking the change---produces annotations
+that are cleaner but lose information about where the schema
+strains.
+
+Second, the workflow's two-track structure separates two
+different epistemic roles that the literature tends to conflate.
+A manually-curated annotation is a piece of primary knowledge
+work: it reflects a human reading of the source. An AI-drafted
+annotation is a piece of \emph{secondary} knowledge work: it
+reflects a machine reading that is valid only insofar as a human
+reviewer assents. The flag vocabularies differ because the
+epistemic situations differ; conflating them---treating
+AI-drafted annotations as if they were ground truth, or
+treating manually-curated annotations as if they required
+assumption tags---loses information about the provenance of each
+claim.
+
+Third, the six-paper pilot is deliberately small. We did not set
+out to benchmark the workflow against inter-annotator agreement
+metrics computed over dozens of papers; we set out to verify that
+the schema's structural requirements are practical to meet, and
+that the workflow's flag vocabularies capture the kinds of
+disagreement that arise in practice. We report below on the
+specific model-extension findings that the pilot surfaced
+(\cref{sec:discussion}), and flag as future work the question of
+whether the workflow scales to larger corpora and multiple
+annotators.

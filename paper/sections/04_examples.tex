@@ -1,0 +1,207 @@
+% =====================================================================
+%  §4 — Worked Examples from the Literature
+%
+%  Six-paper corpus table, two featured examples (Duerr 2006, Inouye
+%  2018), summary pointer to GitHub for the full annotations of all
+%  six.
+% =====================================================================
+
+\section{Worked Examples from the Literature}
+\label{sec:examples}
+
+To demonstrate the model's coverage and to expose the places where it
+strains, we applied it to six published genetic-evidence papers
+spanning the major epistemic shapes encountered in literature-based
+variant interpretation (\cref{tab:corpus}). Four of the six were
+annotated manually from the curator's PDF highlights and callouts and
+are treated as ground truth. The remaining two were drafted by an AI
+assistant working from the PDF text alone, with the curator's review
+serving as the evaluation signal. All six annotations are available in
+the project repository; this section features two in detail.
+
+\begin{table}[tbp]
+\centering
+\caption{The six annotated publications and the epistemic shape each
+exercises. Manual annotations are treated as ground truth; AI-drafted
+annotations are evaluated against curator review. GE = \GeneticEvidence{}
+items produced per paper after decomposition at natural-claim granularity.}
+\label{tab:corpus}
+\small
+\begin{tabularx}{\linewidth}{@{}lllllX@{}}
+\toprule
+Paper & Source & GE items & Credibility & Role & Notes \\
+\midrule
+Jossin 2017 (Llgl1)   & manual       & 6 & Very high & molecular mechanism           & multi-scale phenotype; motivates \emph{phenotype\_scale} \\
+Davis 2011 (TTC21B)   & manual       & 6 & High      & breadth exemplar              & motivates \emph{variant\_ascertainment} \\
+Nelson 1992 (CD18)    & manual       & 3 & Medium    & classical molecular genetics  & single-gene functional; no extensions surfaced \\
+Gupta 2015 (ATP6AP2)  & manual       & 2 & Low       & low-credibility edge case     & schema fits cleanly \\
+Duerr 2006 (IL23R)    & AI-drafted   & 6 & High      & clean GWAS exemplar           & featured below \\
+Inouye 2018 (metaGRS) & AI-drafted   & 5 & High/Med  & model-extension stress test   & featured below \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+We feature two of the papers here. Duerr et al.\ 2006
+(\cref{sec:ex-duerr}) is a textbook GWAS whose evidence shape the
+model accommodates cleanly; it shows the machinery in ordinary
+operation. Inouye et al.\ 2018 (\cref{sec:ex-inouye}) is a polygenic
+risk score study whose evidence shape deliberately strains the model;
+its annotation surfaces a cluster of candidate extensions that we
+return to in \cref{sec:discussion}. The other four annotations
+(Jossin, Davis, Nelson, Gupta) are described in sufficient detail in
+the repository's \texttt{annotations/} directory, and we mention them
+below only to illustrate specific methodological points.
+
+\subsection{A Genome-Wide Association Study: Duerr et al.\ 2006}
+\label{sec:ex-duerr}
+
+Duerr and colleagues identified the \textit{IL23R} association with
+inflammatory bowel disease by typing 308{,}332 autosomal SNPs in 547
+non-Jewish European-ancestry cases with ileal Crohn's disease against
+548 matched controls, following genome-wide significance with
+independent replication in a Jewish-ancestry cohort and family-based
+transmission disequilibrium testing in 883 nuclear families. The
+paper's central finding---that the Arg381Gln coding variant
+rs11209026 confers protection against Crohn's disease with an odds
+ratio of 0.26 in the discovery cohort---is the kind of result the
+model was designed to represent: a variant-level claim grounded in
+population-genetic methodology, with explicit cohort descriptors, a
+multiple-testing adjustment, and external replication.
+
+Our annotation decomposes the paper into six \GeneticEvidence{} items
+covering, respectively, the GWAS discovery, the Jewish-cohort
+replication, the family-based transmission analysis, a conditional
+analysis showing that the IL23R signal comprises more than one
+independent variant, a negative result at three related IL-23 pathway
+genes, and cited mouse-model evidence supporting a therapeutic
+rationale. All six items fit the schema without invoking any
+conditional dimension that was not already part of the model, and
+only one candidate extension (a direction-of-effect dimension for
+protective versus risk-conferring alleles) was surfaced, which awaits
+a second-paper confirmation before promotion.
+
+Listing~\ref{lst:duerr} shows the annotation of the paper's primary
+assertion---the discovery of rs11209026's association---abridged to
+fit the page. The full annotation, including all six evidence items
+and their source-anchored sub-assertions, is available in the
+project repository.
+
+\begin{lstlisting}[language=yaml, caption={Abridged \GeneticEvidence{} annotation for the primary discovery in Duerr et al.\ 2006. Source-span and credibility fields are retained; some sub-fields (e.g., \texttt{special\_considerations}) are elided for space. \texttt{source: ai\_drafted} marks the item as AI-generated and pending curator review.}, label={lst:duerr}]
+- id: GE-1
+  label: "GWAS discovery of rs11209026 in IL23R"
+  source: ai_drafted
+  knowledge_domain: [POPULATION_GENETICS]
+  method: [STATISTICAL_GENETICS]
+  target_type: VARIANT
+  target: "rs11209026 (p.Arg381Gln) in IL23R"
+  resolution: VARIANT
+  variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
+  phenotype_scale: CLINICAL
+  subdomain: "GWAS"
+  credibility: HIGH
+  credibility_comment: >
+    Genome-wide significance after Bonferroni correction
+    (corrected P = 1.56e-3). OR = 0.26 (95% CI 0.15-0.43).
+    Replication follows in GE-2.
+  assertions:
+    - id: GE-1.A1
+      statement: "rs11209026 is genome-wide significantly associated with ileal Crohn's disease"
+      source_span:
+        page: 1
+        key_phrase: "rs11209026 (P = 5.05e-9, corrected P = 1.56e-3)"
+    - id: GE-1.A2
+      statement: "The Gln allele is protective (OR = 0.26, 95% CI 0.15-0.43)"
+      source_span:
+        page: 2
+        key_phrase: "glutamine allele appears to protect against development of CD"
+\end{lstlisting}
+
+Two things in the listing are worth calling attention to. First, the
+\texttt{variant\_ascertainment} field records that rs11209026 was
+observed in both cases and controls, which it was---the
+case--control design ascertains variants in both groups by
+construction. This instance of the dimension is what justifies its
+promotion to the core schema: the Duerr annotation exercises it, as
+does the Davis annotation (patient-observed vs.\ functionally-tested
+variants), as does every variant-level annotation in the corpus.
+Second, each assertion carries a source span pointing to a specific
+page and a short identifying phrase from the paper, which is what
+makes the annotation auditable---a reader disagreeing with our
+interpretation can check directly.
+
+\subsection{A Polygenic Risk Score: Inouye et al.\ 2018}
+\label{sec:ex-inouye}
+
+The polygenic risk score literature stresses the model in a different
+direction. Inouye and colleagues constructed a meta-genomic risk
+score (metaGRS) for coronary artery disease from 1{,}745{,}180 SNPs,
+weighted by effect size, combining three prior polygenic scores; they
+validated the score externally in 482{,}629 UK Biobank participants,
+reported a hazard ratio per standard deviation of 1.71, demonstrated
+substantial independence from conventional risk factors, and showed
+that the score's predictive power persists in medicated
+subpopulations. Every one of these claims is a genuine piece of
+genetic evidence, and every one of them stretches the model: the
+target is not a gene or a variant but a derived score, the
+resolution is not a locus but the whole genome in aggregate, and the
+measurement targets are epidemiological (hazard ratio, C-index,
+cumulative incidence) rather than molecular. The annotation surfaces
+six candidate extensions as a direct consequence, all of which we
+return to in \cref{sec:discussion}.
+
+Listing~\ref{lst:inouye} shows the UK Biobank validation evidence
+item. Fields whose values required the use of placeholder
+enumeration entries are accompanied by
+\texttt{candidate\_extension\_exercised} tags, which link to the
+proposed extensions recorded in the annotation's
+\texttt{candidate\_extensions} block.
+
+\begin{lstlisting}[language=yaml, caption={Abridged \GeneticEvidence{} annotation for the UK Biobank external validation of the metaGRS. The candidate-extension tags identify the fields whose current values are placeholders from the existing enumerations, with the proposed new enumeration values recorded in the full annotation. This makes the annotation's strain on the schema explicit and auditable.}, label={lst:inouye}]
+- id: GE-2
+  label: "External validation of metaGRS in UK Biobank"
+  source: ai_drafted
+  knowledge_domain: [POPULATION_GENETICS]
+  method: [STATISTICAL_GENETICS]
+  target_type: GENE       # placeholder; candidate: SCORE
+  candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4]
+  target: "metaGRS"
+  resolution: GENE        # placeholder; candidate: WHOLE_GENOME_AGGREGATE
+  variant_ascertainment: [FROM_DATABASE]
+  phenotype_scale: CLINICAL
+  credibility: HIGH
+  credibility_comment: >
+    Prospective cohort of 482,629 individuals independent of training
+    set. <5% non-European ancestry limits generalisability.
+  assertions:
+    - id: GE-2.A1
+      statement: "Hazard ratio per standard deviation of metaGRS is 1.71"
+      measurement_type: HAZARD_RATIO   # candidate: CE-IN4
+      source_span:
+        page: 1
+        key_phrase: "HR for CAD was 1.71 (95% CI 1.68 to 1.73) per SD"
+    - id: GE-2.A3
+      statement: "metaGRS C-index exceeds every conventional risk factor"
+      measurement_type: C_INDEX        # candidate: CE-IN4
+      source_span:
+        page: 1
+        key_phrase: "C-index = 0.623 (95% CI 0.615-0.631) for incident CAD"
+\end{lstlisting}
+
+The four candidate extensions flagged inline---\texttt{CE-IN1}
+through \texttt{CE-IN4}---propose, respectively, a \dimval{Score}
+value for Target Type, a \dimval{Whole Genome Aggregate} value for
+Resolution, a new \emph{target composition} dimension distinguishing
+single versus aggregate targets, and an extension of the measurement
+target enumeration to cover epidemiological quantities such as
+\dimval{Hazard Ratio} and \dimval{C-Index}. Two further extensions
+(CE-IN5 on structured cohort descriptors, CE-IN6 on distinguishing
+natural from derived-artifact targets) are surfaced elsewhere in the
+annotation. The important methodological point is that the model's
+strain is \emph{legible}: rather than silently forcing a polygenic
+score into a variant-level field and producing a misleading
+annotation, the schema requires the curator (human or AI) to mark
+the forced fit and propose an extension. \cref{sec:workflow}
+describes the promotion rule that governs when such candidates become
+first-class, and \cref{sec:discussion} reports what we learned about
+the model from the pattern of extensions that the six papers
+surfaced as a group.

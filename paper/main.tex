@@ -185,12 +185,12 @@ Cite IAO, OBI, and PROV-O in addition to the existing citations.}
 % \subsection{GA4GH Genomic Knowledge Standards}
 % \subsection{ACMG/AMP Variant Interpretation Guidelines}
 
-\begin{table*}[t]
+\begin{table}[tbp]
 \centering
 \caption{Alignment sketch between dimensions of the proposed model and
 existing standards. (To be completed.)}
 \label{tab:standards-mapping}
-\begin{tabularx}{\textwidth}{@{}lXXXX@{}}
+\begin{tabularx}{\linewidth}{@{}lXXXX@{}}
 \toprule
 Our dimension & FHIR Evidence & ECO/SEPIO & GA4GH GKS & IAO/OBI \\
 \midrule
@@ -201,195 +201,27 @@ Credibility          & \tbd{} & SEPIO provenance & \tbd{} & \tbd{} \\
 Mode of inheritance  & \tbd{} & \tbd{} & \tbd{} & HP:\ldots / HPO \\
 \bottomrule
 \end{tabularx}
-\end{table*}
+\end{table}
 
 % =====================================================================
-\section{A Semantic Model of Genetic Evidence}
-\label{sec:model}
+% =====================================================================
+% §3 — Model (see paper/sections/03_model.tex)
+\input{sections/03_model.tex}
+
 % =====================================================================
 
-\todo[inline]{Model section — reorganize the existing Tables 1 and 2 into
-a single consolidated table (Table~\ref{tab:dimensions}). Add a class
-diagram (Figure~\ref{fig:class-diagram}). Add one SHACL or OWL-Manchester
-snippet for a conditional-dimension activation rule, to give the section
-a formal anchor.}
-
-\subsection{Core Classes}
-
-We define three abstract classes:
-
-\begin{description}
-  \item[\ScientificEvidence] A unit of evidence, typically linked to a
-    publication or dataset, described by a set of dimensions
-    (\cref{tab:dimensions}).
-  \item[\EvidenceVariable] A variable extracted from one or more
-    \ScientificEvidence{} items (for example, \emph{gnomAD AF for variant
-    V}, or \emph{LOD score in family F}), also annotated by relevant
-    dimensions.
-  \item[\EvidenceAssertion] A formal statement or predicate over one or
-    more \EvidenceVariable{} instances, intended to be machine-checkable
-    and composable in decision workflows.
-\end{description}
-
-Specialising these to genetics yields \GeneticEvidence, \GeneticEvidenceVariable,
-and \GeneticEvidenceAssertion.
-
-% ---- class diagram placeholder ----
-\begin{figure}[t]
-\centering
-\fbox{\parbox[c][5cm][c]{0.8\linewidth}{\centering
-  \emph{Class diagram placeholder}\\[0.5em]
-  \ScientificEvidence{} $\leftarrow$ \GeneticEvidence\\
-  \EvidenceVariable{} $\leftarrow$ \GeneticEvidenceVariable\\
-  \EvidenceAssertion{} $\leftarrow$ \GeneticEvidenceAssertion\\[0.5em]
-  with dimension attachments and conditional activation
-}}
-\caption{Core classes of the model and their genetic specialisations.
-To be replaced with a proper UML/TikZ diagram.}
-\label{fig:class-diagram}
-\end{figure}
-
-\subsection{Dimensions}
-
-\todo[inline]{Consolidated dimension table goes here. Merge current
-Tables 1 (value types) and 2 (dimensions) into one. Columns: Dimension,
-Value type, Cardinality, Objectivity, Activation condition, Required/Optional.
-Fill every cell.}
-
-\begin{table*}[t]
-\centering
-\caption{Dimensions of the \GeneticEvidence{} model. Conditional
-dimensions are activated only when their activation condition holds.}
-\label{tab:dimensions}
-\small
-\begin{tabularx}{\textwidth}{@{}lllllX@{}}
-\toprule
-Dimension & Value type & Cardinality & Objectivity & Activation & Notes \\
-\midrule
-Knowledge Domain & categorical & single & objective & always & \dimval{Human Genetics}, \dimval{Population Genetics}, \dimval{Model Organism}, \dimval{Gene Function}, \ldots \\
-Method           & categorical & single & objective & always & \dimval{Statistical Genetics}, \dimval{In Vivo}, \dimval{In Vitro}, \dimval{Clinical Evidence}, \ldots \\
-Target type      & categorical & single & objective & always & \dimval{Gene}, \dimval{Variant}, \dimval{Region}, \ldots \\
-Resolution       & categorical or interval & single & objective & always & \\
-Credibility      & fuzzy key/value & multiple & subjective & always & \\
-Mode of inheritance & categorical & single & objective & Knowledge~Domain~=~\dimval{Human Genetics} \textbf{and} Target~=~\dimval{Gene} & \\
-Mendelian segregation & boolean & single & objective & \textit{(same)} & \\
-Measurement target & categorical & multiple & objective & Knowledge~Domain~=~\dimval{Gene Function} & \\
-Organism         & categorical & single & objective & Method~=~\dimval{In Vivo} \textbf{or} Knowledge~Domain~=~\dimval{Model Organism} & \\
-Knockout Type    & categorical & single & objective & Knowledge~Domain~=~\dimval{Model Organism} & \dimval{Conditional}, \dimval{Unconditional} \\
-\bottomrule
-\end{tabularx}
-% This table is abbreviated. Full set of dimensions (including sub-dimensions
-% of "Accuracy of mapping to phenotype") goes in the final draft.
-\end{table*}
-
-\subsection{Conditional Dimension Activation}
-
-\todo[inline]{Add one SHACL shape (preferred) or OWL Manchester snippet
-showing how a conditional activation condition is formalised. Use "Mode
-of inheritance is required when Knowledge Domain = Human Genetics and
-Target = Gene" as the example, because it's referenced elsewhere in the
-paper.}
-
-\begin{lstlisting}[language=yaml, caption={Conditional activation rule expressed as a SHACL-like constraint (sketch).}, label={lst:shacl}]
-# When knowledge_domain is HUMAN_GENETICS and target_type is GENE,
-# mode_of_inheritance must be present.
-- id: GeneticEvidenceShape_MoI
-  targetClass: GeneticEvidence
-  condition:
-    and:
-      - path: knowledge_domain
-        hasValue: HUMAN_GENETICS
-      - path: target_type
-        hasValue: GENE
-  requires:
-    path: mode_of_inheritance
-    minCount: 1
-\end{lstlisting}
+% =====================================================================
+% =====================================================================
+% §4 — Worked Examples (see paper/sections/04_examples.tex)
+\input{sections/04_examples.tex}
 
 % =====================================================================
-\section{Worked Examples from the Literature}
-\label{sec:examples}
-% =====================================================================
-
-\todo[inline]{Worked examples. Summary table (Table~\ref{tab:corpus})
-listing all six annotated papers. Then two featured examples in prose,
-each with its YAML annotation as a listing: (1) Duerr 2006 as the clean
-GWAS exemplar, (2) Davis 2011 as the breadth exemplar. Keep Jossin,
-Nelson, Gupta, Inouye as summary-table-only, pointing to the supplementary
-material.}
-
-\begin{table*}[t]
-\centering
-\caption{The six annotated publications and the epistemic shape each
-exercises. Manual annotations are treated as ground truth; AI-drafted
-annotations are evaluated against them and against expert review.}
-\label{tab:corpus}
-\small
-\begin{tabularx}{\textwidth}{@{}llllX@{}}
-\toprule
-Paper & Knowledge Domain(s) & Method(s) & Target & Role \\
-\midrule
-Jossin 2017 (Llgl1)   & Model Organism, Gene Function & In vivo, In vitro        & Gene          & molecular mechanism \\
-Davis 2011 (TTC21B)   & Human, Population, Model Org. & Multi-modal              & Variant/Gene  & breadth exemplar \\
-Nelson 1992 (CD18)    & Human Genetics                & Clinical, In vitro       & Variant       & classical molecular genetics \\
-Gupta 2015 (ATP6AP2)  & Human Genetics                & Clinical, In silico      & Variant       & low-credibility edge case \\
-Duerr 2006 (IL23R)    & Population Genetics           & GWAS, family-based       & Variant       & clean GWAS exemplar \\
-Inouye 2018 (metaGRS) & Population Genetics           & Polygenic prediction     & Score         & model-extension case \\
-\bottomrule
-\end{tabularx}
-\end{table*}
-
-\subsection{A Classical Genome-Wide Association Study: Duerr et al. 2006}
-\label{sec:ex-duerr}
-
-\todo[inline]{Prose introduction (~1 paragraph) and the YAML annotation
-block. This is the positive example — shows the model handling a
-textbook GWAS cleanly.}
-
-\begin{lstlisting}[language=yaml, caption={Partial \GeneticEvidence{} annotation for Duerr et al.\ 2006, discovery of the IL23R association in Crohn's disease.}, label={lst:duerr}]
-# Placeholder — full annotation from Section 4 goes here.
-publication:
-  citation: "Duerr RH et al., Science 2006;314:1461-3"
-evidence:
-  - id: GE-1
-    knowledge_domain: POPULATION_GENETICS
-    method: STATISTICAL_GENETICS
-    target_type: VARIANT
-    resolution: VARIANT
-    # ... (abridged in main text; full version in supplementary material)
-\end{lstlisting}
-
-\subsection{A Polygenic Risk Score: Inouye et al.\ 2018}
-\label{sec:ex-inouye}
-
-\todo[inline]{Prose paragraph and the YAML annotation block. This is the
-stress-test example — where the model strains and where we report model
-extensions as findings in the Discussion.}
 
 % =====================================================================
-\section{Human--AI Annotation Workflow and Evaluation}
-\label{sec:workflow}
+% §5 — Workflow and Evaluation (see paper/sections/05_workflow.tex)
+\input{sections/05_workflow.tex}
+
 % =====================================================================
-
-\todo[inline]{This is the ICBO-2026-theme hook section. Structure:
-(1) workflow description with explicit protocol for manual-ground-truth
-vs AI-drafted-then-reviewed papers; (2) agreement / coverage metrics;
-(3) disagreement taxonomy (reviewer\_query / reviewer\_suggestion /
-reviewer\_disagreement). Keep honest about the small corpus —
-"feasibility study, not benchmark".}
-
-\subsection{Protocol}
-
-\todo{Describe: (a) for Jossin, Davis, Nelson, Gupta, manual highlights
-were transformed into the schema with explicit flags where mapping was
-uncertain; (b) for Duerr and Inouye, the annotation was AI-drafted then
-reviewed.}
-
-\subsection{Coverage and Agreement}
-
-\todo{Report per-dimension population rate across the six papers; report
-curator--AI agreement rate on Duerr and Inouye; report the three categories
-of disagreement with worked examples.}
 
 % =====================================================================
 \section{Discussion}

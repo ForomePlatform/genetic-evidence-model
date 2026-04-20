@@ -175,6 +175,31 @@ gem:ModeOfInheritanceConditionalShape
     """
   ] .
 
+# ---------- conditional-activation rule: organism ----------
+#
+# Organism is required when method contains IN_VIVO_EXPERIMENT OR
+# knowledge_domain contains MODEL_ORGANISM. Demonstrates the
+# disjunctive (OR-joined) activation shape and cross-axis activation
+# (Method OR Knowledge Domain).
+
+gem:OrganismConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When method contains IN_VIVO_EXPERIMENT or knowledge_domain contains MODEL_ORGANISM, organism is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        { $this gem:method gem:IN_VIVO_EXPERIMENT . }
+        UNION
+        { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
+        FILTER NOT EXISTS { $this gem:organism ?org }
+      }
+    """
+  ] .
+
 # ---------- further shapes follow as the corpus grows ----------
 # TODOs:
 #   - enumerate measurement_target values

@@ -1,0 +1,272 @@
+% =====================================================================
+%  §3 — A Semantic Model of Genetic Evidence
+%
+%  Core classes, dimensional vocabulary, conditional activation
+%  mechanism. Written to be self-contained; subsequent sections
+%  reference back to the table and the formal snippets here.
+% =====================================================================
+
+\section{A Semantic Model of Genetic Evidence}
+\label{sec:model}
+
+The model comprises three parts: a small set of \emph{core classes}
+(\cref{sec:model-classes}) that define what a unit of evidence is and
+how evidence items compose; a \emph{dimensional vocabulary}
+(\cref{sec:model-dimensions}) that describes each evidence item along
+roughly twenty axes; and a \emph{conditional activation} mechanism
+(\cref{sec:model-conditional}) that makes the vocabulary compact by
+requiring dimensions only when they are semantically appropriate. The
+three parts reinforce each other: the core classes are deliberately
+minimal so the dimensional vocabulary can do the descriptive work, and
+conditional activation keeps the vocabulary itself from becoming a
+long list of dimensions that are ``required except when \ldots.''
+
+\subsection{Core Classes}
+\label{sec:model-classes}
+
+Three abstract classes anchor the model:
+
+\begin{description}
+  \item[\ScientificEvidence] A unit of evidence, typically linked to a
+    publication or a dataset, described by a set of dimensions (see
+    \cref{tab:dimensions-core,tab:dimensions-cond}). A single paper may
+    give rise to multiple
+    \ScientificEvidence{} items when it reports evidentially
+    distinct claims (for example, a case--control association and an
+    in vivo functional assay for the same variant).
+  \item[\EvidenceVariable] A named quantity extracted from one or more
+    \ScientificEvidence{} items---for instance, the gnomAD allele
+    frequency of a variant, the LOD score in a family, or the odds
+    ratio reported by a GWAS. Variables are themselves annotated by
+    dimensions, because the same quantity (say, an odds ratio) may
+    carry different epistemic weight depending on how it was obtained.
+  \item[\EvidenceAssertion] A predicate over one or more
+    \EvidenceVariable{} instances, intended to be machine-checkable
+    and composable in decision workflows. An assertion is a predicate
+    of any polarity: it may state that a variant is associated with a
+    phenotype, that it is \emph{not} associated, that its effect
+    exceeds a threshold, and so on. The model places no syntactic
+    restriction on the form of the predicate; it only requires that
+    every assertion anchor to a specific source span in the underlying
+    publication so that its provenance is auditable.
+\end{description}
+
+Specialising these three classes to the genetic domain yields
+\GeneticEvidence, \GeneticEvidenceVariable, and
+\GeneticEvidenceAssertion{} (\cref{fig:class-diagram}). The
+specialisations inherit the provenance requirement and add the
+dimensional annotations discussed next.
+
+% ---- class diagram placeholder; to be replaced with TikZ ----
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5cm][c]{0.8\linewidth}{\centering
+  \emph{Class diagram placeholder}\\[0.5em]
+  \ScientificEvidence{} $\leftarrow$ \GeneticEvidence\\
+  \EvidenceVariable{} $\leftarrow$ \GeneticEvidenceVariable\\
+  \EvidenceAssertion{} $\leftarrow$ \GeneticEvidenceAssertion\\[0.5em]
+  with dimension attachments and conditional activation
+}}
+\caption{Core classes of the model and their genetic specialisations.
+To be replaced with a proper UML/TikZ diagram.}
+\label{fig:class-diagram}
+\end{figure}
+
+\subsection{Dimensions}
+\label{sec:model-dimensions}
+
+Each \GeneticEvidence{} instance is described along a vocabulary of
+dimensions summarised in \cref{tab:dimensions-core}
+(always-required dimensions) and \cref{tab:dimensions-cond}
+(conditional dimensions). A handful of
+dimensions are \emph{always required}---Knowledge Domain, Method,
+Target Type, Resolution, and Credibility---because no well-formed
+genetic-evidence item is fully specified without them. These are the
+dimensions that tell a downstream reader \emph{what kind} of evidence
+this is, \emph{how} it was obtained, \emph{what} it is about, and
+\emph{how much} we should believe it.
+
+Two further dimensions, Phenotype Scale and Variant Ascertainment,
+were added to the core set during this work as a result of the
+annotation process described in \cref{sec:workflow}. Phenotype Scale
+distinguishes evidence about molecular phenotypes (e.g., binding,
+activity) from evidence about cellular, histological, organismal, or
+clinical phenotypes; the scale of the phenotype is independent of the
+scale of the genetic target and is consequential for how the evidence
+composes with other types. Variant Ascertainment records how the
+variant under discussion entered the study---whether it was observed
+in affected individuals, observed in controls, drawn from a database
+of known polymorphisms, or constructed synthetically. Both dimensions
+apply across the corpus of six annotated publications and are
+discussed in \cref{sec:discussion}.
+
+The remaining dimensions are \emph{conditional}. They are required or
+meaningful only when other dimensions take particular values: it makes
+no sense to ask for the mode of inheritance of a polygenic score, or
+for the knockout type of a case--control human study. Rather than
+marking these dimensions as ``optional'' and relying on convention,
+the model attaches explicit activation conditions to each, formalised
+as described in \cref{sec:model-conditional}. The activation condition
+documents not just \emph{whether} the dimension is required, but
+\emph{when}, which is a more useful piece of information for both
+human curators and automated validators.
+
+Credibility deserves brief separate comment. Unlike the other core
+dimensions, Credibility is a fuzzy key--value field rather than a
+closed enumeration: a curator may record any of an open-ended set of
+credibility-relevant features (\texttt{cohort\_size},
+\texttt{replication\_cohort}, \texttt{multiple\_testing\_correction},
+and so on), accompanied by a free-text comment. The model deliberately
+does not attempt to reduce credibility to a single numeric score, on
+the grounds that clinical and research consumers of genetic evidence
+have different weighting preferences over credibility features, and
+collapsing them prematurely would lose information that could be
+reconstructed downstream.
+
+% \begin{table*}[t]
+% ... existing \begin{table*} goes here ...
+% \end{table*}
+
+\begin{table}[tbp]
+\centering
+\caption{Always-required dimensions of the \GeneticEvidence{} model.
+These apply to every evidence item regardless of context. The final
+two rows (Phenotype Scale and Variant Ascertainment) were added to
+the always-required set during the annotation work in
+\cref{sec:workflow}. KD abbreviates Knowledge Domain.}
+\label{tab:dimensions-core}
+\small
+\begin{tabularx}{\linewidth}{@{}llllX@{}}
+\toprule
+Dimension              & Value type        & Card.    & Obj.       & Example values \\
+\midrule
+Knowledge Domain       & categorical       & multiple & obj.       & \dimval{Human Genetics}, \dimval{Population Genetics}, \dimval{Model Organism}, \dimval{Gene Function} \\
+Method                 & categorical       & multiple & obj.       & \dimval{Statistical Genetics}, \dimval{In Vivo}, \dimval{In Vitro}, \dimval{Clinical Evidence} \\
+Target Type            & categorical       & single   & obj.       & \dimval{Gene}, \dimval{Variant}, \dimval{Interval}, \dimval{Transcript} \\
+Resolution             & categorical       & single   & obj.       & \dimval{Window}, \dimval{Gene}, \dimval{Functional Element}, \dimval{Position}, \dimval{Variant} \\
+Credibility            & fuzzy key/value   & multiple & subj.      & \texttt{cohort\_size}, \texttt{replication}, \texttt{correction}, \ldots \\
+Phenotype Scale        & categorical       & single   & obj.       & \dimval{Molecular}, \dimval{Cellular}, \dimval{Histological}, \dimval{Organismal}, \dimval{Clinical} \\
+Variant Ascertainment  & categorical       & multiple & obj.       & \dimval{Observed in Cases}, \dimval{Observed in Controls}, \dimval{From Database}, \dimval{Synthetic} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[tbp]
+\centering
+\caption{Conditional dimensions of the \GeneticEvidence{} model.
+Each is required only when its activation condition holds. KD
+abbreviates Knowledge Domain; MT abbreviates Method; TT abbreviates
+Target Type; $\supseteq$ denotes set membership for multi-valued
+dimensions.}
+\label{tab:dimensions-cond}
+\small
+\begin{tabularx}{\linewidth}{@{}lllX@{}}
+\toprule
+Dimension              & Value type   & Card.    & Activation condition \\
+\midrule
+Mode of Inheritance    & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
+Mendelian Segregation  & boolean      & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
+Penetrance             & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Variant} \\
+Measurement Target     & categorical  & multiple & KD $\supseteq$ \dimval{Gene Function} \\
+Gene Relation          & categorical  & single   & KD $\supseteq$ \dimval{Gene Function} \\
+Organism               & categorical  & multiple & MT $\supseteq$ \dimval{In Vivo} OR KD $\supseteq$ \dimval{Model Organism} \\
+Knockout Type          & categorical  & single   & KD $\supseteq$ \dimval{Model Organism} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Conditional Activation}
+\label{sec:model-conditional}
+
+The conditional activation mechanism is the least conventional part of
+the model, and it is what makes the vocabulary compact without
+sacrificing expressive power. Rather than declaring a fixed schema in
+which every \GeneticEvidence{} item has every dimension (with many
+dimensions marked as optional and left empty for most items), the
+model declares that certain dimensions are required \emph{exactly
+when} specified conditions hold over other dimensions. This mirrors
+how domain experts actually reason: a human curator working through a
+paper about an X-linked recessive pedigree knows to ask about mode of
+inheritance, not because a global schema demands it, but because the
+evidence being examined makes the question meaningful.
+
+We formalise activation conditions as SHACL shapes using SPARQL-based
+constraints, which are the idiomatic SHACL mechanism for expressing
+requirements that cannot be captured by simple cardinality annotations
+on a single property. Two examples, both drawn from the distributed
+schema file, illustrate the pattern.
+
+The first example encodes the rule that \emph{mode of inheritance} is
+required when the Knowledge Domain contains \dimval{Human Genetics}
+\textbf{and} the Target Type is \dimval{Gene}
+(\cref{lst:shacl-moi}). Its logical shape is a conjunction over two
+axes of classification.
+
+\begin{lstlisting}[language=yaml, caption={SHACL conditional activation shape: \emph{mode of inheritance} is required when Knowledge Domain contains \dimval{Human Genetics} and Target Type is \dimval{Gene}.}, label={lst:shacl-moi}]
+gem:ModeOfInheritanceConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message
+      "mode_of_inheritance is required when knowledge_domain contains HUMAN_GENETICS and target_type is GENE." ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this WHERE {
+        $this gem:knowledgeDomain gem:HUMAN_GENETICS .
+        $this gem:targetType      gem:GENE .
+        FILTER NOT EXISTS { $this gem:modeOfInheritance ?moi }
+      }
+    """
+  ] .
+\end{lstlisting}
+
+The second example encodes a different logical shape: \emph{organism}
+is required when \textbf{either} the Method contains
+\dimval{In Vivo Experiment} \textbf{or} the Knowledge Domain contains
+\dimval{Model Organism} (\cref{lst:shacl-org}). Its activation is a
+disjunction, and the two disjuncts involve different axes---one a
+Method value, the other a Knowledge Domain value---so the rule also
+illustrates that activation conditions can span the dimensional
+vocabulary rather than being confined to a single axis.
+
+\begin{lstlisting}[language=yaml, caption={SHACL conditional activation shape: \emph{organism} is required when Method contains \dimval{In Vivo Experiment} or Knowledge Domain contains \dimval{Model Organism}.}, label={lst:shacl-org}]
+gem:OrganismConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message
+      "organism is required when method contains IN_VIVO_EXPERIMENT or knowledge_domain contains MODEL_ORGANISM." ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this WHERE {
+        { $this gem:method gem:IN_VIVO_EXPERIMENT . }
+        UNION
+        { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
+        FILTER NOT EXISTS { $this gem:organism ?org }
+      }
+    """
+  ] .
+\end{lstlisting}
+
+Taken together, the two examples show that the activation conditions
+encountered in practice are ordinary Boolean combinations over
+dimension values: conjunctions, disjunctions, and
+cross-axis constraints, all straightforwardly expressible in SHACL.
+We have found that the small additional cost of writing each
+conditional rule explicitly is repaid many times over in the
+downstream clarity: a reader of an annotation file can look up
+\emph{why} a particular dimension is required or absent, and a
+validator can check conformance automatically. Critically, when an
+annotated paper violates an activation condition (for example, a
+human-genetics gene-level study that lacks a mode of inheritance
+value), the validator reports not just that a field is missing, but
+that a specific semantic condition has been declared and not met.
+
+Section~\ref{sec:workflow} returns to conditional activation in the
+context of the annotation workflow: we report there that every one of
+the six publications we annotated could be placed into the model with
+conditional activation acting as designed, and that the few cases in
+which a curator found themselves populating a dimension the
+conditional rules did not require---or leaving empty a dimension the
+rules did require---were themselves informative signals about where
+the model needed refinement.
