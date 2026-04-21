@@ -1,0 +1,78 @@
+% =====================================================================
+%  §1 - Introduction
+%
+%  Acronyms expanded on first mention per user preference.
+% =====================================================================
+
+\section{Introduction}
+\label{sec:intro}
+
+Scientific and clinical decision-making depends on evidence from
+heterogeneous sources, especially the primary literature. Today,
+this evidence is largely consumed by humans and encoded indirectly
+into annotation databases and local rules.
+
+Existing resources such as HL7 Fast Healthcare Interoperability
+Resources (FHIR) Evidence and EvidenceVariable~\cite{fhir_evidence},
+the Evidence and Conclusion Ontology (ECO)~\cite{eco2019}, the
+Scientific Evidence and Provenance Information Ontology
+(SEPIO)~\cite{sepio}, and the Global Alliance for Genomics and
+Health (GA4GH) Genomic Knowledge Standards (GKS)~\cite{ga4gh_va}
+advance interoperability in clinical research. However, they do not
+comprehensively address the evidence types and workflows that
+originate in the basic sciences. Existing standards focus mainly on
+clinical trials, high-level assertions, and variant representations,
+and provide limited support for the fine-grained, domain-specific
+characterisation of basic and pre-clinical scientific evidence needed
+for automated reasoning and AI-ready infrastructures.
+
+Each scientific domain demands a tailored approach for structuring
+and communicating evidence, and this need is particularly prominent
+in clinical genomics, which is the focus of this paper. Genetic
+evidence is produced under diverse contexts, from experimental model
+systems to large-scale population studies, that are not fully
+supported by current standards. To properly use evidence derived from
+scientific literature in clinical workflows, two principal challenges
+require standardisation: \emph{Relevance and Specificity}, that is,
+how precisely a genetic finding maps to an individual patient,
+disease context, or biological hypothesis; and \emph{Confidence},
+that is, whether a given evidence assertion can be robustly and
+safely used, ensuring defensible compliance, interpretability, and
+reproducibility.
+
+A well-designed schema for genetic evidence helps make literature
+review a \emph{semantic-parsing} problem: mapping natural-language
+claims to a shared, source-anchored representation. Large language
+models are increasingly capable of this kind of parsing, but
+dependable automation still requires careful ontological grounding of
+the target language. The present work offers one such increment,
+building on decades of work by the biomedical-ontology community and
+aiming toward literature review that is materially assisted by
+automated parsing.
+
+\paragraph{Contributions.} This paper makes the following contributions:
+\begin{itemize}
+    \item A domain-analysis-driven semantic model for genetic
+    evidence, with core classes (\ScientificEvidence,
+    \EvidenceVariable, \EvidenceAssertion) and genetic
+    specialisations, plus a compact dimensional vocabulary
+    formalised using the W3C Shapes Constraint Language (SHACL)%
+    ~\cite{w3c-shacl}.
+    \item A worked mapping of the model to six genetic-evidence papers
+    spanning human, population, model-organism, and polygenic-score
+    genetics, with annotations and extraction tooling.
+    \footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model}}
+    \item A human--AI collaborative annotation workflow.
+    \item An alignment sketch between the model and existing standards
+    (FHIR Evidence, ECO, SEPIO, GA4GH GKS, ACMG/AMP, IAO, OBI,
+    PROV-O, ClinGen, MONDO, HPO), intended as a compact pointer
+    rather than an exhaustive mapping.
+\end{itemize}
+
+The remainder of the paper reviews related standards
+(\Cref{sec:background}), defines the semantic model
+(\Cref{sec:model}), and illustrates it on two worked examples
+(\Cref{sec:examples}). We then describe the annotation workflow and
+pilot statistics (\Cref{sec:workflow}), discuss findings, candidate
+extensions, limitations, and future work (\Cref{sec:discussion}), and
+conclude (\Cref{sec:conclusion}).

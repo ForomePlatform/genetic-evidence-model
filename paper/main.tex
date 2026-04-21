@@ -100,15 +100,22 @@
 % are in the project notes.
 
 % Authors — fill in ORCIDs and emails per CEUR footer requirements.
-\author[1]{Author One}[
-  orcid=0000-0000-0000-0000,
-  email=one@example.org
+\author[1,2,3]{Michael Bouzinier}[
+  orcid=0000-0002-3161-5601,
+  email=michael_bouzinier@harvard.edu
 ]
-\author[1]{Author Two}[
-  orcid=0000-0000-0000-0000,
-  email=two@example.org
+\author[3,4]{Dmitry Etin}[
+  orcid=0000-0003-1068-2781,
+  email=dmitry.etin@forome.org
 ]
-\address[1]{Affiliation, City, Country}
+\author[7]{Author Three}[
+  orcid=0000-0000-0000-0000,
+  email=a@b
+]
+\address[1]{Harvard University, Cambridge, MA, USA}
+\address[2]{IDEXX Laboratories, Westbrook, ME, USA}
+\address[3]{Forome Association, Newton, MA, USA}
+\address[4]{Deggendorf Institute of Technology, Germany}
 
 % CEUR requires a conference footnote on the first page. Fill in exact wording
 % from the ICBO 2026 camera-ready template when available.
@@ -139,69 +146,16 @@ evaluated via human--AI annotation), and land on the ICBO 2026 theme
 \maketitle
 
 % =====================================================================
-\section{Introduction}
-\label{sec:intro}
-% =====================================================================
-
-\todo[inline]{Introduction — adapt existing draft. Key moves: (1) establish
-the gap between clinical-trial-oriented standards and basic/preclinical
-genetic evidence, (2) state the two core challenges (Relevance/Specificity
-and Confidence), (3) close with explicit contributions list.}
-
-% Placeholder text — replace with revised version of the existing intro.
-\lipsum[1-2] % remove \lipsum and this line in final draft
-
-\paragraph{Contributions.}
-This paper makes the following contributions:
-\begin{itemize}
-  \item A domain-analysis-driven semantic model for genetic evidence,
-        comprising a small set of core classes
-        (\ScientificEvidence, \EvidenceVariable, \EvidenceAssertion)
-        and their genetic specializations, together with a compact
-        dimensional vocabulary structured by a conditional-activation
-        mechanism.
-  \item A worked mapping of the model to six published genetic-evidence
-        papers spanning human, population, model-organism, and polygenic-score
-        genetics, demonstrating coverage across heterogeneous evidence types.
-  \item A human--AI collaborative annotation workflow, using the model
-        as schema, together with an evaluation of the workflow against
-        manually curated ground-truth annotations.
-  \item An alignment sketch between the model and existing standards
-        (FHIR Evidence, ECO, SEPIO, GA4GH GKS, IAO/OBI, PROV-O).
-\end{itemize}
+% §1 — Introduction (see paper/sections/01_intro.tex)
+\input{sections/01_intro.tex}
 
 % =====================================================================
-\section{Background and Related Work}
-\label{sec:background}
+
 % =====================================================================
+% §2 — Background and Related Work (see paper/sections/02_background.tex)
+\input{sections/02_background.tex}
 
-\todo[inline]{Background — lightly revise existing draft. Add explicit
-mapping paragraph pointing forward to Table~\ref{tab:standards-mapping}.
-Cite IAO, OBI, and PROV-O in addition to the existing citations.}
-
-% --- subsections if you want them; optional ---
-% \subsection{FHIR Evidence Resources}
-% \subsection{ECO and SEPIO}
-% \subsection{GA4GH Genomic Knowledge Standards}
-% \subsection{ACMG/AMP Variant Interpretation Guidelines}
-
-\begin{table}[tbp]
-\centering
-\caption{Alignment sketch between dimensions of the proposed model and
-existing standards. (To be completed.)}
-\label{tab:standards-mapping}
-\begin{tabularx}{\linewidth}{@{}lXXXX@{}}
-\toprule
-Our dimension & FHIR Evidence & ECO/SEPIO & GA4GH GKS & IAO/OBI \\
-\midrule
-Knowledge Domain     & \tbd{} & \tbd{} & \tbd{} & \tbd{} \\
-Method               & \tbd{} & ECO:0000\ldots (inference types) & \tbd{} & OBI:0000\ldots (assay) \\
-Target / Resolution  & \tbd{} & \tbd{} & VRS / Statement & \tbd{} \\
-Credibility          & \tbd{} & SEPIO provenance & \tbd{} & \tbd{} \\
-Mode of inheritance  & \tbd{} & \tbd{} & \tbd{} & HP:\ldots / HPO \\
-\bottomrule
-\end{tabularx}
-\end{table}
+% =====================================================================
 
 % =====================================================================
 % =====================================================================
@@ -224,33 +178,16 @@ Mode of inheritance  & \tbd{} & \tbd{} & \tbd{} & HP:\ldots / HPO \\
 % =====================================================================
 
 % =====================================================================
-\section{Discussion}
-\label{sec:discussion}
-% =====================================================================
-
-\todo[inline]{Discussion. Structure: (1) summary of what the model does
-and for whom; (2) alignment with ICBO 2026 theme explicitly; (3) subsection
-"Model extensions identified through annotation" listing the five gaps
-surfaced by the Inouye paper (Score target type, genome-wide resolution,
-measurement-target vocabulary, cohort descriptors, derived artifacts);
-(4) limitations — small corpus, schema not yet formalised in OWL,
-evaluation setting is not a clinical deployment; (5) future work —
-full OWL/SHACL formalisation, larger corpus, ClinGen integration.}
-
-\subsection{Model Extensions Surfaced by Annotation}
-
-\todo{Enumerate the five extensions from the Inouye annotation as
-findings of the methodology working correctly. Frame as: the model
-does what a good semantic framework should do — it yields diagnostic
-information about its own coverage.}
+% §6 — Discussion (see paper/sections/06_discussion.tex)
+\input{sections/06_discussion.tex}
 
 % =====================================================================
-\section{Conclusion}
-\label{sec:conclusion}
-% =====================================================================
 
-\todo[inline]{Tight conclusion — three to four sentences. Recap the
-contribution and land on the ICBO theme one more time.}
+% =====================================================================
+% §7 — Conclusion (see paper/sections/07_conclusion.tex)
+\input{sections/07_conclusion.tex}
+
+% =====================================================================
 
 % =====================================================================
 % \bibliographystyle is set by ceurart natbib=true; do not add another one here.
