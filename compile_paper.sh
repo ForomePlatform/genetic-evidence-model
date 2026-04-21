@@ -6,11 +6,12 @@ set -euo pipefail
 PAPER_DIR="$(cd "$(dirname "$0")/paper" && pwd)"
 TARGET="$PAPER_DIR/target"
 MAIN="main"
+JOBNAME="Semantic-GEM"        # pick whatever you want here
 ENGINE="${LATEX_ENGINE:-pdflatex}"
 
 mkdir -p "$TARGET"
 cd "$PAPER_DIR"
 
-latexmk -"$ENGINE" -bibtex -f -output-directory="$TARGET" "$MAIN.tex"
+latexmk -"$ENGINE" -bibtex -f -jobname="$JOBNAME" -output-directory="$TARGET" "$MAIN.tex"
 
-echo "==> Done: $TARGET/$MAIN.pdf"
+echo "==> Done: $TARGET/$JOBNAME.pdf"

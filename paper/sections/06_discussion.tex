@@ -1,261 +1,133 @@
 % =====================================================================
 %  §6 — Discussion
 %
-%  Structure:
-%    §6 opening:     what the paper did and for whom
-%    §6.1:           ICBO 2026 theme alignment
-%    §6.2:           Model extensions surfaced by annotation
-%                    (the methodology payoff — grouped candidate table)
-%    §6.3:           Limitations
-%    §6.4:           Future work
-%
-%  Avoids restating the model (§3's job) and over-claiming
-%  generalisability from a 6-paper pilot.
+%  Revised 2026-04-21: compressed significantly to meet the 12-page
+%  limit. Detail on individual candidate extensions moved to a
+%  companion EXTENSIONS.md in the repository.
 % =====================================================================
 
 \section{Discussion}
 \label{sec:discussion}
 
-We introduced a semantic model for genetic evidence
-(\cref{sec:model}), applied it to a heterogeneous corpus of six
-publications spanning classical molecular genetics, population
-genetics, model-organism biology, and polygenic risk scoring
-(\cref{sec:examples}), and piloted a two-track annotation workflow
-with explicit flag vocabularies for both human-curated and
-AI-drafted annotations (\cref{sec:workflow}). Two features of the
-model are worth recapitulating as the framing for the discussion
-that follows. First, the model's always-required vocabulary is
-small (seven dimensions) and its conditional-activation mechanism
-keeps the extended vocabulary compact without sacrificing
-expressive power: an item describing a \dimval{Model Organism}
-knockout is required to declare its organism and knockout type,
-while an item describing a human genetic association is not.
-Second, every assertion in every annotation is anchored to a
-specific source span in its underlying publication, making each
-annotation independently auditable. These two features, we argue,
-together distinguish the proposal from the larger class of evidence
-schemas that either fix a flat vocabulary or rely on convention
-rather than formal constraint for provenance.
+Two features of the proposal bear brief recapitulation. The
+always-required vocabulary is small, and its conditional-activation
+mechanism keeps the extended vocabulary compact without sacrificing
+expressive power. And every assertion in every annotation is
+anchored to a specific source span in its underlying publication,
+making each annotation independently auditable.
 
 \subsection{Alignment with the ICBO 2026 Theme}
 \label{sec:disc-icbo}
 
-The conference call asks for contributions that advance
-trustworthy, interpretable, and AI-ready semantic infrastructure.
-The present work contributes to each of these in a concrete way
-that was not invented to match the theme but reflects decisions
-made during the corpus pilot.
-
-\emph{Trustworthiness.} Every schema conformance requirement is
-expressed formally as a SHACL shape, and every activation
-condition is machine-checkable. An annotation that violates a
-conditional-activation rule is flagged automatically; the rule
-itself is auditable from the schema file rather than from a style
-guide. The source-anchoring requirement makes each assertion
-independently verifiable against its source; a reader disagreeing
-with any assertion can locate the specific passage the annotation
-rests on without tracing through the paper.
-
-\emph{Interpretability.} The flag vocabularies of
-\cref{sec:workflow-flags} make the provenance of each judgment
-explicit: a reader encountering a value in an annotation can tell
-whether it was drawn from the author's summary, proposed by a
-reviewer, added as an AI assumption, or left deliberately
-unpopulated. No value in a conforming annotation is orphaned; each
-either fits a schema constraint or carries a tag explaining why it
-does not.
-
-\emph{AI-readiness.} The annotations are machine-actionable not
-because they are simple but because they carry their own
-metadata. An automated consumer that needs only high-credibility
-human-genetics evidence can filter on the relevant dimensions;
-one that needs to reason about cross-level variant descriptions
-(HGVS cDNA vs.\ genomic coordinates) can route to
-\texttt{special\_considerations} entries keyed to that concern.
-The schema is readable by both humans and validators, and the
-structure is stable across papers that span an order of magnitude
-in sample size and half a century in publication date.
-
-A broader way to frame the same point is that the schema
-is designed to make literature review tractable as a
-\emph{semantic parsing} problem: the mapping of natural-language
-claims in a publication to a shared, source-anchored
-representation. Modern large language models have become
-substantially more capable at semantic parsing than they were
-only a few years ago, and the flag vocabularies of
-\cref{sec:workflow-flags} were in fact designed with a parser's
-three possible outcomes in mind---a successful mapping,
+The conference call asks for contributions that advance trustworthy,
+interpretable, and AI-ready semantic infrastructure. Every schema
+conformance requirement is formalised as a SHACL shape, every
+activation condition is machine-checkable, and source anchoring
+makes each assertion verifiable against its origin rather than
+against a style guide. The flag vocabularies of
+\cref{sec:workflow-flags} make provenance explicit: a reader can
+tell whether a value was drawn from the author's summary, proposed
+by a reviewer, added as an AI assumption, or left deliberately
+unpopulated. A broader framing is that the schema is designed to
+make literature review tractable as a \emph{semantic-parsing}
+problem, the mapping of natural-language claims to a shared,
+source-anchored representation. Modern large language models have
+become substantially more capable at semantic parsing than they
+were only a few years ago; our flag vocabularies were designed with
+a parser's three possible outcomes in mind, a successful mapping,
 a request for human disambiguation, or a proposal to extend the
-target language. That said, semantic parsing of the biomedical
-literature is not something a language model can perform in
-isolation, and we do not claim otherwise: the target language
-into which each claim is parsed is an ontology, and the quality
-of the parse depends on the quality of the ontological grounding.
-The proposed schema is one such target, partial and evolving,
-whose development rests on decades of prior work in biomedical
-ontology (ECO, SEPIO, HPO, IAO, OBI, VRS, and others).
-We see the present contribution as one increment along a
-longer path, not as a replacement for any of the work it
-builds on.
+target language. Parsing the biomedical literature, however, is not
+something a language model can do in isolation: the target of each
+parse is an ontology, and the quality of the parse depends on the
+quality of the ontological grounding. We see the present
+contribution as one increment along a longer path, building on
+decades of biomedical-ontology work (ECO, SEPIO, HPO, IAO, OBI,
+VRS, and others), not as a replacement for any of it.
 
 \subsection{Model Extensions Surfaced by Annotation}
 \label{sec:disc-extensions}
 
-The most substantive methodological finding of the pilot is that
-applying the schema to a small but heterogeneous corpus surfaced
-specific, grounded proposals for how the schema should evolve.
-Two dimensions---\emph{Phenotype Scale} and \emph{Variant
-Ascertainment}---were proposed by individual papers, independently
-exercised by others, and consequently promoted to first-class
-status in the always-required vocabulary
-(\cref{tab:dimensions-core}). Thirteen additional candidate
-extensions were surfaced by individual annotations and recorded
-in their \texttt{candidate\_extensions} blocks; under the
-promotion rule of \cref{sec:workflow-promotion} none has yet been
-promoted, because no single candidate has been independently
-exercised by a second paper in the six-paper pilot. These
-candidates are listed in \cref{tab:candidates}, grouped by what
-they suggest about the model's initial scope.
+The pilot surfaced two candidate dimensions that were exercised by
+multiple papers and promoted to the always-required vocabulary
+(Phenotype Scale and Variant Ascertainment), plus thirteen further
+candidate extensions that have been recorded but not yet promoted
+under the two-papers rule (\cref{sec:workflow-promotion}). The
+pattern of candidates is itself informative and is summarised in
+\cref{tab:candidates}; per-candidate rationale, affected dimensions,
+and proposed enumeration values are documented in a companion
+\texttt{schema/EXTENSIONS.md} in the repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/EXTENSIONS.md}}
+The Gupta annotation, which surfaced no candidate extensions, is
+worth naming as a positive finding: the paper reports a family with
+an X-linked splice-site mutation and careful pedigree segregation,
+the canonical evidence shape the model was designed for, and the
+schema accommodates it without strain.
 
 \begin{table}[tbp]
 \centering
-\caption{Candidate schema extensions surfaced by the corpus
-pilot, grouped by concern. None has yet been promoted to
-first-class under the two-papers rule. Entries are keyed by the
-paper that surfaced them (J~=~Jossin, D~=~Davis, N~=~Nelson,
-DU~=~Duerr, IN~=~Inouye; Gupta surfaced none).}
+\caption{Candidate schema extensions surfaced by the six-paper
+pilot, grouped by concern. None has yet been promoted under the
+two-papers rule. Per-candidate detail is in the companion
+\texttt{schema/EXTENSIONS.md}; paper keys are J~=~Jossin, D~=~Davis,
+N~=~Nelson, DU~=~Duerr, IN~=~Inouye. Gupta surfaced none.}
 \label{tab:candidates}
 \small
 \begin{tabularx}{\linewidth}{@{}llX@{}}
 \toprule
-ID      & Source & Proposed extension \\
+Group & Papers & Count and examples \\
 \midrule
-\multicolumn{3}{@{}l}{\emph{Finer structural resolution}} \\
-CE-J1   & J      & \dimval{Protein Subdomain} value for Resolution \\
-CE-J2   & J      & \dimval{Interaction} and \dimval{Complex} values for Target Type \\
-CE-J3   & J      & \dimval{X physically binds Y} and \dimval{X regulates trafficking of Y} values for Gene Relation \\
-CE-N1   & N      & Cross-level variant description (gDNA vs.\ cDNA vs.\ protein); resolvable via reference to HGVS / GA4GH VRS \\
-\midrule
-\multicolumn{3}{@{}l}{\emph{Polygenic-score machinery}} \\
-CE-IN1  & IN     & \dimval{Score} value for Target Type \\
-CE-IN2  & IN     & \dimval{Whole Genome Aggregate} value for Resolution \\
-CE-IN3  & IN     & \emph{target\_composition} dimension: \dimval{Single} / \dimval{Aggregate} / \dimval{Composite} \\
-CE-IN4  & IN     & Epidemiological Measurement Target values: \dimval{Hazard Ratio}, \dimval{Odds Ratio}, \dimval{C-Index}, \dimval{AUROC}, \ldots \\
-CE-IN5  & IN     & Structured \emph{cohort} sub-block (n\_total, ancestry, follow-up, ascertainment) \\
-CE-IN6  & IN     & \emph{derived\_artifact} flag distinguishing natural from constructed targets \\
-\midrule
-\multicolumn{3}{@{}l}{\emph{Effect-size direction and curation}} \\
-CE-DU1  & DU     & \emph{direction\_of\_effect} dimension: \dimval{Risk}/\dimval{Protective}/\dimval{Neutral} \\
-CE-D1   & D      & Ordinal priority on multi-valued \emph{knowledge\_domain} \\
-CE-D2   & D      & \emph{curator\_critique} sub-block on \EvidenceAssertion{} \\
+Finer structural resolution  & J, N   & 4 (subdomain, interaction, gene-relation, cross-level variant) \\
+Polygenic-score machinery    & IN     & 6 (score target, whole-genome aggregate, target composition, epidemiological measurement, cohort sub-block, derived-artifact flag) \\
+Effect-size and curation     & DU, D  & 3 (direction of effect, knowledge-domain priority, curator critique) \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The grouping itself is the interpretation. The first cluster
-(finer structural resolution) is what the model would need to
-accommodate papers that reason below the gene level---to
-protein subdomains, to interactions, to cross-level variant
-descriptions. This is largely solved by external vocabularies we
-would simply reference rather than reinvent: PROTEIN\_SUBDOMAIN
-could be grounded in InterPro; the HGVS / GA4GH VRS ecosystem
-already provides the cross-level variant identifiers that CE-N1
-identifies as missing. The second cluster (polygenic-score
-machinery) is different in character: it is concentrated in a
-single paper and reflects a genuine category shift from
-variant-level to aggregate-score-level evidence. Whether these
-candidates become first-class dimensions or whether polygenic
-scores warrant a distinct \GeneticEvidence{} subtype is a
-question that would be settled by annotating additional
-polygenic-score papers, which the two-papers promotion rule
-anticipates. The third cluster (effect-size direction and
-curation) is the smallest and most heterogeneous: each candidate
-responds to a specific curator judgement that the current schema
-does not have a place for.
-
-A negative finding is worth naming as well. The Gupta annotation
-surfaced no candidate extensions. This was not because the paper
-is trivial---it reports a family with an X-linked splice-site
-mutation and careful pedigree segregation---but because the
-paper's evidence shape is exactly the one the model was designed
-for: a human-genetics variant-level claim with Mendelian
-segregation and a clinical phenotype. The schema accommodates it
-without strain. Taken together with the ten stress-test
-candidates from Inouye, the six-paper pilot suggests that the
-model covers conventional variant-level human-genetics evidence
-comfortably but strains predictably at the population-genetics
-and systems-biology boundaries of the field.
-
 \subsection{Limitations}
 \label{sec:disc-limitations}
 
-The pilot has significant limitations, some inherent to the
-design and some that a larger study could address.
-
-First, six papers and a single annotator do not support claims
-about inter-annotator agreement or generalisability. We treat
-the work as a feasibility study
-(\cref{sec:workflow-discussion}), not a benchmark. A larger
-corpus annotated by multiple curators would be required to
-benchmark the workflow against inter-annotator agreement
-metrics.
-
-Second, the model has not yet been released as a fully OWL-formalised
-ontology. The present SHACL distribution covers top-level class
-declarations, dimension enumerations, and the conditional
-activation rules, but does not yet attempt the axiomatisation
-required for classification and subsumption inference. A
-LinkML source-of-truth representation, from which OWL, SHACL,
-JSON Schema, and Avro could be generated, is one possible
-direction for that work and would also make the model
-interoperable with the existing OBO tool chain.
-
-Third, our evaluation is not a clinical deployment. The model is
-motivated by variant interpretation in clinical-genomics
-programs (the BGM/UDN setting cited in the curation provenance
-blocks), but the current pilot stops short of applying the model
-to a live interpretation workflow. Whether annotations in this
-form are useful to a working ACMG-AMP-style variant
-classification pipeline remains a question for future work.
-
-Fourth, the corpus is skewed toward research papers about
-disease genes and variants. We did not annotate clinical-trial
-evidence, family-reported phenotype data, or gene-dosage findings,
-all of which would stress different parts of the schema. The
-candidate extensions in \cref{tab:candidates} should be read as
-findings from \emph{this} corpus, not as a complete survey of the
+The pilot has significant limitations. Six papers and a single
+annotator do not support claims about inter-annotator agreement or
+generalisability; we treat the work as a feasibility study, not a
+benchmark. The model has not been released as a fully
+OWL-formalised ontology: the present SHACL distribution covers
+class declarations, dimension enumerations, and activation rules,
+but not the axiomatisation that classification and subsumption
+inference would require. The evaluation is not a clinical
+deployment: although the model is motivated by variant
+interpretation in clinical-genomics programs, the pilot stops short
+of applying the model to a live workflow. And the corpus is skewed
+toward research papers about disease genes and variants; the
+candidate extensions of \cref{tab:candidates} should be read as
+findings from \emph{this} corpus, not a complete survey of the
 schema's coverage gaps.
 
 \subsection{Future Work}
 \label{sec:disc-future}
 
-We see three near-term directions.
+Three near-term directions: annotate a second corpus selected to
+exercise the strongest candidate extensions; generate OWL, SHACL,
+JSON Schema, and LinkML renderings from a single source-of-truth to
+open the schema to the OBO and Bridge2AI ecosystems; and carry out
+a clinical-deployment study to turn the feasibility claim into a
+utility claim.
 
-First, the promotion rule of \cref{sec:workflow-promotion} is
-currently conservative: a candidate extension promotes to the
-schema only after independent confirmation in a second paper. The
-next natural step is to apply the rule forward by annotating a
-second corpus selected to exercise the strongest candidates: a
-handful of additional polygenic-score papers would settle CE-IN1
-through CE-IN6, a handful of additional protein-interaction
-papers would settle CE-J1 through CE-J3, and a handful of
-additional GWAS follow-ups would settle CE-DU1.
+\section{Availability of Code, Data, and Artefacts}
+\label{sec:availability}
 
-Second, a LinkML or OWL source-of-truth would open the schema to
-the OBO and Bridge2AI ecosystems and would let us align our
-dimensions formally to existing vocabularies (ECO, SEPIO, HPO,
-IAO, OBI, PROV-O). The detailed mapping is work that would
-benefit from a collaboration with the relevant ontology
-maintainers rather than being done in isolation.
+All artefacts referenced in this paper are open-source and
+available in the project repository at
+\url{https://github.com/ForomePlatform/genetic-evidence-model}.
+This includes the SHACL schema, the human-readable dimension
+reference (\texttt{dimensions.md}), per-paper annotations for all
+six pilot publications, case reports for the two featured
+annotations (Duerr 2006 and Inouye 2018), the companion
+\texttt{schema/EXTENSIONS.md}, the SHACL walkthrough
+(\texttt{schema/examples.md}), and the extraction tooling used to
+convert PDF highlights and callouts into annotation scaffolds. The
+namespace \url{https://w3id.org/genetic-evidence-model/} resolves
+to the same repository.
 
-Third, a clinical-deployment study---applying the model to a live
-variant interpretation workflow---would turn the feasibility
-claim into a utility claim. The specific question is whether
-annotations in this format make a measurable difference to
-clinical reasoning: for example, whether an interpreter working
-from a pre-annotated set of publications reaches an ACMG-AMP
-classification faster, more consistently, or with fewer
-omissions than one working from the raw publications alone. The
-expected effect size is modest, and the study would need
-careful design, but the pilot annotations are a reasonable
-starting point for a pre-registered comparison.
+\section*{Acknowledgements}
+\todo[inline]{Acknowledgements to be filled in. Likely candidates:
+the annotator (if declining authorship); BGM/UDN colleagues for
+the curation context; reviewers; funders.}

@@ -64,7 +64,7 @@ discussed next.
 Each \GeneticEvidence{} instance is described using a dimensional
 vocabulary that is summarised in \cref{tab:dimensions-core}
 (always-required dimensions) and \cref{tab:dimensions-cond}
-(representative conditional dimensions). \footnote{The full
+(representative conditional dimensions).\footnote{The full
 enumeration of conditional dimensions, including those omitted
 from \cref{tab:dimensions-cond} for space, is maintained in the
 project repository at
@@ -108,6 +108,10 @@ free-text comment. The model deliberately does not collapse these
 features into a single numeric score, because clinical and research
 consumers weight credibility features differently and may wish to
 aggregate them downstream in different ways.
+
+% \begin{table*}[t]
+% ... existing \begin{table*} goes here ...
+% \end{table*}
 
 \begin{table}[tbp]
 \centering
@@ -174,60 +178,50 @@ makes that question meaningful, not because a global schema demands it.
 We formalise activation conditions as SHACL shapes using SPARQL-based
 constraints, which are the idiomatic SHACL mechanism for expressing
 requirements that cannot be captured by simple cardinality annotations
-on a single property. Two examples, both drawn from the distributed
-schema file, illustrate the pattern.
+on a single property. Two representative shapes illustrate the
+pattern; we show only the \texttt{sh:sparql} body of each and elide
+the outer NodeShape wrapper for space. The full shapes, together
+with the base \texttt{GeneticEvidenceShape} and the simpler
+\texttt{variant\_ascertainment} conditional rule, are distributed
+with annotated walkthrough in the project repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
 
-The first example encodes the rule that \emph{mode of inheritance} is
-required when the Knowledge Domain contains \dimval{Human Genetics}
-\textbf{and} the Target Type is \dimval{Gene}
-(\cref{lst:shacl-moi}). Its logical shape is a conjunction over two
-axes of classification.
+The first example encodes a conjunction over two axes of
+classification: \emph{mode of inheritance} is required when the
+Knowledge Domain contains \dimval{Human Genetics} \textbf{and} the
+Target Type is \dimval{Gene} (\cref{lst:shacl-moi}).
 
-\begin{lstlisting}[language=yaml, caption={SHACL conditional activation shape: \emph{mode of inheritance} is required when Knowledge Domain contains \dimval{Human Genetics} and Target Type is \dimval{Gene}.}, label={lst:shacl-moi}]
-gem:ModeOfInheritanceConditionalShape
-  a sh:NodeShape ;
-  sh:targetClass gem:GeneticEvidence ;
-  sh:sparql [
-    sh:message
-      "mode_of_inheritance is required when knowledge_domain contains HUMAN_GENETICS and target_type is GENE." ;
-    sh:select """
-      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
-      SELECT $this WHERE {
-        $this gem:knowledgeDomain gem:HUMAN_GENETICS .
-        $this gem:targetType      gem:GENE .
-        FILTER NOT EXISTS { $this gem:modeOfInheritance ?moi }
-      }
-    """
-  ] .
+\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{mode of inheritance}: the outer NodeShape wrapper is elided. The two triple patterns in \texttt{WHERE} form the conjunction; \texttt{FILTER NOT EXISTS} identifies instances that satisfy the condition but lack the required dimension.}, label={lst:shacl-moi}]
+sh:sparql [ sh:select """
+  SELECT $this WHERE {
+    $this gem:knowledgeDomain gem:HUMAN_GENETICS .
+    $this gem:targetType      gem:GENE .
+    FILTER NOT EXISTS { $this gem:modeOfInheritance ?m }
+  }""" ] .
 \end{lstlisting}
 
-The second example encodes a different logical pattern. Here,
-\emph{organism} is required when \textbf{either} the Method contains
+The second example encodes a cross-axis disjunction:
+\emph{organism} is required when the Method contains
 \dimval{In Vivo Experiment} \textbf{or} the Knowledge Domain contains
-\dimval{Model Organism} (\cref{lst:shacl-org}). Its activation
-condition is a disjunction, and the two disjuncts refer to different
-axes, one a Method value and the other a Knowledge Domain value. This
-illustrates that activation conditions can span the dimensional
-vocabulary rather than being confined to a single axis.
+\dimval{Model Organism} (\cref{lst:shacl-org}). The two disjuncts
+refer to different axes, one a Method value and the other a
+Knowledge Domain value, illustrating that activation conditions can
+span the dimensional vocabulary rather than being confined to a
+single axis.
 
-\begin{lstlisting}[language=yaml, caption={SHACL conditional activation shape: \emph{organism} is required when Method contains \dimval{In Vivo Experiment} or Knowledge Domain contains \dimval{Model Organism}.}, label={lst:shacl-org}]
-gem:OrganismConditionalShape
-  a sh:NodeShape ;
-  sh:targetClass gem:GeneticEvidence ;
-  sh:sparql [
-    sh:message
-      "organism is required when method contains IN_VIVO_EXPERIMENT or knowledge_domain contains MODEL_ORGANISM." ;
-    sh:select """
-      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
-      SELECT $this WHERE {
-        { $this gem:method gem:IN_VIVO_EXPERIMENT . }
-        UNION
-        { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
-        FILTER NOT EXISTS { $this gem:organism ?org }
-      }
-    """
-  ] .
+\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{organism}: the disjunction is expressed by a SPARQL \texttt{UNION} whose two branches refer to different dimensions.}, label={lst:shacl-org}]
+sh:sparql [ sh:select """
+  SELECT $this WHERE {
+    { $this gem:method          gem:IN_VIVO_EXPERIMENT . }
+    UNION
+    { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
+    FILTER NOT EXISTS { $this gem:organism ?o }
+  }""" ] .
 \end{lstlisting}
+
+In each case, the \texttt{SELECT} returns every \GeneticEvidence{}
+instance that satisfies the activation condition but lacks the
+required dimension; the validator reports those instances as
+constraint violations with a localised diagnostic.
 
 Taken together, the two examples show that the activation conditions
 we encounter in practice are ordinary Boolean combinations over

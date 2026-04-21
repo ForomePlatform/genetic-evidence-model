@@ -17,25 +17,24 @@
 The model is a schema, but a schema is only as useful as the
 annotations it supports. We designed and piloted an annotation
 workflow whose central commitment is that every annotation be
-\emph{auditable}: an assertion anchored to the specific text that
-justifies it, a dimension value justifiable against the schema's
-activation conditions, and a reviewer flag on any judgment call that
-a downstream consumer might contest. The same commitment extends to
-AI assistance: when an AI system drafts an annotation, its
-uncertainties and assumptions are not silently absorbed but recorded
-alongside the annotation for curator review.
+\emph{auditable}: each assertion is anchored to the specific text that
+justifies it, each dimension value is defensible against the schema's
+activation conditions, and every judgement call that a downstream
+consumer might contest carries an explicit reviewer flag. The same
+commitment extends to AI assistance: when an AI system drafts an
+annotation, its uncertainties and assumptions are not silently
+absorbed but recorded alongside the annotation for curator review.
 
 This section describes the protocol (\cref{sec:workflow-protocol}),
 reports coverage and flag statistics from the six-paper pilot
 (\cref{sec:workflow-coverage,sec:workflow-flags}), and examines the
 extension-promotion rule that determines when a candidate schema
 extension becomes first-class (\cref{sec:workflow-promotion}). We
-treat the pilot as a \emph{feasibility study} rather than a
-benchmark: six papers and one annotator are not enough to make
-claims about inter-annotator agreement or generalisability. What the
-pilot does show is that the workflow's epistemic commitments are
-practical to meet and that the schema's strain points are surfaced
-rather than hidden.
+treat the pilot as a \emph{feasibility study} rather than a benchmark:
+six papers with a single annotator are not enough to support claims
+about inter-annotator agreement or generalisability. The pilot does
+show that the workflow's epistemic commitments are practical to meet
+and that the schema's strain points are surfaced rather than hidden.
 
 \subsection{Protocol}
 \label{sec:workflow-protocol}
@@ -43,124 +42,117 @@ rather than hidden.
 Annotations are authored in two tracks.
 
 \paragraph{Manual track.}
-For four of the six publications (Jossin, Davis, Nelson, Gupta) a
-human curator read the paper and marked the relevant passages
-directly in the PDF as highlights and sticky-note callouts. A short
-extraction script (provided in the project repository) pulls the
-highlights and callouts into a structured JSON record. The curator's
-judgements---expressed as a summary table of dimension values and
-as free-text callouts attached to specific passages---are then
-transformed into a YAML annotation that conforms to the schema. Where
-the transformation requires a judgment that the curator did not
-make explicit (for example, normalising the free-text value
+Four of the six publications (Jossin, Davis, Nelson, Gupta) were
+annotated manually. A curator read each paper and marked relevant PDF
+passages as highlights and callouts. A provided script extracted these
+into a structured JSON record. The curator's summary table of
+dimension values and passage-level callouts was then converted into a
+YAML annotation conforming to the schema. Whenever this conversion
+required an extra judgement (for example, mapping the free-text
 ``localisation and protein expression'' to the enumeration values
-\dimval{Localization} and \dimval{Existence}), the transformation is
-recorded inline as a \texttt{normalization\_note} with a
-\texttt{type} tag (\texttt{ai\_normalization}, in this case) so that
-the curator can audit the transformation later.
+\dimval{Localization} and \dimval{Existence}), the change was recorded
+inline as a \texttt{normalization\_note} with \texttt{type =
+ai\_normalization} for later audit.
 
 \paragraph{AI-drafted track.}
 For two publications (Duerr, Inouye) the annotation was drafted
 directly by an AI assistant\footnote{Claude Opus 4.7 Adaptive.}
-working from the PDF text. The AI was given the schema (as
-\texttt{dimensions.md}), the ground-truth annotations of the four
-manual papers for reference, and the PDFs themselves. It produced
-YAML annotations in the same format. Where the AI judged that a
-mapping was uncertain or that a judgement call ought to be verified
-by a human reviewer, it recorded the uncertainty inline (see
-\cref{sec:workflow-flags}). The curator then reviewed each AI-drafted
-annotation assertion-by-assertion, flagging any that misrepresented
-the paper or misused the schema.
+working from the PDF text. The AI was given the schema
+(\texttt{dimensions.md}), the ground-truth annotations of the four
+manual papers, and the PDFs themselves, and produced YAML annotations
+in the same format. When the AI judged that a mapping was uncertain or
+that a judgement call ought to be verified by a human reviewer, it
+recorded the uncertainty inline (see \cref{sec:workflow-flags}). The
+curator then reviewed each AI-drafted annotation
+assertion-by-assertion, flagging any that misrepresented the paper or
+misused the schema.
 
 \paragraph{Source anchoring.}
-In both tracks, every
-\GeneticEvidenceAssertion{} carries a \texttt{source\_span} pointing
-to a specific page of the publication and a short key phrase
-(typically under fifteen words) from the underlying text. The phrase
-is chosen to be long enough that a reader can locate the passage by
-search and short enough to stay within fair-use norms for
-copyrighted publisher material. Source anchoring is not optional:
-an annotation without source spans is rejected at validation time.
-Across the six-paper pilot, 65 of 65 assertions (100\%) are
-source-anchored; this is by construction, not by observation.
+In both tracks, every \GeneticEvidenceAssertion{} carries a
+\texttt{source\_span} pointing to a specific page and a short key
+phrase (typically under 15 words) from the underlying text. The phrase
+is chosen to be long enough for a reader to locate the passage by
+search and short enough to stay within fair-use norms for copyrighted
+publisher material. Source anchoring is not optional: an annotation
+without source spans is rejected at validation time. Across the
+six-paper pilot, 65 of 65 assertions (100\%) are source-anchored; this
+is by construction, not by observation.
 
 \subsection{Coverage}
 \label{sec:workflow-coverage}
 
-\Cref{tab:coverage} reports, for each schema dimension, the
-fraction of applicable \GeneticEvidence{} items in which the
-dimension is populated with a real value. The denominator is the
-number of items where the dimension's activation condition holds;
-for the always-required dimensions the denominator is always 28
-(the total number of \GeneticEvidence{} items produced across the
-corpus).
+\Cref{tab:coverage} summarises, for each dimension, how many
+\GeneticEvidence{} items it is populated in and how many items it is
+applicable to. Applicability is defined by the activation conditions;
+for always-required dimensions this is all 28 items.
 
 \begin{table}[tbp]
 \centering
-\caption{Dimension population rates across 28 \GeneticEvidence{}
-items from six papers. The denominator for each conditional
-dimension is the number of items whose activation condition holds.
-A rate of 100\% indicates that every applicable item has the
-dimension populated.}
+\caption{Population of always-required and conditional dimensions
+across 28 \GeneticEvidence{} items from six papers. ``Populated''
+counts items where the dimension has a value; ``Applicable'' counts
+items where its activation condition holds (for Variant
+Ascertainment, only variant-level targets are counted as applicable).}
+
 \label{tab:coverage}
 \small
-\begin{tabular}{@{}llcc@{}}
+\begin{tabular}{@{}lcc@{\hspace{1em}}lcc@{}}
 \toprule
-Dimension              & Class        & Populated & Applicable \\
+\multicolumn{3}{c}{Always-required dimensions} &
+\multicolumn{3}{c}{Conditional dimensions} \\
+Dimension            & Populated & Applicable &
+Dimension            & Populated & Applicable \\
 \midrule
-Knowledge Domain       & always       & 28        & 28 \\
-Method                 & always       & 28        & 28 \\
-Target Type            & always       & 28        & 28 \\
-Resolution             & always       & 28        & 28 \\
-Credibility            & always       & 28        & 28 \\
-Phenotype Scale        & always       & 28        & 28 \\
-Variant Ascertainment  & cond.\ on TT & 21        & 21 \\
-\midrule
-Mode of Inheritance    & cond.        & 0         & 1 \\
-Mendelian Segregation  & cond.        & 0         & 1 \\
-Penetrance             & cond.        & 2         & 4 \\
-Measurement Target     & cond.        & 10        & 11 \\
-Gene Relation          & cond.        & 1         & 11 \\
-Organism               & cond.        & 7         & 8 \\
-Knockout Type          & cond.        & 1         & 6 \\
+Knowledge Domain     & 28        & 28         &
+Mode of Inheritance  & 0         & 1          \\
+Method               & 28        & 28         &
+Mendelian Segregation& 0         & 1          \\
+Target Type          & 28        & 28         &
+Penetrance           & 2         & 4          \\
+Resolution           & 28        & 28         &
+Measurement Target   & 10        & 11         \\
+Credibility          & 28        & 28         &
+Gene Relation        & 1         & 11         \\
+Phenotype Scale      & 28        & 28         &
+Organism             & 7         & 8          \\
+Variant Ascertainment& 21        & 21         &
+Knockout Type        & 1         & 6          \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The always-required dimensions are fully populated, which is by
-construction: the schema rejects annotations that leave them empty.
-The conditional-dimension population rates are more informative.
-Three patterns are worth remarking on.
 
-First, \emph{high-population} dimensions (Measurement Target at
-10/11, Organism at 7/8) indicate that the corresponding activation
-condition is well-calibrated: when the rule says the dimension
-should apply, it almost always does. Second, \emph{zero-population}
-dimensions (Mode of Inheritance at 0/1, Mendelian Segregation at
-0/1) indicate boundary cases. The single applicable item for each
-is Duerr's family-based transmission disequilibrium analysis, which
-is a complex-trait genetic study; the annotator recorded explicit
-uncertainty about whether the enumeration value \dimval{Complex}
-ought to be a first-class member of the Mode-of-Inheritance
-enumeration (\cref{sec:workflow-flags}, \textit{ai\_uncertainty} on
-Duerr GE-3). Third, \emph{low-but-nonzero} dimensions (Gene
-Relation at 1/11) reveal schema shortcomings: in the eleven
-\dimval{Gene Function} evidence items, only one had a gene relation
-that fit the current three-value enumeration
-(\dimval{X regulates Y}, \dimval{X inhibits Y},
-\dimval{X has same function as Y}); the remaining ten mostly
-involved physical binding or trafficking, which the enumeration
-does not cover. This observation motivates the candidate extension
-CE-J3 surfaced in the Jossin annotation
-(\cref{sec:discussion}).
+The always-required dimensions are fully populated by construction,
+since the schema rejects annotations that leave them empty. The
+conditional dimensions are more informative, and three patterns are
+worth noting.
 
-These coverage statistics are internally consistent with the
-activation rules: no dimension is populated where the rule says it
-should not be, and the few places where a rule-required dimension
-is left empty are each accompanied by an explicit flag. Coverage
-alone does not tell us whether the annotations are \emph{correct}
-(that would require a second annotator), only whether the schema's
-structural requirements are met.
+First, \emph{high-population} dimensions such as Measurement Target
+(10/11) and Organism (7/8) suggest that their activation conditions
+are well calibrated: when the rule says the dimension should apply, it
+almost always does. Second, \emph{zero-population} dimensions such as
+Mode of Inheritance (0/1) and Mendelian Segregation (0/1) indicate
+boundary cases. The single applicable item for each is Duerr's
+family-based transmission disequilibrium analysis, a complex-trait
+study where the annotator was unsure whether \dimval{Complex} ought to
+be a first-class value in the Mode-of-Inheritance enumeration
+(\cref{sec:workflow-flags}, \textit{ai\_uncertainty} on Duerr GE-3).
+Third, \emph{low-but-nonzero} dimensions such as Gene Relation (1/11)
+reveal schema shortcomings: in the eleven \dimval{Gene Function}
+evidence items, only one had a gene relation that fit the current
+three-value enumeration (\dimval{X regulates Y}, \dimval{X inhibits
+Y}, \dimval{X has same function as Y}); the remaining ten mostly
+involved physical binding or trafficking, which the enumeration does
+not cover. This motivates the candidate extension CE-J3 surfaced in
+the Jossin annotation (\cref{sec:discussion}).
+
+These coverage statistics are consistent with the activation rules: no
+dimension is populated where the rule says it should not be, and the
+few cases where a required dimension is empty are each accompanied by
+an explicit flag. Coverage alone does not tell us whether the
+annotations are \emph{correct} (that would require a second
+annotator); it only shows that the schema's structural requirements
+are being met.
 
 \subsection{Flag Taxonomy}
 \label{sec:workflow-flags}
@@ -169,69 +161,62 @@ The two tracks use different flag vocabularies because they
 represent different epistemic situations.
 
 \paragraph{Manual track: three flag types.}
-When a curator-authored annotation diverges from the curator's own
-summary table, or when an AI reviewer pass over the manual
-annotation detected a mapping issue, we record one of three flag
-types. A \texttt{reviewer\_disagreement} marks a clear factual
-correction: in the Davis 2011 annotation, the curator's summary
-listed the organism set as \{mouse, zebrafish\}, but the paper's
-rat-retinal electroporation experiment was passed over in the
-summary, and the AI reviewer proposed adding \dimval{Rat} to the
-set. A \texttt{reviewer\_suggestion} marks an optional addition
-whose inclusion depends on curator preference: HPO terms for
-patient phenotypes are a recurring case, flagged in Davis, Nelson,
-and Gupta. A \texttt{reviewer\_query} marks a case where the
-mapping itself is unclear and curator input is needed: the Nelson
-2011 summary table gave
-\texttt{specificity\_of\_phenotype = SNV}, which is semantically
-odd (SNV is a variant type, not a phenotype-specificity
-descriptor), and the annotation preserves the original value with
-a query rather than silently correcting it.
+When a curator-authored annotation diverged from the curator's own
+summary table, or when an AI review of the manual annotation detected
+a mapping issue, we recorded one of three flag types. A
+\texttt{reviewer\_disagreement} marks a clear factual correction: in
+the Davis 2011 annotation, the curator's summary listed the organism
+set as \{mouse, zebrafish\}, but the paper also reported a rat retinal
+electroporation experiment, and the AI reviewer proposed adding
+\dimval{Rat}. A \texttt{reviewer\_suggestion} marks an optional
+addition whose inclusion depends on curator preference; HPO terms for
+patient phenotypes are a recurring case, flagged in Davis, Nelson, and
+Gupta. A \texttt{reviewer\_query} marks a case where the mapping is
+itself unclear and curator input is needed: the Nelson summary table
+gave \texttt{specificity\_of\_phenotype = SNV}, which is semantically
+odd (SNV is a variant type, not a phenotype-specificity descriptor),
+and the annotation preserves the original value with a query rather
+than silently correcting it.
 
 \paragraph{AI-drafted track: two flag types.}
 When no prior ground truth exists, an AI-drafted annotation has
-nothing to \emph{disagree} with. The AI track therefore uses a
-narrower vocabulary: an \texttt{ai\_uncertainty} marks a case where
-the AI was unsure about a schema mapping and would prefer human
-input (Duerr's \dimval{Complex} value for Mode of Inheritance,
-above, is one); an \texttt{ai\_assumption} marks a judgement call
-the AI made without strong evidence, which the reviewer should
-verify. An example of the latter is Duerr's GE-6, which collects
-citations to prior mouse-model work that the paper's Discussion
-leverages to motivate the therapeutic claim; the AI drafted this
-as a \GeneticEvidence{} item but flagged that it is not clear
-whether evidence \emph{cited} by a paper belongs in the annotation
-of \emph{that} paper, or whether citation chains require a
-separate representational layer. This is a judgment call we think
-worth recording but not resolving silently.
+nothing to \emph{disagree} with, so the AI track uses a narrower
+vocabulary. An \texttt{ai\_uncertainty} marks a case where the AI was
+unsure about a schema mapping and prefers human input (for example,
+Duerr's \dimval{Complex} value for Mode of Inheritance). An
+\texttt{ai\_assumption} marks a judgement call made without strong
+evidence that a reviewer should verify. Duerr GE-6 is a typical case:
+the AI collected cited mouse-model work into a \GeneticEvidence{}
+item but flagged that it is unclear whether evidence \emph{cited} by a
+paper belongs in that paper's annotation or whether citation chains
+need a separate representational layer. Such decisions are recorded
+rather than resolved silently.
 
 \Cref{tab:flags} summarises the flag counts across the six
 annotations.
 
-\begin{table}[tbp]
+\begin{wraptable}{r}{0.5\linewidth}
 \centering
-\caption{Reviewer and AI flags across the six-paper pilot. Each
-cell is a count per paper. Manual-track flags (query, suggestion,
-disagreement) apply to the four manually curated papers; AI-track
-flags (uncertainty, assumption) apply to the two AI-drafted papers.
-Em dashes indicate inapplicable flag--paper combinations.}
+\caption{Flags per paper in the six-paper pilot. Manual-track flags
+(Query, Suggestion, Disagree) apply to the four manual papers; AI-track
+flags (AI unc., AI assum.) to the two AI-drafted papers.}
 \label{tab:flags}
 \small
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 Paper      & Query & Suggestion & Disagree & AI unc. & AI assum. \\
 \midrule
-Jossin     & 3     & 1          & 0        & ---      & ---        \\
-Davis      & 2     & 1          & 1        & ---      & ---        \\
-Nelson     & 0     & 3          & 0        & ---      & ---        \\
-Gupta      & 0     & 1          & 0        & ---      & ---        \\
-Duerr      & ---   & ---        & ---      & 3        & 2          \\
-Inouye     & ---   & ---        & ---      & 0        & 2          \\
+Jossin     & 3     & 1          & 0        & ---     & ---       \\
+Davis      & 2     & 1          & 1        & ---     & ---       \\
+Nelson     & 0     & 3          & 0        & ---     & ---       \\
+Gupta      & 0     & 1          & 0        & ---     & ---       \\
+Duerr      & ---   & ---        & ---      & 3       & 2         \\
+Inouye     & ---   & ---        & ---      & 0       & 2         \\
 \midrule
-Total      & 5     & 6          & 1        & 3        & 4          \\
+Total      & 5     & 6          & 1        & 3       & 4         \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{wraptable}
 
 The totals themselves are less informative than the distribution.
 Disagreements are rare (one across the four manual papers), which
@@ -252,89 +237,45 @@ measurement-target encoding.
 \subsection{The Extension-Promotion Rule}
 \label{sec:workflow-promotion}
 
-The workflow's most substantive methodological commitment is its
-rule for when a candidate schema extension becomes a first-class
-part of the model. The rule is simple and deliberately
-conservative: a gap surfaced in exactly one paper is recorded in
-that paper's \texttt{candidate\_extensions} block but does not
-change the schema; a gap surfaced \emph{independently} in a second
-paper is promoted to a first-class dimension or enumeration
-value. The rationale is that the biomedical literature is
-heterogeneous enough that any given paper can surface
-idiosyncrasies that do not generalise, and the schema should only
-grow in response to convergent evidence.
+The workflow adopts a deliberately conservative rule for when a
+candidate extension enters the schema. A gap seen in a single paper is
+recorded in that paper's \texttt{candidate\_extensions} block only. A
+gap seen \emph{independently} in a second paper is promoted to a
+first-class dimension or enumeration value. The aim is to let
+idiosyncrasies remain local while growing the schema only in response
+to convergent evidence.
 
-In the six-paper pilot the rule has fired twice. \emph{Phenotype
-Scale} was first proposed by the Jossin annotation (to
-distinguish the paper's three ``phenotype'' callouts at molecular,
-histological, and organismal scales) and then independently
-exercised by Davis, Nelson, and all subsequent papers; it was
-promoted to the always-required set and is now part of
-\cref{tab:dimensions-core}. \emph{Variant Ascertainment} was first
-proposed by the Davis annotation (to distinguish variants observed
-in patients from variants tested because they appeared in a
-database) and then independently exercised by Nelson, Duerr,
-and Inouye; it was promoted conditionally on
-\mbox{\dimval{Target Type}~=~\dimval{Variant}} and is also now
-in \cref{tab:dimensions-core}. Thirteen candidate extensions
-remain unpromoted, pending either a second encounter or an
+In the six-paper pilot this rule promoted two extensions:
+\emph{Phenotype Scale}, first proposed in Jossin to distinguish
+molecular, histological, and organismal phenotypes and then exercised
+in Davis, Nelson, and later papers; and \emph{Variant Ascertainment},
+first proposed in Davis to distinguish patient-observed from
+database-selected variants and then exercised in Nelson, Duerr, and
+Inouye. Both now appear in the core dimensions
+(\cref{tab:dimensions-core}), the latter conditional on
+\mbox{\dimval{Target Type}~=~\dimval{Variant}}. Thirteen other
+candidates remain unpromoted, pending either a second encounter or an
 explicit curator decision.
 
-A complementary positive finding from the pilot is a candidate
-extension that the rule \emph{correctly} blocked. The Duerr
-annotation initially proposed a new dimension for handling
-negative-polarity assertions (GE-5 asserts ``no significant
-association at IL12RB1, IL23A, or IL12B''), on the reasoning
-that the schema seemed oriented toward positive claims. On
-review the curator noted that an \EvidenceAssertion{} is a
-predicate, and a predicate can state the absence of something
-just as readily as its presence; no new dimension was needed.
-The candidate was retracted before any schema change occurred.
-This is the kind of false-positive extension that a
-conservative promotion rule is designed to catch: had the rule
-permitted single-paper promotion, the schema would now carry
-a redundant polarity field that would never have been exercised
-again. The retraction is preserved in the project repository
-for methodological completeness.
+The rule also blocks false positives. In Duerr, AI initially proposed
+a new dimension for negative-polarity assertions (for example, ``no
+significant association at IL12RB1, IL23A, or IL12B''). On review the
+curator observed that an \EvidenceAssertion{} is just a predicate and
+already supports absence as well as presence, so no change to the
+schema was needed and the candidate was retracted. Under a looser
+single-paper rule this would have left the model with a redundant
+polarity field of little practical use.
 
 \subsection{Discussion of Methodology}
 \label{sec:workflow-discussion}
 
-Three features of the workflow are worth making explicit before
-we turn to broader implications in \cref{sec:discussion}.
-
-First, the workflow treats schema gaps as \emph{data} rather than
-as problems to be hidden. When an AI-drafted annotation cannot fit
-a claim into the existing enumeration, it records the strain
-inline with a candidate-extension tag and continues. When a
-curator-authored annotation finds the summary-table value at odds
-with the schema, the disagreement is preserved alongside the
-resolution. The alternative---silently forcing the claim into the
-nearest available enumeration value, or quietly extending the
-enumeration without marking the change---produces annotations
-that are cleaner but lose information about where the schema
-strains.
-
-Second, the workflow's two-track structure separates two
-different epistemic roles that the literature tends to conflate.
-A manually-curated annotation is a piece of primary knowledge
-work: it reflects a human reading of the source. An AI-drafted
-annotation is a piece of \emph{secondary} knowledge work: it
-reflects a machine reading that is valid only insofar as a human
-reviewer assents. The flag vocabularies differ because the
-epistemic situations differ; conflating them---treating
-AI-drafted annotations as if they were ground truth, or
-treating manually-curated annotations as if they required
-assumption tags---loses information about the provenance of each
-claim.
-
-Third, the six-paper pilot is deliberately small. We did not set
-out to benchmark the workflow against inter-annotator agreement
-metrics computed over dozens of papers; we set out to verify that
-the schema's structural requirements are practical to meet, and
-that the workflow's flag vocabularies capture the kinds of
-disagreement that arise in practice. We report below on the
-specific model-extension findings that the pilot surfaced
-(\cref{sec:discussion}), and flag as future work the question of
-whether the workflow scales to larger corpora and multiple
-annotators.
+Three features of the workflow bear brief emphasis. First, schema gaps
+are treated as \emph{data}: AI and curator annotations record
+candidate extensions, uncertainties, and disagreements inline rather
+than silently coercing claims into existing enumerations. Second, the
+manual and AI tracks reflect different epistemic roles, primary versus
+secondary knowledge work, and use distinct flag vocabularies to record
+provenance. Third, the six-paper pilot is intentionally small; it
+tests feasibility and the adequacy of the flag vocabularies, not
+inter-annotator agreement or large-scale scalability, which we leave
+for future work.
