@@ -98,20 +98,13 @@ described in \cref{sec:model-conditional}. These conditions state the
 situations in which a dimension must be present; outside those
 situations it may be omitted. This makes the requirement status
 transparent to both human curators and automated validators.
-
-Credibility deserves brief separate comment. Unlike the other core
-dimensions, Credibility is an open key--value field rather than a
-closed enumeration: a curator may record any credibility-relevant
-features (\texttt{cohort\_size}, \texttt{replication\_cohort},
-\texttt{multiple\_testing\_correction}, and so on), with an optional
-free-text comment. The model deliberately does not collapse these
-features into a single numeric score, because clinical and research
-consumers weight credibility features differently and may wish to
-aggregate them downstream in different ways.
-
-% \begin{table*}[t]
-% ... existing \begin{table*} goes here ...
-% \end{table*}
+Credibility is an exception in form: unlike the other core dimensions
+it is an open key--value field (\texttt{cohort\_size},
+\texttt{replication\_cohort}, \texttt{multiple\_testing\_correction},
+and so on) rather than a closed enumeration, because clinical and
+research consumers weight credibility features differently and are
+better served by preserving them than by collapsing them to a single
+score.
 
 \begin{table}[tbp]
 \centering

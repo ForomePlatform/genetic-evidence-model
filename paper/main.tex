@@ -26,7 +26,6 @@
 \usepackage[section]{placeins} % flushes floats at every \section boundary
 \usepackage{hyperref}         % load near last
 \usepackage{cleveref}         % load after hyperref; \cref{} auto-adds "Figure"/"Table"/etc.
-\usepackage{wrapfig}
 
 % ---------- listings setup for YAML annotations ----------
 % Define a lightweight YAML "language" for listings.
@@ -121,13 +120,32 @@
 Biomedical Ontology, July 15--17, 2026, Washington, D.C.}
 
 \begin{abstract}
-% ~200 words. Write last. Structure: (1) the gap, (2) the proposal,
-% (3) contributions, (4) evaluation approach.
-\todo[inline]{Abstract — write last. Target ~200 words. Name the gap
-(existing standards do not fully support basic/pre-clinical genetic evidence),
-state the contribution (semantic model with core + conditional dimensions,
-evaluated via human--AI annotation), and land on the ICBO 2026 theme
-(AI-ready infrastructure for trustworthy variant interpretation).}
+Scientific and clinical decision-making depends on evidence from
+the primary literature, but existing standards for representing
+that evidence (FHIR Evidence, ECO, SEPIO, and the GA4GH Genomic
+Knowledge Standards) are oriented toward clinical-trial workflows,
+evidence codes, or single-variant assertions, and do not capture
+the fine-grained, domain-specific structure of claims in basic and
+pre-clinical research. We introduce a semantic model for
+scientific evidence comprising three core classes
+(ScientificEvidence, EvidenceVariable, EvidenceAssertion) and
+specialise it for genetics as GeneticEvidence, with a dimensional
+vocabulary covering knowledge domain, method, target, resolution,
+credibility, phenotype scale, and variant ascertainment, and a
+conditional-activation mechanism formalised as SHACL shapes that
+require each dimension only when it is semantically appropriate.
+Using clinical variant interpretation as the driving use case, we
+evaluate the model through a human--AI annotation pilot over six
+publications spanning human, population, model-organism, and
+polygenic-score genetics, yielding 28 GeneticEvidence items and
+65 source-anchored assertions. The workflow separates
+curator-authored ground truth from AI-drafted annotations with
+distinct flag vocabularies, and promotes candidate schema
+extensions only when a second independent paper confirms them.
+Treating the pilot as a feasibility study rather than a benchmark,
+we argue that the model is a useful increment toward AI-ready,
+ontologically grounded infrastructure for trustworthy variant
+interpretation.
 \end{abstract}
 
 \begin{keywords}

@@ -1,6 +1,7 @@
 % =====================================================================
-%  references.bib — seed bibliography
-%  Entries marked TODO need filling in or verifying.
+%  references.bib — bibliography for the ICBO 2026 submission
+%  (The our_preprint entry at the bottom is a placeholder awaiting
+%  the arxiv ID; fill in once the preprint is public.)
 % =====================================================================
 
 % ---------- The six annotated papers ----------
@@ -73,10 +74,11 @@
 % ---------- Standards and ontologies ----------
 
 @misc{fhir_evidence,
-  title        = {{FHIR} Evidence Resource},
   author       = {{{HL7 International}}},
-  howpublished = {\url{https://www.hl7.org/fhir/evidence.html}},
-  note         = {Accessed 2026}
+  title        = {{FHIR Evidence, EvidenceVariable, and EvidenceReport Resources}},
+  year         = {2023},
+  howpublished = {\url{https://hl7.org/fhir/R5/evidence.html}},
+  note         = {FHIR Release 5 (v5.0.0), published 26 March 2023}
 }
 
 @article{eco2019,
@@ -91,35 +93,28 @@
 }
 
 @misc{sepio,
+  author       = {{Monarch Initiative}},
   title        = {{SEPIO}: {S}cientific {E}vidence and {P}rovenance {I}nformation {O}ntology},
-  howpublished = {\url{https://github.com/monarch-initiative/SEPIO-ontology}},
-  note         = {TODO: replace with canonical citation}
+  howpublished = {\url{https://github.com/monarch-initiative/SEPIO-ontology}}
 }
 
-@misc{w3c-shacl,
-  author       = {Holger Knublauch and Dimitris Kontokostas},
-  title        = {Shapes Constraint Language (SHACL)},
-  howpublished = {W3C Recommendation},
-  year         = {2017},
-  month        = jul,
-  url          = {https://www.w3.org/TR/shacl/},
-  note         = {W3C Recommendation 20 July 2017}
-}
-
-@article{ga4gh_va,
-  author  = {{GA4GH Variation Annotation Working Group}},
-  title   = {{GA4GH} Genomic Knowledge Standards: Variation Representation and Annotation},
-  journal = {TODO},
-  year    = {TODO},
-  note    = {TODO: fill in}
+@misc{ga4gh_va,
+  author       = {{Global Alliance for Genomics and Health}},
+  title        = {{GA4GH Variant Annotation (VA) Specification}},
+  year         = {2024},
+  howpublished = {\url{https://va-spec.ga4gh.org/en/1.0/}},
+  note         = {VA-Spec v1.0}
 }
 
 @article{ga4gh_vrs,
-  author  = {Hart, Reece K. and Prlic, Andreas and others},
-  title   = {{GA4GH} Variation Representation Specification ({VRS}): A Computational Framework for Variation Representation and Federated Identification},
+  author  = {Wagner, Alex H. and Babb, Lawrence and Alterovitz, Gil and others},
+  title   = {The {GA4GH} Variation Representation Specification: A Computational Framework for Variation Representation and Federated Identification},
   journal = {Cell Genomics},
-  year    = {2024},
-  note    = {TODO: verify authors and volume/pages before submission}
+  volume  = {1},
+  number  = {2},
+  pages   = {100027},
+  year    = {2021},
+  doi     = {10.1016/j.xgen.2021.100027}
 }
 
 @article{hpo,
@@ -134,12 +129,14 @@
 }
 
 @article{mondo,
-  author  = {Vasilevsky, Nicole A. and Matentzoglu, Nicolas A. and Toro, Sabrina and others},
-  title   = {Mondo: Unifying Diseases for the World, by the World},
-  journal = {medRxiv},
-  year    = {2022},
-  doi     = {10.1101/2022.04.13.22273750},
-  note    = {TODO: update to peer-reviewed citation when available}
+  author  = {Vasilevsky, Nicole A. and Toro, Sabrina and Matentzoglu, Nicolas and others},
+  title   = {Mondo: Integrating Disease Terminology Across Communities},
+  journal = {Genetics},
+  volume  = {232},
+  number  = {4},
+  pages   = {iyaf215},
+  year    = {2026},
+  doi     = {10.1093/genetics/iyaf215}
 }
 
 @article{acmg2015,
@@ -153,12 +150,15 @@
   doi     = {10.1038/gim.2015.30}
 }
 
-@article{iao2015,
-  author  = {Ceusters, Werner and Smith, Barry},
-  title   = {Aboutness: Towards Foundations for the {Information Artifact Ontology}},
-  journal = {Proceedings of the International Conference on Biomedical Ontology},
-  year    = {2015},
-  note    = {TODO: verify canonical IAO citation for ICBO audience}
+@inproceedings{iao2015,
+  author    = {Ceusters, Werner and Smith, Barry},
+  title     = {Aboutness: Towards Foundations for the {Information Artifact Ontology}},
+  booktitle = {Proceedings of the Sixth International Conference on Biomedical Ontology (ICBO 2015)},
+  series    = {CEUR Workshop Proceedings},
+  volume    = {1515},
+  pages     = {1--5},
+  year      = {2015},
+  url       = {https://ceur-ws.org/Vol-1515/regular10.pdf}
 }
 
 @article{obi2016,
@@ -179,6 +179,14 @@
   howpublished = {\url{https://www.w3.org/TR/prov-o/}}
 }
 
+@misc{w3c-shacl,
+  author       = {{{W3C}}},
+  title        = {{Shapes Constraint Language (SHACL)}},
+  year         = {2017},
+  howpublished = {\url{https://www.w3.org/TR/shacl/}},
+  note         = {W3C Recommendation, 20 July 2017}
+}
+
 @article{clingen2018,
   author  = {Rehm, Heidi L. and Berg, Jonathan S. and Brooks, Lisa D. and others},
   title   = {{ClinGen}---{T}he {C}linical {G}enome {R}esource},
@@ -189,12 +197,12 @@
   doi     = {10.1056/NEJMsr1406261}
 }
 
-% ---------- Prior work cited in the introduction ----------
+% ---------- Companion preprint (pending arxiv upload) ----------
 
 @misc{our_preprint,
-  author       = {TODO},
-  title        = {TODO: the preprint referenced in the introduction},
-  year         = {TODO},
-  howpublished = {Preprint},
-  note         = {Fill in before submission; currently a placeholder in the draft.}
+  author       = {Bouzinier, Michael and Etin, Dmitry},
+  title        = {Trustworthy Clinical Decision Support Using Meta-Predicates and Domain-Specific Languages},
+  year         = {2026},
+  howpublished = {Preprint, forthcoming on arXiv},
+  note         = {TODO: confirm full author list and add arxiv ID once uploaded}
 }

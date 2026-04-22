@@ -14,19 +14,17 @@
 \label{sec:background}
 
 The representation of scientific and clinical evidence has been the
-subject of sustained standards work in at least three communities:
-clinical informatics, biomedical ontology, and genomic knowledge
-representation, each with its own emphasis. Our schema sits at the
-intersection of these. Like clinical standards, it is oriented toward
-supporting downstream decision-making; like ontology work, it is
-grounded in formal constraints and explicit provenance; like genomic
-knowledge representation, it treats target resolution (variant, gene,
-region, whole-genome aggregate, and so on) as a first-class concern,
-while relying on GA4GH standards for sequence identifiers. This
-section positions the proposed schema among the six standards families
-we have engaged with and closes by spelling out the specific coverage
-gap that motivated the work. Detailed term-level alignment with each
-family is scoped as future work (\cref{sec:disc-future}).
+subject of sustained standards work in clinical informatics,
+biomedical ontology, and genomic knowledge representation. Our
+schema sits at the intersection of these communities: oriented
+toward downstream decision-making, grounded in formal constraints
+and explicit provenance, and treating target resolution (variant,
+gene, region, whole-genome aggregate, and so on) as a first-class
+concern while relying on GA4GH standards for sequence identifiers.
+This section positions the schema among the six standards families
+we have engaged with and closes by spelling out the coverage gap
+that motivated the work. Detailed term-level alignment is scoped as
+future work (\cref{sec:disc-future}).
 
 \paragraph{FHIR Evidence Resources.}
 The HL7 FHIR Evidence, EvidenceVariable, and EvidenceReport
@@ -45,50 +43,37 @@ dimensional description but replaces this clinical-trial skeleton with
 a vocabulary appropriate to genetic claims.
 
 \paragraph{Evidence Codes: ECO and SEPIO.}
-The Evidence and Conclusion Ontology (ECO)~\cite{eco2019} provides a
-large hierarchical vocabulary of evidence types, including inference
-methods, assay types, and source-document categories, organised within
-the Open Biological and Biomedical Ontologies (OBO) framework and
-widely used in Gene Ontology annotation. The Scientific Evidence and
-Provenance Information Ontology (SEPIO)~\cite{sepio} complements ECO
-with machine-readable representations of statements, qualifiers, and
-provenance relationships, supporting structured evidence chains. Our
-Method and Measurement Target dimensions overlap substantially with
-areas that ECO and SEPIO already populate, and our long-term goal is
-to ground those dimensions in ECO and SEPIO identifiers rather than
-maintain a separate vocabulary. The contribution of the present schema
-relative to ECO and SEPIO is therefore orthogonal: we provide the
-conditional-activation structure and the paper-level decomposition into
-\GeneticEvidence{} items, both of which are independent of the
-particular evidence-code vocabulary used to populate the Method
-dimension.
+The Evidence and Conclusion Ontology (ECO)~\cite{eco2019} provides
+a large hierarchical vocabulary of evidence types, including
+inference methods, assay types, and source-document categories,
+organised within the Open Biological and Biomedical Ontologies (OBO)
+framework and widely used in Gene Ontology annotation. The
+Scientific Evidence and Provenance Information Ontology
+(SEPIO)~\cite{sepio} complements ECO with machine-readable
+representations of statements, qualifiers, and provenance
+relationships. Our Method and Measurement Target dimensions overlap
+substantially with areas that ECO and SEPIO already populate, and
+our long-term goal is to ground those dimensions in ECO and SEPIO
+identifiers rather than maintain a separate vocabulary.
 
 \paragraph{GA4GH Genomic Knowledge Standards.}
-The most natural point of comparison for our schema within the
-GA4GH Genomic Knowledge Standards effort is the Variant Annotation
-(VA) Specification~\cite{ga4gh_va}. VA is a broad information model
-for structured statements about variants, organised around a
+The most natural point of comparison within the GA4GH Genomic
+Knowledge Standards effort is the Variant Annotation (VA)
+Specification~\cite{ga4gh_va}. VA is a broad information model for
+structured statements about variants, organised around a
 \texttt{Statement} class whose instances carry a proposition,
-direction of support, strength, classification, a list of evidence
-lines, and contribution and method metadata. In scope and
-orientation VA is information-centric: its top-level abstraction is
-an \texttt{InformationEntity}, and it represents what is known about
-a variant as structured information rather than the process by which
-primary-literature claims become evidence for downstream reasoning.
-Its design does not engage explicitly with FHIR Evidence or kindred
-evidence standards, and it is not primarily intended for parsing a
-publication and assessing the credibility of what it reports. Our
-schema is narrower and complementary: it focuses on evidence drawn
-from primary-literature publications, with the \emph{Relevance and
-Specificity} and \emph{Confidence} challenges of \cref{sec:intro} as
-concrete targets and an eventual semantic-parsing workflow over the
-literature as the longer-horizon motivation. A VA \texttt{Statement}
-can be viewed as a plausible downstream aggregate of the
-per-publication evidence items our schema records, rather than a
-substitute for them. The Variation Representation Specification
+direction of support, strength, classification, evidence lines,
+and contribution metadata. In scope VA is information-centric: its
+top-level abstraction is an \texttt{InformationEntity}, representing
+what is known about a variant rather than the process by which
+primary-literature claims become evidence. Our schema is narrower
+and complementary: it focuses on evidence drawn from the primary
+literature, with the \emph{Relevance and Specificity} and
+\emph{Confidence} challenges of \cref{sec:intro} as concrete
+targets. The Variation Representation Specification
 (VRS)~\cite{ga4gh_vrs}, a separate product of the same effort,
-addresses canonical variant identity across coordinate systems and is
-orthogonal to the concerns of the present work.
+addresses canonical variant identity across coordinate systems
+and is orthogonal to the concerns of the present work.
 
 \paragraph{ACMG/AMP variant interpretation.}
 The American College of Medical Genetics and Genomics /
@@ -104,17 +89,14 @@ to the ACMG/AMP evidence codes is scoped as future work.
 \paragraph{Upper ontologies: IAO, OBI, PROV-O.}
 The Information Artefact Ontology (IAO)~\cite{iao2015} and the
 Ontology for Biomedical Investigations (OBI)~\cite{obi2016} provide
-upper-level scaffolding for many OBO-compliant biomedical ontologies:
-IAO supplies classes such as \emph{information-content-entity} and
-\emph{textual-entity}, and OBI supplies the assay and protocol
-hierarchies relevant to our Method dimension. The W3C PROV Ontology
-(PROV-O)~\cite{prov_o} provides standard provenance relationships
-(\emph{wasDerivedFrom}, \emph{wasGeneratedBy}, etc.) that a future
-Web Ontology Language (OWL) representation of our schema would use for
-source-span and curator-provenance fields. Formal alignment of our
-top-level classes with IAO, OBI, and PROV-O is scoped as future work;
-the current SHACL representation is intentionally lightweight, and we
-expect to replace it with an OWL/LinkML rendering.
+upper-level scaffolding for many OBO-compliant biomedical
+ontologies: IAO supplies classes such as
+\emph{information-content-entity} and \emph{textual-entity}, and OBI
+supplies the assay and protocol hierarchies relevant to our Method
+dimension. The W3C PROV Ontology (PROV-O)~\cite{prov_o} supplies
+standard provenance relationships. Formal alignment of our top-level
+classes with IAO, OBI, and PROV-O is scoped as future work, alongside
+a planned OWL/LinkML rendering of the schema.
 
 \paragraph{Related annotation efforts.}
 The Clinical Genome Resource (ClinGen) evidence curation
@@ -133,17 +115,13 @@ Nelson, and Gupta case studies (\cref{sec:workflow-flags}).
 \paragraph{The coverage gap.}
 None of the standards above was designed to treat as a first-class
 concern the heterogeneous evidence patterns encountered in
-basic-science and pre-clinical genetic publications: for example, a
-Llgl1 conditional-knockout study that reports phenotypes at molecular,
-cellular, and clinical scales in the same paper; a TTC21B study that
-reports both case--control enrichment and an orthogonal functional
-assay of 40 variants; or a metaGRS that spans 1.7 million variants
-weighted into a single score. FHIR Evidence is shaped around
-interventions; the GA4GH Statement model around single-variant
-assertions; ECO around evidence codes for already-classified claims.
-Each captures part of what such papers say, but none captures the
-whole. The schema we introduce in the next section is an attempt to
-represent that whole in a way that is compact enough to annotate
-manually, machine-checkable enough to validate automatically, and
-flexible enough to accommodate the heterogeneity the literature
-actually produces.
+basic-science and pre-clinical genetic publications: a Llgl1
+conditional-knockout study, for example, may report phenotypes at
+molecular, cellular, and clinical scales in the same paper; a
+polygenic-score study may span millions of variants weighted into a
+single score. Each existing standard captures part of what such
+papers say, but none captures the whole. The schema we introduce in
+the next section aims to represent that whole in a way that is
+compact enough to annotate manually, machine-checkable enough to
+validate automatically, and flexible enough to accommodate the
+heterogeneity the literature actually produces.

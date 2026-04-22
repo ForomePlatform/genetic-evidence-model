@@ -1,9 +1,11 @@
 % =====================================================================
 %  §6 — Discussion
 %
-%  Revised 2026-04-21: compressed significantly to meet the 12-page
-%  limit. Detail on individual candidate extensions moved to a
-%  companion EXTENSIONS.md in the repository.
+%  Revised 2026-04-21: subsections collapsed from four to two.
+%  §6.1 ICBO Alignment + §6.2 Model Extensions → §6.1 Discussion.
+%  §6.3 Limitations + §6.4 Future Work → §6.2 Limitations and
+%  Future Work. Labels preserved for all cross-section references
+%  (sec:disc-future is referenced from §2).
 % =====================================================================
 
 \section{Discussion}
@@ -16,8 +18,9 @@ expressive power. And every assertion in every annotation is
 anchored to a specific source span in its underlying publication,
 making each annotation independently auditable.
 
-\subsection{Alignment with the ICBO 2026 Theme}
+\subsection{ICBO Alignment and Model Extensions}
 \label{sec:disc-icbo}
+\label{sec:disc-extensions}
 
 The conference call asks for contributions that advance trustworthy,
 interpretable, and AI-ready semantic infrastructure. Every schema
@@ -44,23 +47,20 @@ contribution as one increment along a longer path, building on
 decades of biomedical-ontology work (ECO, SEPIO, HPO, IAO, OBI,
 VRS, and others), not as a replacement for any of it.
 
-\subsection{Model Extensions Surfaced by Annotation}
-\label{sec:disc-extensions}
-
 The pilot surfaced two candidate dimensions that were exercised by
 multiple papers and promoted to the always-required vocabulary
 (Phenotype Scale and Variant Ascertainment), plus thirteen further
-candidate extensions that have been recorded but not yet promoted
-under the two-papers rule (\cref{sec:workflow-promotion}). The
-pattern of candidates is itself informative and is summarised in
-\cref{tab:candidates}; per-candidate rationale, affected dimensions,
-and proposed enumeration values are documented in a companion
-\texttt{schema/EXTENSIONS.md} in the repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/EXTENSIONS.md}}
+candidate extensions recorded but not yet promoted under the
+two-papers rule (\cref{sec:workflow-promotion}). The pattern of
+candidates is summarised in \cref{tab:candidates}; per-candidate
+rationale, affected dimensions, and proposed enumeration values
+are documented in a companion \texttt{schema/EXTENSIONS.md} in the
+repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/EXTENSIONS.md}}
 The Gupta annotation, which surfaced no candidate extensions, is
-worth naming as a positive finding: the paper reports a family with
-an X-linked splice-site mutation and careful pedigree segregation,
-the canonical evidence shape the model was designed for, and the
-schema accommodates it without strain.
+worth naming as a positive finding: the paper reports a family
+with an X-linked splice-site mutation and careful pedigree
+segregation, the canonical evidence shape the model was designed
+for, and the schema accommodates it without strain.
 
 \begin{table}[tbp]
 \centering
@@ -82,8 +82,9 @@ Effect-size and curation     & DU, D  & 3 (direction of effect, knowledge-domain
 \end{tabularx}
 \end{table}
 
-\subsection{Limitations}
+\subsection{Limitations and Future Work}
 \label{sec:disc-limitations}
+\label{sec:disc-future}
 
 The pilot has significant limitations. Six papers and a single
 annotator do not support claims about inter-annotator agreement or
@@ -101,15 +102,12 @@ candidate extensions of \cref{tab:candidates} should be read as
 findings from \emph{this} corpus, not a complete survey of the
 schema's coverage gaps.
 
-\subsection{Future Work}
-\label{sec:disc-future}
-
-Three near-term directions: annotate a second corpus selected to
-exercise the strongest candidate extensions; generate OWL, SHACL,
-JSON Schema, and LinkML renderings from a single source-of-truth to
-open the schema to the OBO and Bridge2AI ecosystems; and carry out
-a clinical-deployment study to turn the feasibility claim into a
-utility claim.
+Three near-term directions address these limitations: annotate a
+second corpus selected to exercise the strongest candidate
+extensions; generate OWL, SHACL, JSON Schema, and LinkML renderings
+from a single source-of-truth to open the schema to the OBO and
+Bridge2AI ecosystems; and carry out a clinical-deployment study to
+turn the feasibility claim into a utility claim.
 
 \section{Availability of Code, Data, and Artefacts}
 \label{sec:availability}
@@ -128,6 +126,15 @@ namespace \url{https://w3id.org/genetic-evidence-model/} resolves
 to the same repository.
 
 \section*{Acknowledgements}
-\todo[inline]{Acknowledgements to be filled in. Likely candidates:
-the annotator (if declining authorship); BGM/UDN colleagues for
-the curation context; reviewers; funders.}
+
+The idea of a semantic model for the analysis of genetic literature
+grew out of 2018 conversations with Prof.\ Shamil Sunyaev; without
+his early support this work could not have been completed. The
+authors are also grateful to colleagues at the Brigham Genomics
+Medicine (BGM) program, where much of the thinking about
+clinical-genomics evidence curation took shape. This work received
+no external funding.
+
+\todo[inline]{Optional: one sentence on the annotator once
+authorship decision is settled.}
+
