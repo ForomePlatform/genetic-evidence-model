@@ -34,18 +34,13 @@ by a reviewer, added as an AI assumption, or left deliberately
 unpopulated. A broader framing is that the schema is designed to
 make literature review tractable as a \emph{semantic-parsing}
 problem, the mapping of natural-language claims to a shared,
-source-anchored representation. Modern large language models have
-become substantially more capable at semantic parsing than they
-were only a few years ago; our flag vocabularies were designed with
-a parser's three possible outcomes in mind, a successful mapping,
-a request for human disambiguation, or a proposal to extend the
-target language. Parsing the biomedical literature, however, is not
-something a language model can do in isolation: the target of each
-parse is an ontology, and the quality of the parse depends on the
-quality of the ontological grounding. We see the present
-contribution as one increment along a longer path, building on
-decades of biomedical-ontology work (ECO, SEPIO, HPO, IAO, OBI,
-VRS, and others), not as a replacement for any of it.
+source-anchored representation. This is not a task a language model
+can do in isolation: the target of each parse is an ontology, and
+the quality of the parse depends on the quality of the ontological
+grounding. We see the present contribution as one increment along
+a longer path, building on decades of biomedical-ontology work
+(ECO, SEPIO, HPO, IAO, OBI, VRS, and others), not as a replacement
+for any of it.
 
 The pilot surfaced two candidate dimensions that were exercised by
 multiple papers and promoted to the always-required vocabulary
@@ -134,7 +129,4 @@ authors are also grateful to colleagues at the Brigham Genomics
 Medicine (BGM) program, where much of the thinking about
 clinical-genomics evidence curation took shape. This work received
 no external funding.
-
-\todo[inline]{Optional: one sentence on the annotator once
-authorship decision is settled.}
 

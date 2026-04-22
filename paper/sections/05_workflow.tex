@@ -121,20 +121,16 @@ Knockout Type        & 1         & 6          \\
 \end{table}
 
 The always-required dimensions are 28/28 by construction. The
-conditional dimensions show three patterns worth naming. Measurement
-Target (10/11) and Organism (7/8) are well calibrated: when the
-activation condition fires, the dimension almost always applies.
-Mode of Inheritance and Mendelian Segregation are zero-populated on
-their one applicable item each: Duerr's family-based transmission
-disequilibrium analysis, a complex-trait study for which the AI
-reviewer flagged \dimval{Complex} as a missing enumeration value
-(\textit{ai\_uncertainty} on Duerr GE-3). Gene Relation is
-low-but-nonzero (1/11) because ten of the eleven \dimval{Gene
-Function} items in the corpus involve physical binding or
-trafficking, which the three-value enumeration does not cover; this
-is the gap that candidate extension CE-J3 proposes to fill
-(\cref{sec:discussion}). Per-paper population counts and the raw
-computation are in the
+conditional dimensions vary: well-calibrated ones (Measurement
+Target 10/11, Organism 7/8) fire the activation condition in the
+items that actually populate them; under-populated ones reveal
+either boundary cases (Mode of Inheritance 0/1 in Duerr's
+complex-trait TDT analysis) or enumeration gaps (Gene Relation
+1/11, because ten of the eleven \dimval{Gene Function} items
+involve physical binding or trafficking, which is the gap
+candidate extension CE-J3 proposes to fill;
+\cref{sec:discussion}). Per-paper counts, per-cell rationale, and
+the raw computation are in the
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/coverage.md}}
 Coverage alone does not say whether the annotations are
 \emph{correct}; it shows that the schema's structural requirements
@@ -170,31 +166,10 @@ without strong evidence that a reviewer should verify, such as
 whether evidence \emph{cited} by a paper belongs in that paper's
 annotation or warrants a separate representational layer (Duerr
 GE-6). Such decisions are recorded rather than resolved silently.
-\Cref{tab:flags} summarises the counts.
 
-\begin{table}[htbp]
-\centering
-\caption{Flags per paper in the six-paper pilot. Manual-track flags
-(Query, Suggestion, Disagree) apply to the four manual papers;
-AI-track flags (AI unc., AI assum.) to the two AI-drafted papers.}
-\label{tab:flags}
-\small
-\begin{tabular}{@{}lccccc@{}}
-\toprule
-Paper      & Query & Suggestion & Disagree & AI unc. & AI assum. \\
-\midrule
-Jossin     & 3     & 1          & 0        & ---     & ---       \\
-Davis      & 2     & 1          & 1        & ---     & ---       \\
-Nelson     & 0     & 3          & 0        & ---     & ---       \\
-Gupta      & 0     & 1          & 0        & ---     & ---       \\
-Duerr      & ---   & ---        & ---      & 3       & 2         \\
-Inouye     & ---   & ---        & ---      & 0       & 2         \\
-\midrule
-Total      & 5     & 6          & 1        & 3       & 4         \\
-\bottomrule
-\end{tabular}
-\end{table}
-
+Across the six-paper pilot, manual-track flags numbered 5
+queries, 6 suggestions, and 1 disagreement; AI-track flags
+numbered 3 uncertainties and 4 assumptions.
 The distribution is more informative than the totals. Disagreements
 are rare (one across the four manual papers), which is expected when
 the annotator also authored the summary being compared against.
@@ -204,6 +179,8 @@ For the AI-drafted papers, Inouye generated no uncertainties at all
 (the AI identified every stress-test point as a candidate extension
 rather than an uncertain mapping), while Duerr generated three
 uncertainties concentrated on scoping and enumeration decisions.
+Per-paper flag counts are in the
+repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/coverage.md}}
 
 \paragraph{The extension-promotion rule.}
 The workflow adopts a deliberately conservative rule for when a

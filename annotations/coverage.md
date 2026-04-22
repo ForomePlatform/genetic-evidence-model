@@ -1,11 +1,19 @@
-# Dimension coverage of the six-paper pilot
+# Dimension coverage and reviewer flags in the six-paper pilot
 
-This file reports per-dimension population counts for the six
-annotated papers that form the corpus pilot of the Genetic Evidence
-Model. The aggregate counts are reported in §5.2 of the ICBO 2026
-paper (`tab:coverage`); this file gives the per-paper breakdown, the
-definition of "applicable" for each dimension, and the rationale for
-every zero-populated or under-populated cell.
+This file reports per-paper detail for the six annotated papers that
+form the corpus pilot of the Genetic Evidence Model. It has two
+parts:
+
+1. **Dimension coverage** (sections below): per-dimension population
+   counts, with the definition of "applicable" for each dimension
+   and the rationale for every zero-populated or under-populated
+   cell. The aggregate counts are reported in §5.1 of the ICBO 2026
+   paper (`tab:coverage`).
+
+2. **Reviewer-flag counts** (final section): per-paper counts of the
+   five flag types recorded during annotation. The ICBO 2026 paper
+   gives only the aggregate totals in §5.2 prose; this file is the
+   authoritative per-paper breakdown.
 
 ## Corpus summary
 
@@ -150,3 +158,83 @@ file is maintained by hand. Candidate future work: a small
 `scripts/compute_coverage.py` that regenerates this table from the
 YAML files, so the paper's `tab:coverage` can be kept in sync with
 the annotations automatically.
+
+## Reviewer-flag counts per paper
+
+The annotation workflow records five flag types across two tracks
+(§5.2 of the ICBO 2026 paper). The table below gives per-paper
+counts. Manual-track flags (Query, Suggestion, Disagree) apply to
+the four manually annotated papers; AI-track flags (ai_uncertainty,
+ai_assumption) to the two AI-drafted papers.
+
+| Paper  | Track       | Query | Suggestion | Disagree | AI unc. | AI assum. |
+| ------ | ----------- | ----: | ---------: | -------: | ------: | --------: |
+| Jossin | manual      |   3   |    1       |    0     |    —    |    —      |
+| Davis  | manual      |   2   |    1       |    1     |    —    |    —      |
+| Nelson | manual      |   0   |    3       |    0     |    —    |    —      |
+| Gupta  | manual      |   0   |    1       |    0     |    —    |    —      |
+| Duerr  | AI-drafted  |   —   |    —       |    —     |    3    |    2      |
+| Inouye | AI-drafted  |   —   |    —       |    —     |    0    |    2      |
+| **Total** |          | **5** | **6**      | **1**    | **3**   | **4**     |
+
+### Observations
+
+- **Disagreements are rare (1/4 manual papers).** Davis is the only
+  manual paper with a `reviewer_disagreement`: the curator's
+  summary listed the organism set as {mouse, zebrafish} but the
+  paper also reported a rat retinal electroporation experiment.
+  Other manual papers produced no factual corrections because the
+  annotator also authored the summary being compared against, so
+  factual drift between summary and annotation was minimal.
+
+- **Suggestions and queries are the workhorses (6 of each).**
+  Typical cases are edge mappings where human judgement beyond the
+  schema is needed: HPO-term candidates for patient phenotypes
+  (recurring across Davis, Nelson, Gupta); preservation of
+  curator-entered values that don't fit the schema cleanly (Nelson
+  `specificity_of_phenotype = SNV`, kept with a `reviewer_query`
+  rather than silently corrected).
+
+- **Nelson has 3 suggestions and 0 queries**, the most suggestion-
+  heavy paper in the corpus. This reflects the 1992 vintage: the
+  paper predates HPO and several of the paper's phenotype
+  descriptions map naturally onto HPO terms the curator chose to
+  propose rather than invent.
+
+- **Inouye generated 0 AI-uncertainties despite stressing the
+  model** (5 GE items, 6 candidate extensions). The AI identified
+  every stress-test point as a candidate extension (the model is
+  missing a feature) rather than an uncertain mapping (the AI is
+  unsure which existing value applies). This is consistent with
+  the paper being a polygenic-score study: the gaps are
+  structural, not enumerative.
+
+- **Duerr generated 3 AI-uncertainties** concentrated on scoping
+  and enumeration decisions:
+  - GE-1 knowledge-domain scoping (human-genetics vs. statistical-
+    genetics for a GWAS)
+  - GE-3 mode-of-inheritance enumeration (`COMPLEX` as a missing
+    value for the family-based TDT analysis)
+  - GE-6 cited-vs-generated boundary (whether mouse-model work
+    cited by the paper belongs in its annotation or warrants a
+    separate representational layer)
+
+- **Duerr `ai_assumption` cases (2)** are source-phrase selection
+  (which short phrase to use for the source span) and placeholder
+  choice for GE-3 (what value to record while flagging the
+  enumeration as missing).
+
+- **Inouye `ai_assumption` cases (2)** are measurement-target
+  encoding choices (how to record hazard ratio and C-index while
+  flagging the epidemiological-measurement gap as a candidate
+  extension).
+
+### Methodology note (flag counts)
+
+Flag counts were computed by reading the `flags` section of each
+annotation YAML file and counting occurrences by `type`. The
+`normalization_note` entries of `type = ai_normalization` (used
+during the manual track to record enumeration mappings made during
+YAML conversion) are not counted in the totals above, because they
+are provenance records rather than flags requiring review. There
+are 11 normalization notes across the manual annotations.
