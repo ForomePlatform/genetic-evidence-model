@@ -15,12 +15,7 @@ how evidence items compose; a \emph{dimensional vocabulary}
 (\cref{sec:model-dimensions}) that describes each evidence item along
 around twenty axes; and a \emph{conditional activation} mechanism
 (\cref{sec:model-conditional}) that keeps the vocabulary compact by
-requiring dimensions only when they are semantically appropriate. The
-three parts reinforce each other. The core classes are deliberately
-minimal so that the dimensional vocabulary can do most of the
-descriptive work, and conditional activation prevents the vocabulary
-from becoming a long list of dimensions that are ``required except
-when \ldots.''
+requiring dimensions only when they are semantically appropriate.
 
 \subsection{Core Classes}
 \label{sec:model-classes}
@@ -214,25 +209,13 @@ sh:sparql [ sh:select """
 In each case, the \texttt{SELECT} returns every \GeneticEvidence{}
 instance that satisfies the activation condition but lacks the
 required dimension; the validator reports those instances as
-constraint violations with a localised diagnostic.
+constraint violations with a localised diagnostic. The small
+additional cost of writing each conditional rule explicitly is
+repaid in downstream clarity: a reader of an annotation file can
+see \emph{why} a particular dimension is required or absent, and a
+validator can check conformance automatically.
 
-Taken together, the two examples show that the activation conditions
-we encounter in practice are ordinary Boolean combinations over
-dimension values: conjunctions, disjunctions, and cross-axis
-constraints, all straightforwardly expressible in SHACL. The small
-additional cost of writing each conditional rule explicitly is repaid
-in downstream clarity: a reader of an annotation file can see
-\emph{why} a particular dimension is required or absent, and a
-validator can check conformance automatically. When an annotated paper
-violates an activation condition (for example, a human-genetics
-gene-level study that lacks a mode-of-inheritance value), the
-validator reports not only that a field is missing but also that a
-declared semantic condition has not been met.
-
-Section~\ref{sec:workflow} returns to conditional activation in the
-context of the annotation workflow. There we report that all six
+\Cref{sec:workflow} returns to conditional activation in the
+context of the annotation workflow; there we report that all six
 publications we annotated could be placed into the model with
-conditional activation behaving as designed, and that the few cases in
-which a curator populated a dimension the rules did not require, or
-left empty a dimension they did require, were themselves informative
-signals that the model needed refinement.
+conditional activation behaving as designed.

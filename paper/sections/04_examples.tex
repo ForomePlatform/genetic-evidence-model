@@ -29,8 +29,7 @@ repository; here we discuss two in detail.
 exercises. Manual annotations are treated as ground truth; AI-drafted
 annotations are evaluated against curator review. GE abbreviates
 \GeneticEvidence{}; the ``GE items'' column counts how many evidence
-items each paper yields under our decomposition into distinct
-evidence claims.}
+items each paper yields under our claim-level decomposition.}
 
 \label{tab:corpus}
 \small
@@ -48,21 +47,16 @@ Inouye 2018 (metaGRS) & AI-drafted   & 5 & High/Med  & model-extension stress te
 \end{tabularx}
 \end{table}
 
-We describe two of the papers in detail here and summarise the others
-more briefly. Duerr et al.\ 2006 (\cref{sec:ex-duerr}) is a textbook
-GWAS with an evidence shape that our proposed approach accommodates
-cleanly; it serves as our reference example of a classical
-variant-level association study. Inouye et al.\ 2018
-(\cref{sec:ex-inouye}) is a polygenic risk score study with an
-evidence shape that deliberately strains the model; its
-annotation surfaces a cluster of candidate extensions that we return
-to in \cref{sec:discussion}. The other four annotations (Jossin,
-Davis, Nelson, Gupta) are documented in the repository's
-\texttt{annotations/} directory, and we refer to them below only as
-needed to illustrate specific methodological points. Full annotations
+Duerr et al.\ 2006 (\cref{sec:ex-duerr}) serves as our reference
+example of a classical variant-level association study. Inouye et
+al.\ 2018 (\cref{sec:ex-inouye}) is a polygenic risk score study
+whose annotation deliberately strains the model and surfaces a
+cluster of candidate extensions (\cref{sec:discussion}). The other
+four annotations (Jossin, Davis, Nelson, Gupta) are documented in
+the repository's \texttt{annotations/} directory; full annotations
 for the two featured papers, with per-assertion source spans and
-annotator commentary, are distributed as standalone case reports in
-the repository's \texttt{case-reports/} directory.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/case-reports}}
+annotator commentary, are in the repository's
+\texttt{case-reports/} directory.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/case-reports}}
 
 \subsection{A Genome-Wide Association Study: Duerr et al.\ 2006}
 \label{sec:ex-duerr}
@@ -94,17 +88,13 @@ our two-papers rule (\cref{sec:workflow}), this extension remains
 provisional until it is exercised by at least one additional
 publication.
 
-Two methodological points are worth highlighting in this example.
-First, the \texttt{variant\_ascertainment} field records that
-rs11209026 was observed in both cases and controls, which it was:
-the case--control design ascertains variants in both groups by
-construction. This use of the dimension is what justifies its
-promotion to the core schema: the Duerr annotation exercises it, as
-does the Davis annotation (patient-observed vs.\ functionally-tested
-variants), and every variant-level annotation in the corpus requires
-some ascertainment value. Second, each assertion carries a source
-span pointing to a specific page and a short identifying phrase from
-the paper, which is what makes the annotation auditable: a reader
+The Duerr annotation also illustrates two methodological points.
+First, \texttt{variant\_ascertainment} was promoted to the core
+schema because every variant-level annotation in the corpus requires
+some ascertainment value: rs11209026 is observed in both cases and
+controls by construction of the case--control design. Second, each
+assertion carries a \texttt{source\_span} pointing to a specific
+page and a short identifying phrase from the paper, so a reader
 disagreeing with our interpretation can check the underlying text
 directly.
 
@@ -135,12 +125,8 @@ extension of the measurement-target enumeration to cover
 epidemiological quantities such as \dimval{Hazard Ratio} and
 \dimval{C-Index}. Two further extensions (CE-IN5, on structured cohort
 descriptors, and CE-IN6, on distinguishing natural from
-derived-artifact targets) occur elsewhere in the annotation. The
-methodological point is that where the model strains is itself
-informative. Rather than silently forcing a polygenic score into a
-variant-level field and producing a misleading annotation, the schema
-requires the curator (human or AI) to mark the forced fit and propose
-an extension. \Cref{sec:workflow} describes the promotion rule that
-governs when such candidates become first-class, and
-\cref{sec:discussion} reports what we learned from the pattern of
-extensions surfaced across the six papers.
+derived-artifact targets) occur elsewhere in the annotation.
+Where the model strains is itself informative: rather than silently
+forcing a polygenic score into a variant-level field, the schema
+requires the curator (human or AI) to mark the forced fit and
+propose an extension.

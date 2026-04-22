@@ -16,19 +16,18 @@
 \section{Human--AI Annotation Workflow and Evaluation}
 \label{sec:workflow}
 
-The model is a schema, but a schema is only as useful as the
-annotations it supports. We designed and piloted an annotation
-workflow whose central commitment is that every annotation be
-\emph{auditable}: each assertion is anchored to the specific text
-that justifies it, each dimension value is defensible against the
-schema's activation conditions, and every judgement call that a
-downstream consumer might contest carries an explicit reviewer flag.
-The same commitment extends to AI assistance: when an AI system
-drafts an annotation, its uncertainties and assumptions are not
-silently absorbed but recorded alongside the annotation for curator
-review. The manual and AI tracks below reflect different epistemic
-roles, primary versus secondary knowledge work, and use distinct
-flag vocabularies to record provenance.
+We designed and piloted an annotation workflow whose central
+commitment is that every annotation be \emph{auditable}: each
+assertion is anchored to the specific text that justifies it, each
+dimension value is defensible against the schema's activation
+conditions, and every judgement call that a downstream consumer
+might contest carries an explicit reviewer flag. The same
+commitment extends to AI assistance: when an AI system drafts an
+annotation, its uncertainties and assumptions are not silently
+absorbed but recorded alongside the annotation for curator review.
+The manual and AI tracks below reflect different epistemic roles,
+primary versus secondary knowledge work, and use distinct flag
+vocabularies to record provenance.
 
 We treat the pilot as a \emph{feasibility study} rather than a
 benchmark: six papers with a single annotator are not enough to
@@ -85,13 +84,10 @@ observation.
 is applicable to under the activation conditions. For
 always-required dimensions applicability is all 28 items.
 
-\begin{table}[tbp]
+\begin{table}[htbp]
 \centering
-\caption{Population of always-required and conditional dimensions
-across 28 \GeneticEvidence{} items from six papers. ``Populated''
-counts items where the dimension has a value; ``Applicable'' counts
-items where its activation condition holds (for Variant
-Ascertainment, only variant-level targets are counted as applicable).}
+\caption{Dimension population across 28 \GeneticEvidence{} items
+from six papers.}
 
 \label{tab:coverage}
 \small
@@ -144,14 +140,13 @@ The two tracks use different flag vocabularies because they represent
 different epistemic situations.
 
 \paragraph{Manual track: three flag types.}
-A \texttt{reviewer\_disagreement} marks a clear factual correction,
-for example Davis 2011, where the curator's summary listed the
-organism set as \{mouse, zebrafish\} but the paper also reported a
-rat retinal electroporation experiment. A \texttt{reviewer\_suggestion}
-marks an optional addition whose inclusion depends on curator
-preference (HPO terms for patient phenotypes are recurrent cases in
-Davis, Nelson, and Gupta). A \texttt{reviewer\_query} marks a case
-where the mapping is itself unclear: the Nelson summary gave
+A \texttt{reviewer\_disagreement} marks a clear factual correction
+(for example, an organism-set correction in Davis 2011). A
+\texttt{reviewer\_suggestion} marks an optional addition whose
+inclusion depends on curator preference (HPO terms for patient
+phenotypes are recurrent cases in Davis, Nelson, and Gupta). A
+\texttt{reviewer\_query} marks a case where the mapping is itself
+unclear: the Nelson summary gave
 \texttt{specificity\_of\_phenotype = SNV}, which is semantically
 odd, and the annotation preserves the original with a query rather
 than silently correcting it.
@@ -187,13 +182,11 @@ The workflow adopts a deliberately conservative rule for when a
 candidate extension enters the schema. A gap seen in a single paper
 is recorded in that paper's \texttt{candidate\_extensions} block
 only. A gap seen \emph{independently} in a second paper is promoted
-to a first-class dimension or enumeration value. The aim is to let
-idiosyncrasies remain local while growing the schema only in
-response to convergent evidence. In the six-paper pilot this rule
-promoted two extensions: \emph{Phenotype Scale}, first proposed in
-Jossin and then exercised in Davis, Nelson, and later papers; and
-\emph{Variant Ascertainment}, first proposed in Davis and then
-exercised in Nelson, Duerr, and Inouye. Both now appear in the core
+to a first-class dimension or enumeration value. In the six-paper
+pilot this rule promoted two extensions: \emph{Phenotype Scale},
+first proposed in Jossin and then exercised in Davis, Nelson, and
+later papers; and \emph{Variant Ascertainment}, first proposed in
+Davis and then exercised in Nelson, Duerr, and Inouye. Both now appear in the core
 dimensions (\cref{tab:dimensions-core}), the latter conditional on
 \mbox{\dimval{Target Type}~=~\dimval{Variant}}. Thirteen other
 candidates remain unpromoted, pending either a second encounter or
