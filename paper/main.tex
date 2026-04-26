@@ -122,26 +122,19 @@ that evidence (FHIR Evidence, ECO, SEPIO, and the GA4GH Genomic
 Knowledge Standards) are oriented toward clinical-trial workflows,
 evidence codes, or single-variant assertions, and do not capture
 the fine-grained, domain-specific structure of claims in basic and
-pre-clinical research. We introduce a semantic model for
-scientific evidence comprising three core classes
-(ScientificEvidence, EvidenceVariable, EvidenceAssertion) and
-specialise it for genetics as GeneticEvidence, with a dimensional
-vocabulary covering knowledge domain, method, target, resolution,
-credibility, phenotype scale, and variant ascertainment, and a
-conditional-activation mechanism formalised as SHACL shapes that
-require each dimension only when it is semantically appropriate.
-Using clinical variant interpretation as the driving use case, we
-evaluate the model through a human--AI annotation pilot over six
-publications spanning human, population, model-organism, and
-polygenic-score genetics, yielding 28 GeneticEvidence items and
-65 source-anchored assertions. The workflow separates
-curator-authored ground truth from AI-drafted annotations with
-distinct flag vocabularies, and promotes candidate schema
-extensions only when a second independent paper confirms them.
-Treating the pilot as a feasibility study rather than a benchmark,
-we argue that the model is a useful increment toward AI-ready,
-ontologically grounded infrastructure for trustworthy variant
-interpretation.
+pre-clinical research. We introduce a semantic model for scientific
+evidence with three core classes, specialise it for genetics, and
+attach a compact dimensional vocabulary whose conditional-activation
+rules are formalised as SHACL shapes that require each dimension only
+when it is semantically appropriate. Using clinical variant
+interpretation as the driving use case, we evaluate the model
+through a human--AI annotation pilot over six genetics papers,
+yielding 28 evidence items and 65 source-anchored assertions, with
+a workflow that keeps curator-authored ground truth distinct from
+AI-drafted annotations. Treating the pilot as a feasibility study
+rather than a benchmark, we argue that the model is a useful
+increment toward AI-ready, ontologically grounded infrastructure
+for trustworthy variant interpretation.
 \end{abstract}
 
 \begin{keywords}
