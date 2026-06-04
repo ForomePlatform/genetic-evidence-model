@@ -1,127 +1,98 @@
-% =====================================================================
-%  §2 — Background and Related Work
-%
-%  Six standards families: FHIR Evidence, ECO, SEPIO, GA4GH GKS,
-%  ACMG-AMP, IAO/OBI/PROV-O. Each in a compact paragraph. Closes
-%  with a paragraph naming the gap this paper addresses.
-%
-%  Revised 2026-04-21: standards-mapping table dropped for space
-%  (paper was at 18pp vs 12pp cap); per-family paragraphs tightened
-%  and acronyms expanded consistently on first mention.
-% =====================================================================
-
-\section{Background and Related Work}
+\section{Background and Relation to Existing Standards}
 \label{sec:background}
 
-The representation of scientific and clinical evidence has been the
-subject of sustained standards work in clinical informatics,
-biomedical ontology, and genomic knowledge representation. Our
-schema sits at the intersection of these communities: oriented
-toward downstream decision-making, grounded in formal constraints
-and explicit provenance, and treating target resolution (variant,
-gene, region, whole-genome aggregate, and so on) as a first-class
-concern while relying on GA4GH standards for sequence identifiers.
-This section positions the schema among the six standards families
-we have engaged with and closes by spelling out the coverage gap
-that motivated the work. Detailed term-level alignment is scoped as
-future work (\cref{sec:disc-future}).
+The representation of scientific and clinical evidence has been developed
+across clinical informatics, biomedical ontology, and genomic knowledge
+representation. Six standards families bear directly on our work: HL7 FHIR
+Evidence~\cite{fhir_evidence}; the Evidence and Conclusion Ontology
+(ECO)~\cite{eco2019} and the Scientific Evidence and Provenance Information
+Ontology (SEPIO)~\cite{sepio}; the GA4GH Variant Annotation and Variation
+Representation specifications~\cite{ga4gh_va,ga4gh_vrs}; the ACMG/AMP
+variant-interpretation guidelines~\cite{acmg2015}; the upper ontologies IAO,
+OBI, and PROV-O~\cite{iao2015,obi2016,prov_o}; and the ClinGen, MONDO, and HPO
+curation and terminology resources~\cite{clingen2018,mondo,hpo}. Each captures
+part of what a basic-science genetic publication reports, but none captures the
+whole: a single conditional-knockout study may report molecular, cellular, and
+clinical phenotypes at once, and a polygenic-score study may aggregate millions
+of variants into one score. A per-family review, with the specific coverage
+gaps that motivate our model, is given in Supplementary Note~S1. Of these
+families, FHIR Evidence is the closest structural relative of our model, and we
+position the model against it here.
 
-\paragraph{FHIR Evidence Resources.}
+\subsection{Relation to FHIR Evidence}
+\label{sec:background-fhir}
+
+FHIR is an HL7 information model rather than an OBO Foundry ontology, and a
+genetic-evidence model could in principle be built directly on the OBO side. We
+have reservations about doing so first. The OBO evidence resources ECO and SEPIO supply,
+respectively, an evidence-type vocabulary and a model of assertion provenance
+and qualifiers, but neither supplies the variable and certainty
+content model of an evidence unit that FHIR Evidence provides and that
+basic-science evidence needs to be applciable bedside. FHIR, on the other hand,
+does not provide a way to assert the applicability of evidence, something that SEPIO does.
+
+Aligning a genetics-only model directly to OBO,
+before that general content model exists, would yield a narrow resource: one
+that neither composes with other basic-science domains nor reuses OBO's
+orthogonal vocabularies cleanly, which is the redundancy that OBO's own emphasis
+on orthogonality and reuse exists to prevent. We therefore take the structural
+content model from FHIR, generalise it from clinical trials to basic science,
+and align the dimensions to ECO, SEPIO, IAO, and OBI at the term level (initial
+mapping in Supplementary Table~S2). Genetics is the first specialisation;
+broadening to other basic-science domains and completing the OBO term alignment
+are future work for other teams. The proposed sequence is: a general content model first, and
+OBO-aligned specialisation next, is what keeps the eventual resource broad and
+reusable rather than narrow.
+
 The HL7 FHIR Evidence, EvidenceVariable, and EvidenceReport
-resources~\cite{fhir_evidence} provide structured representations of
-clinical-trial-style evidence, with explicit fields for population,
-intervention, comparator, outcome, and statistical measures.
-FHIR Evidence was designed around systematic-review and
-guideline-development workflows and assumes that evidence concerns an
-intervention tested in a population. This assumption does not fit
-basic-science and pre-clinical genetic evidence cleanly: a mouse
-knockout study does not have an ``intervention'' in the clinical-trial
-sense, and a coding-variant case--control study has a target (the
-variant) that is not the same kind of object as a drug or a procedure.
-Our schema shares FHIR Evidence's commitment to structured,
-dimensional description but replaces this clinical-trial skeleton with
-a vocabulary appropriate to genetic claims.
+resources~\cite{fhir_evidence} were designed around systematic-review and guideline-development workflows in
+which evidence concerns an intervention tested in a population. Like the other
+standards above, FHIR Evidence does not represent the evidence produced by basic
+and pre-clinical research at all. Our three core classes address exactly that
+gap. They are a basic-science model, general across the basic sciences rather
+than specific to genetics: they reuse FHIR's separation of variable, statistic,
+and certainty but drop its clinical-trial content frame (population,
+intervention, comparator, outcome). Genetics is the worked specialisation
+developed in this paper (\cref{sec:model}), in which \ScientificEvidence{},
+\EvidenceVariable{}, and \EvidenceAssertion{} specialise to \GeneticEvidence{},
+\GeneticEvidenceVariable{}, and \GeneticEvidenceAssertion{}.
+We keep FHIR's separation of variable, statistic, and certainty, and
+we replace its clinical-trial content frame (population, intervention,
+comparator, outcome) with a vocabulary appropriate to genetic claims.
+\Cref{tab:fhir-alignment} gives the class-level correspondence; the field-level
+alignment, including the certainty subcomponents discussed in
+\cref{sec:model-dimensions}, is in Supplementary Table~S2.
+\footnote{Our \EvidenceAssertion{} is a structured, machine-checkable predicate, not the
+FHIR \texttt{Evidence.assertion} element (a human-readable summary).
+Structurally it belongs to the assertion-with-evidence family of the GA4GH VA
+\texttt{Statement} and the SEPIO assertion; the meta-predicate layer it
+supports~\cite{our_preprint} acts as a normative constraint over such
+assertions rather than as another description of one, with term-level alignment
+left to future work.}
 
-\paragraph{Evidence Codes: ECO and SEPIO.}
-The Evidence and Conclusion Ontology (ECO)~\cite{eco2019} provides
-a large hierarchical vocabulary of evidence types, including
-inference methods, assay types, and source-document categories,
-organised within the Open Biological and Biomedical Ontologies (OBO)
-framework and widely used in Gene Ontology annotation. The
-Scientific Evidence and Provenance Information Ontology
-(SEPIO)~\cite{sepio} complements ECO with machine-readable
-representations of statements, qualifiers, and provenance
-relationships. Our Method and Measurement Target dimensions overlap
-substantially with areas that ECO and SEPIO already populate, and
-our long-term goal is to ground those dimensions in ECO and SEPIO
-identifiers rather than maintain a separate vocabulary.
-
-\paragraph{GA4GH Genomic Knowledge Standards.}
-The most natural point of comparison within the GA4GH Genomic
-Knowledge Standards effort is the Variant Annotation (VA)
-Specification~\cite{ga4gh_va}. VA is a broad information model for
-structured statements about variants, organised around a
-\texttt{Statement} class whose instances carry a proposition,
-direction of support, strength, classification, evidence lines,
-and contribution metadata. In scope VA is information-centric: its
-top-level abstraction is an \texttt{InformationEntity}, representing
-what is known about a variant rather than the process by which
-primary-literature claims become evidence. Our schema is narrower
-and complementary: it focuses on evidence drawn from the primary
-literature, with the \emph{Relevance and Specificity} and
-\emph{Confidence} challenges of \cref{sec:intro} as concrete
-targets. The Variation Representation Specification
-(VRS)~\cite{ga4gh_vrs}, a separate product of the same effort,
-addresses canonical variant identity across coordinate systems
-and is orthogonal to the concerns of the present work.
-
-\paragraph{ACMG/AMP variant interpretation.}
-The American College of Medical Genetics and Genomics /
-Association for Molecular Pathology (ACMG/AMP)
-guidelines~\cite{acmg2015} specify a rule-based framework for
-variant classification from weighted evidence codes and
-criteria. Our schema is intended to feed such frameworks rather
-than replace them: its per-publication evidence items are the
-kind of input an ACMG/AMP-compatible classifier would consume.
-A term-level mapping from our Method and Credibility dimensions
-to the ACMG/AMP evidence codes is scoped as future work.
-
-\paragraph{Upper ontologies: IAO, OBI, PROV-O.}
-The Information Artefact Ontology (IAO)~\cite{iao2015} and the
-Ontology for Biomedical Investigations (OBI)~\cite{obi2016} provide
-upper-level scaffolding for many OBO-compliant biomedical
-ontologies: IAO supplies classes such as
-\emph{information-content-entity} and \emph{textual-entity}, and OBI
-supplies the assay and protocol hierarchies relevant to our Method
-dimension. The W3C PROV Ontology (PROV-O)~\cite{prov_o} supplies
-standard provenance relationships. Formal alignment of our top-level
-classes with IAO, OBI, and PROV-O is scoped as future work, alongside
-a planned OWL/LinkML rendering of the schema.
-
-\paragraph{Related annotation efforts.}
-The Clinical Genome Resource (ClinGen) evidence curation
-framework~\cite{clingen2018} provides a structured workflow for
-gene--disease validity and variant pathogenicity assessments with
-explicit evidence rubrics; our schema shares its commitment to
-source-anchored claims and explicit categorisation but operates at a
-lower level by representing the individual claims that such frameworks
-aggregate. The Monarch Disease Ontology (MONDO)~\cite{mondo} and the
-Human Phenotype Ontology (HPO)~\cite{hpo} provide established
-vocabularies for disease and phenotype terms; we expect
-curator-authored HPO terms to populate the phenotype-mapping fields of
-our schema, as illustrated by the HPO-term suggestions in the Davis,
-Nelson, and Gupta case studies (\cref{sec:workflow-flags}).
-
-\paragraph{The coverage gap.}
-None of the standards above was designed to treat as a first-class
-concern the heterogeneous evidence patterns encountered in
-basic-science and pre-clinical genetic publications: a Llgl1
-conditional-knockout study, for example, may report phenotypes at
-molecular, cellular, and clinical scales in the same paper; a
-polygenic-score study may span millions of variants weighted into a
-single score. Each existing standard captures part of what such
-papers say, but none captures the whole. The schema we introduce in
-the next section aims to represent that whole in a way that is
-compact enough to annotate manually, machine-checkable enough to
-validate automatically, and flexible enough to accommodate the
-heterogeneity the literature actually produces.
+\begin{table}[tbp]
+    \centering
+    \caption{Class-level correspondence between the core model and FHIR Evidence
+    R5. The alignment is architectural; the genetic dimensional frame replaces
+    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S2.}
+    \label{tab:fhir-alignment}
+    \small
+    \begin{tabularx}{\linewidth}{@{}llX@{}}
+\toprule
+This work & FHIR Evidence R5 & Relationship \\
+\midrule
+\ScientificEvidence
+& \texttt{Evidence}
+& Structural sibling; genetic dimensional frame replaces the PICO frame \\
+\EvidenceVariable
+& \texttt{EvidenceVariable} ${+}$ \texttt{Evidence.statistic}
+& Variable definition and measured value, folded into one class \\
+\EvidenceAssertion
+& (no structural equivalent)
+& Structured predicate; closest analogue is GA4GH VA \texttt{Statement} \\
+Credibility
+& \texttt{Evidence.certainty}
+& Direct adoption: overall rating plus rated subcomponent domains \\
+\bottomrule
+    \end{tabularx}
+\end{table}

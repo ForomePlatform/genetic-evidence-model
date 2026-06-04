@@ -1,0 +1,39 @@
+% =====================================================================
+%  Supplementary Material — compiles STANDALONE as a plain article.
+%  Shares paper/preamble.tex with main.tex (macros, table packages,
+%  listings). natbib is loaded here (before preamble's hyperref) because
+%  the main paper gets natbib from the ceurart [natbib=true] option,
+%  which an article does not.
+% =====================================================================
+\documentclass[11pt]{article}
+\usepackage[numbers,sort&compress]{natbib}   % load BEFORE preamble (hyperref order)
+\usepackage[margin=1in]{geometry}
+\input{preamble}                              % shared macros + tabularx/booktabs/cleveref/listings
+\microtypesetup{expansion=false}              % protrusion only; expansion needs scalable fonts not guaranteed under article
+
+\title{Supplementary Material:\\[2pt]
+A Semantic Model of Genetic Evidence}
+\author{Michael Bouzinier \and Dmitry Etin}
+\date{}
+
+\begin{document}
+    \maketitle
+    \tableofcontents
+    \bigskip
+
+    \part*{S1.\quad Supplementary Notes}
+    \addcontentsline{toc}{part}{S1.\quad Supplementary Notes}
+    \input{sections/s02_background}
+
+    \part*{S2.\quad Supplementary Tables}
+    \addcontentsline{toc}{part}{S2.\quad Supplementary Tables}
+    \input{sections/supplement_tables}
+
+    \part*{S3.\quad Appendices}
+    \addcontentsline{toc}{part}{S3.\quad Appendices}
+% Existing supplement content (SHACL schema, annotation YAMLs, case reports)
+% goes here, e.g.:  \input{sections/s3_appendices}
+
+    \bibliographystyle{plainnat}
+    \bibliography{references}
+\end{document}

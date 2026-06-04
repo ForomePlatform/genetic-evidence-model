@@ -10,193 +10,116 @@
 
 \documentclass[natbib=true]{ceurart}
 
-% ---------- core packages ----------
-\usepackage[T1]{fontenc}
-\usepackage{microtype}        % better typography; load early
-\usepackage{graphicx}
-\usepackage{booktabs}         % nicer tables (\toprule, \midrule, \bottomrule)
-\usepackage{tabularx}         % auto-width columns
-\usepackage{array}
-\usepackage{listings}         % code/YAML listings — chosen over minted for portability
-\usepackage{xcolor}
-\usepackage{amsmath,amssymb}
-\usepackage{todonotes}        % \todo{...} and \todo[inline]{...} for draft notes
-\usepackage{lipsum}           % placeholder text; remove before final submission
-\usepackage{morefloats}       % raises the unprocessed-float limit for draft builds
-\usepackage[section]{placeins} % flushes floats at every \section boundary
-\usepackage{hyperref}         % load near last
-\usepackage{cleveref}         % load after hyperref; \cref{} auto-adds "Figure"/"Table"/etc.
 
-% ---------- listings setup for YAML annotations ----------
-% Define a lightweight YAML "language" for listings.
-\definecolor{yamlKey}{RGB}{0,90,156}
-\definecolor{yamlStr}{RGB}{163,21,21}
-\definecolor{yamlComment}{RGB}{0,128,0}
-\definecolor{listingBg}{RGB}{248,248,248}
-
-\lstdefinelanguage{yaml}{
-  keywords={true,false,null},
-  keywordstyle=\color{yamlKey}\bfseries,
-  sensitive=true,
-  comment=[l]{\#},
-  commentstyle=\color{yamlComment}\itshape,
-  stringstyle=\color{yamlStr},
-  morestring=[b]',
-  morestring=[b]",
-  moredelim=[l][\color{yamlKey}]{-\ },
-}
-
-\lstset{
-  language=yaml,
-  inputencoding=utf8,
-  extendedchars=true,
-  literate={—}{{---}}1 {–}{{--}}1,
-  basicstyle=\ttfamily\small,
-  backgroundcolor=\color{listingBg},
-  frame=single,
-  framerule=0pt,
-  rulecolor=\color{listingBg},
-  xleftmargin=1em,
-  xrightmargin=1em,
-  aboveskip=0.8em,
-  belowskip=0.8em,
-  showstringspaces=false,
-  columns=fullflexible,
-  breaklines=true,
-  breakatwhitespace=true,
-  captionpos=b,
-}
-
-% ---------- typography commands for our model's core terms ----------
-% Using \textsc for the abstract classes so they stand out as technical terms
-% without being as loud as monospace.
-\newcommand{\ScientificEvidence}{\textsc{ScientificEvidence}}
-\newcommand{\EvidenceVariable}{\textsc{EvidenceVariable}}
-\newcommand{\EvidenceAssertion}{\textsc{EvidenceAssertion}}
-\newcommand{\GeneticEvidence}{\textsc{GeneticEvidence}}
-\newcommand{\GeneticEvidenceVariable}{\textsc{GeneticEvidenceVariable}}
-\newcommand{\GeneticEvidenceAssertion}{\textsc{GeneticEvidenceAssertion}}
-
-% \todo{} is illegal inside floats (table*, figure) because it uses \marginpar.
-% Use \tbd{} in table cells instead — it renders identically in the margin
-% outside floats and falls back to coloured text inside floats.
-\makeatletter
-\newcommand{\tbd}[1][]{%
-  \@ifundefined{@captype}%
-    {\todo[#1]{}}%
-    {\textcolor{orange}{\textbf{[?]}}}}
-\makeatother
-
-% For categorical values of dimensions (e.g., STATISTICAL GENETICS), we use
-% small caps so they are visually distinct from prose but not as heavy as code.
-\newcommand{\dimval}[1]{\textsc{\lowercase{#1}}}
+% ---------- shared preamble (factored out; also \input by supplement.tex) ----------
+\input{preamble}
 
 % ---------- front matter ----------
 \begin{document}
 
-\title{A Semantic Model of Genetic Evidence: A Step Toward Bridging the Basic-Science--Clinic Gap}
+    \title{A Semantic Model of Genetic Evidence: A Step Toward Bridging the Basic-Science--Clinic Gap}
 
 % Authors — fill in ORCIDs and emails per CEUR footer requirements.
-\author[1,2,3]{Michael Bouzinier}[
-  orcid=0000-0002-3161-5601,
-  email=michael_bouzinier@harvard.edu
-]
-\author[3,4]{Dmitry Etin}[
-  orcid=0000-0003-1068-2781,
-  email=dmitry.etin@forome.org
-]
-\address[1]{Harvard University, Cambridge, MA, USA}
-\address[2]{IDEXX Laboratories, Westbrook, ME, USA}
-\address[3]{Forome Association, Newton, MA, USA}
-\address[4]{Deggendorf Institute of Technology, Germany}
+    \author[1,2,3]{Michael Bouzinier}[
+        orcid=0000-0002-3161-5601,
+        email=michael_bouzinier@harvard.edu
+    ]
+    \author[3,4]{Dmitry Etin}[
+        orcid=0000-0003-1068-2781,
+        email=dmitry.etin@forome.org
+    ]
+    \address[1]{Harvard University, Cambridge, MA, USA}
+    \address[2]{IDEXX Laboratories, Westbrook, ME, USA}
+    \address[3]{Forome Association, Newton, MA, USA}
+    \address[4]{Deggendorf Institute of Technology, Germany}
 
 % CEUR requires a conference footnote on the first page. Fill in exact wording
 % from the ICBO 2026 camera-ready template when available.
-\conference{ICBO 2026: 17th International Conference on Biological and
-Biomedical Ontology, July 15--17, 2026, Washington, D.C.}
+    \conference{ICBO 2026: 17th International Conference on Biological and
+    Biomedical Ontology, July 15--17, 2026, Washington, D.C.}
 
-\begin{abstract}
-Scientific and clinical decision-making depends on evidence from
-the primary literature, but existing standards for representing
-that evidence (FHIR Evidence, ECO, SEPIO, and the GA4GH Genomic
-Knowledge Standards) are oriented toward clinical-trial workflows,
-evidence codes, or single-variant assertions, and do not capture
-the fine-grained, domain-specific structure of claims in basic and
-pre-clinical research. We introduce a semantic model for scientific
-evidence with three core classes, specialise it for genetics, and
-attach a compact dimensional vocabulary whose conditional-activation
-rules are formalised as SHACL shapes that require each dimension only
-when it is semantically appropriate. Using clinical variant
-interpretation as the driving use case, we evaluate the model
-through a human--AI annotation pilot over six genetics papers,
-yielding 28 evidence items and 65 source-anchored assertions, with
-a workflow that keeps curator-authored ground truth distinct from
-AI-drafted annotations. Treating the pilot as a feasibility study
-rather than a benchmark, we argue that the model is a useful
-increment toward AI-ready, ontologically grounded infrastructure
-for trustworthy variant interpretation.
-\end{abstract}
+    \begin{abstract}
+        Scientific and clinical decision-making depends on evidence from
+        the primary literature, but existing standards for representing
+        that evidence (FHIR Evidence, ECO, SEPIO, and the GA4GH Genomic
+        Knowledge Standards) are oriented toward clinical-trial workflows,
+        evidence codes, or single-variant assertions, and do not capture
+        the fine-grained, domain-specific structure of claims in basic and
+        pre-clinical research. We introduce a semantic model for scientific
+        evidence with three core classes, specialise it for genetics, and
+        attach a compact dimensional vocabulary whose conditional-activation
+        rules are formalised as SHACL shapes that require each dimension only
+        when it is semantically appropriate. Using clinical variant
+        interpretation as the driving use case, we evaluate the model
+        through a human--AI annotation pilot over six genetics papers,
+        yielding 28 evidence items and 65 source-anchored assertions, with
+        a workflow that keeps curator-authored ground truth distinct from
+        AI-drafted annotations. Treating the pilot as a feasibility study
+        rather than a benchmark, we argue that the model is a useful
+        increment toward AI-ready, ontologically grounded infrastructure
+        for trustworthy variant interpretation.
+    \end{abstract}
 
-\begin{keywords}
-  genetic evidence \sep
-  variant interpretation \sep
-  ontology \sep
-  FHIR \sep
-  ECO \sep
-  SEPIO \sep
-  GA4GH \sep
-  AI-ready data
-\end{keywords}
+    \begin{keywords}
+        genetic evidence \sep
+        variant interpretation \sep
+        ontology \sep
+        FHIR \sep
+        ECO \sep
+        SEPIO \sep
+        GA4GH \sep
+        AI-ready data
+    \end{keywords}
 
-\maketitle
+    \maketitle
 
 % =====================================================================
 % §1 — Introduction (see paper/sections/01_intro.tex)
-\input{sections/01_intro.tex}
+    \input{sections/01_intro.tex}
 
 % =====================================================================
 
 % =====================================================================
 % §2 — Background and Related Work (see paper/sections/02_background.tex)
-\input{sections/02_background.tex}
+    \input{sections/02_background.tex}
 
 % =====================================================================
 
 % =====================================================================
 % =====================================================================
 % §3 — Model (see paper/sections/03_model.tex)
-\input{sections/03_model.tex}
+    \input{sections/03_model.tex}
 
 % =====================================================================
 
 % =====================================================================
 % =====================================================================
 % §4 — Worked Examples (see paper/sections/04_examples.tex)
-\input{sections/04_examples.tex}
+    \input{sections/04_examples.tex}
 
 % =====================================================================
 
 % =====================================================================
 % §5 — Workflow and Evaluation (see paper/sections/05_workflow.tex)
-\input{sections/05_workflow.tex}
+    \input{sections/05_workflow.tex}
 
 % =====================================================================
 
 % =====================================================================
 % §6 — Discussion (see paper/sections/06_discussion.tex)
-\input{sections/06_discussion.tex}
+    \input{sections/06_discussion.tex}
 
 % =====================================================================
 
 % =====================================================================
 % §7 — Conclusion (see paper/sections/07_conclusion.tex)
-\input{sections/07_conclusion.tex}
+    \input{sections/07_conclusion.tex}
 
 % =====================================================================
 
 % =====================================================================
 % \bibliographystyle is set by ceurart natbib=true; do not add another one here.
-\bibliography{references}
+    \bibliography{references}
 % =====================================================================
 
 \end{document}

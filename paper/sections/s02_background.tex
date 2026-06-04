@@ -1,0 +1,127 @@
+% =====================================================================
+%  §2 — Background and Related Work
+%
+%  Six standards families: FHIR Evidence, ECO, SEPIO, GA4GH GKS,
+%  ACMG-AMP, IAO/OBI/PROV-O. Each in a compact paragraph. Closes
+%  with a paragraph naming the gap this paper addresses.
+%
+%  Revised 2026-04-21: standards-mapping table dropped for space
+%  (paper was at 18pp vs 12pp cap); per-family paragraphs tightened
+%  and acronyms expanded consistently on first mention.
+% =====================================================================
+
+\section{Background and Related Work}
+\label{sec:supp-background}
+
+The representation of scientific and clinical evidence has been the
+subject of sustained standards work in clinical informatics,
+biomedical ontology, and genomic knowledge representation. Our
+schema sits at the intersection of these communities: oriented
+toward downstream decision-making, grounded in formal constraints
+and explicit provenance, and treating target resolution (variant,
+gene, region, whole-genome aggregate, and so on) as a first-class
+concern while relying on GA4GH standards for sequence identifiers.
+This section positions the schema among the six standards families
+we have engaged with and closes by spelling out the coverage gap
+that motivated the work. Detailed term-level alignment is scoped as
+future work.
+
+\paragraph{FHIR Evidence Resources.}
+The HL7 FHIR Evidence, EvidenceVariable, and EvidenceReport
+resources~\cite{fhir_evidence} provide structured representations of
+clinical-trial-style evidence, with explicit fields for population,
+intervention, comparator, outcome, and statistical measures.
+FHIR Evidence was designed around systematic-review and
+guideline-development workflows and assumes that evidence concerns an
+intervention tested in a population. This assumption does not fit
+basic-science and pre-clinical genetic evidence cleanly: a mouse
+knockout study does not have an ``intervention'' in the clinical-trial
+sense, and a coding-variant case--control study has a target (the
+variant) that is not the same kind of object as a drug or a procedure.
+Our schema shares FHIR Evidence's commitment to structured,
+dimensional description but replaces this clinical-trial skeleton with
+a vocabulary appropriate to genetic claims.
+
+\paragraph{Evidence Codes: ECO and SEPIO.}
+The Evidence and Conclusion Ontology (ECO)~\cite{eco2019} provides
+a large hierarchical vocabulary of evidence types, including
+inference methods, assay types, and source-document categories,
+organised within the Open Biological and Biomedical Ontologies (OBO)
+framework and widely used in Gene Ontology annotation. The
+Scientific Evidence and Provenance Information Ontology
+(SEPIO)~\cite{sepio} complements ECO with machine-readable
+representations of statements, qualifiers, and provenance
+relationships. Our Method and Measurement Target dimensions overlap
+substantially with areas that ECO and SEPIO already populate, and
+our long-term goal is to ground those dimensions in ECO and SEPIO
+identifiers rather than maintain a separate vocabulary.
+
+\paragraph{GA4GH Genomic Knowledge Standards.}
+The most natural point of comparison within the GA4GH Genomic
+Knowledge Standards effort is the Variant Annotation (VA)
+Specification~\cite{ga4gh_va}. VA is a broad information model for
+structured statements about variants, organised around a
+\texttt{Statement} class whose instances carry a proposition,
+direction of support, strength, classification, evidence lines,
+and contribution metadata. In scope VA is information-centric: its
+top-level abstraction is an \texttt{InformationEntity}, representing
+what is known about a variant rather than the process by which
+primary-literature claims become evidence. Our schema is narrower
+and complementary: it focuses on evidence drawn from the primary
+literature, with the \emph{Relevance and Specificity} and
+\emph{Confidence} challenges set out in the introduction of the main paper as concrete
+targets. The Variation Representation Specification
+(VRS)~\cite{ga4gh_vrs}, a separate product of the same effort,
+addresses canonical variant identity across coordinate systems
+and is orthogonal to the concerns of the present work.
+
+\paragraph{ACMG/AMP variant interpretation.}
+The American College of Medical Genetics and Genomics /
+Association for Molecular Pathology (ACMG/AMP)
+guidelines~\cite{acmg2015} specify a rule-based framework for
+variant classification from weighted evidence codes and
+criteria. Our schema is intended to feed such frameworks rather
+than replace them: its per-publication evidence items are the
+kind of input an ACMG/AMP-compatible classifier would consume.
+A term-level mapping from our Method and Credibility dimensions
+to the ACMG/AMP evidence codes is scoped as future work.
+
+\paragraph{Upper ontologies: IAO, OBI, PROV-O.}
+The Information Artefact Ontology (IAO)~\cite{iao2015} and the
+Ontology for Biomedical Investigations (OBI)~\cite{obi2016} provide
+upper-level scaffolding for many OBO-compliant biomedical
+ontologies: IAO supplies classes such as
+\emph{information-content-entity} and \emph{textual-entity}, and OBI
+supplies the assay and protocol hierarchies relevant to our Method
+dimension. The W3C PROV Ontology (PROV-O)~\cite{prov_o} supplies
+standard provenance relationships. Formal alignment of our top-level
+classes with IAO, OBI, and PROV-O is scoped as future work, alongside
+a planned OWL/LinkML rendering of the schema.
+
+\paragraph{Related annotation efforts.}
+The Clinical Genome Resource (ClinGen) evidence curation
+framework~\cite{clingen2018} provides a structured workflow for
+gene--disease validity and variant pathogenicity assessments with
+explicit evidence rubrics; our schema shares its commitment to
+source-anchored claims and explicit categorisation but operates at a
+lower level by representing the individual claims that such frameworks
+aggregate. The Monarch Disease Ontology (MONDO)~\cite{mondo} and the
+Human Phenotype Ontology (HPO)~\cite{hpo} provide established
+vocabularies for disease and phenotype terms; we expect
+curator-authored HPO terms to populate the phenotype-mapping fields of
+our schema, as illustrated by the HPO-term suggestions in the Davis,
+Nelson, and Gupta case studies (see the evaluation section of the main paper).
+
+\paragraph{The coverage gap.}
+None of the standards above was designed to treat as a first-class
+concern the heterogeneous evidence patterns encountered in
+basic-science and pre-clinical genetic publications: a Llgl1
+conditional-knockout study, for example, may report phenotypes at
+molecular, cellular, and clinical scales in the same paper; a
+polygenic-score study may span millions of variants weighted into a
+single score. Each existing standard captures part of what such
+papers say, but none captures the whole. The schema we introduce in
+the next section aims to represent that whole in a way that is
+compact enough to annotate manually, machine-checkable enough to
+validate automatically, and flexible enough to accommodate the
+heterogeneity the literature actually produces.

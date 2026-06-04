@@ -1,0 +1,54 @@
+% =====================================================================
+%  Supplementary tables — FRAGMENT. \input by supplement.tex.
+%  No \documentclass / preamble / document env here. Relies on the
+%  shared preamble (tabularx, booktabs, cleveref) loaded by supplement.tex.
+%  NOTE: table CONTENT (GRADE column, EvidenceVariable value row) is
+%  unchanged here on purpose — those are the pending content edits.
+% =====================================================================
+
+\begin{table}[tbp]
+    \centering
+    \caption{Controlled credibility-facet vocabulary, with GRADE-domain and FHIR
+    \texttt{Evidence.certainty} correspondences. GRADE was developed for clinical
+    intervention evidence; correspondences here are by analogy and specialisation,
+        not identity. Facets without a core-GRADE downgrading domain (for example effect
+        magnitude) correspond to GRADE's upgrading domains for observational evidence.}
+    \label{tab:credibility-facets}
+    \small
+    \begin{tabularx}{\linewidth}{@{}lXl@{}}
+\toprule
+Facet & Aspect of trust recorded & GRADE-style domain \\
+\midrule
+\texttt{sample\_size}             & Size of cohort, pedigree, or sample                       & Imprecision \\
+\texttt{cohort\_composition}      & Case/control makeup and ascertainment                     & Risk of bias \\
+\texttt{multiple\_testing}        & Whether and how multiplicity was controlled               & Risk of bias \\
+\texttt{stratification\_control}  & Ancestry restriction or matching against confounding      & Risk of bias / Indirectness \\
+\texttt{replication}              & Independent replication or internal resampling            & (In)consistency \\
+\texttt{effect\_magnitude}        & Size of the reported effect (OR, HR, and so on)           & Large effect (upgrade) \\
+\texttt{phenotype\_concordance}   & Fit of the studied phenotype to the clinical question     & Indirectness \\
+\texttt{confounding\_control}     & Accounting for genetic background or residual confounding & Plausible confounding (upgrade) \\
+\bottomrule
+    \end{tabularx}
+\end{table}
+
+
+\begin{table}[tbp]
+    \centering
+    \caption{Field-level alignment of the core model to FHIR Evidence R5. The certainty rows expand the Credibility entry of the class-level alignment table in the main paper.}
+    \label{tab:fhir-fields}
+    \small
+    \begin{tabularx}{\linewidth}{@{}llX@{}}
+\toprule
+This work & FHIR Evidence R5 & Note \\
+\midrule
+\ScientificEvidence{} item        & \texttt{Evidence}                              & One evidence concept per claim \\
+dimensions                         & \texttt{Evidence.variableDefinition} (roles)   & PICO roles replaced by genetic dimensions \\
+\EvidenceVariable{} definition     & \texttt{EvidenceVariable.characteristic}       & What the variable is and how measured \\
+\EvidenceVariable{} value          & \texttt{Evidence.statistic}                    & The measured quantity itself \\
+Credibility overall rating         & \texttt{Evidence.certainty.rating}             & Coded; maps to GRADE levels and SEPIO confidence \\
+Credibility facet                  & \texttt{Evidence.certainty.\-certaintySubcomponent.type} & Extension to the subcomponent-type value set \\
+facet rating (where graded)        & \texttt{...certaintySubcomponent.rating}       & Per-domain rating \\
+\texttt{source\_span}              & \texttt{Evidence.note} / \texttt{Citation}     & Page plus key phrase for audit \\
+\bottomrule
+    \end{tabularx}
+\end{table}
