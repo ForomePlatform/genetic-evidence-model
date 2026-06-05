@@ -22,9 +22,9 @@ Cardinality: multiple. Objectivity: objective.
 
 | Value | Meaning |
 | --- | --- |
-| `HUMAN_GENETICS`      | Evidence from human genetic studies (family, cohort, case-control) |
+| `HUMAN_GENETICS`      | Evidence from human family- or inheritance-based genetic studies (pedigrees, segregation, transmission) |
 | `ANIMAL_GENETICS`     | Non-human animal genetics outside a model-organism context |
-| `POPULATION_GENETICS` | Population-level variation, allele frequencies, GWAS, PGS |
+| `POPULATION_GENETICS` | Population-level variation, allele frequencies, case-control association, GWAS, PGS |
 | `COMPARATIVE_GENOMICS`| Cross-species sequence/synteny analysis |
 | `EPIGENETICS`         | Methylation, chromatin, non-sequence inheritance |
 | `GENE_FUNCTION`       | Molecular function of gene products |
@@ -34,18 +34,133 @@ Cardinality: multiple. Objectivity: objective.
 
 Cardinality: multiple. Objectivity: objective.
 
-| Value | Meaning |
+The `method` dimension records *how* the evidence was generated. It is the
+first dimension of the model to receive an explicit **hierarchical structure**
+rather than a flat enumeration. To stay consistent with OBO conventions, the
+hierarchy is expressed as `is_a` relations between terms (subject `is_a`
+object), which lift directly to OWL `rdfs:subClassOf` when the schema is
+rendered as an ontology (future work; see §6.2 of the companion paper).
+Subsumption is transitive: `GWAS is_a ASSOCIATION_STUDY` and
+`ASSOCIATION_STUDY is_a STATISTICAL_GENETICS`, so a `GWAS` is also (by
+transitivity) a `STATISTICAL_GENETICS`.
+
+**Method terms.**
+
+| Term | Meaning |
 | --- | --- |
-| `CLINICAL_EVIDENCE`        | Clinical observation, phenotype report, pedigree |
-| `STATISTICAL_GENETICS`     | Association, linkage, segregation statistics |
-| `BIOINFORMATICS_PREDICTION`| In silico prediction (splice, conservation, structure) |
-| `IN_VIVO_EXPERIMENT`       | Experimental intervention in a whole organism |
-| `IN_VITRO_EXPERIMENT`      | Experimental work in cell culture or cell-free systems |
-| `POPULATION_DATA`          | Aggregated population data (gnomAD, 1000G, biobanks) |
-| `EPIGENETICS_DATA`         | Measurement of epigenetic state |
+| `STATISTICAL_GENETICS`             | Population-level statistical inference from genetic data |
+| `ASSOCIATION_STUDY`                | Statistical test of association between genetic variation and phenotype |
+| `GWAS`                             | Genome-wide, hypothesis-free association scan |
+| `CANDIDATE_GENE_STUDY`             | Hypothesis-driven association study at one or a small set of genes |
+| `FINE_MAPPING`                     | Within-locus association analysis, often with conditional or LD-aware modelling |
+| `FAMILY_BASED`                     | Statistical inference from family or pedigree data |
+| `LINKAGE_ANALYSIS`                 | LOD-score-based identification of disease-linked chromosomal regions |
+| `TRANSMISSION_DISEQUILIBRIUM_TEST` | Tests for non-random allele transmission to affected offspring (TDT, FBAT) |
+| `SEGREGATION_ANALYSIS`             | Tests of Mendelian segregation patterns in pedigrees |
+| `META_ANALYSIS`                    | Combining results across studies; includes polygenic-score construction from multiple GWASes |
+| `EXPERIMENT`                       | Empirical procedure (laboratory or computational simulation) producing new data points |
+| `IN_VIVO`                          | Experiment in a living organism |
+| `IN_VITRO`                         | Experiment in isolated cells, tissues, or biochemical systems outside a living organism |
+| `IN_SILICO`                        | Computational simulation of a biological process (molecular dynamics, docking, simulation models) |
+| `BIOINFORMATICS_INFERENCE`         | Computational analysis of existing biological data to characterise or predict features |
+| `CLINICAL_EVIDENCE`                | Observation of variants or phenotypes in clinical contexts |
+
+The four top-level families, `STATISTICAL_GENETICS`, `EXPERIMENT`,
+`BIOINFORMATICS_INFERENCE`, and `CLINICAL_EVIDENCE`, have no parent and so do
+not appear as a subject in the relations table below.
+
+**Method hierarchy (`is_a` relations).**
+
+| Term | Relation | Parent term |
+| --- | --- | --- |
+| `ASSOCIATION_STUDY`                | `is_a` | `STATISTICAL_GENETICS` |
+| `GWAS`                             | `is_a` | `ASSOCIATION_STUDY`    |
+| `CANDIDATE_GENE_STUDY`             | `is_a` | `ASSOCIATION_STUDY`    |
+| `FINE_MAPPING`                     | `is_a` | `ASSOCIATION_STUDY`    |
+| `FAMILY_BASED`                     | `is_a` | `STATISTICAL_GENETICS` |
+| `LINKAGE_ANALYSIS`                 | `is_a` | `FAMILY_BASED`         |
+| `TRANSMISSION_DISEQUILIBRIUM_TEST` | `is_a` | `FAMILY_BASED`         |
+| `SEGREGATION_ANALYSIS`             | `is_a` | `FAMILY_BASED`         |
+| `META_ANALYSIS`                    | `is_a` | `STATISTICAL_GENETICS` |
+| `IN_VIVO`                          | `is_a` | `EXPERIMENT`           |
+| `IN_VITRO`                         | `is_a` | `EXPERIMENT`           |
+| `IN_SILICO`                        | `is_a` | `EXPERIMENT`           |
 
 Convention: when multiple methods apply, the optional `primary_method` field
-records the curator's hierarchy preference.
+records the curator's hierarchy preference. Multiple values from this
+dimension are interpreted as **additive, not hierarchical** (e.g.,
+`method: [GWAS, META_ANALYSIS]` means both apply); do not list a leaf and its
+own ancestor together unless both genuinely apply.
+
+#### Notes on the structure
+
+**Why `EXPERIMENT` is a parent.** The pre-hierarchical schema had
+`IN_VIVO_EXPERIMENT` and `IN_VITRO_EXPERIMENT` as flat sibling values, with no
+explicit acknowledgement that they share an epistemic structure (a controlled
+procedure producing new data points). Introducing `EXPERIMENT` as a parent
+makes the shared structure explicit and creates a natural home for `IN_SILICO`
+as a third sibling.
+
+**`IN_SILICO` is distinct from `BIOINFORMATICS_INFERENCE`.** The two are easy
+to conflate but capture different epistemic operations. `IN_SILICO` is
+computational *simulation*: a model is constructed, parameterised, executed,
+and analysed, producing new data points by execution (molecular dynamics,
+docking, forward population-genetics simulation). `BIOINFORMATICS_INFERENCE` is
+computational *analysis* of existing data (sequences, structures, database
+records) to characterise or predict features of those data, with no process
+simulated (conservation analysis, splice-site prediction, variant-impact
+prediction). A study running molecular dynamics to predict the effect of a
+substitution is `IN_SILICO`; a study running SIFT or PolyPhen on a list of
+substitutions is `BIOINFORMATICS_INFERENCE`.
+
+**Branches kept flat in this revision.** `BIOINFORMATICS_INFERENCE` and
+`CLINICAL_EVIDENCE` are top-level families without children in this version.
+Natural decompositions exist (`CONSERVATION_ANALYSIS`, `SPLICE_PREDICTION`,
+`IMPACT_PREDICTION` for the former; `PEDIGREE_SEGREGATION`, `CASE_REPORT`,
+`CASE_SERIES` for the latter) and are candidates for elaboration as the corpus
+exercises more leaves. Until then they remain flat to avoid introducing
+structure not exercised by available evidence.
+
+#### How to use the hierarchy in annotations
+
+See `protocols/PROTOCOL.md` §3.4. The short version: pick the most specific
+applicable value; parent relationships are recoverable from the `is_a`
+hierarchy table above.
+If you are confident only at an intermediate level (e.g., the paper says
+"statistical genetics" without specifying the design), record the intermediate
+value and emit `ai_uncertainty` on the dimension.
+
+#### Backward compatibility
+
+Existing annotations in the corpus use the pre-hierarchical flat values
+(`STATISTICAL_GENETICS`, `IN_VIVO_EXPERIMENT`, `IN_VITRO_EXPERIMENT`,
+`BIOINFORMATICS_PREDICTION`). These remain valid: `STATISTICAL_GENETICS` is a
+legitimate value (the top of its family); `IN_VIVO_EXPERIMENT` and
+`IN_VITRO_EXPERIMENT` are legacy synonyms for `IN_VIVO` and `IN_VITRO`; and
+`BIOINFORMATICS_PREDICTION` is a legacy synonym for `BIOINFORMATICS_INFERENCE`.
+A future curator-review pass will migrate these to leaf values where the
+underlying paper supports a more specific assignment (see
+`notes/ROADMAP.md` §1.b); until then, annotations using flat values are
+interpreted as having committed to the intermediate level only.
+
+Note: the earlier POPULATION_DATA and EPIGENETICS_DATA method values
+(never exercised by any annotation in the corpus) no longer appear as
+standalone method values in this revision. Their content is recovered in
+two places:
+
+* Population-scale statistical work is recorded under
+STATISTICAL_GENETICS (or its leaves such as GWAS or
+META_ANALYSIS); the relevant phenomenon is captured by the
+POPULATION_GENETICS value in knowledge_domain.
+* Epigenetic work is recorded with the appropriate experimental
+method (IN_VIVO, IN_VITRO, or BIOINFORMATICS_INFERENCE,
+depending on the workflow); the relevant phenomenon is captured
+by the EPIGENETICS value in knowledge_domain.
+
+The general principle: the previous *_DATA method values conflated
+what the evidence concerns (knowledge domain) with how it was
+generated (method). The revision separates these into the appropriate
+dimensions.
 
 ### Target type
 
@@ -162,7 +277,7 @@ Measurement target enumeration: `EXISTENCE`, `EXPRESSION`, `STABILITY`,
 Gene relation enumeration: `X_has_same_function_as_Y`, `X_regulates_Y`,
 `X_inhibits_Y`.
 
-### When Method contains `IN_VIVO_EXPERIMENT` or Knowledge Domain contains `MODEL_ORGANISM`
+### When Method contains `IN_VIVO` (or legacy `IN_VIVO_EXPERIMENT`) or Knowledge Domain contains `MODEL_ORGANISM`
 
 | Dimension                  | Value type   | Cardinality |
 | -------------------------- | ------------ | ----------- |

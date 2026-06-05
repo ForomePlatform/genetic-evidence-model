@@ -9,6 +9,9 @@
 #  model is expected to accommodate its evidence shape cleanly; any
 #  candidate extensions surfaced here are genuine gaps rather than
 #  idiosyncrasies of this particular paper.
+#
+#  Curator-reviewed edits applied 2026-06-04 (see provenance.review_applied
+#  and annotations/reviews/duerr2006-review-2026-06-04.yaml).
 # =====================================================================
 
 publication:
@@ -21,12 +24,27 @@ provenance:
   drafting_context: >
     Drafted by AI from the paper as uploaded. No prior curator summary
     table exists for this paper; the annotation is therefore AI-inferred
-    from the PDF text alone. Awaiting human reviewer evaluation.
-    The AI reviewer's judgments are surfaced as ai_uncertainty or
-    ai_assumption fields where appropriate, rather than asserted as
-    ground truth.
+    from the PDF text alone. Produced under annotation protocol v0.
   annotator: "AI assistant (Claude, Opus 4.7 Adaptive)"
   annotation_date: "2026-04-20"
+  review_applied:
+    review_log: "annotations/reviews/duerr2006-review-2026-06-04.yaml"
+    date: "2026-06-04"
+    summary: >
+      Curator-reviewed edits applied. GE-1..GE-4 marked_for_edit: label
+      restatements, knowledge_domain / method / subdomain corrections,
+      GE-2.A2 page fix (3 -> 2), GE-3.A2 split into per-phenotype
+      sub-assertions, GE-4.A1 restated to the main-text-supported claim.
+      MA-1 retired from the invented meta_assertions key and logged as
+      CE-DU3. GE-new-1 (cited anti-p40 antibody trial) added. CE-DU3 and
+      CE-DU4 recorded. Method values migrated to leaf level per ROADMAP
+      §1.b: GE-1 GWAS, GE-2 ASSOCIATION_STUDY, GE-3
+      TRANSMISSION_DISEQUILIBRIUM_TEST, GE-4 FINE_MAPPING, GE-5 GWAS,
+      GE-6 IN_VIVO_EXPERIMENT/IN_VITRO_EXPERIMENT -> IN_VIVO/IN_VITRO
+      (renames). GE-5 and GE-6 were approved_despite_flags and are
+      otherwise left as-is (their non-blocking flags were accepted, not
+      applied). Spans not verifiable against the (repo-absent) PDF are
+      marked source_span_is_paraphrase and flagged for verification.
 
 # =====================================================================
 #  Candidate extensions surfaced by this paper
@@ -48,26 +66,65 @@ candidate_extensions:
       numerically; flagging only the dimension question.
     location_in_this_annotation: "GE-1 (primary discovery)"
 
+  - id: CE-DU3
+    dimension: cross_item_synthesis / translational_scope
+    description: >
+      The paper makes a higher-order, cross-item synthesizing claim —
+      that blockade of the IL-23 signaling pathway would be a rational
+      therapeutic strategy for IBD (p.3) — that references multiple GE
+      items jointly. The schema has no slot for such a meta-assertion.
+      Two framings: (a) add a construct for higher-order claims that
+      reference multiple GeneticEvidence items; (b) treat translational
+      / therapeutic recommendations as out of GEM scope. Per PROTOCOL
+      §3.3 / §5 the gap is logged locally on first sight; the two-papers
+      rule governs promotion only. Replaces the previously invented
+      `meta_assertions` top-level key (former MA-1).
+    location_in_this_annotation: "former MA-1 (retired) and GE-new-1"
+    instances:
+      - source: "former MA-1 (therapeutic-strategy statement)"
+        source_span:
+          page: 3
+          key_phrase: "blockade of the IL-23 signaling pathway would be a rational therapeutic strategy"
+      - source: "GE-new-1 (cited anti-p40 antibody trial, ref 25)"
+
+  - id: CE-DU4
+    dimension: conditional_activation
+    affected_dimensions: [mode_of_inheritance, mendelian_segregation, exact_variant, subdomain]
+    description: >
+      The conditional set {mode_of_inheritance, mendelian_segregation,
+      exact_variant, subdomain} currently activates only for
+      HUMAN_GENETICS + GENE, but is equally relevant for HUMAN_GENETICS
+      + VARIANT — as in GE-3, a family-based transmission test on a
+      specific variant where mode_of_inheritance is genuinely relevant
+      yet the schema does not activate it. Proposed fix: extend
+      activation to HUMAN_GENETICS + (GENE or VARIANT). Two sub-gaps:
+      (a) mode_of_inheritance has no COMPLEX / non-Mendelian value
+      (GE-3 used COMPLEX as a placeholder); (b) subdomain has no
+      family-based value (so the GWAS value previously forced onto
+      GE-3's transmission test was simply wrong).
+    location_in_this_annotation: "GE-3"
+
 # =====================================================================
 #  GeneticEvidence items
 #
 #  Decomposition per natural-claim granularity. Item overview:
-#    GE-1: GWAS discovery in non-Jewish ileal CD cohort
-#    GE-2: Case-control replication in Jewish ileal CD cohort
+#    GE-1: rs11209026 protective in non-Jewish ileal CD discovery cohort
+#    GE-2: rs11209026 protective in Jewish ileal CD replication cohort
 #    GE-3: Family-based transmission disequilibrium (TDT via FBAT)
-#    GE-4: Conditional analysis — multiple independent IL23R signals
+#    GE-4: Multiple independent IL23R signals (conditional/fine-mapping)
 #    GE-5: Negative association at IL12RB1/IL23A/IL12B (pathway genes)
 #    GE-6: Cited mouse-model and functional support (external)
+#    GE-new-1: Cited anti-p40 (IL12B) antibody trial (external, clinical)
 # =====================================================================
 
 evidence:
 
   # --------------------------------------------------------------------
   - id: GE-1
-    label: "GWAS discovery — rs11209026 (Arg381Gln) in IL23R associated with ileal CD"
+    label: "rs11209026 (Arg381Gln) in IL23R confers protection against ileal CD in non-Jewish discovery cohort"
     source: ai_drafted
     knowledge_domain: [POPULATION_GENETICS]
-    method: [STATISTICAL_GENETICS]
+    method: [GWAS]
     target_type: VARIANT
     target: "rs11209026 (c.1142G>A, p.Arg381Gln) in IL23R"
     resolution: VARIANT
@@ -75,14 +132,11 @@ evidence:
     phenotype_scale: CLINICAL
     mode_of_inheritance:
       annotated_as: not_applicable_or_omitted
-      ai_assumption:
-        rationale: >
-          Complex-disease association study; no Mendelian mode applies.
-          The conditional rule (activates for HUMAN_GENETICS + GENE) is
-          not triggered here because target_type is VARIANT and
-          knowledge_domain is POPULATION_GENETICS. Dimension correctly
-          inactive. Recorded for clarity.
-    subdomain: "GWAS"
+      rule_outcome: >
+        The conditional activates for HUMAN_GENETICS + GENE; it is not
+        triggered here (target_type is VARIANT, knowledge_domain is
+        POPULATION_GENETICS). Dimension correctly inactive — recorded as a
+        rule outcome, not an annotator assumption.
     credibility: HIGH
     credibility_comment: >
       Genome-wide significance after Bonferroni correction
@@ -101,16 +155,6 @@ evidence:
         value: "Bonferroni correction across all 308,332 tested SNPs"
       - key: "ancestry_restriction"
         value: "European ancestry, non-Jewish; chosen to minimise population stratification"
-    ai_uncertainty:
-      issue: >
-        The paper's design — GWAS discovery — fits Knowledge Domain =
-        POPULATION_GENETICS straightforwardly. But rs11209026 is a
-        *coding* variant (Arg381Gln), and its functional interpretation
-        in the paper straddles population genetics (the association
-        test) and human genetics (the Mendelian-style reasoning about
-        the protective allele). AI did not add HUMAN_GENETICS to the
-        Knowledge Domain set; human reviewer should confirm whether
-        this is correct scoping.
     candidate_extension_exercised: CE-DU1  # direction of effect
     assertions:
       - id: GE-1.A1
@@ -137,20 +181,21 @@ evidence:
 
   # --------------------------------------------------------------------
   - id: GE-2
-    label: "Case-control replication in Jewish ileal CD cohort"
+    label: "rs11209026 (Arg381Gln) confers protection against ileal CD in Jewish replication cohort"
     source: ai_drafted
     knowledge_domain: [POPULATION_GENETICS]
-    method: [STATISTICAL_GENETICS]
+    method: [ASSOCIATION_STUDY]
     target_type: VARIANT
     target: "rs11209026"
     resolution: VARIANT
     variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
     phenotype_scale: CLINICAL
-    subdomain: "GWAS"
     credibility: HIGH
     credibility_comment: >
       Independent cohort, independent ancestry group, consistent
-      direction of effect. Combined Cochran-Mantel-Haenszel P = 3.55e-11.
+      direction of effect. Targeted replication of IL23R markers (not a
+      fresh genome-wide scan). Combined Cochran-Mantel-Haenszel
+      P = 3.55e-11.
     special_considerations:
       - key: "cohort"
         value: "401 Jewish-ancestry ileal CD cases; 433 Jewish-ancestry controls"
@@ -164,17 +209,20 @@ evidence:
         statement: "rs11209026 association replicates in the Jewish cohort (P = 7.95e-4)"
         source_span:
           page: 2
-          key_phrase: "rs11209026_p_value_Jewish: 7.95e-4"
+          key_phrase: "replication in the Jewish cohort (P = 7.95 x 10-4)"
+          source_span_is_paraphrase: true
         callout: null
         ai_assumption:
           note: >
-            Paper table and inline text both report the same value;
-            combined analysis also reported (P = 3.55e-11 by
-            Cochran-Mantel-Haenszel). Key phrase from paper Table 1.
+            REVIEW 2026-06-04: the original key_phrase was a reconstructed
+            field-style token ("rs11209026_p_value_Jewish: 7.95e-4"), not a
+            literal substring. Replaced with a paraphrase anchor. The value
+            (P = 7.95e-4, Table 1) is correct; the verbatim substring still
+            needs confirmation against the PDF.
       - id: GE-2.A2
         statement: "Direction of effect is preserved across ancestries (Jewish OR = 0.45, 95% CI 0.27-0.73)"
         source_span:
-          page: 3
+          page: 2  # REVIEW 2026-06-04: corrected from page 3 (phrase is in the page-2 protective-allele sentence)
           key_phrase: "Jewish [OR = 0.45, 95% CI (0.27 to 0.73)]"
         callout: null
 
@@ -182,9 +230,8 @@ evidence:
   - id: GE-3
     label: "Family-based transmission disequilibrium — Gln undertransmitted to affected offspring"
     source: ai_drafted
-    knowledge_domain: [HUMAN_GENETICS, POPULATION_GENETICS]
-    candidate_primary_knowledge_domain: HUMAN_GENETICS
-    method: [STATISTICAL_GENETICS, CLINICAL_EVIDENCE]
+    knowledge_domain: [HUMAN_GENETICS]
+    method: [TRANSMISSION_DISEQUILIBRIUM_TEST]
     target_type: VARIANT
     target: "rs11209026"
     resolution: VARIANT
@@ -193,18 +240,19 @@ evidence:
     mode_of_inheritance: COMPLEX
     mendelian_segregation: false
     exact_variant: true
-    subdomain: "GWAS"
     ai_assumption:
       field: mode_of_inheritance
       value_used: COMPLEX
       rationale: >
         The paper does not model Mendelian inheritance but uses
-        transmission disequilibrium to test association. Existing
-        enumeration does not include COMPLEX explicitly (current values
-        are autosomal dominant/recessive, X-linked etc.). Using
-        COMPLEX as placeholder; flag to human reviewer. Candidate
-        extension not raised because mode_of_inheritance already
-        permits extension via curator-defined values per protocol.
+        transmission disequilibrium to test association. The existing
+        enumeration has no COMPLEX / non-Mendelian value; COMPLEX is used
+        as a placeholder. See CE-DU4 (this conditional set is relevant for
+        HUMAN_GENETICS + VARIANT, and the enumeration lacks a COMPLEX
+        value). mode_of_inheritance is KEPT per curator (MOI is relevant
+        for a within-family transmission test), even though the schema
+        does not currently activate the conditional set for a VARIANT
+        target.
       ai_uncertainty: true
     credibility: HIGH
     credibility_comment: >
@@ -231,23 +279,55 @@ evidence:
           page: 2
           key_phrase: "transmitted:non-transmitted = 45:130, P = 1.32e-10 for the IBD phenotype in all 883 families"
         callout: null
+      # REVIEW 2026-06-04: the former compound A2 (four per-phenotype clauses
+      # under a single partial anchor) is split per PROTOCOL §4.4. Table 2,
+      # p.2 carries each per-phenotype P. The verbatim anchor existed only
+      # for the negative Jewish-UC clause (now A5); the positive clauses use
+      # paraphrase anchors pending PDF verification.
       - id: GE-3.A2
-        statement: "Association replicates for CD and UC in non-Jewish families, and for CD in Jewish families, but not for UC in Jewish families"
+        statement: "Gln allele is undertransmitted in non-Jewish CD families"
+        source_span:
+          page: 2
+          key_phrase: "non-Jewish CD families, per-phenotype transmission (Table 2)"
+          source_span_is_paraphrase: true
+        callout: null
+        ai_uncertainty:
+          note: "Per-phenotype span (Table 2, p.2) needs verbatim confirmation against the PDF."
+      - id: GE-3.A3
+        statement: "Gln allele is undertransmitted in non-Jewish UC families"
+        source_span:
+          page: 2
+          key_phrase: "non-Jewish UC families, per-phenotype transmission (Table 2)"
+          source_span_is_paraphrase: true
+        callout: null
+        ai_uncertainty:
+          note: "Per-phenotype span (Table 2, p.2) needs verbatim confirmation against the PDF."
+      - id: GE-3.A4
+        statement: "Gln allele is undertransmitted in Jewish CD families"
+        source_span:
+          page: 2
+          key_phrase: "Jewish CD families, per-phenotype transmission (Table 2)"
+          source_span_is_paraphrase: true
+        callout: null
+        ai_uncertainty:
+          note: "Per-phenotype span (Table 2, p.2) needs verbatim confirmation against the PDF."
+      - id: GE-3.A5
+        statement: "No association of Arg381Gln in Jewish UC families"
         source_span:
           page: 2
           key_phrase: "no evidence for association of Arg381Gln or other IL23R region markers in the Jewish UC families"
         callout: null
         note: >
           Phenotype-stratified negative result within a replication —
-          itself informative. Highlighted here but not raised as a
-          candidate extension.
+          itself informative. Handled as an ordinary predicate of absence
+          (no polarity dimension required; cf. withdrawn CE-DU2).
 
   # --------------------------------------------------------------------
   - id: GE-4
-    label: "Conditional analysis reveals multiple independent IL23R signals"
+    label: "Multiple independent IL23R variants contribute to CD risk by conditional analysis"
     source: ai_drafted
     knowledge_domain: [POPULATION_GENETICS]
-    method: [STATISTICAL_GENETICS]
+    method: [FINE_MAPPING]
     target_type: VARIANT
     target: "rs7517847 (intronic, r^2 = 0.03 with rs11209026)"
     resolution: VARIANT
@@ -271,18 +351,29 @@ evidence:
           rs7517847 has r^2 = 0.03 (independent)
     assertions:
       - id: GE-4.A1
-        statement: "rs7517847 remains significantly associated after conditioning on rs11209026 genotype"
+        statement: >
+          Multiple residual association signals across IL23R indicate
+          multiple independent risk variants in the region; rs7517847 is
+          not in LD with rs11209026 (r^2 = 0.03) and carries the strongest
+          combined signal (P = 3.36e-13)
         source_span:
           page: 3
           key_phrase: "multiple residual association signals throughout IL23R, indicating that there are multiple risk variants in the region"
         callout: null
+        note: >
+          REVIEW 2026-06-04: restated from the prior claim that "rs7517847
+          remains significantly associated after conditioning on rs11209026",
+          which is a per-marker conditional result in table S3 (supplementary,
+          not in the provided PDF). This statement is restricted to what the
+          main text supports (independence-by-LD, strongest combined signal,
+          aggregate multiplicity).
 
   # --------------------------------------------------------------------
   - id: GE-5
     label: "Negative association at IL-23 pathway genes other than IL23R"
     source: ai_drafted
     knowledge_domain: [POPULATION_GENETICS]
-    method: [STATISTICAL_GENETICS]
+    method: [GWAS]
     target_type: GENE
     target: "IL12RB1, IL23A, IL12B (pathway genes)"
     resolution: GENE
@@ -305,13 +396,18 @@ evidence:
           page: 3
           key_phrase: "no evidence for association... with the IL12RB1 gene... or the IL23A and IL12B genes"
         callout: null
+        note: >
+          Negative result represented as an ordinary predicate of absence
+          (clean application of the withdrawn-CE-DU2 rationale). Reviewer
+          noted a stitched/ellipsised key_phrase as a non-blocking fix
+          (accepted as-is per review SR-3).
 
   # --------------------------------------------------------------------
   - id: GE-6
     label: "Cited mouse-model and functional support for IL-23 in colitis"
     source: ai_drafted
     knowledge_domain: [MODEL_ORGANISM, GENE_FUNCTION]
-    method: [IN_VIVO_EXPERIMENT, IN_VITRO_EXPERIMENT]
+    method: [IN_VIVO, IN_VITRO]
     target_type: GENE
     target: "IL-23 pathway"
     resolution: GENE
@@ -326,11 +422,11 @@ evidence:
         the Discussion leverages to motivate IL23R as a therapeutic
         target. There is no model-provided dimension distinguishing
         "evidence produced by this paper" from "evidence cited by this
-        paper." Flagged as ai_uncertainty because extracting cited
-        evidence blurs the boundary of which publication an evidence
-        item belongs to. Human reviewer to decide whether GE-6 belongs
-        in this annotation at all, or should be dropped with a note
-        that citation chains require a separate annotation layer.
+        paper." Resolved in the KEEP direction per PROTOCOL §7 (cited
+        evidence is a separate flagged item). Reviewer flags
+        (GENE_FUNCTION unjustified; IN_VITRO unsupported; evidence_origin
+        should be cited_evidence: true; role-description label; loose
+        target) were accepted as-is (approved_despite_flags), not applied.
     special_considerations:
       - key: "evidence_status"
         value: >
@@ -355,37 +451,63 @@ evidence:
           key_phrase: "transgenic expression of IL-23 subunit p19 results in severe systemic inflammation"
         callout: null
 
-# =====================================================================
-#  Paper-level contextual information — meta-assertions
-# =====================================================================
-meta_assertions:
-  - id: MA-1
-    statement: >
-      The IL23R pathway is a rational therapeutic target in inflammatory
-      bowel disease
-    support: "GE-1 through GE-6 jointly"
-    rationale: >
-      Genetic-evidence association (GE-1-GE-4) + pathway specificity
-      (GE-5) + mechanistic plausibility from cited mouse work (GE-6)
-      together motivate the therapeutic claim. Each GE is individually
-      insufficient; the combination is the paper's central argument.
-    ai_assumption:
-      issue: >
-        Model lacks a structured representation for meta-assertions
-        that combine multiple GeneticEvidence items into a higher-level
-        claim. Current MA-1 is inline. Not raising as candidate
-        extension pending second-paper confirmation.
+  # --------------------------------------------------------------------
+  # Added in the 2026-06-04 review (Phase-1 missing-evidence check).
+  - id: GE-new-1
+    label: "Anti-p40 (IL12B) monoclonal antibody reduces disease activity in a Crohn's disease trial (cited, ref 25)"
+    source: ai_drafted
+    added_in_review: "2026-06-04 (Phase 1)"
+    cited_evidence: true
+    knowledge_domain:
+      annotated_as: not_applicable_or_omitted
+      ai_uncertainty:
+        note: >
+          Cited therapeutic-response (drug-response) evidence with no
+          fitting genetic knowledge_domain. This scope gap is the second
+          independent instance of CE-DU3 (translational/cross-item
+          evidence). knowledge_domain left unresolved by curator decision
+          rather than forced into a genetic domain.
+    method: [CLINICAL_EVIDENCE]
+    target_type: GENE
+    target: "IL12B (p40 subunit)"
+    resolution: GENE
+    phenotype_scale: CLINICAL
+    credibility: HIGH
+    credibility_comment: >
+      Cited clinical-trial evidence (ref 25); credibility inherited from
+      the cited trial. Noted tension: the antibody targets the p40
+      subunit (IL12B gene product) — the same gene GE-5 found genetically
+      UNassociated — yet pharmacological blockade is effective. No genetic
+      association, but the intervention works.
+    candidate_extension_exercised: CE-DU3
+    assertions:
+      - id: GE-new-1.A1
+        statement: "An anti-p40 monoclonal antibody reduced Crohn's disease activity in a clinical trial"
+        source_span:
+          page: 3
+          key_phrase: "anti-p40 (IL-12/IL-23) monoclonal antibody in a Crohn's disease trial (ref 25)"
+          source_span_is_paraphrase: true
+        callout: null
+        ai_uncertainty:
+          note: "p.3 antibody sentence (ref 25); verbatim substring to be confirmed against the PDF."
 
 # =====================================================================
 #  Reviewer flag summary
+#
+#  NOTE: in AI-drafted output these are ANNOTATOR-emitted flags, not
+#  reviewer flags (see review observation O3; renaming deferred as a
+#  protocol improvement). Counts reflect the post-review (2026-06-04)
+#  state of this annotation.
 # =====================================================================
 reviewer_flag_summary:
   ai_uncertainties: 3
-    # GE-1: HUMAN_GENETICS in knowledge_domain scoping
-    # GE-3: mode_of_inheritance = COMPLEX (enumeration question)
+    # GE-3: mode_of_inheritance = COMPLEX (enumeration question; see CE-DU4)
     # GE-6: cited-vs-generated evidence boundary
+    # GE-new-1: no fitting knowledge_domain (see CE-DU3)
+    # (GE-1 HUMAN_GENETICS-scoping uncertainty RESOLVED in review: POPULATION_GENETICS only)
   ai_assumptions: 2
-    # GE-2.A1: key phrase source
-    # GE-3: mode_of_inheritance placeholder
-  candidate_extensions: 1   # CE-DU1 only (CE-DU2 withdrawn — EvidenceAssertion is a predicate, polarity already handled by predicate nature)
+    # GE-2.A1: paraphrase anchor pending verbatim confirmation
+    # GE-3: mode_of_inheritance placeholder (COMPLEX)
+    # (GE-1 mode_of_inheritance demoted from ai_assumption to a rule outcome)
+  candidate_extensions: 3   # CE-DU1, CE-DU3, CE-DU4 (CE-DU2 withdrawn — predicate carries its own polarity)
   promoted_dimensions_applied: 2  # phenotype_scale, variant_ascertainment

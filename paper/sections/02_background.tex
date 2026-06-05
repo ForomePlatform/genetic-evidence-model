@@ -23,45 +23,44 @@ position the model against it here.
 \label{sec:background-fhir}
 
 FHIR is an HL7 information model rather than an OBO Foundry ontology, and a
-genetic-evidence model could in principle be built directly on the OBO side. We
-have reservations about doing so first. The OBO evidence resources ECO and SEPIO supply,
-respectively, an evidence-type vocabulary and a model of assertion provenance
-and qualifiers, but neither supplies the variable and certainty
+genetic-evidence model could in principle be built directly on the OBO side.
+Doing so first would be premature. The OBO evidence resources ECO and SEPIO
+supply, respectively, an evidence-type vocabulary and a model of assertion
+provenance and qualifiers, but neither supplies the variable-and-certainty
 content model of an evidence unit that FHIR Evidence provides and that
-basic-science evidence needs to be applciable bedside. FHIR, on the other hand,
-does not provide a way to assert the applicability of evidence, something that SEPIO does.
+basic-science evidence needs in order to be carried from bench to bedside.
 
-Aligning a genetics-only model directly to OBO,
-before that general content model exists, would yield a narrow resource: one
-that neither composes with other basic-science domains nor reuses OBO's
-orthogonal vocabularies cleanly, which is the redundancy that OBO's own emphasis
-on orthogonality and reuse exists to prevent. We therefore take the structural
-content model from FHIR, generalise it from clinical trials to basic science,
-and align the dimensions to ECO, SEPIO, IAO, and OBI at the term level (initial
-mapping in Supplementary Table~S2). Genetics is the first specialisation;
-broadening to other basic-science domains and completing the OBO term alignment
-are future work for other teams. The proposed sequence is: a general content model first, and
-OBO-aligned specialisation next, is what keeps the eventual resource broad and
-reusable rather than narrow.
+Aligning a genetics-only model directly to OBO, before that general content
+model exists, would yield a narrow resource: one that neither composes with
+other basic-science domains nor reuses OBO's orthogonal vocabularies cleanly,
+the redundancy that OBO's own emphasis on orthogonality and reuse exists to
+prevent. We therefore take the structural content model from FHIR, generalise
+it from clinical trials to basic science, and align the dimensions to ECO,
+SEPIO, IAO, and OBI at the term level (initial mapping in Supplementary
+Table~S2). Genetics is the first specialisation; broadening to other
+basic-science domains and completing the OBO term alignment are future work for
+other teams. Building the general content model first and the OBO-aligned
+specialisation second is what keeps the eventual resource broad and reusable
+rather than narrow.
 
 The HL7 FHIR Evidence, EvidenceVariable, and EvidenceReport
-resources~\cite{fhir_evidence} were designed around systematic-review and guideline-development workflows in
-which evidence concerns an intervention tested in a population. Like the other
-standards above, FHIR Evidence does not represent the evidence produced by basic
-and pre-clinical research at all. Our three core classes address exactly that
-gap. They are a basic-science model, general across the basic sciences rather
-than specific to genetics: they reuse FHIR's separation of variable, statistic,
-and certainty but drop its clinical-trial content frame (population,
-intervention, comparator, outcome). Genetics is the worked specialisation
-developed in this paper (\cref{sec:model}), in which \ScientificEvidence{},
-\EvidenceVariable{}, and \EvidenceAssertion{} specialise to \GeneticEvidence{},
-\GeneticEvidenceVariable{}, and \GeneticEvidenceAssertion{}.
-We keep FHIR's separation of variable, statistic, and certainty, and
-we replace its clinical-trial content frame (population, intervention,
-comparator, outcome) with a vocabulary appropriate to genetic claims.
-\Cref{tab:fhir-alignment} gives the class-level correspondence; the field-level
-alignment, including the certainty subcomponents discussed in
-\cref{sec:model-dimensions}, is in Supplementary Table~S2.
+resources~\cite{fhir_evidence} were designed around systematic-review and
+guideline-development workflows in which evidence concerns an intervention
+tested in a population. Like the other standards above, FHIR Evidence does not
+represent the evidence produced by basic and pre-clinical research at all. Our
+three core classes address exactly that gap. They are a basic-science model,
+general across the basic sciences rather than specific to genetics: they keep
+FHIR's separation of the evidence variable from the certainty of the finding,
+fold FHIR's separate \texttt{statistic} into the variable (the measured value
+is carried on the \EvidenceVariable{}), and drop FHIR's clinical-trial content
+frame (population, intervention, comparator, outcome). Genetics is the worked
+specialisation developed in this paper (\cref{sec:model}), in which
+\ScientificEvidence{}, \EvidenceVariable{}, and \EvidenceAssertion{} specialise
+to \GeneticEvidence{}, \GeneticEvidenceVariable{}, and
+\GeneticEvidenceAssertion{}. \Cref{tab:fhir-alignment} gives the class-level
+correspondence; the field-level alignment, including the certainty
+subcomponents discussed in \cref{sec:model-dimensions}, is in Supplementary
+Table~S2.
 \footnote{Our \EvidenceAssertion{} is a structured, machine-checkable predicate, not the
 FHIR \texttt{Evidence.assertion} element (a human-readable summary).
 Structurally it belongs to the assertion-with-evidence family of the GA4GH VA
@@ -74,7 +73,7 @@ left to future work.}
     \centering
     \caption{Class-level correspondence between the core model and FHIR Evidence
     R5. The alignment is architectural; the genetic dimensional frame replaces
-    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S2.}
+    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S3.}
     \label{tab:fhir-alignment}
     \small
     \begin{tabularx}{\linewidth}{@{}llX@{}}
@@ -92,7 +91,7 @@ This work & FHIR Evidence R5 & Relationship \\
 & Structured predicate; closest analogue is GA4GH VA \texttt{Statement} \\
 Credibility
 & \texttt{Evidence.certainty}
-& Direct adoption: overall rating plus rated subcomponent domains \\
+& Structural parallel: overall rating plus separable, genetics-specific subcomponents (rating anchored on SEPIO confidence, not GRADE) \\
 \bottomrule
     \end{tabularx}
 \end{table}

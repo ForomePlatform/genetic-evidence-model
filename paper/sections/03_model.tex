@@ -93,13 +93,25 @@ described in \cref{sec:model-conditional}. These conditions state the
 situations in which a dimension must be present; outside those
 situations it may be omitted. This makes the requirement status
 transparent to both human curators and automated validators.
-Credibility is an exception in form: unlike the other core dimensions
-it is an open key--value field (\texttt{cohort\_size},
-\texttt{replication\_cohort}, \texttt{multiple\_testing\_correction},
-and so on) rather than a closed enumeration, because clinical and
-research consumers weight credibility features differently and are
-better served by preserving them than by collapsing them to a single
-score.
+Credibility records how far the asserted finding can be trusted as a
+matter of methodological soundness, and nothing else. Rather than an
+open key-value field it is a structured decomposition: one overall
+ordinal rating together with separately rated facets (statistical power
+or sample size, independent replication, multiple-testing control,
+ancestry or population-stratification control, and ascertainment). The
+facets are kept separate, not collapsed to a single score, because
+clinical and research consumers reweight them; we take this
+decomposition principle from GRADE without adopting its clinical-trial
+domains. The overall rating is anchored on SEPIO confidence, the degree
+of belief that the asserted proposition is true~\cite{sepio}, realised
+as a genetics-specific value set bound to that attribute as SEPIO
+profiles prescribe (Supplementary Table~S2). Two things stay out of
+credibility by design: the direction or hedging of a finding is content
+of the assertion, carried in the width of the value range it
+constrains, so an honestly reported null from a rigorous study is
+high-credibility; and how well the evidence bears on a given question
+is applicability, captured by Relevance and Specificity and computed
+per question. Representing the three as one field would conflate them.
 
 \begin{table}[tbp]
 \centering
@@ -118,7 +130,7 @@ Knowledge Domain       & categorical       & multiple & obj.       & \dimval{Hum
 Method                 & categorical       & multiple & obj.       & \dimval{Statistical Genetics}, \dimval{In Vivo}, \dimval{In Vitro}, \dimval{Clinical Evidence} \\
 Target Type            & categorical       & single   & obj.       & \dimval{Gene}, \dimval{Variant}, \dimval{Interval}, \dimval{Transcript} \\
 Resolution             & categorical       & single   & obj.       & \dimval{Window}, \dimval{Gene}, \dimval{Functional Element}, \dimval{Position}, \dimval{Variant} \\
-Credibility            & fuzzy key/value   & multiple & subj.      & \texttt{cohort\_size}, \texttt{replication}, \texttt{correction}, \ldots \\
+Credibility            & rating ${+}$ facets & multiple & subj.      & overall rating ${+}$ \texttt{sample\_size}, \texttt{replication}, \texttt{multiple\_testing}, \texttt{stratification\_control}, \ldots \\
 Phenotype Scale        & categorical       & single   & obj.       & \dimval{Molecular}, \dimval{Cellular}, \dimval{Histological}, \dimval{Organismal}, \dimval{Clinical} \\
 Variant Ascertainment  & categorical       & multiple & obj.       & \dimval{Observed in Cases}, \dimval{Observed in Controls}, \dimval{From Database}, \dimval{Synthetic} \\
 \bottomrule

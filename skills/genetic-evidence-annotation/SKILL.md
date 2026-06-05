@@ -14,9 +14,10 @@ papers under the GEM schema, following the protocol documented in
 This skill produces a single YAML file that annotates one paper
 under the Genetic Evidence Model schema. The output matches the
 format of the existing annotations in the
-`ForomePlatform/genetic-evidence-model` repository (see
-`annotations/duerr2006.yaml` and `annotations/inouye2018.yaml`
-as the canonical autonomous-mode exemplars).
+`ForomePlatform/genetic-evidence-model` repository. The four
+curator-led annotations (Jossin 2017, Davis 2011, Nelson 1992,
+Gupta 2015) are the canonical exemplars: they are the
+ground-truth applications of the schema by a human domain expert.
 
 The skill operates in **autonomous mode only**: a single pass
 that produces a complete annotation without a curator in the
@@ -87,8 +88,13 @@ When invoked, read these files in this order before starting:
 2. `protocols/PROTOCOL_AUTONOMOUS.md` (the autonomous workflow)
 3. `schema/dimensions.md` (the dimension reference)
 4. `schema/genetic_evidence.shacl.ttl` (the formal schema)
-5. At least one prior annotation, ideally `annotations/duerr2006.yaml`
-   or `annotations/inouye2018.yaml` (autonomous exemplars)
+5. The four curator-led annotations as exemplars:
+   `annotations/jossin2017.yaml`, `annotations/davis2011.yaml`,
+   `annotations/nelson1992.yaml`, `annotations/gupta2015.yaml`.
+   These are the ground-truth applications of the schema.
+   Do not use prior AI-drafted annotations as exemplars: they
+   are the same kind of output this skill produces, and using
+   them as templates would propagate any weaknesses they carry.
 6. `schema/EXTENSIONS.md` (to avoid duplicating already-surfaced
    candidate extensions)
 
@@ -154,4 +160,3 @@ If the user picks autonomous, proceed.
   the existing corpus.
 - The companion paper "A Semantic Model of Genetic Evidence"
   (ICBO 2026) for the conceptual background.
-- 

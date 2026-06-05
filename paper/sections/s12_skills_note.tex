@@ -1,0 +1,38 @@
+% =====================================================================
+%  S1 (Supplementary Notes): what an executable skill is.
+%  Fragment \input by supplement.tex under the S1 part. No preamble here.
+% =====================================================================
+\section{Executable skills}
+\label{sec:supp-skills}
+
+Because the term may be unfamiliar to readers outside agent-based AI
+tooling, we describe briefly what we mean by an executable
+\emph{skill}. A skill is a packaged, version-controlled bundle of
+natural-language instructions together with any supporting resources,
+such as reference files, templates, or worked examples, that an AI
+assistant loads on demand to perform a defined task in a repeatable
+way~\cite{anthropic_skills}. It is the executable counterpart of a
+written protocol: where a protocol tells a human reader what a task
+requires, a skill states the same requirements in a form an assistant
+can apply directly. Concretely, a skill is a folder containing a
+top-level instruction file (by convention \texttt{SKILL.md}) that
+describes when the skill applies and how to carry the task out, plus
+the resources the instructions refer to. The assistant reviews the
+skills available to it, loads only the one relevant to the task at
+hand, and follows its instructions, so behaviour is governed by the
+versioned bundle rather than improvised for each session. The general
+mechanism is not specific to one model or vendor, and a cross-vendor
+specification for it is emerging;\footnote{\url{https://agentskills.io}}
+the two skills accompanying this work are implemented as Claude Agent
+Skills.
+
+The annotation skill packages the annotation protocol, and the review
+skill packages the review protocol (\cref{sec:supp-protocol-suite}), so
+that the rules a human curator follows can be applied by an AI
+assistant under curator supervision. Both are published with the
+protocols in the project
+repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/skills}}
+Their purpose here is reproducibility and reuse, not autonomy: as the
+provenance note above records, every AI-drafted annotation and every
+review verdict was adjudicated by the human curator, who remains the
+authority for the recorded annotations.

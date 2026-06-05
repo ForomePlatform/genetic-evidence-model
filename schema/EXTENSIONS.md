@@ -92,7 +92,7 @@ aggregate-score-level evidence. Whether they become first-class
 dimensions or whether polygenic scores warrant a distinct
 `GeneticEvidence` subtype is a question for a second polygenic-score
 annotation. All six are currently exercised via placeholder values
-in `annotations/inouye2018.yaml`.
+in `annotations/v0/inouye2018.yaml`.
 
 #### CE-IN1: `SCORE` value for Target Type
 
@@ -202,6 +202,38 @@ have a named place for.
   `GeneticEvidenceAssertion` with fields `raised_by`, `concern`,
   and `status`.
 
+#### CE-DU3: cross-item / translational synthesis
+
+- **Source paper:** Duerr 2006 (surfaced in the 2026-06-04 curator
+  review, after paper submission).
+- **Triggering evidence:** the paper's central recommendation —
+  "blockade of the IL-23 signaling pathway would be a rational
+  therapeutic strategy for IBD" (p.3) — is a higher-order claim
+  referencing several `GeneticEvidence` items jointly. The original
+  annotation captured it in an invented `meta_assertions` top-level
+  key (MA-1), which is disallowed. Two in-paper instances now exist:
+  the therapeutic-strategy statement (former MA-1) and GE-new-1 (the
+  cited anti-p40 antibody trial). Two instances within one paper do
+  not promote (the two-papers rule requires a second *independent*
+  paper).
+- **Proposal:** either add a construct for higher-order claims that
+  reference multiple `GeneticEvidence` items, or declare
+  translational/therapeutic recommendations out of GEM scope.
+
+#### CE-DU4: conditional-activation gap (HUMAN_GENETICS + VARIANT)
+
+- **Source paper:** Duerr 2006 (surfaced in the 2026-06-04 curator
+  review, after paper submission).
+- **Triggering evidence:** GE-3 is a family-based transmission test on
+  a specific variant (HUMAN_GENETICS + VARIANT) for which
+  `mode_of_inheritance` is genuinely relevant, but the conditional set
+  `{mode_of_inheritance, mendelian_segregation, exact_variant,
+  subdomain}` activates only for HUMAN_GENETICS + GENE.
+- **Proposal:** extend activation to HUMAN_GENETICS + (GENE or
+  VARIANT). Two enumeration sub-gaps: `mode_of_inheritance` has no
+  COMPLEX / non-Mendelian value (GE-3 used COMPLEX as a placeholder),
+  and `subdomain` has no family-based value.
+
 
 ## Withdrawn candidates
 
@@ -224,8 +256,10 @@ polarity field.
 
 - **Promoted to first-class:** 2 (Phenotype Scale, Variant
   Ascertainment).
-- **Candidate, awaiting second-paper confirmation:** 13 (CE-J1,
-  CE-J2, CE-J3, CE-IN1 through CE-IN6, CE-DU1, CE-D1, CE-D2; plus
-  CE-N1 resolved by external reference).
+- **Candidate, awaiting second-paper confirmation:** 15 (CE-J1,
+  CE-J2, CE-J3, CE-IN1 through CE-IN6, CE-DU1, CE-DU3, CE-DU4, CE-D1,
+  CE-D2; plus CE-N1 resolved by external reference). CE-DU3 and CE-DU4
+  were added in the 2026-06-04 Duerr review, after paper submission;
+  the submitted paper states thirteen (see `PAPER_ERRATA.md` E1.3).
 - **Withdrawn after review:** 1 (CE-DU2).
 

@@ -1,0 +1,34 @@
+% =====================================================================
+%  S1 (Supplementary Notes): the annotation and review protocol suite.
+%  Fragment \input by supplement.tex under the S1 part. No preamble here.
+% =====================================================================
+\section{The annotation and review protocol suite}
+\label{sec:supp-protocol-suite}
+
+The annotation workflow described in the main paper has been
+consolidated into a versioned, openly published protocol suite,
+available on GitHub in the project
+repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/protocols}}
+The suite separates the rules of
+annotation from their execution. A mode-agnostic annotation protocol
+(\texttt{PROTOCOL.md}) states what a well-formed annotation requires;
+two mode-specific protocols specialise it for autonomous drafting
+(\texttt{PROTOCOL\_AUTONOMOUS.md}) and for interactive,
+curator-in-the-loop work; and a separate review protocol
+(\texttt{REVIEW\_PROTOCOL.md}, with an interactive variant) governs the
+assertion-by-assertion review of drafted annotations. A
+labelling-examples document records worked cases for the recurring
+judgement calls. The protocols are packaged as two executable skills
+(defined in \cref{sec:supp-skills}), one for annotation and one for
+review, so that the same rules can be applied by a human curator or by
+an AI assistant working under curator supervision.
+
+Two points of provenance are recorded. First, the pilot corpus
+described in the main paper was annotated under an earlier procedure
+(protocol v0); the suite described here is the later formalisation, and
+the pilot annotations remain valid under it. Second, the AI-drafted
+annotations were drafted with Claude Opus 4.7 and reviewed with Claude
+Opus 4.8 under the review skill by an author whose expertise is in
+genomic data curation and the evidence model rather than in human
+or population genetics, with every verdict adjudicated by the curator; the
+curator, not the model, is the authority for the recorded annotations.

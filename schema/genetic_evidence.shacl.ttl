@@ -2,6 +2,7 @@
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix gem:  <https://w3id.org/genetic-evidence-model/> .
 
 # =====================================================================
@@ -37,16 +38,52 @@ gem:EPIGENETICS           a gem:KnowledgeDomain .
 gem:GENE_FUNCTION         a gem:KnowledgeDomain .
 gem:MODEL_ORGANISM        a gem:KnowledgeDomain .
 
-# ---------- enumeration of method values ----------
+# ---------- enumeration of method values (hierarchical) ----------
+#
+# The method dimension is hierarchical; see schema/dimensions.md for the
+# human-readable terms table and `is_a` relations. Each term is declared as
+# an instance of gem:Method so that it satisfies the `sh:class gem:Method`
+# constraint when used as a method value. The OBO-style `is_a` hierarchy is
+# encoded with rdfs:subClassOf (subject is_a object), which lifts directly to
+# OWL when the schema is rendered as an ontology (future work). Terms are thus
+# punned: an instance of gem:Method (for enumeration membership) and a class
+# (for the subsumption hierarchy).
 
-gem:Method                    a rdfs:Class .
-gem:CLINICAL_EVIDENCE         a gem:Method .
-gem:STATISTICAL_GENETICS      a gem:Method .
-gem:BIOINFORMATICS_PREDICTION a gem:Method .
-gem:IN_VIVO_EXPERIMENT        a gem:Method .
-gem:IN_VITRO_EXPERIMENT       a gem:Method .
-gem:POPULATION_DATA           a gem:Method .
-gem:EPIGENETICS_DATA          a gem:Method .
+gem:Method a rdfs:Class .
+
+# top-level families (no parent)
+gem:STATISTICAL_GENETICS     a gem:Method .
+gem:EXPERIMENT               a gem:Method .
+gem:BIOINFORMATICS_INFERENCE a gem:Method .
+gem:CLINICAL_EVIDENCE        a gem:Method .
+
+# STATISTICAL_GENETICS subtree
+gem:ASSOCIATION_STUDY                a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+gem:GWAS                             a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:CANDIDATE_GENE_STUDY             a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:FINE_MAPPING                     a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:FAMILY_BASED                     a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+gem:LINKAGE_ANALYSIS                 a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:TRANSMISSION_DISEQUILIBRIUM_TEST a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:SEGREGATION_ANALYSIS             a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:META_ANALYSIS                    a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+
+# EXPERIMENT subtree
+gem:IN_VIVO   a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+gem:IN_VITRO  a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+gem:IN_SILICO a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+
+# Legacy synonyms, retained so existing annotations validate. Migration to
+# the renamed values is deferred (see notes/ROADMAP.md §1.b and the
+# "Backward compatibility" note in dimensions.md).
+gem:IN_VIVO_EXPERIMENT        a gem:Method ; owl:sameAs gem:IN_VIVO .
+gem:IN_VITRO_EXPERIMENT       a gem:Method ; owl:sameAs gem:IN_VITRO .
+gem:BIOINFORMATICS_PREDICTION a gem:Method ; owl:sameAs gem:BIOINFORMATICS_INFERENCE .
+
+# Removed in this revision (never exercised by any annotation). Their content
+# is recovered in knowledge_domain (POPULATION_GENETICS / EPIGENETICS):
+#   gem:POPULATION_DATA   a gem:Method .
+#   gem:EPIGENETICS_DATA  a gem:Method .
 
 # ---------- enumeration of target-type values ----------
 
@@ -177,21 +214,25 @@ gem:ModeOfInheritanceConditionalShape
 
 # ---------- conditional-activation rule: organism ----------
 #
-# Organism is required when method contains IN_VIVO_EXPERIMENT OR
-# knowledge_domain contains MODEL_ORGANISM. Demonstrates the
-# disjunctive (OR-joined) activation shape and cross-axis activation
-# (Method OR Knowledge Domain).
+# Organism is required when method contains IN_VIVO (or its legacy synonym
+# IN_VIVO_EXPERIMENT) OR knowledge_domain contains MODEL_ORGANISM.
+# Demonstrates the disjunctive (OR-joined) activation shape and cross-axis
+# activation (Method OR Knowledge Domain). Both the renamed and legacy method
+# values are matched explicitly, since owl:sameAs is not materialised without
+# a reasoner.
 
 gem:OrganismConditionalShape
   a sh:NodeShape ;
   sh:targetClass gem:GeneticEvidence ;
   sh:sparql [
-    sh:message "When method contains IN_VIVO_EXPERIMENT or knowledge_domain contains MODEL_ORGANISM, organism is required." ;
+    sh:message "When method contains IN_VIVO (or legacy IN_VIVO_EXPERIMENT) or knowledge_domain contains MODEL_ORGANISM, organism is required." ;
     sh:prefixes gem: ;
     sh:select """
       PREFIX gem: <https://w3id.org/genetic-evidence-model/>
       SELECT $this
       WHERE {
+        { $this gem:method gem:IN_VIVO . }
+        UNION
         { $this gem:method gem:IN_VIVO_EXPERIMENT . }
         UNION
         { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }

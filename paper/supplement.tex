@@ -9,6 +9,7 @@
 \usepackage[numbers,sort&compress]{natbib}   % load BEFORE preamble (hyperref order)
 \usepackage[margin=1in]{geometry}
 \input{preamble}                              % shared macros + tabularx/booktabs/cleveref/listings
+\usepackage{float}                            % [H] placement so supplement tables stay under their part heading
 \microtypesetup{expansion=false}              % protrusion only; expansion needs scalable fonts not guaranteed under article
 
 \title{Supplementary Material:\\[2pt]
@@ -16,23 +17,31 @@ A Semantic Model of Genetic Evidence}
 \author{Michael Bouzinier \and Dmitry Etin}
 \date{}
 
+\renewcommand{\thetable}{S\arabic{table}}   % supplement tables are S1, S2, ...
+
 \begin{document}
     \maketitle
+    \setcounter{tocdepth}{2}   % list parts, sections, and subsections (every appendix paper)
     \tableofcontents
-    \bigskip
 
+    \clearpage
     \part*{S1.\quad Supplementary Notes}
     \addcontentsline{toc}{part}{S1.\quad Supplementary Notes}
     \input{sections/s02_background}
+    \input{sections/s11_protocol_suite}
+    \input{sections/s12_skills_note}
 
+    % Hard break so the S2 tables stay under their own part and do not
+    % float forward into the S3 Appendices.
+    \clearpage
     \part*{S2.\quad Supplementary Tables}
     \addcontentsline{toc}{part}{S2.\quad Supplementary Tables}
     \input{sections/supplement_tables}
 
+    \clearpage
     \part*{S3.\quad Appendices}
     \addcontentsline{toc}{part}{S3.\quad Appendices}
-% Existing supplement content (SHACL schema, annotation YAMLs, case reports)
-% goes here, e.g.:  \input{sections/s3_appendices}
+    \input{sections/s3_appendices}
 
     \bibliographystyle{plainnat}
     \bibliography{references}

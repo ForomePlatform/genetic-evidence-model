@@ -51,10 +51,14 @@ The AI assistant requires:
    `schema/genetic_evidence.shacl.ttl`.
 3. **Exemplar annotations.** At least one prior annotation in the
    repository's `annotations/` directory, used to ground the AI's
-   sense of corpus conventions. More is better. The four manual
-   annotations (Jossin, Davis, Nelson, Gupta) are the canonical
-   exemplars; the two existing AI-drafted annotations (Duerr,
-   Inouye) are secondary exemplars.
+   sense of corpus conventions. The four curator-led annotations
+   (Jossin 2017, Davis 2011, Nelson 1992, Gupta 2015) are the
+   canonical exemplars: they are the ground-truth applications of
+   the schema by a human domain expert. Existing AI-drafted
+   annotations should not be used as exemplars when producing
+   further AI-drafted annotations, because using past output of
+   this protocol as a template for new output would propagate any
+   weaknesses it carries.
 
 Optionally:
 
@@ -178,8 +182,8 @@ annotation without it is incomplete.
 ## 4. Output
 
 The output is a single YAML file matching the structure of the
-existing annotations in `annotations/` (see Duerr and Inouye as
-reference). The file should be placed at
+existing annotations in `annotations/` (see the four curator-led
+annotations: Jossin, Davis, Nelson, Gupta). The file should be placed at
 `annotations/<paper-id>.yaml` where `<paper-id>` follows the
 existing convention (lowercase first-author surname + year, e.g.,
 `smith2024`).
@@ -243,4 +247,4 @@ attempting).
   is gathered upfront (see the skill specification).
 - It does not consume or emit `reviewer_*` flags. Those belong to
   the (future) interactive and review protocols.
-- 
+-

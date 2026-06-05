@@ -16,36 +16,16 @@
 To demonstrate the model's coverage and to see where it strains, we
 applied it to six published genetic-evidence papers that span the
 major epistemic shapes encountered in literature-based variant
-interpretation (\cref{tab:corpus}). Four of the six were annotated
+interpretation (Supplementary Table~S1). Four of the six were annotated
 manually from curator PDF highlights and callouts and are treated as
 ground truth. The remaining two were drafted by an AI assistant
 working from the PDF text alone, with curator review serving as the
 evaluation signal. All six annotations are available in the project
 repository; here we discuss two in detail.
 
-\begin{table}[tbp]
-\centering
-\caption{The six annotated publications and the epistemic shape each
-exercises. Manual annotations are treated as ground truth; AI-drafted
-annotations are evaluated against curator review. GE abbreviates
-\GeneticEvidence{}; the ``GE items'' column counts how many evidence
-items each paper yields under our claim-level decomposition.}
-
-\label{tab:corpus}
-\small
-\begin{tabularx}{\linewidth}{@{}lllllX@{}}
-\toprule
-Paper & Source & GE items & Credibility & Role & Notes \\
-\midrule
-Jossin 2017 (Llgl1)   & manual       & 6 & Very high & molecular mechanism           & multi-scale phenotype; motivates \emph{phenotype\_scale} \\
-Davis 2011 (TTC21B)   & manual       & 6 & High      & breadth exemplar              & motivates \emph{variant\_ascertainment} \\
-Nelson 1992 (CD18)    & manual       & 3 & Medium    & classical molecular genetics  & single-gene functional; no extensions surfaced \\
-Gupta 2015 (ATP6AP2)  & manual       & 2 & Low       & low-credibility edge case     & schema fits cleanly \\
-Duerr 2006 (IL23R)    & AI-drafted   & 6 & High      & clean GWAS exemplar           & featured below \\
-Inouye 2018 (metaGRS) & AI-drafted   & 5 & High/Med  & model-extension stress test   & featured below \\
-\bottomrule
-\end{tabularx}
-\end{table}
+% The six-paper corpus table was moved to the supplement to keep the
+% main paper within the page limit; see Supplementary Table~S1
+% (paper/sections/supplement_tables.tex).
 
 Duerr et al.\ 2006 (\cref{sec:ex-duerr}) serves as our reference
 example of a classical variant-level association study. Inouye et
@@ -73,18 +53,22 @@ variant-level claim grounded in population-genetic methodology, with
 explicit cohort descriptors, a multiple-testing adjustment, and
 external replication.
 
-Our annotation decomposes the paper into six \GeneticEvidence{} items
-covering, respectively, the GWAS discovery, the Jewish-cohort
-replication, the family-based transmission analysis, a conditional
-analysis showing that the IL23R signal comprises more than one
-independent variant, a negative result at three related IL-23 pathway
-genes, and cited mouse-model evidence supporting a therapeutic
-rationale. All six items fit the schema as it stands; only one
-candidate extension emerged, a direction-of-effect dimension
-distinguishing protective from risk-conferring alleles. In line with
-our two-papers rule (\cref{sec:workflow}), this extension remains
-provisional until it is exercised by at least one additional
-publication.
+Our annotation decomposes the paper into seven \GeneticEvidence{} items:
+the GWAS discovery, the Jewish-cohort replication, the family-based
+transmission analysis, a conditional analysis showing that the IL23R
+signal comprises more than one independent variant, a negative result
+at three related IL-23 pathway genes, cited mouse-model evidence
+supporting a therapeutic rationale, and a cited anti-p40 antibody trial
+added during curator review. Six of the seven fit the schema as it
+stands; the seventh, the antibody trial, is drug-response evidence with
+no fitting genetic knowledge domain. Curator review surfaced three
+candidate extensions: a direction-of-effect dimension distinguishing
+protective from risk-conferring alleles, a construct for the paper's
+cross-item translational synthesis, and a widening of the
+conditional-activation scope to cover variant-level Mendelian context.
+In line with our two-papers rule (\cref{sec:workflow}), these
+extensions remain provisional until exercised by at least one
+additional publication.
 
 The Duerr annotation also illustrates two methodological points.
 First, \texttt{variant\_ascertainment} was promoted to the core

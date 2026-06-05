@@ -43,7 +43,12 @@ Annotations are authored in two tracks.
 
 \paragraph{Manual track.}
 Four of the six publications (Jossin, Davis, Nelson, Gupta) were
-annotated manually. A curator read each paper and marked relevant
+annotated manually by Vladimir Seplyarskiy, a researcher in human and
+population genetics specialising in human germline mutation and
+mutational processes (Assistant Professor at UT~Southwestern; formerly
+Harvard Medical School and Brigham and Women's Hospital). This
+expertise covers the human-genetics and population-genetics knowledge
+domains the corpus exercises. The curator read each paper and marked relevant
 PDF passages as highlights and callouts. A provided script extracted
 these into a structured JSON record. The curator's summary table of
 dimension values and passage-level callouts was then converted into
@@ -57,14 +62,22 @@ recorded inline as a \texttt{normalization\_note} with
 \paragraph{AI-drafted track.}
 For two publications (Duerr, Inouye) the annotation was drafted
 directly by an AI assistant\footnote{Claude Opus 4.7 Adaptive.}
-working from the PDF text. The AI was given the schema
+working from the PDF text. Both the drafting and the subsequent
+review were carried out under executable \emph{skills}~\cite{anthropic_skills},
+versioned bundles that package the annotation and review protocols for
+an AI assistant to apply (Supplementary Note~S1). The AI was given the schema
 (\texttt{dimensions.md}), the ground-truth annotations of the four
 manual papers, and the PDFs themselves, and produced YAML
 annotations in the same format. When the AI judged that a mapping
 was uncertain or that a judgement call ought to be verified by a
-human reviewer, it recorded the uncertainty inline. The curator
-then reviewed each AI-drafted annotation assertion-by-assertion,
-flagging any that misrepresented the paper or misused the schema.
+human reviewer, it recorded the uncertainty inline. These AI-drafted annotations were then reviewed
+assertion-by-assertion by one of the authors, whose expertise is in
+genomic data curation and the evidence model rather than in genetics
+domain science, working with Claude Opus 4.8; the review checked
+faithful representation of the source and conformance to the schema,
+flagging any assertion that misrepresented the paper or misused the
+model, and did not re-adjudicate the underlying science, for which
+the manual annotations provide the domain-expert ground truth.
 
 \paragraph{Source anchoring.}
 In both tracks, every \GeneticEvidenceAssertion{} carries a
@@ -74,7 +87,7 @@ phrase is chosen to be long enough for a reader to locate the
 passage by search and short enough to stay within fair-use norms
 for copyrighted publisher material. Source anchoring is not
 optional: an annotation without source spans is rejected at
-validation time. Across the six-paper pilot, 65 of 65 assertions
+validation time. Across the six-paper pilot, 69 of 69 assertions
 (100\%) are source-anchored; this is by construction, not by
 observation.
 
@@ -82,11 +95,11 @@ observation.
 \Cref{tab:coverage} reports, for each dimension, how many
 \GeneticEvidence{} items it is populated in and how many items it
 is applicable to under the activation conditions. For
-always-required dimensions applicability is all 28 items.
+always-required dimensions applicability is all 29 items.
 
 \begin{table}[htbp]
 \centering
-\caption{Dimension population across 28 \GeneticEvidence{} items
+\caption{Dimension population across 29 \GeneticEvidence{} items
 from six papers.}
 
 \label{tab:coverage}
@@ -98,34 +111,40 @@ from six papers.}
 Dimension            & Populated & Applicable &
 Dimension            & Populated & Applicable \\
 \midrule
-Knowledge Domain     & 28        & 28         &
-Mode of Inheritance  & 0         & 1          \\
-Method               & 28        & 28         &
-Mendelian Segregation& 0         & 1          \\
-Target Type          & 28        & 28         &
+Knowledge Domain     & 28        & 29         &
+Mode of Inheritance  & 1         & 0          \\
+Method               & 29        & 29         &
+Mendelian Segregation& 1         & 0          \\
+Target Type          & 29        & 29         &
 Penetrance           & 2         & 4          \\
-Resolution           & 28        & 28         &
+Resolution           & 29        & 29         &
 Measurement Target   & 10        & 11         \\
-Credibility          & 28        & 28         &
+Credibility          & 29        & 29         &
 Gene Relation        & 1         & 11         \\
-Phenotype Scale      & 28        & 28         &
-Organism             & 7         & 8          \\
+Phenotype Scale      & 29        & 29         &
+Organism             & 8         & 8          \\
 Variant Ascertainment& 21        & 21         &
 Knockout Type        & 1         & 6          \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The always-required dimensions are 28/28 by construction. The
+The always-required dimensions are 29/29 by construction, with one
+exception: Knowledge Domain is 28/29, because the cited anti-p40
+antibody trial is drug-response evidence with no fitting genetic
+knowledge domain, a scope gap (\cref{sec:discussion}). The
 conditional dimensions vary: well-calibrated ones (Measurement
-Target 10/11, Organism 7/8) fire the activation condition in the
-items that actually populate them; under-populated ones reveal
-either boundary cases (Mode of Inheritance 0/1 in Duerr's
-complex-trait TDT analysis) or enumeration gaps (Gene Relation
-1/11, because ten of the eleven \dimval{Gene Function} items
-involve physical binding or trafficking, which is the gap
-candidate extension CE-J3 proposes to fill;
-\cref{sec:discussion}). Per-paper counts, per-cell rationale, and
+Target 10/11, Organism 8/8) fire the activation condition in the
+items that actually populate them; others reveal activation or
+enumeration gaps. Mode of Inheritance and Mendelian Segregation are
+populated on Duerr's family-based variant-level item but are not
+activated by the current rule (which fires only for
+\mbox{\dimval{Human Genetics}~$+$~\dimval{Gene}}), the gap that
+motivates extending activation to variant targets
+(\cref{sec:discussion}); Gene Relation is 1/11, because ten of the
+eleven \dimval{Gene Function} items involve physical binding or
+trafficking, the gap candidate extension CE-J3 proposes to fill
+(\cref{sec:discussion}). Per-paper counts, per-cell rationale, and
 the raw computation are in the
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/coverage.md}}
 Coverage alone does not say whether the annotations are
@@ -188,7 +207,7 @@ first proposed in Jossin and then exercised in Davis, Nelson, and
 later papers; and \emph{Variant Ascertainment}, first proposed in
 Davis and then exercised in Nelson, Duerr, and Inouye. Both now appear in the core
 dimensions (\cref{tab:dimensions-core}), the latter conditional on
-\mbox{\dimval{Target Type}~=~\dimval{Variant}}. Thirteen other
+\mbox{\dimval{Target Type}~=~\dimval{Variant}}. Fifteen other
 candidates remain unpromoted, pending either a second encounter or
 an explicit curator decision. The rule also blocks false positives.
 In Duerr, AI initially proposed a new dimension for negative-polarity

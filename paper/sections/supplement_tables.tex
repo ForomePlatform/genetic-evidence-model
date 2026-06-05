@@ -6,33 +6,60 @@
 %  unchanged here on purpose — those are the pending content edits.
 % =====================================================================
 
-\begin{table}[tbp]
+\begin{table}[H]
     \centering
-    \caption{Controlled credibility-facet vocabulary, with GRADE-domain and FHIR
-    \texttt{Evidence.certainty} correspondences. GRADE was developed for clinical
-    intervention evidence; correspondences here are by analogy and specialisation,
-        not identity. Facets without a core-GRADE downgrading domain (for example effect
-        magnitude) correspond to GRADE's upgrading domains for observational evidence.}
-    \label{tab:credibility-facets}
+    \caption{The six annotated publications and the epistemic shape each
+    exercises. Manual annotations are treated as ground truth; AI-drafted
+    annotations are evaluated against curator review. GE abbreviates
+    \GeneticEvidence{}; the ``GE items'' column counts how many evidence
+    items each paper yields under our claim-level decomposition.}
+    \label{tab:corpus}
     \small
-    \begin{tabularx}{\linewidth}{@{}lXl@{}}
+    \begin{tabularx}{\linewidth}{@{}lllllX@{}}
 \toprule
-Facet & Aspect of trust recorded & GRADE-style domain \\
+Paper & Source & GE items & Credibility & Role & Notes \\
 \midrule
-\texttt{sample\_size}             & Size of cohort, pedigree, or sample                       & Imprecision \\
-\texttt{cohort\_composition}      & Case/control makeup and ascertainment                     & Risk of bias \\
-\texttt{multiple\_testing}        & Whether and how multiplicity was controlled               & Risk of bias \\
-\texttt{stratification\_control}  & Ancestry restriction or matching against confounding      & Risk of bias / Indirectness \\
-\texttt{replication}              & Independent replication or internal resampling            & (In)consistency \\
-\texttt{effect\_magnitude}        & Size of the reported effect (OR, HR, and so on)           & Large effect (upgrade) \\
-\texttt{phenotype\_concordance}   & Fit of the studied phenotype to the clinical question     & Indirectness \\
-\texttt{confounding\_control}     & Accounting for genetic background or residual confounding & Plausible confounding (upgrade) \\
+Jossin 2017 (Llgl1)   & manual       & 6 & Very high & molecular mechanism           & multi-scale phenotype; motivates \emph{phenotype\_scale} \\
+Davis 2011 (TTC21B)   & manual       & 6 & High      & breadth exemplar              & motivates \emph{variant\_ascertainment} \\
+Nelson 1992 (CD18)    & manual       & 3 & Medium    & classical molecular genetics  & single-gene functional; no extensions surfaced \\
+Gupta 2015 (ATP6AP2)  & manual       & 2 & Low       & low-credibility edge case     & schema fits cleanly \\
+Duerr 2006 (IL23R)    & AI-drafted   & 7 & High      & clean GWAS exemplar           & featured in the main text \\
+Inouye 2018 (metaGRS) & AI-drafted   & 5 & High/Med  & model-extension stress test   & featured in the main text \\
 \bottomrule
     \end{tabularx}
 \end{table}
 
 
-\begin{table}[tbp]
+\begin{table}[H]
+    \centering
+    \caption{Credibility facets in the \GeneticEvidence{} model.
+    Credibility records methodological soundness only; each facet is
+    rated separately rather than collapsed to one score, and the facets
+    are registered as genetics-specific subcomponents anchored on SEPIO
+    confidence, not as GRADE domains. The overall rating's levels are
+    analogous in spirit to ClinGen gene-disease validity
+    classifications~\cite{clingen2018}, which however aggregate per
+    gene-disease relationship rather than per assertion. Effect
+    magnitude is not a credibility facet: it is a measured value carried
+    on the \GeneticEvidenceVariable{}. Phenotype fit to a clinical
+    question is applicability, captured by Relevance and Specificity.}
+    \label{tab:credibility-facets}
+    \small
+    \begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Facet & Aspect of methodological soundness recorded \\
+\midrule
+\texttt{sample\_size}            & Size of cohort, pedigree, or sample (statistical power) \\
+\texttt{ascertainment}           & Case/control makeup and selection of the studied sample \\
+\texttt{multiple\_testing}       & Whether and how multiplicity was controlled \\
+\texttt{stratification\_control} & Ancestry restriction or matching, and residual-confounding control \\
+\texttt{replication}             & Independent replication or internal resampling \\
+\bottomrule
+    \end{tabularx}
+\end{table}
+
+
+\begin{table}[H]
     \centering
     \caption{Field-level alignment of the core model to FHIR Evidence R5. The certainty rows expand the Credibility entry of the class-level alignment table in the main paper.}
     \label{tab:fhir-fields}

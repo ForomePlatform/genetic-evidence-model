@@ -1,0 +1,511 @@
+# =====================================================================
+#  Review log — Duerr et al. 2006, "A Genome-Wide Association Study
+#  Identifies IL23R as an Inflammatory Bowel Disease Gene"
+#  (Science 314:1461-1463)
+#
+#  Reviewed annotation: v0/duerr2006.yaml  (AI-drafted; production protocol v0)
+#  Review conducted under REVIEW_PROTOCOL v1.0, interactive mode.
+#
+#  This log is the authoritative review artefact. The companion markdown
+#  report (duerr2006-review-2026-06-04.md) is derived from it.
+# =====================================================================
+
+reviewed_annotation: "v0/duerr2006.yaml"
+reviewed_annotation_id: "PMID:17068223"
+reviewed_annotation_doi: "10.1126/science.1135245"
+annotation_production_protocol: "0"   # predates PROTOCOL_AUTONOMOUS v1.0 (see O1/O2/O4/O5)
+reviewer: "Claude (Opus 4.8) — AI reviewer"
+curator: "Michael"                    # interactive review; all verdicts are curator decisions
+review_mode: interactive
+reviewed_at: "2026-06-04T00:00:00Z"
+protocol_version: "1.0"               # REVIEW_PROTOCOL.md version
+incomplete: false
+
+# ---------------------------------------------------------------------
+#  Session-level rulings (set by the curator; govern the whole review)
+# ---------------------------------------------------------------------
+session_rulings:
+  - id: SR-1
+    topic: "knowledge_domain assignment"
+    ruling: >
+      HUMAN_GENETICS is reserved for family/inheritance-based evidence;
+      POPULATION_GENETICS for allele-frequency / GWAS evidence. Under this
+      principle the case-control and GWAS items (GE-1, GE-2, GE-4, GE-5) are
+      POPULATION_GENETICS and the family-based transmission item (GE-3) is
+      HUMAN_GENETICS.
+    note: >
+      This tightens the dimensions.md gloss for HUMAN_GENETICS, which
+      currently lists "case-control" explicitly. Recommend a doc note on the
+      gloss. The ruling itself stands for this review.
+  - id: SR-2
+    topic: "source-span length (PROTOCOL §4.2)"
+    ruling: >
+      The 15-word span limit is treated as SOFT for this review; 16-word
+      phrases are acceptable. Relaxes length only — not the verbatim-substring
+      or contiguity requirements.
+    pre_cleared: [GE-1.A3, GE-3.A2, GE-4.A1]
+  - id: SR-3
+    topic: "source-span defects (O6)"
+    ruling: >
+      Span defects are acceptable for this review EXCEPT the GE-2.A2 page
+      error. Clears GE-2.A1 (non-verbatim token), GE-3.A1 (notation drift),
+      and GE-5.A1 (stitched ellipses). GE-4.A1 is out of scope here: it is an
+      unsupported-claim issue, not a span defect.
+  - id: SR-4
+    topic: "protocol-version baseline"
+    ruling: >
+      The annotation is recorded as produced under protocol v0. Rules added
+      in v1.0 — confidence_summary, the full provenance block, the
+      hierarchical method dimension, and conditional-activation strictness —
+      are not charged against it as defects. They survive only as forward
+      notes and non-blocking suggestions.
+
+# ---------------------------------------------------------------------
+#  Per-item verdicts (7 items: 6 existing + 1 added in Phase 1)
+# ---------------------------------------------------------------------
+verdicts:
+
+  - ge_item: GE-1
+    decision: marked_for_edit
+    flags_recorded:
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          Label asserts "associated with"; the paper's finding is that the Gln
+          allele is PROTECTIVE (OR 0.26). Restate as protection.
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Drop the "GWAS discovery —" study-type prefix (meta-label per
+          LABELING_EXAMPLES.md). Suggested label: "rs11209026 (Arg381Gln) in
+          IL23R confers protection against ileal CD in non-Jewish discovery
+          cohort."
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          knowledge_domain resolved to [POPULATION_GENETICS]; do NOT add
+          HUMAN_GENETICS (curator: "it is statgen"). Resolves the annotator's
+          ai_uncertainty on this dimension. Per SR-1.
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Remove subdomain: GWAS — its conditional activates only for
+          HUMAN_GENETICS + GENE, which does not hold here.
+      - type: reviewer_suggestion
+        level: structural
+        note: >
+          The mode_of_inheritance not-applicable block is flagged ai_assumption
+          where §6.2 would make it a rule-outcome (ai_uncertainty or no flag);
+          the dimension is correctly inactive.
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: "method STATISTICAL_GENETICS -> GWAS (genome-wide hypothesis-free scan)."
+    notes: >
+      Spans verify (A1 p.1, A2 p.2 verbatim; A3 16 words, pre-cleared by SR-2).
+      Evidentially strong; CE-DU1 correctly exercised and de-duplicated. Edits
+      are label + knowledge_domain + subdomain + flag correction; migration is
+      non-blocking and applied by the separate edit workflow.
+
+  - ge_item: GE-2
+    decision: marked_for_edit
+    flags_recorded:
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Label ("Case-control replication in Jewish ileal CD cohort") names
+          neither variant nor claim (forward-reference pattern). Suggested:
+          "rs11209026 (Arg381Gln) confers protection against ileal CD in Jewish
+          replication cohort."
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: >
+          method STATISTICAL_GENETICS -> ASSOCIATION_STUDY (targeted replication
+          of IL23R markers, not a fresh genome-wide scan). Diverges from
+          ROADMAP §1.b (which expected GWAS); that roadmap row references a
+          "GE-8" absent from this file and is keyed to a finer decomposition.
+          Curator endorsed ASSOCIATION_STUDY.
+      - type: reviewer_suggestion
+        level: consistency
+        note: "Remove subdomain: GWAS (inactive conditional, as GE-1)."
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          GE-2.A2 cites page 3; the phrase "Jewish [OR = 0.45, 95% CI (0.27 to
+          0.73)]" is in the protective-allele sentence on page 2. Correct to
+          page 2. (Curator confirmed.)
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          GE-2.A1 key_phrase "rs11209026_p_value_Jewish: 7.95e-4" is a
+          reconstructed field-style token, not a literal substring (value is
+          correct, Table 1). Replace with a verbatim anchor. Carried inside the
+          edit. NOTE: also cleared as a span defect by SR-3, so non-blocking;
+          retained as a recommended fix.
+    notes: >
+      Both assertions faithfully state the paper (replication P = 7.95e-4;
+      protective direction preserved, OR 0.45). Combined CMH (P = 3.55e-11)
+      lives in the credibility comment — acceptable under the lumper rule.
+
+  - ge_item: GE-3
+    decision: marked_for_edit
+    flags_recorded:
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          knowledge_domain -> [HUMAN_GENETICS]; drop POPULATION_GENETICS
+          (curator: "human genetics, not popgen"). Per SR-1. Removing
+          POPULATION_GENETICS also moots candidate_primary_knowledge_domain
+          (ad-hoc field exercising EXTENSIONS.md CE-D1); remove it with the
+          domain unless POPULATION_GENETICS is retained as secondary.
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          Drop CLINICAL_EVIDENCE from method -> [STATISTICAL_GENETICS]. The
+          evidence is generated by the FBAT transmission test (family-based
+          statistical genetics); the offspring phenotyping is clinical but that
+          is true of every item and none other carries CLINICAL_EVIDENCE.
+          (Curator agreed.)
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          A2 is a compound four-clause assertion under a single partial anchor
+          (only the negative Jewish-UC clause is anchored). Split into
+          separately-anchored sub-assertions (Table 2, p.2 carries each
+          per-phenotype P). Per §4.4. (Curator agreed.)
+      - type: reviewer_query
+        level: evidential
+        note: >
+          exact_variant: true is arguable given GE-4's finding of multiple
+          independent signals at the locus; revisit during the edit.
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Remove subdomain: GWAS — inactive conditional, and the subdomain enum
+          has no family-based value, so GWAS is simply the wrong value for a
+          transmission test (feeds CE-DU4).
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: >
+          method STATISTICAL_GENETICS -> TRANSMISSION_DISEQUILIBRIUM_TEST
+          (FBAT named in special_considerations).
+    notes: >
+      mode_of_inheritance / mendelian_segregation / exact_variant are KEPT per
+      curator ("MOI is relevant"). This REVERSES the reviewer's initial
+      recommendation to drop them. The defect is that this conditional set
+      activates only for HUMAN_GENETICS + GENE, not + VARIANT — a protocol gap,
+      logged as CE-DU4, not an annotation error. A1 has a notation/hyphen drift
+      ("non-transmitted"/"1.32e-10" vs paper); acceptable per SR-3, align if
+      convenient. GE-1 and GE-3 now diverge on MOI by principle (N/A on GE-1 as
+      it is not human genetics; relevant-but-schema-blocked on GE-3).
+
+  - ge_item: GE-4
+    decision: marked_for_edit
+    flags_recorded:
+      - type: reviewer_disagreement
+        level: evidential
+        note: >
+          A1 claim "rs7517847 remains significantly associated after
+          conditioning on rs11209026" is not stated in the main text — the
+          per-marker conditional result is in table S3 (supplementary, not in
+          the provided PDF). The main text supports independence-by-LD
+          (r^2 = 0.03), strongest combined signal (P = 3.36e-13), and the
+          aggregate multiplicity claim. Restate A1 to what the main text
+          carries, or anchor an rs7517847-specific conditional assertion to
+          table S3. (Upgraded from reviewer_query; supersedes it. Curator
+          confirmed the claim is not directly in the paper.)
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Label "Conditional analysis reveals…" leads with method
+          (thematic-summary pattern). Claim-first form, e.g. "Multiple
+          independent IL23R variants contribute to CD risk by conditional
+          analysis."
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: "method STATISTICAL_GENETICS -> FINE_MAPPING (within-locus conditional/LD-aware analysis)."
+    notes: >
+      Structurally the cleanest statistical item (all required dimensions
+      present, no spurious subdomain). A1 phrase is 16 words, pre-cleared by
+      SR-2 on length; the edit is about the claim's support, not its span.
+
+  - ge_item: GE-5
+    decision: approved_despite_flags
+    flags_recorded:
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          A1 key_phrase is stitched across non-contiguous fragments with "..."
+          (would violate §4.4). Accepted per SR-3. A clean contiguous substring
+          exists ("no evidence for association in our non-Jewish, ileal CD
+          case-control cohort") with the statement carrying the gene list;
+          recorded as a non-blocking fix.
+      - type: reviewer_suggestion
+        level: consistency
+        note: "subdomain: GWAS is an inactive conditional; non-blocking removal suggestion."
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: >
+          method STATISTICAL_GENETICS -> GWAS (negative result read off the same
+          genome-wide scan). Open: ASSOCIATION_STUDY if the pathway-gene look
+          (table S4) is read as targeted rather than read off the scan.
+      - type: reviewer_suggestion
+        level: structural
+        note: >
+          variant_ascertainment is populated but not required for a GENE target
+          and near-vacuous on a gene-level negative result; candidate to drop.
+      - type: reviewer_note
+        level: evidential
+        note: >
+          POSITIVE: the negative result is represented as an ordinary predicate
+          asserting absence, with no spurious polarity/negation dimension — a
+          clean application of the withdrawn-CE-DU2 rationale in EXTENSIONS.md.
+    notes: >
+      Verdict reverted from marked_for_edit to approved_despite_flags after SR-3
+      cleared the stitched span, which had been the sole blocking basis. All
+      flags retained as noted-but-accepted. POPULATION_GENETICS is correct here
+      per SR-1 (frequency comparison), so mode_of_inheritance correctly does not
+      activate.
+
+  - ge_item: GE-6
+    decision: approved_despite_flags
+    flags_recorded:
+      - type: reviewer_disagreement
+        level: consistency
+        note: >
+          knowledge_domain includes GENE_FUNCTION, which activates
+          measurement_target + gene_relation (both unpopulated); the cited
+          evidence is organismal disease-model work, not molecular assays.
+          Would drop to [MODEL_ORGANISM]. Accepted as-is by curator.
+      - type: reviewer_query
+        level: consistency
+        note: >
+          IN_VITRO_EXPERIMENT is unsupported by the assertions (A1, A2 and refs
+          13-15, 18 are all in vivo). Would drop to [IN_VIVO_EXPERIMENT].
+          Accepted as-is.
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          evidence_origin: cited_prior_literature should be the §7-prescribed
+          cited_evidence: true (machine-consumable alongside GE-new-1).
+          Accepted as-is.
+      - type: reviewer_suggestion
+        level: consistency
+        note: >
+          Label is a role description (flagged for this item in
+          LABELING_EXAMPLES.md). Claim-first, e.g. "IL-23 is required for murine
+          colitis and p19 overexpression drives intestinal inflammation (cited,
+          refs 13-15, 18)." Accepted as-is.
+      - type: reviewer_query
+        level: consistency
+        note: "target 'IL-23 pathway' under target_type GENE is loose (a pathway/cytokine is not a gene). Accepted as-is."
+      - type: reviewer_suggestion
+        subcategory: migration
+        level: evidential
+        note: "method IN_VIVO_EXPERIMENT -> IN_VIVO (rename per the hierarchy)."
+    notes: >
+      Approved despite flags at curator's discretion. Spans are the cleanest in
+      the file; core cited claims are faithful. The annotator ai_uncertainty
+      ("whether GE-6 belongs at all") is resolved in the KEEP direction per
+      PROTOCOL §7 (cited evidence is a separate flagged item, not dropped). All
+      reviewer flags preserved against the verdict per curator instruction.
+
+  - ge_item: GE-new-1
+    decision: approved
+    added_in_phase: 1
+    flags_recorded:
+      - type: reviewer_query
+        level: consistency
+        note: >
+          Exposes a scope gap: a cited therapeutic-response claim has no method
+          value but CLINICAL_EVIDENCE and arguably no fitting knowledge_domain
+          (drug-response evidence, not genetic evidence). Routed into CE-DU3 as
+          its second independent instance (per curator "approve as proposed").
+      - type: reviewer_note
+        level: evidential
+        note: >
+          Tension worth recording: the antibody targets the p40 subunit (IL12B
+          gene product) — the same gene GE-5 found genetically UNassociated —
+          yet pharmacological blockade works. No genetic association, but the
+          intervention is effective.
+    notes: >
+      Accepted into the queue during the Phase-1 missing-evidence check and
+      approved as proposed. Proposed shape (corrections pre-applied):
+      cited_evidence: true; target "IL12B (p40 subunit)" / GENE;
+      method [CLINICAL_EVIDENCE]; phenotype_scale CLINICAL; A1 anchored to the
+      p.3 antibody sentence. Joins MA-1's support set.
+
+# ---------------------------------------------------------------------
+#  Paper-level observations (not tied to a single GE item)
+# ---------------------------------------------------------------------
+observations:
+
+  - id: MA-1
+    prominence: high
+    flags: [reviewer_disagreement, reviewer_suggestion]
+    disposition: >
+      RETAINED as a meta-assertion per curator decision. A therapeutic-strategy
+      recommendation is not itself genetic evidence (no method, no
+      variant_ascertainment, no natural target_type), so it does not become a
+      GE item. Retained does not mean correct as written — four fixes required.
+    detail:
+      claim_in_paper: >
+        p.3: "blockade of the IL-23 signaling pathway would be a rational
+        therapeutic strategy for IBD."
+      fixes:
+        - "1. No source_span. MA-1 carries no anchor; attach it to the p.3 sentence above (PROTOCOL §4.3)."
+        - "2. Wording drift. MA-1 says 'the IL23R pathway is a rational therapeutic TARGET'; the paper says the IL-23 SIGNALING pathway and a therapeutic STRATEGY. Receptor vs cytokine, target vs intervention. Restate as written."
+        - "3. Invented structure. meta_assertions is a non-schema top-level key; the missing slot for a cross-item synthesizing claim is a schema gap to log as a candidate_extension, not new structure (PROTOCOL §3.3, §5; output spec forbids inventing top-level keys)."
+        - "4. Undercounted candidate. Record CE-DU3 (a construct for a higher-order claim referencing multiple GE items; alt framing: such translational recommendations are out of GEM scope). MA-1's own note withholds the candidate 'pending second-paper confirmation', which misreads the rule — gaps are logged locally on first sight; the two-papers rule governs only PROMOTION (PROTOCOL §5.2)."
+      dependency: "Once GE-new-1 is added, MA-1's support set should include it."
+
+  - id: O1
+    flags: [reviewer_note]
+    note: >
+      confidence_summary is absent. REFRAMED from a defect to a note: it is a
+      v1.0-autonomous requirement (PROTOCOL_AUTONOMOUS §3.7), correctly absent
+      under the annotation's v0 production protocol. Required only if the file
+      is re-run or upgraded under v1.0.
+
+  - id: O2
+    flags: [reviewer_note]
+    note: >
+      provenance lacks mode / protocol_version / exemplars_used and uses
+      annotation_date rather than annotated_at. These are v1.0 conventions,
+      absent-by-design in v0. Forward note only. Corollary: recording even a
+      bare protocol_version on future v0 output would pre-empt the anachronism
+      that produced O1/O2.
+
+  - id: O3
+    flags: [reviewer_suggestion]
+    subcategory: protocol_improvement
+    note: >
+      The annotation's reviewer_flag_summary is mislabeled (in AI-drafted output
+      these are ANNOTATOR flags, not reviewer flags) and its count
+      candidate_extensions: 1 is low — the MA-1 gap was unlogged even before
+      this review, and CE-DU3 and CE-DU4 are now surfaced. Tighten the
+      summary-block naming and the candidate-count convention in the protocol.
+
+  - id: O4
+    flags: [reviewer_note]
+    note: >
+      RETRACTED as a defect. Under v0's flat method enumeration,
+      STATISTICAL_GENETICS across GE-1/GE-2/GE-3 was the correct annotation and
+      §3.5 (silent method-collapse) did not yet exist; there was no collapse to
+      flag. The per-item leaf migrations survive as non-blocking forward
+      suggestions (ROADMAP §1.b). No longer a second-round trigger.
+
+  - id: O5
+    flags: [reviewer_note]
+    note: >
+      REFRAMED to a v0 note (ditto O4): subdomain conditional-activation
+      strictness postdates v0, so its presence is not a v0 defect. The per-item
+      subdomain removals the curator endorsed on GE-1/GE-2/GE-3 survive as
+      curator-chosen cleanups; CE-DU4's subdomain sub-gap (no family-based enum
+      value) survives as a forward candidate.
+
+  - id: O6
+    flags: [reviewer_suggestion]
+    note: >
+      Source-span fidelity is the annotation's weakest area: GE-2.A1
+      non-verbatim, GE-2.A2 wrong page, GE-5.A1 stitched, GE-3.A1 notation
+      drift. Per curator ruling SR-3, all are acceptable EXCEPT the GE-2.A2 page
+      error (retained as a blocking fix under GE-2). GE-4.A1 is explicitly
+      out of scope here — an unsupported-claim issue, not a span defect.
+
+  - id: O-CE
+    flags: [reviewer_note]
+    topic: "candidate-extension ledger after this review"
+    note: >
+      CE-DU1 (direction_of_effect): correctly surfaced and de-duplicated
+      against EXTENSIONS.md; status quo. CE-DU2 (negated-assertion polarity):
+      correctly WITHHELD — GE-5's negative handled as an ordinary predicate; a
+      clean application of the withdrawal rationale. CE-DU3 (NEW): construct for
+      a higher-order/cross-item synthesizing claim, alt framing translational
+      recommendations out of GEM scope; now TWO independent instances (MA-1 and
+      GE-new-1). CE-DU4 (NEW): the conditional set {mode_of_inheritance,
+      mendelian_segregation, exact_variant, subdomain} activates only for
+      HUMAN_GENETICS + GENE but is equally relevant for HUMAN_GENETICS +
+      VARIANT; proposed fix, extend activation to HUMAN_GENETICS + (GENE or
+      VARIANT); sub-gaps (a) mode_of_inheritance has no COMPLEX/non-Mendelian
+      value, (b) subdomain has no family-based value. CE-DU3 and CE-DU4
+      de-duplicate clean against EXTENSIONS.md.
+
+# ---------------------------------------------------------------------
+#  Phase-1 missing-evidence outcomes
+# ---------------------------------------------------------------------
+phase_1_accepted_candidates:
+  - id: GE-new-1
+    description: "Anti-p40 monoclonal antibody efficacy in a Crohn's disease clinical trial (cited, ref 25, p.3)."
+phase_1_rejected_candidates: []
+phase_1_deferred_candidates:
+  - description: >
+      IL-17 / Th17 mechanistic citations (refs 19-24; elevated mucosal IL-17 in
+      CD and UC). Deferred: overlaps GE-6's territory. Resurfaced at session end;
+      left deferred per curator.
+
+# ---------------------------------------------------------------------
+#  Migration suggestions (subcategory: migration; non-blocking)
+#  Recorded for the migration workflow / ROADMAP §1.b; applied separately.
+# ---------------------------------------------------------------------
+migration_suggestions:
+  - ge_item: GE-1
+    from: STATISTICAL_GENETICS
+    to: GWAS
+    rationale: "Genome-wide hypothesis-free discovery scan."
+  - ge_item: GE-2
+    from: STATISTICAL_GENETICS
+    to: ASSOCIATION_STUDY
+    rationale: >
+      Targeted replication of IL23R markers, not a fresh genome-wide scan.
+      Diverges from ROADMAP §1.b (GWAS); curator-endorsed.
+  - ge_item: GE-3
+    from: STATISTICAL_GENETICS
+    to: TRANSMISSION_DISEQUILIBRIUM_TEST
+    rationale: "FBAT transmission test, named in special_considerations."
+  - ge_item: GE-4
+    from: STATISTICAL_GENETICS
+    to: FINE_MAPPING
+    rationale: "Within-locus conditional / LD-aware analysis."
+  - ge_item: GE-5
+    from: STATISTICAL_GENETICS
+    to: GWAS
+    rationale: >
+      Negative result read off the same genome-wide scan. Open: ASSOCIATION_STUDY
+      if table S4 is read as a targeted look.
+  - ge_item: GE-6
+    from: IN_VIVO_EXPERIMENT
+    to: IN_VIVO
+    rationale: "Rename to the leaf value under the method hierarchy."
+
+# ---------------------------------------------------------------------
+#  Recommendations
+# ---------------------------------------------------------------------
+recommendations:
+  second_round_warranted: true
+  rationale: >
+    Two REVIEW_PROTOCOL §7 triggers fire: an item was added during the Phase-1
+    missing-evidence check (GE-new-1), and multiple items were marked for edit
+    (GE-1, GE-2, GE-3, GE-4). The third trigger (cross-cutting method-hierarchy
+    rework) does NOT fire — it was dissolved by the v0 reframing (O4). A second
+    round should re-scrutinise the four edited items and the newly added item
+    under the same workflow.
+  out_of_scope_followups:
+    - "Apply the six leaf-value method migrations (separate edit workflow; ROADMAP §1.b)."
+    - "Curator/schema action on CE-DU3 and CE-DU4 (the review records candidates; it does not change the schema)."
+    - "Doc note tightening the dimensions.md HUMAN_GENETICS gloss per SR-1."
+    - "Protocol improvement per O3 (summary-block naming and candidate counting)."
+
+# ---------------------------------------------------------------------
+#  Verdict tally
+# ---------------------------------------------------------------------
+verdict_summary:
+  total_items: 7
+  approved: 1                 # GE-new-1
+  approved_despite_flags: 2   # GE-5, GE-6
+  marked_for_edit: 4          # GE-1, GE-2, GE-3, GE-4
+  rejected: 0

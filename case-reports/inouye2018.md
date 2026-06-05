@@ -99,7 +99,7 @@ assertions:
 
 The full annotation including GE-1 and GE-3 through GE-5 is in the
 repository at
-[`annotations/inouye2018.yaml`](../annotations/inouye2018.yaml).
+[`annotations/v0/inouye2018.yaml`](../annotations/v0/inouye2018.yaml).
 
 ## Candidate extensions surfaced
 

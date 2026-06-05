@@ -1,0 +1,154 @@
+% =====================================================================
+%  S3 Appendices — FRAGMENT. \input by supplement.tex.
+%
+%  Embeds the machine-checkable artefacts (the SHACL schema and the six
+%  per-paper annotation YAMLs) via \lstinputlisting, so the embedded
+%  content stays in sync with the source files at compile time. This
+%  replaces the former standalone pandoc bundle (build_supplementary.sh),
+%  whose appendix-generation role now lives here.
+%
+%  Paths are relative to paper/ (the supplement.tex directory): the
+%  schema is ../schema/ and the annotations are ../annotations/.
+%
+%  Each appendix entry is added to the table of contents explicitly with
+%  \addcontentsline, so every individual paper appears in the ToC.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+%  Appendix A: SHACL schema
+% ---------------------------------------------------------------------
+\section*{Appendix A:\quad SHACL schema (\texttt{genetic\_evidence.shacl.ttl})}
+\addcontentsline{toc}{section}{Appendix A:\quad SHACL schema}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/genetic_evidence.shacl.ttl}
+
+\medskip
+\noindent The SHACL distribution covers class declarations, dimension
+enumerations, and conditional-activation rules expressed as
+SPARQL-based shapes. Together with the human-readable dimension
+reference in \texttt{schema/dimensions.md} (in the repository), it
+constitutes the complete machine-checkable representation of the model.
+
+\lstinputlisting[basicstyle=\ttfamily\footnotesize]{../schema/genetic_evidence.shacl.ttl}
+
+% ---------------------------------------------------------------------
+%  Appendix B: Annotation YAML files
+% ---------------------------------------------------------------------
+\section*{Appendix B:\quad Annotation YAML files}
+\addcontentsline{toc}{section}{Appendix B:\quad Annotation YAML files}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/annotations}
+
+\medskip
+\noindent The six YAML files below are the per-paper annotations whose
+aggregate counts are reported in section 5.1 (\texttt{tab:coverage})
+and section 5.2 (flag totals) of the paper. Each annotation contains
+the paper's publication metadata, the curator's summary table, the
+\GeneticEvidence{} items with their dimension values and
+source-anchored assertions, the \texttt{candidate\_extensions} block
+listing schema gaps surfaced during annotation, the reviewer flags,
+and an annotator-omitted-dimensions audit log.
+
+The four manual annotations (Jossin, Davis, Nelson, Gupta) were
+authored by Vladimir Seplyarskiy and are treated as ground truth. The
+two AI-drafted annotations (Duerr, Inouye) were produced by Claude
+Opus 4.7 Adaptive working from the schema, the four manual
+annotations, and the source PDFs; they were curator-reviewed
+assertion-by-assertion.
+
+% ---- B.1 Jossin ----
+\subsection*{B.1\quad Jossin et al. 2017 (Llgl1)}
+\addcontentsline{toc}{subsection}{B.1\quad Jossin et al. 2017 (Llgl1)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/jossin2017.yaml}
+
+\medskip
+\noindent Manual annotation. 6 \GeneticEvidence{} items. Multi-scale
+phenotype exemplar. Surfaces three candidate extensions (CE-J1, CE-J2,
+CE-J3) including the gene-relation enumeration gap referenced in
+section 6.1.
+
+\lstinputlisting[language=yaml]{../annotations/jossin2017.yaml}
+
+% ---- B.2 Davis ----
+\subsection*{B.2\quad Davis et al. 2011 (TTC21B)}
+\addcontentsline{toc}{subsection}{B.2\quad Davis et al. 2011 (TTC21B)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/davis2011.yaml}
+
+\medskip
+\noindent Manual annotation. 6 \GeneticEvidence{} items. Breadth
+exemplar combining case-control resequencing, zebrafish in vivo
+complementation, in vitro rescue, and pedigree segregation. The sole
+\texttt{reviewer\_disagreement} in the corpus arises from this paper.
+Surfaces two candidate extensions (CE-D1, CE-D2).
+
+\lstinputlisting[language=yaml]{../annotations/davis2011.yaml}
+
+% ---- B.3 Nelson ----
+\subsection*{B.3\quad Nelson et al. 1992 (CD18)}
+\addcontentsline{toc}{subsection}{B.3\quad Nelson et al. 1992 (CD18)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/nelson1992.yaml}
+
+\medskip
+\noindent Manual annotation. 3 \GeneticEvidence{} items. Classical
+molecular-genetics paper from before HPO, ClinVar, and VEP existed.
+Surfaces one candidate extension (CE-N1) which on review was retired to
+a discussion-section observation about VRS integration.
+
+\lstinputlisting[language=yaml]{../annotations/nelson1992.yaml}
+
+% ---- B.4 Gupta ----
+\subsection*{B.4\quad Gupta et al. 2015 (ATP6AP2)}
+\addcontentsline{toc}{subsection}{B.4\quad Gupta et al. 2015 (ATP6AP2)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/gupta2015.yaml}
+
+\medskip
+\noindent Manual annotation. 2 \GeneticEvidence{} items.
+Low-credibility edge case and the corpus's schema-fits-cleanly
+positive finding. Surfaces no candidate extensions.
+
+\lstinputlisting[language=yaml]{../annotations/gupta2015.yaml}
+
+% ---- B.5 Duerr ----
+\subsection*{B.5\quad Duerr et al. 2006 (IL23R)}
+\addcontentsline{toc}{subsection}{B.5\quad Duerr et al. 2006 (IL23R)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/v0/duerr2006.yaml}
+
+\medskip
+\noindent AI-drafted annotation, curator-reviewed (2026-06-04). 7
+\GeneticEvidence{} items (the six original items plus GE-new-1, a cited
+anti-p40 antibody trial added during the review). Reference example of
+a classical variant-level association study. Three
+\texttt{ai\_uncertainty} flags concentrated on scoping and enumeration
+decisions. Three candidate extensions (CE-DU1, CE-DU3, CE-DU4); an
+earlier candidate (CE-DU2) was retracted on review.
+
+\lstinputlisting[language=yaml]{../annotations/v0/duerr2006.yaml}
+
+% ---- B.6 Inouye ----
+\subsection*{B.6\quad Inouye et al. 2018 (metaGRS)}
+\addcontentsline{toc}{subsection}{B.6\quad Inouye et al. 2018 (metaGRS)}
+
+\noindent\textbf{Authoritative source:}\\
+\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/v0/inouye2018.yaml}
+
+\medskip
+\noindent AI-drafted annotation, curator-reviewed. 5 \GeneticEvidence{}
+items. Polygenic-score model-extension stress test. Surfaces six
+candidate extensions (CE-IN1 through CE-IN6) covering score target
+type, whole-genome aggregate resolution, target composition,
+epidemiological measurement targets, structured cohort descriptors, and
+the natural-vs-derived-artifact distinction.
+
+\lstinputlisting[language=yaml]{../annotations/v0/inouye2018.yaml}

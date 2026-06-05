@@ -79,6 +79,50 @@ proposes the alternative to the curator (in interactive mode).
 **It is easier to retroactively split a GE item than to merge
 two.**
 
+### 2.4 What an item's label should be
+
+Each GE item's `label` field is an **evidential statement**:
+it names the subject of the claim, the claim itself, and the
+relevant qualifier (cohort, condition, scale). A label is not
+a description of the *kind of evidence* the item contains, nor
+a description of the *role* the item plays in the paper.
+
+The label is the answer to "what does this item assert?": not
+"what kind of analysis produced it?" or "what does this item
+do in the paper's argument?"
+
+Good label patterns:
+
+- `"<variant or gene> <verb> <effect> in <cohort or condition>"`
+  e.g., `"rs11209026 (Arg381Gln) in IL23R confers protection
+  against ileal CD in non-Jewish discovery cohort"`
+- `"<protein A> binds <protein B> via <domain>"`
+- `"<gene> conditional knockout produces <phenotype> at <scale>"`
+- `"<variant> shows <pattern> in <study design>"`
+
+Bad label patterns (avoid):
+
+- `"GWAS discovery of <gene>"`: describes the study type, not
+  the claim.
+- `"Confirmation of <X> in <cohort>"`: forward reference; the
+  reader must know what X is before "confirmation" parses, and
+  the *claim* (rather than the act of confirming) should be
+  named.
+- `"Allelic architecture: multiple independent signals"`,
+  a thematic summary rather than a statement.
+- `"<gene> annotation and characterisation"`: describes the
+  item's content abstractly rather than naming the claim.
+
+When an item lumps several related claims (per the lumper rule),
+the label names the strongest or most representative claim,
+with the others appearing as `assertions`. The label is not a
+generalised summary that abstracts away from any specific
+claim.
+
+If no single label captures all the lumped claims clearly,
+this is a signal that the items should be split, not that the
+label should be generalised further.
+
 ---
 
 ## 3. Dimension assignment
@@ -124,6 +168,82 @@ Instead:
 
 Candidate extensions are local to the paper that surfaced them
 until they are promoted (section 5).
+
+### 3.4 Hierarchical dimensions
+
+Some dimensions have a hierarchical structure with parent-child
+relationships rather than a flat enumeration. The `method`
+dimension is the first to receive this treatment (see
+`schema/dimensions.md` for the hierarchy).
+
+When a dimension is hierarchical, the annotator follows these
+rules:
+
+1. **Pick the most specific applicable value.** If the paper
+   supports a leaf value (`GWAS`, `IN_VIVO`, `META_ANALYSIS`),
+   use the leaf. Do not redundantly list ancestors; parent
+   relationships are recoverable from the schema.
+
+2. **Intermediate values are valid when leaf values are not
+   supported.** If the paper says "statistical genetics" without
+   specifying the design, or "experiment" without specifying
+   in-vivo / in-vitro / in-silico, the intermediate value
+   (`STATISTICAL_GENETICS`, `EXPERIMENT`) is the correct
+   annotation. In this case, **emit `ai_uncertainty`** on the
+   dimension to record that the value is intermediate by
+   epistemic necessity, not by oversight.
+
+3. **Multiple values from the same dimension are interpreted
+   as additive, not hierarchical.** If `method: [GWAS,
+   META_ANALYSIS]`, both apply (e.g., a meta-analysis of
+   multiple GWASes). Do not list a leaf and its ancestor
+   together unless both genuinely apply.
+
+4. **For items decomposed by method differences** (see §2.2
+   and §3.5), the new hierarchical structure usually replaces
+   the need for the `ai_uncertainty` / candidate-extension
+   handling described in §3.5. A GWAS discovery cohort
+   (`method: [GWAS]`) and a family-based transmission test
+   (`method: [TRANSMISSION_DISEQUILIBRIUM_TEST]`) now have
+   distinguishable method values without forcing both into
+   `STATISTICAL_GENETICS`. §3.5 still applies when even the
+   leaf values fail to distinguish methodologically distinct
+   items.
+
+### 3.5 When two items share a method enumeration value
+
+Sometimes the decomposition rule (section 2.2) splits two items
+based on differing methods (case-control vs family-based
+transmission test, for example), but the `method` dimension's
+enumeration is too coarse to reflect the distinction at the
+schema level: both items end up with `method:
+[STATISTICAL_GENETICS]`.
+
+This is not a labelling problem; it is a real schema-granularity
+question. When it arises, the annotator must do one of:
+
+1. **Cite the specific design in `credibility_comment`** and
+   proceed. This is the default when the decomposition rule was
+   correctly applied (the items ARE distinct on credibility or
+   target) and the method-dimension collapse is incidental rather
+   than load-bearing.
+
+2. **Emit a `candidate_extension`** proposing finer
+   enumeration values (e.g., distinguishing case-control,
+   family-based, transmission-disequilibrium, conditional, and
+   meta-analytic statistical methods). Do this when the
+   collapse loses information that downstream consumers would
+   plausibly want.
+
+3. **Flag as `ai_uncertainty`** on the `method` dimension if
+   the annotator is unsure whether the collapse is acceptable.
+
+Do not silently assign the same `method` value to multiply
+decomposed items without naming the distinction somewhere in
+the annotation. The decomposition into separate items is a
+claim that they are evidentially distinct; the dimension
+assignment must not contradict that claim by appearing
+identical across items.
 
 ---
 
@@ -229,11 +349,11 @@ curator-emitted flags are out of scope for this document.
 For each annotation choice:
 
 1. **Is the choice fully supported by the paper's text?**
-    - Yes → no flag.
-    - No → continue.
+   - Yes → no flag.
+   - No → continue.
 2. **Was a commitment made (a value assigned)?**
-    - Yes → `ai_assumption`.
-    - No → `ai_uncertainty`.
+   - Yes → `ai_assumption`.
+   - No → `ai_uncertainty`.
 
 The choice between `ai_uncertainty` and `ai_assumption` is
 **not** about confidence per se; it is about commitment. If the
@@ -264,9 +384,10 @@ Both can co-occur on the same dimension if both apply.
   reflecting what the paper claims and how, not the annotator's
   assessment of whether the claims are correct.
 - The annotator does not add citations to other works. If the
-  paper cites another work as evidence (Duerr citing mouse-model
-  work, for example), that becomes a separate GE item in the
-  annotation, flagged as `cited_evidence: true`.
+  paper cites another work as evidence (for example, a clinical
+  paper citing prior mouse-model work to support a therapeutic
+  rationale), that becomes a separate GE item in the annotation,
+  flagged as `cited_evidence: true`.
 
 ---
 
@@ -292,3 +413,4 @@ Editorial changes are minor-version bumps.
 - `annotations/coverage.md`: per-paper dimension and flag counts.
 - `protocols/PROTOCOL_AUTONOMOUS.md`: operational workflow for autonomous mode.
 - `protocols/PROTOCOL_INTERACTIVE.md`: (planned) operational workflow for interactive mode.
+
