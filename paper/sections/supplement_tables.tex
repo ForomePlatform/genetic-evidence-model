@@ -36,7 +36,7 @@ Inouye 2018 (metaGRS) & AI-drafted   & 5 & High/Med  & model-extension stress te
     Credibility records methodological soundness only; each facet is
     rated separately rather than collapsed to one score, and the facets
     are registered as genetics-specific subcomponents anchored on SEPIO
-    confidence, not as GRADE domains. The overall rating's levels are
+    confidence. The overall rating's levels are
     analogous in spirit to ClinGen gene-disease validity
     classifications~\cite{clingen2018}, which however aggregate per
     gene-disease relationship rather than per assertion. Effect
@@ -72,7 +72,7 @@ This work & FHIR Evidence R5 & Note \\
 dimensions                         & \texttt{Evidence.variableDefinition} (roles)   & PICO roles replaced by genetic dimensions \\
 \EvidenceVariable{} definition     & \texttt{EvidenceVariable.characteristic}       & What the variable is and how measured \\
 \EvidenceVariable{} value          & \texttt{Evidence.statistic}                    & The measured quantity itself \\
-Credibility overall rating         & \texttt{Evidence.certainty.rating}             & Coded; maps to GRADE levels and SEPIO confidence \\
+Credibility overall rating         & \texttt{Evidence.certainty.rating}             & Coded ordinal rating anchored on SEPIO confidence \\
 Credibility facet                  & \texttt{Evidence.certainty.\-certaintySubcomponent.type} & Extension to the subcomponent-type value set \\
 facet rating (where graded)        & \texttt{...certaintySubcomponent.rating}       & Per-domain rating \\
 \texttt{source\_span}              & \texttt{Evidence.note} / \texttt{Citation}     & Page plus key phrase for audit \\

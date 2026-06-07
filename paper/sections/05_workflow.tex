@@ -36,10 +36,43 @@ The pilot does show that the workflow's epistemic commitments are
 practical to meet and that the schema's strain points are surfaced
 rather than hidden.
 
+\begin{figure}[tbp]
+  \centering
+  \begin{tikzpicture}[
+      box/.style={draw, rounded corners, align=center, inner sep=3pt,
+                  text width=25mm, minimum height=9mm, font=\footnotesize},
+      arr/.style={-{Latex[length=2mm]}, semithick}]
+    \node[box, fill=black!5] (src) {Source publication (PDF)};
+    \node[box, fill=blue!6, below left=12mm and 22mm of src] (m1) {Curator highlights \& callouts};
+    \node[box, fill=blue!6, below=6mm of m1] (m2) {Structured JSON record};
+    \node[box, fill=blue!6, below=6mm of m2] (m3) {YAML annotation\\(curator ground truth)};
+    \node[box, fill=orange!8, below right=12mm and 22mm of src] (a1) {AI draft\\(annotation skill)};
+    \node[box, fill=orange!8, below=6mm of a1] (a2) {Curator review\\(review skill)};
+    \node[box, fill=orange!8, below=6mm of a2] (a3) {Reviewed YAML annotation};
+    \node[box, fill=black!5] (val) at ($(m3)!0.5!(a3) - (0,1.3cm)$) {SHACL validation\\(conditional activation)};
+    \draw[arr] (src) -- (m1);
+    \draw[arr] (src) -- (a1);
+    \draw[arr] (m1) -- (m2);
+    \draw[arr] (m2) -- (m3);
+    \draw[arr] (a1) -- (a2);
+    \draw[arr] (a2) -- (a3);
+    \draw[arr] (m3) -- (val);
+    \draw[arr] (a3) -- (val);
+  \end{tikzpicture}
+  \caption{The two annotation tracks, kept distinct. Curator-authored
+  annotations (left) are treated as ground truth; AI-drafted annotations
+  (right) are produced under the annotation skill from the PDF, the
+  schema, and the manual annotations as exemplars, then adjudicated
+  assertion-by-assertion under the review skill. Both tracks are checked
+  against the same SHACL shapes, and the curator, not the model, is the
+  authority for every recorded annotation.}
+  \label{fig:workflow}
+\end{figure}
+
 \subsection{Protocol and Coverage}
 \label{sec:workflow-protocol}
 
-Annotations are authored in two tracks.
+Annotations are authored in two tracks (\cref{fig:workflow}).
 
 \paragraph{Manual track.}
 Four of the six publications (Jossin, Davis, Nelson, Gupta) were
@@ -80,8 +113,9 @@ model, and did not re-adjudicate the underlying science, for which
 the manual annotations provide the domain-expert ground truth.
 
 \paragraph{Source anchoring.}
-In both tracks, every \GeneticEvidenceAssertion{} carries a
-\texttt{source\_span} pointing to a specific page and a short key
+In both tracks, every assertion (the \texttt{assertion} property of a
+\GeneticEvidence{} item) carries a \texttt{source\_span} pointing to a
+specific page and a short key
 phrase (typically under 15 words) from the underlying text. The
 phrase is chosen to be long enough for a reader to locate the
 passage by search and short enough to stay within fair-use norms
@@ -196,6 +230,25 @@ uncertainties concentrated on scoping and enumeration decisions.
 Per-paper flag counts are in the coverage file in the
 repository.
 
+\paragraph{AI-drafted track: review outcomes.}
+Both AI-drafted annotations were reviewed assertion by assertion by one
+of the authors against the review protocol, with every correction
+recorded in the public review logs and summarised in Supplementary
+Note~S1. Of the nine AI-drafted items across the two papers, none was
+rejected, one was approved as drafted, three carried only non-blocking
+flags, and five were marked for edit. Two patterns stand out. The draft
+written under the current protocol needed far less correction than the
+earlier one, with two of its three items accepted without edits against
+four of six edited, and all thirty-seven of its cited spans verbatim;
+the two papers differ, so this is suggestive rather than a controlled
+comparison. And in both papers the evidence the reviewer had to add was
+not a granular finding but a higher-level claim, the paper's overall
+thesis in one case and its cited translational evidence in the other,
+which suggests the draft is most reliable on specific, directly stated
+claims. The remaining edits fell in dimension assignment and credibility
+calibration, not in the evidence itself, and no item was found to
+misrepresent its source.
+
 \paragraph{The extension-promotion rule.}
 The workflow adopts a deliberately conservative rule for when a
 candidate extension enters the schema. A gap seen in a single paper
@@ -205,7 +258,7 @@ to a first-class dimension or enumeration value. In the six-paper
 pilot this rule promoted two extensions: \emph{Phenotype Scale},
 first proposed in Jossin and then exercised in Davis, Nelson, and
 later papers; and \emph{Variant Ascertainment}, first proposed in
-Davis and then exercised in Nelson, Duerr, and Inouye. Both now appear in the core
+Davis and then exercised in Nelson and Duerr. Both now appear in the core
 dimensions (\cref{tab:dimensions-core}), the latter conditional on
 \mbox{\dimval{Target Type}~=~\dimval{Variant}}. Fifteen other
 candidates remain unpromoted, pending either a second encounter or
@@ -213,7 +266,7 @@ an explicit curator decision. The rule also blocks false positives.
 In Duerr, AI initially proposed a new dimension for negative-polarity
 assertions (for example, ``no significant association at IL12RB1,
 IL23A, or IL12B''). On review the curator observed that an
-\EvidenceAssertion{} is just a predicate and already supports absence
+assertion is just a predicate and already supports absence
 as well as presence, so no change to the schema was needed and the
 candidate was retracted. Under a looser single-paper rule this would
 have left the model with a redundant polarity field of little

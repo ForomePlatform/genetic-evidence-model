@@ -1,0 +1,200 @@
+reviewed_annotation: annotations/inouye2018.yaml (uploaded autonomous v1.0 draft)
+annotation_production_protocol: '1.0'
+reviewer: Claude Opus 4.8 (interactive review session)
+reviewed_at: '2026-06-06'
+protocol_version: '1.0'
+protocol_version_baseline: 'Annotation produced under PROTOCOL v1.0 (current). All v1.0 rules apply as
+  live rules; there are no post-baseline rules, so no forward-notes. (Note: EXTENSIONS.md/ROADMAP reference
+  a separate v0 Inouye draft expecting a GE-1 -> META_ANALYSIS migration; this v1.0 annotation already
+  carries META_ANALYSIS on GE-1, so that migration is effectively reflected.)'
+session_rulings:
+- id: SR-1
+  topic: Inline candidate-dimension instantiation (strict 2.1.1)
+  ruling: target_nature, target_composition, observed_outcome_measures, and the candidate_extension_*
+    pointer keys are extra (schema-not-defined) keys per REVIEW_PROTOCOL 2.1.1. Strip them from every
+    item and relocate the captured values into special_considerations; the schema gaps remain carried
+    by candidate_extensions (CE-IN3/IN4/IN6). Open-world SHACL would not reject extra keys; the review
+    protocol is the basis.
+  pre_cleared:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+- id: SR-2
+  topic: variant_ascertainment applicability to a score target
+  ruling: 'variant_ascertainment does not cleanly apply to the metaGRS (a score) target. On every item:
+    withdraw FROM_DATABASE, set variant_ascertainment = not_applicable_or_omitted, record constituent-variant
+    sources in special_considerations, and flip F-VA to ai_uncertainty (Protocol 6.2: no value committed).
+    The resulting SHACL unsatisfiability under target_type=VARIANT is recorded as support for CE-IN1.'
+  pre_cleared:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+- id: SR-3
+  topic: Field-name normalization (applied global edit)
+  ruling: 'Curator-approved global rename applied in the updated annotation: item field resolution ->
+    target_resolution (PROTOCOL 3) and source_span key_phrase -> phrase (PROTOCOL 4.1). Non-blocking;
+    systematic across all items.'
+phase_1_missing_evidence:
+  existing_items:
+  - GE-1
+  - GE-2
+  - GE-3
+  curator_observations:
+  - id: OBS-1
+    description: GRS effective for early-life screening/intervention vs conventional factors (germline
+      scores quantifiable at/before birth; genomic screening to complement conventional prediction; ~$50
+      genotyping; high-risk patients benefit most from early therapy).
+    disposition: Empirical/life-course half already covered by GE-1 (A8-A12) and GE-2 (A12-A14). Distinctive
+      translational half is a higher-order cross-item synthesis - the CE-DU3 shape - not a genetic-target
+      assertion; routed to paper-level observation PO-1 plus a CE-DU3 promotion recommendation. Subsumes
+      AI-candidates C3 (cost) and C4 (cited early-therapy benefit).
+  - id: OBS-2
+    description: Combining component GRSs (metaGRS) outperforms individual GRSs and prior published scores.
+    disposition: Accepted as new item GE-new-1 (distinct headline thesis; re-homes GE-1.A2 + benchmark_comparators).
+  ai_candidates:
+  - id: C1
+    description: Competing-risk null result (Aalen-Johansen, p6)
+    disposition: Accepted as GE-1.A13.
+  - id: C2
+    description: No metaGRS x sex interaction (p7)
+    disposition: Accepted as GE-1.A14.
+  - id: C3
+    description: Genomic-screening cost/implementation claim (~$50, p10)
+    disposition: Subsumed into OBS-1 / PO-1 (translational; out of standard GE scope).
+  - id: C4
+    description: Cited statin-benefit rationale (Mega 2015, p9)
+    disposition: Subsumed into OBS-1 / PO-1; too thin to itemize as cited_evidence.
+  deferred: []
+verdicts:
+- ge_item: GE-1
+  decision: marked_for_edit
+  flags_recorded:
+  - flag: reviewer_query
+    subject: variant_ascertainment / target_type circularity
+    note: F-TT justified VARIANT partly to keep VA active - reasoning runs backwards. Resolved by SR-2
+      (VA not-applicable).
+  - flag: reviewer_suggestion
+    subject: A5/A7 augmented-model precision
+    note: AUROC 0.79 and APRC 0.161 are the metaGRS-augmented model (+2.8% over reference), not the score
+      in isolation. Applied.
+  - flag: reviewer_suggestion
+    subject: field-name normalization
+    note: resolution->target_resolution, key_phrase->phrase. Applied via SR-3.
+  notes: 'Edits applied: SR-1 strip+relocate; SR-2 VA not-applicable + F-VA->ai_uncertainty; re-home A2
+    and benchmark_comparators to GE-new-1; add A13 (competing-risk null) and A14 (no sex interaction);
+    clarify A5/A7. Label remains a valid evidential statement post-edit. No migration available (META_ANALYSIS
+    already leaf-level; ASSOCIATION_STUDY intermediate by necessity - no fitting leaf for PGS-to-disease
+    association). Credibility stays HIGH (direct prediction claim, large external set).'
+- ge_item: GE-2
+  decision: approved
+  flags_recorded: []
+  notes: 'Clean. SR-1/SR-2/SR-3 apply via session rulings (not item-specific edits). The C-index-vs-joint
+    sub-split the confidence_summary muses about was considered and judged not required (one honest label
+    covers all 14 assertions). Paper-internal note (not a defect): A1 cites the body C-index 0.615-0.630;
+    the abstract prints 0.615-0.631 - the annotation correctly cites the body to p6.'
+- ge_item: GE-3
+  decision: approved_despite_flags
+  flags_recorded:
+  - flag: reviewer_query
+    subject: GE-2/GE-3 decomposition
+    note: 'Shares method/target/credibility-tier with GE-2; split rests on label-coherence + medicated
+      subpopulation. RESOLVED: keep split - the reverse-causation bound (A6) is a real evidential distinction.'
+  - flag: reviewer_suggestion
+    subject: A3/A4 subgroup clarity
+    note: A3 (2.71) is the lipid-lowering subgroup; A4 (2.83) is the on-either-medication pooled group.
+      Logged, NOT applied.
+  - flag: reviewer_suggestion
+    subject: label phrasing
+    note: '''continues to'' is slightly relative; ''stratifies even among the medicated'' is more self-contained.
+      Logged, NOT applied.'
+  notes: Split kept. Reverse-causation handling (A6 reflected in credibility_comment, not the tier) is
+    correct. Suggestions recorded but not applied (approved rather than edited).
+- ge_item: GE-new-1
+  decision: marked_for_edit
+  flags_recorded:
+  - flag: reviewer_query
+    subject: A3/A4 redundancy
+    note: A3 and A4 arguably state one superiority claim twice (abstract + discussion). Offered to merge;
+      both kept.
+  notes: 'Added per OBS-2 (Phase 1). credibility HIGH -> MEDIUM (curator-set): empirical comparison is
+    fair (components/priors re-computed in the same UKB set) but the paper gives no mechanistic account
+    of WHY combining helps - possible overfitting (3,000-person weighting subset) or contamination. F-CRED
+    dropped from this item''s flag list (MEDIUM is a review-time judgment, not the annotator''s HIGH rationale).
+    Method [META_ANALYSIS, ASSOCIATION_STUDY], primary_method META_ANALYSIS. The MEDIUM-vs-HIGH gap now
+    independently justifies the split from GE-1 on a canonical (credibility) dimension, not just label-coherence.
+    A3 re-homed from GE-1.A2.'
+observations:
+- id: PO-1
+  level: evidential
+  scope: paper
+  observation: OBS-1 translational/early-screening synthesis recorded as a paper-level item, not a GE
+    item (no genetic-target->phenotype assertion). It is an independent SECOND occurrence of CE-DU3 (cross-item/translational
+    synthesis; first occurrence Duerr 2006), so promotion-eligible under the two-papers rule. CE-DU3 is
+    already logged in EXTENSIONS.md (no logging prerequisite).
+  verdict: approved (observation + promotion recommendation)
+- id: PO-2
+  level: consistency
+  scope: paper
+  observation: 'Consequence of SR-2: EXTENSIONS.md credits this paper toward variant_ascertainment''s
+    promotion (Davis/Nelson/Duerr/Inouye). If Inouye no longer cleanly exercises VA, that basis may rest
+    on three papers, not four. The reviewer does not edit EXTENSIONS.md or reopen promotions - logged
+    for the sync workflow.'
+  verdict: approved (observation for sync workflow)
+- id: PO-3
+  level: evidential
+  scope: paper
+  observation: 'The curator''s MEDIUM-credibility rationale on GE-new-1 (no mechanism -> possible overfitting/contamination)
+    is the kind of methodological critique CE-D2 (curator_critique sub-block; first occurrence Davis 2011)
+    was proposed for. Possible SECOND occurrence (Davis + Inouye). CAVEAT: Davis''s was annotator-side
+    at the assertion level; this is reviewer-side at the item level and is partly already housed in credibility_comment
+    - so ''same gap'' is a judgment call.'
+  verdict: approved (promotion recommendation, candidate_with_caveat; curator may downgrade to observation-only)
+- id: OBS-RENAME
+  level: structural
+  scope: paper
+  observation: Field-name normalization (resolution->target_resolution; key_phrase->phrase) applied globally
+    per SR-3.
+  verdict: applied
+- id: OBS-CEIN1
+  level: structural
+  scope: paper
+  observation: CE-IN1 description enriched with the SHACL-unsatisfiability finding (under target_type=VARIANT,
+    VA cannot be satisfied either way; only target_type=SCORE dissolves it).
+  verdict: applied
+- id: OBS-PR-SWEEP
+  level: consistency
+  scope: paper
+  observation: CE-IN1..CE-IN6 are all single_paper_gap in EXTENSIONS.md with no second occurrence; none
+    promotes.
+  verdict: noted
+migration_suggestions: []
+migration_note: No migration suggestions. GE-1 already carries META_ANALYSIS (the expected v0->leaf migration);
+  ASSOCIATION_STUDY on GE-1/GE-2/GE-3/GE-new-1 is intermediate by epistemic necessity - none of its leaves
+  (GWAS, CANDIDATE_GENE_STUDY, FINE_MAPPING) fits polygenic-score-to-disease association testing - so
+  there is no leaf to migrate to (correctly flagged ai_uncertainty via F-METH).
+promotion_recommendations:
+- candidate: CE-DU3
+  status: eligible
+  basis: Duerr 2006 + Inouye 2018 (independent second paper)
+  note: Reviewer records only; applying the promotion (edits to dimensions.md, SHACL, EXTENSIONS.md) is
+    a separate workflow.
+- candidate: CE-D2
+  status: candidate_with_caveat
+  basis: Davis 2011 + Inouye 2018
+  note: Same-gap is a judgment call (annotator-side assertion-level vs reviewer-side item-level; partly
+    housed in credibility_comment). Curator may treat as eligible or downgrade to observation-only.
+recommendations:
+  second_round_warranted: true
+  rationale: A new item (GE-new-1) was added in Phase 1 and needs the same per-item scrutiny as pre-existing
+    content, and two items carry marked_for_edit verdicts (GE-1, GE-new-1), so the edited annotation differs
+    substantially from the source. A second round over the edited GE-1 and the new GE-new-1 is recommended.
+caveats:
+- This bundle ships no corpus annotations, so two-papers promotion checks ran against EXTENSIONS.md only.
+  The two findings (CE-DU3, CE-D2) have their second occurrence within this paper / recorded corpus, so
+  corpus access does not change them.
+- Structural checks are best-effort; no formal SHACL validation was run (SKILL/REVIEW_PROTOCOL 7).
+- 'Downstream artefacts (per-paper case report, annotations/coverage.md, paper counts/PAPER_ERRATA) are
+  not reconciled here: the new item count and the VA promotion-basis note (PO-2) go to the relevant sync
+  workflow.'

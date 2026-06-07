@@ -24,28 +24,42 @@ Three abstract classes anchor the model:
 
 \begin{description}
   \item[\ScientificEvidence] A unit of evidence, typically linked to a
-        publication or dataset and described by a set of dimensions (see
-        \cref{tab:dimensions-core,tab:dimensions-cond}). A single paper may
+        publication or dataset, described by a set of dimensions (see
+        \cref{tab:dimensions-core,tab:dimensions-cond}) and carrying an
+        \texttt{assertion} property: the object-level, source-anchored
+        claims a paper makes about it (that a variant is associated with
+        a phenotype, and so on), which are what the pilot of
+        \cref{sec:workflow} records. A single paper may
         give rise to multiple \ScientificEvidence{} items when it reports
         distinct evidential claims, for example a case--control association
         and an in vivo functional assay for the same variant.
   \item[\EvidenceVariable] A named quantity extracted from one or more
       \ScientificEvidence{} items, for example the gnomAD allele
       frequency of a variant, the LOD score in a family, or the odds
-      ratio reported by a GWAS. Evidence variables are also annotated by
+      ratio reported by a GWAS. They are the terms from which predicates
+      over Evidence are constructed. Evidence variables are also annotated by
       dimensions, because the same quantity (for example, an odds ratio)
       may carry different epistemic weight depending on how it was
       obtained.
-  \item[\EvidenceAssertion] A predicate over one or more
-      \EvidenceVariable{} instances, intended to be machine-checkable
-      and composable in decision workflows. Assertions may be positive
-      or negative: they may state that a variant is associated with a
-      phenotype, that it is \emph{not} associated, that its effect
-      exceeds a threshold, and so on. The model does not restrict the
-      syntactic form of the predicate; it only requires that every
-      assertion be anchored to a specific source span in the underlying
-      publication so that its provenance is auditable.
+  \item[\EvidenceAssertion] A meta-predicate, a predicate about a
+      predicate, that ascertains that \EvidenceVariable{}s are used
+      appropriately in a predicate constructed over Evidence, that is,
+      in a decision rule. It is the model's point of contact with the
+      reasoning layer of~\cite{our_preprint},
+      where such meta-predicates assert which evidence a rule may use.
+      This paper constructs no decision rules and therefore instantiates
+      no \EvidenceAssertion{}: the class is part of the model, and of
+      the reasoning layer that the venue's interpretability and
+      AI-readiness focus concerns, but it is out of scope for the
+      present pilot.
 \end{description}
+
+The \texttt{assertion} property and the \EvidenceAssertion{} class share
+a name but denote different things: the property holds the object-level
+claims the pilot records, whereas the class is the meta-predicate above
+any decision rule that would consume them. We keep the property name for
+continuity with the released annotations and will rename it (for example
+to \texttt{selector}) in a future schema revision.
 
 Specialising these three classes to the genetic domain yields
 \GeneticEvidence, \GeneticEvidenceVariable, and
@@ -71,6 +85,19 @@ fully specified without them. Together these dimensions tell a
 downstream reader \emph{what kind} of evidence this is, \emph{how} it
 was obtained, \emph{what} it is about, and \emph{how} credible it is
 in context.
+
+The dimensions differ in internal structure, and we model each by its
+own nature rather than forcing one hierarchy on all of them. Knowledge
+Domain values are sibling methodological framings, not a subsumption
+hierarchy: a single item may carry several at once (a functional study
+read in a clinical-genetics context), which the multi-valued
+cardinality captures directly. Phenotype Scale is an ordinal
+granularity (molecular through clinical), not a class hierarchy, and
+modelling it as subsumption would misrepresent it. Where a dimension
+genuinely is hierarchical, Method is, its \texttt{is\_a} relations are
+encoded as such in the SHACL distribution and lift to OWL subsumption
+when the schema is later axiomatised. The choice of structure is thus
+part of each dimension's definition.
 
 Two additional dimensions, Phenotype Scale and Variant Ascertainment,
 were added to the core set during the annotation work described in
@@ -101,11 +128,14 @@ or sample size, independent replication, multiple-testing control,
 ancestry or population-stratification control, and ascertainment). The
 facets are kept separate, not collapsed to a single score, because
 clinical and research consumers reweight them; we take this
-decomposition principle from GRADE without adopting its clinical-trial
-domains. The overall rating is anchored on SEPIO confidence, the degree
+decomposition principle from the Grading of Recommendations
+Assessment, Development and Evaluation (GRADE) framework~\cite{grade2008},
+which is anchored in clinical-trial and observational studies and does
+not transfer easily to evidence from the basic sciences. The overall
+rating is anchored on SEPIO confidence, the degree
 of belief that the asserted proposition is true~\cite{sepio}, realised
 as a genetics-specific value set bound to that attribute as SEPIO
-profiles prescribe (Supplementary Table~S2). Two things stay out of
+profiles prescribe (Supplementary Table~S3). Two things stay out of
 credibility by design: the direction or hedging of a finding is content
 of the assertion, carried in the width of the value range it
 constrains, so an honestly reported null from a rigorous study is
@@ -184,6 +214,12 @@ the outer NodeShape wrapper for space. The full shapes, together
 with the base \texttt{GeneticEvidenceShape} and the simpler
 \texttt{variant\_ascertainment} conditional rule, are distributed
 with annotated walkthrough in the project repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
+
+Checking activation conditions this way is a closed-world question,
+whether an annotation contains every dimension its evidence requires,
+which SHACL answers directly; OWL's open-world semantics cannot express
+such completeness, which is one reason the constraints are encoded in
+SHACL rather than as ontology axioms.
 
 The first example encodes a conjunction over two axes of
 classification: \emph{mode of inheritance} is required when the

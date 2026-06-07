@@ -1,0 +1,757 @@
+# =====================================================================
+#  Inouye et al. 2018 - UPDATED ANNOTATION (post-review 2026-06-06)
+#  Source: annotations/v0?/inouye2018.yaml (autonomous v1.0 draft)
+#  This file is the source annotation with curator-approved review edits
+#  applied (see provenance.review_applied and the review log). It does NOT
+#  overwrite the source; it is the Phase-4 sidecar artefact.
+#  Decorative comments from the source draft were not carried over; all
+#  substantive content is preserved or edited per the review verdicts.
+# =====================================================================
+
+publication:
+  id: DOI:10.1016/j.jacc.2018.07.079
+  doi: 10.1016/j.jacc.2018.07.079
+  pmid: null
+  citation: Inouye M, Abraham G, Nelson CP, et al. J Am Coll Cardiol 2018;72(16):1883-1893
+  title: Genomic Risk Prediction of Coronary Artery Disease in 480,000 Adults
+provenance:
+  mode: autonomous
+  protocol_version: '1.0'
+  annotator: Claude Opus 4.8 (claude-opus-4-8)
+  annotated_at: '2026-06-05T22:02:20Z'
+  exemplars_used:
+  - jossin2017
+  - davis2011
+  - nelson1992
+  - gupta2015
+  scope_note: 'Population-genetics / polygenic-score primary research paper; English; clean machine-readable
+    text. In scope for annotation; no refusal conditions triggered.
+
+    '
+  source_text_note: 'Every assertion source_span was verified as a verbatim substring of the paper text
+    on the cited page before emission, and confirmed to be under 15 words. Typographic ligatures were
+    normalized for readability (fi-ligature -> "fi", "=" rendered from the source''s fraction glyph, "+"
+    from the source''s thorn glyph, en-dash -> "-"). Page numbers are 1-indexed PDF pages.
+
+    '
+  decomposition_note: 'Three GeneticEvidence items. All three concern the same target (the metaGRS) and
+    largely share method and credibility; the split rests on label-coherence (Protocol 2.4 — three distinct
+    headline claims that no single label can honestly cover) and, for GE-3, on a distinct medicated subpopulation.
+    See flag F-DECOMP and the confidence_summary.
+
+    '
+  review_applied:
+    review_log: annotations/reviews/inouye2018-review-2026-06-06.yaml
+    reviewed_at: '2026-06-06'
+    reviewer: Claude Opus 4.8 (interactive review session)
+    protocol_version: '1.0'
+    summary:
+    - 'SR-1 (strict 2.1.1): stripped inline candidate-value keys (target_nature, target_composition, observed_outcome_measures)
+      and candidate_extension_* pointers from all items; relocated captured values into special_considerations.
+      Gaps remain in candidate_extensions.'
+    - 'SR-2: variant_ascertainment marked not_applicable_or_omitted on all items (score target); F-VA
+      -> ai_uncertainty; constituent-variant sources moved to special_considerations.'
+    - 'GE-1 (marked_for_edit): re-homed A2 and benchmark_comparators to GE-new-1; added A13 (competing-risk
+      null) and A14 (no metaGRS x sex interaction); clarified A5/A7 as augmented-model figures.'
+    - 'GE-2, GE-3: approved (GE-3 approved_despite_flags; split kept).'
+    - 'GE-new-1 (Observation 2, marked_for_edit): added; combination-superiority thesis; credibility MEDIUM
+      (curator-set, no mechanistic account of combination gain).'
+    - 'Global field rename: resolution -> target_resolution; source_span key_phrase -> phrase.'
+    - CE-IN1 description enriched with the SHACL-unsatisfiability finding.
+    second_round_warranted: true
+candidate_extensions:
+- id: CE-IN1
+  dimension: target_type_score
+  description: 'The evidential target is a polygenic risk score (metaGRS), which is neither a gene, variant,
+    segment, interval, nor transcript. The current Target type enumeration has no value for a score. Candidate
+    value: SCORE, with subtypes POLYGENIC_SCORE / COMPOSITE_SCORE. Forced here to VARIANT (nearest existing
+    value) with a flag.
+
+    SHACL note (added in 2026-06-06 review): with target_type=VARIANT the variant_ascertainment conditional
+    cannot be satisfied cleanly either way - omitting VA fires the VARIANT->VA conditional shape, while
+    marking VA not_applicable violates sh:class gem:VariantAscertainment. Only target_type=SCORE dissolves
+    this unsatisfiability. This is the sharpest justification for CE-IN1.'
+  location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (target_type)
+  status: single_paper_gap
+- id: CE-IN2
+  dimension: resolution_whole_genome_aggregate
+  description: 'The existing Resolution enumeration (WINDOW | GENE | FUNCTIONAL_ELEMENT | POSITION | VARIANT)
+    presupposes a contiguous or pointwise target. The metaGRS aggregates 1,745,180 variants genome-wide
+    and is neither. Candidate value: WHOLE_GENOME_AGGREGATE. Forced here to VARIANT with a flag.
+
+    '
+  location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (resolution)
+  status: single_paper_gap
+- id: CE-IN3
+  dimension: target_composition
+  description: 'A new orthogonal dimension recording whether the target is a SINGLE element, an AGGREGATE
+    of many elements, or a COMPOSITE of sub-scores. Complementary framing to CE-IN2. The metaGRS is AGGREGATE
+    (and itself COMPOSITE of three component scores).
+
+    '
+  location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (target_composition = AGGREGATE)
+  status: single_paper_gap
+- id: CE-IN4
+  dimension: measurement_target_epidemiological
+  description: 'measurement_target currently activates only for GENE_FUNCTION and is molecular (BINDING,
+    ACTIVITY, LOCALIZATION, EXISTENCE). A population-genetics PGS paper reports epidemiological outcome
+    measures that have no home. Candidate values, activated when knowledge_domain contains POPULATION_GENETICS:
+    HAZARD_RATIO, ODDS_RATIO, C_INDEX, AUROC, CUMULATIVE_INCIDENCE, POSITIVE_PREDICTIVE_VALUE, PRECISION_RECALL_AREA.
+
+    '
+  location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (observed_outcome_measures special_consideration)
+  status: single_paper_gap
+- id: CE-IN5
+  dimension: cohort_structured_subblock
+  description: 'Cohort detail (n_total, n_cases, n_controls, mean_followup, ancestry_pct, age_range, ascertainment_source)
+    currently lives as unstructured credibility/special_consideration text. Candidate: a structured `cohort`
+    sub-block so these are queryable.
+
+    '
+  location_in_this_annotation: GE-1 (cohort special_considerations)
+  status: single_paper_gap
+- id: CE-IN6
+  dimension: target_nature_derived_artifact
+  description: 'The metaGRS is a human-engineered construction, not a naturally occurring genomic entity.
+    Candidate: a `target_nature` (NATURAL | DERIVED) field, or boolean `derived_artifact`, to mark computationally
+    derived targets. Recorded here as target_nature = DERIVED.
+
+    '
+  location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (target_nature)
+  status: single_paper_gap
+flags:
+- id: F-TT
+  type: ai_assumption
+  dimension: target_type
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+  note: 'target_type is required and single-valued, but no enumeration value describes a polygenic score;
+    the nearest existing value VARIANT was assigned and the gap flagged via CE-IN1 (precise value SCORE
+    / POLYGENIC_SCORE). The earlier rationale that VARIANT was chosen to keep variant_ascertainment active
+    is withdrawn under SR-2: VA is now marked not-applicable, and the fact that no target_type value satisfies
+    the schema cleanly (see CE-IN1 SHACL note) is itself the evidence for the SCORE extension.'
+- id: F-RES
+  type: ai_assumption
+  dimension: resolution
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+  note: 'resolution forced to VARIANT (nearest existing value). A polygenic score does not localize signal
+    to a window, position, or single variant; it aggregates genome-wide. The precise value would be WHOLE_GENOME_AGGREGATE
+    (CE-IN2) with target_composition = AGGREGATE (CE-IN3).
+
+    '
+- id: F-METH
+  type: ai_uncertainty
+  dimension: method
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+  note: 'ASSOCIATION_STUDY is recorded at the intermediate level (Protocol 3.4, rule 2): the score''s
+    association with CAD is tested by Cox / logistic regression, which matches none of the leaves (GWAS,
+    CANDIDATE_GENE_STUDY, FINE_MAPPING) — there is no leaf for polygenic-score association testing. META_ANALYSIS
+    is a committed sibling value capturing the score''s construction from multiple GWASes (per dimensions.md,
+    META_ANALYSIS includes PGS construction). The two are siblings under STATISTICAL_GENETICS, so listing
+    both is permitted.
+
+    '
+- id: F-VA
+  type: ai_uncertainty
+  dimension: variant_ascertainment
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+  note: 'SR-2 (curator review): variant_ascertainment does not cleanly apply to a score target. The earlier
+    FROM_DATABASE assignment is withdrawn and the dimension is marked not_applicable_or_omitted on every
+    item. The constituent metaGRS variants entered from prior GWAS summary statistics (CARDIoGRAMplusC4D;
+    Metabochip) and reference panels (1000G/HRC/UK10K), recorded in special_considerations. No value is
+    committed, hence ai_uncertainty (Protocol 6.2). The SHACL unsatisfiability this creates under target_type=VARIANT
+    is recorded as support for CE-IN1.'
+- id: F-CRED
+  type: ai_assumption
+  dimension: credibility
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  note: 'credibility is subjective by design. The HIGH tier reflects the annotator''s holistic reading
+    of the described design — a very large (n=482,629), prospective, external validation with 22,242 CAD
+    cases — tempered by stated limitations (>95% European ancestry; volunteer cohort healthier than the
+    general population; component-score weighting trained in a 3,000-person subset of the same biobank).
+    Per Protocol 7, this reflects how the paper substantiates its claims, not a judgment of whether the
+    claims are ultimately correct. Curator should confirm the tier.
+
+    '
+- id: F-MT
+  type: ai_uncertainty
+  dimension: measurement_target
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  - GE-new-1
+  note: 'measurement_target is left unpopulated because its activation condition (knowledge_domain contains
+    GENE_FUNCTION) is not met. This is a schema gap, not annotator doubt: the paper''s outcome measures
+    (hazard ratio, C-index, AUROC, positive predictive value, precision-recall area, cumulative incidence)
+    are recorded under the observed_outcome_measures special_consideration and flagged via CE-IN4, which
+    proposes activating an epidemiological measurement_target for POPULATION_GENETICS.
+
+    '
+- id: F-DECOMP
+  type: ai_assumption
+  dimension: decomposition
+  applies_to:
+  - GE-1
+  - GE-2
+  - GE-3
+  note: 'The three items share target (metaGRS) and largely share method and credibility, so a strict
+    lumper reading (Protocol 2.1) would permit a single merged item. They were split on label-coherence
+    (Protocol 2.4): "metaGRS predicts and stratifies CAD risk", "metaGRS adds information independent
+    of conventional risk factors", and "metaGRS still stratifies risk among the medicated" are three distinct
+    headline claims no single label covers. GE-3 additionally targets a distinct medicated subpopulation.
+    GE-2 and GE-3 operate on the metaGRS constructed (by META_ANALYSIS) in GE-1; their method is therefore
+    recorded as ASSOCIATION_STUDY only. See decomposition_alternatives_considered.
+
+    '
+evidence:
+- id: GE-1
+  label: metaGRS confers HR 1.71 per SD for CAD and stratifies a 4.17-fold risk gradient across quintiles
+    in UK Biobank
+  source: ai_autonomous
+  knowledge_domain:
+  - POPULATION_GENETICS
+  method:
+  - META_ANALYSIS
+  - ASSOCIATION_STUDY
+  target_type: VARIANT
+  target: metaGRS — a genome-wide polygenic risk score for CAD comprising 1,745,180 variants
+  variant_ascertainment: not_applicable_or_omitted
+  phenotype_scale: CLINICAL
+  credibility: HIGH
+  credibility_comment: 'External validation of a pre-specified score in 482,629 UK Biobank participants
+    (the 3,000 used for weighting were held out), with 22,242 CAD cases; metaGRS shows the largest per-SD
+    association of any externally tested published score and clean monotonic quintile stratification.
+    Tempered by single-ancestry composition (>95% European) and a volunteer cohort healthier than the
+    general population. See flag F-CRED.
+
+    '
+  special_considerations:
+  - key: cohort_total
+    value: 482,629 UK Biobank external-validation participants (further 3,000 held out as a weighting/training
+      set)
+  - key: cohort_cases
+    value: 22,242 CAD cases (9,729 prevalent + 12,513 incident)
+  - key: cohort_controls
+    value: 460,387 noncases
+  - key: mean_followup
+    value: 6.2 years for incident analyses; censoring age 75
+  - key: ancestry_composition
+    value: '>95% European; non-European <5% of UK Biobank'
+  - key: age_range
+    value: UK Biobank recruitment ages ~40-69 years
+  - key: source_GWAS
+    value: metaGRS combines GRS46K (46,000 SNPs, Metabochip study), FDR202, and a genome-wide score, both
+      from CARDIoGRAMplusC4D GWAS
+  - key: score_weighting
+    value: three component scores combined/weighted using a 3,000-person UK Biobank training set
+  - key: heritability_captured
+    value: score variants explain 26.8% of CAD heritability
+  - key: candidate_extension_for_cohort_structure
+    value: CE-IN5 (these cohort facts would populate a structured cohort sub-block)
+  - key: target_nature
+    value: DERIVED
+  - key: target_composition
+    value: AGGREGATE
+  - key: observed_outcome_measures
+    value: HAZARD_RATIO, AUROC, POSITIVE_PREDICTIVE_VALUE, PRECISION_RECALL_AREA, CUMULATIVE_INCIDENCE
+  - key: variant_ascertainment_note
+    value: 'SR-2 (curator review): variant_ascertainment does not cleanly apply to a score target; the
+      constituent metaGRS variants entered from prior GWAS summary statistics (CARDIoGRAMplusC4D; Metabochip)
+      and imputation reference panels (1000G/HRC/UK10K). The resulting SHACL unsatisfiability under target_type=VARIANT
+      is recorded as support for CE-IN1.'
+  flags:
+  - F-TT
+  - F-RES
+  - F-METH
+  - F-VA
+  - F-CRED
+  - F-MT
+  assertions:
+  - id: GE-1.A1
+    statement: The hazard ratio for CAD was 1.71 per SD increase in metaGRS
+    source_span:
+      page: 1
+      phrase: '1.71 (95% confidence interval [CI]: 1.68 to 1.73) per SD increase'
+  - id: GE-1.A3
+    statement: The metaGRS comprises 1,745,180 genetic variants
+    source_span:
+      page: 5
+      phrase: comprising 1,745,180 genetic variants
+  - id: GE-1.A4
+    statement: Those variants together explain 26.8% of CAD heritability
+    source_span:
+      page: 5
+      phrase: explaining 26.8% of CAD heritability
+  - id: GE-1.A5
+    statement: The metaGRS-augmented model (metaGRS plus sex, age, array and 10 PCs) classified CAD cases
+      versus noncases with an AUROC of 0.79, +2.8% over the reference model
+    source_span:
+      page: 5
+      phrase: area under the receiver-operating curve of 0.79
+  - id: GE-1.A6
+    statement: It offered greater positive predictive value at any given sensitivity than the reference
+      model
+    source_span:
+      page: 5
+      phrase: greater positive predictive value at any given sensitivity
+  - id: GE-1.A7
+    statement: The metaGRS-augmented model's precision-recall area exceeded the reference model's (0.161
+      vs 0.123)
+    source_span:
+      page: 5
+      phrase: (0.161 vs. 0.123)
+  - id: GE-1.A8
+    statement: Individuals in the top metaGRS quintile had 4.17-fold higher CAD hazard than the bottom
+      quintile
+    source_span:
+      page: 7
+      phrase: top metaGRS quintile were at 4.17-fold
+  - id: GE-1.A9
+    statement: Top-20% versus bottom-20% hazard ratio was 4.17 (abstract, with CI)
+    source_span:
+      page: 1
+      phrase: 'HR of 4.17 (95% CI: 3.97 to 4.38) compared with those'
+  - id: GE-1.A10
+    statement: Men in the highest metaGRS quintile reached 10% cumulative CAD risk by age 61
+    source_span:
+      page: 6
+      phrase: threshold of 10% cumulative risk by 61 years of age
+  - id: GE-1.A11
+    statement: Women in the highest metaGRS quintile did not reach 10% risk until age 75
+    source_span:
+      page: 7
+      phrase: reached 10% at age 75 years
+  - id: GE-1.A12
+    statement: Women in the lowest metaGRS quintile reached only 2.5% CAD risk by the censoring age of
+      75
+    source_span:
+      page: 7
+      phrase: reaching 2.5% CAD risk
+  - id: GE-1.A13
+    statement: No evidence of competing-risk effects was observed in a 3-state Aalen-Johansen analysis
+    source_span:
+      page: 6
+      phrase: No evidence for competing risk effects was observed
+  - id: GE-1.A14
+    statement: There was no evidence of a statistical interaction of the metaGRS with sex
+    source_span:
+      page: 7
+      phrase: no evidence for a statistical interaction of the metaGRS with sex
+  target_resolution: VARIANT
+- id: GE-2
+  label: metaGRS predicts incident CAD largely independently of, and complementarily to, six conventional
+    risk factors
+  source: ai_autonomous
+  knowledge_domain:
+  - POPULATION_GENETICS
+  method:
+  - ASSOCIATION_STUDY
+  target_type: VARIANT
+  target: metaGRS (assessed relative to, and jointly with, six conventional CAD risk factors)
+  variant_ascertainment: not_applicable_or_omitted
+  phenotype_scale: CLINICAL
+  credibility: HIGH
+  credibility_comment: 'Independence/complementarity analyses were restricted to incident CAD with covariates
+    measured at baseline, mitigating reverse causation. The large external cohort supports the comparison.
+    Same ancestry and volunteer-cohort caveats as GE-1. See flag F-CRED.
+
+    '
+  special_considerations:
+  - key: conventional_factors
+    value: smoking, diabetes, hypertension, body mass index, self-reported high cholesterol, family history
+  - key: analysis_population
+    value: incident CAD only, conventional factors measured at UK Biobank assessment
+  - key: weak_factor_associations
+    value: metaGRS was significantly but weakly associated with the conventional factors (per-SD ORs roughly
+      1.06-1.27)
+  - key: hr_attenuation
+    value: per-SD HR 1.58 unadjusted -> 1.55 adjusting for family history -> 1.48 adjusting for all six
+      factors
+  - key: target_nature
+    value: DERIVED
+  - key: target_composition
+    value: AGGREGATE
+  - key: observed_outcome_measures
+    value: C_INDEX, HAZARD_RATIO, ODDS_RATIO, CUMULATIVE_INCIDENCE
+  - key: variant_ascertainment_note
+    value: 'SR-2 (curator review): variant_ascertainment does not cleanly apply to a score target; the
+      constituent metaGRS variants entered from prior GWAS summary statistics (CARDIoGRAMplusC4D; Metabochip)
+      and imputation reference panels (1000G/HRC/UK10K). The resulting SHACL unsatisfiability under target_type=VARIANT
+      is recorded as support for CE-IN1.'
+  flags:
+  - F-TT
+  - F-RES
+  - F-METH
+  - F-VA
+  - F-CRED
+  - F-MT
+  assertions:
+  - id: GE-2.A1
+    statement: For incident CAD, the metaGRS had a higher C-index than any single conventional risk factor
+    source_span:
+      page: 6
+      phrase: 'higher C-index (C = 0.623; 95% CI: 0.615 to 0.630)'
+  - id: GE-2.A2
+    statement: The best single conventional factor, self-reported high cholesterol, trailed the metaGRS
+    source_span:
+      page: 6
+      phrase: second-best factor being self-reported high cholesterol
+  - id: GE-2.A3
+    statement: Adding the metaGRS to all six conventional factors raised the C-index to 0.696
+    source_span:
+      page: 6
+      phrase: 'C-index of 0.696 (95% CI: 0.688 to 0.703)'
+  - id: GE-2.A4
+    statement: That is a 2.6% increase over the six-conventional-factor model
+    source_span:
+      page: 6
+      phrase: increase of 2.6% over the model
+  - id: GE-2.A5
+    statement: The per-SD metaGRS HR was only modestly attenuated to 1.48 after adjustment for the six
+      factors
+    source_span:
+      page: 6
+      phrase: 'HR: 1.48 per SD'
+  - id: GE-2.A6
+    statement: The metaGRS was only weakly associated with conventional factors such as body mass index
+    source_span:
+      page: 6
+      phrase: significantly but weakly associated with body mass index
+  - id: GE-2.A7
+    statement: Genomic and conventional risk combined additively rather than interactively in most instances
+    source_span:
+      page: 7
+      phrase: this was additive rather than interactive
+  - id: GE-2.A8
+    statement: There was no strong evidence of statistical interaction (e.g. with diabetes)
+    source_span:
+      page: 7
+      phrase: no strong evidence of statistical interactions
+  - id: GE-2.A9
+    statement: The one exception was modest evidence of interaction with log BMI (HR 0.85)
+    source_span:
+      page: 8
+      phrase: 'some evidence for interaction with log BMI (HR: 0.85;'
+  - id: GE-2.A10
+    statement: The discussion concludes metaGRS predictive ability is largely independent of established
+      CAD risk factors
+    source_span:
+      page: 9
+      phrase: largely independent of established risk factors for CAD
+  - id: GE-2.A11
+    statement: Genetic information thus complements rather than replaces conventional risk factors
+    source_span:
+      page: 9
+      phrase: complements (rather than replaces) conventional risk factors
+  - id: GE-2.A12
+    statement: Men in the top metaGRS quintile with no conventional factors still reached 10% cumulative
+      CAD incidence by 69
+    source_span:
+      page: 8
+      phrase: still reached 10% cumulative incidence of CAD by age 69 years
+  - id: GE-2.A13
+    statement: Men in the top metaGRS quintile with three or more conventional factors reached 10% by
+      age 48
+    source_span:
+      page: 8
+      phrase: reaching the 10% threshold by age 48 years
+  - id: GE-2.A14
+    statement: About 79% of women did not reach 10% CAD risk before age 75, even with two conventional
+      factors
+    source_span:
+      page: 8
+      phrase: Approximately 79% of women did not reach 10% CAD risk before age 75
+  target_resolution: VARIANT
+- id: GE-3
+  label: metaGRS continues to stratify CAD risk among individuals already on lipid-lowering and/or antihypertensive
+    medication
+  source: ai_autonomous
+  knowledge_domain:
+  - POPULATION_GENETICS
+  method:
+  - ASSOCIATION_STUDY
+  target_type: VARIANT
+  target: metaGRS (within individuals on lipid-lowering and/or antihypertensive medication at baseline)
+  variant_ascertainment: not_applicable_or_omitted
+  phenotype_scale: CLINICAL
+  credibility: HIGH
+  credibility_comment: 'The association claim — that the metaGRS still stratifies CAD risk among the medicated
+    — is supported by the same large cohort and is HIGH. The paper explicitly declines any causal claim
+    that medication modifies genetic risk: the medicated subgroup was not randomized and is likely already
+    higher-risk, so the analysis is susceptible to reverse causation (assertion GE-3.A6). The credibility
+    tier here is for the stratification claim, not for a medication-effect claim. See flag F-CRED.
+
+    '
+  special_considerations:
+  - key: medicated_subgroups
+    value: lipid-lowering, antihypertensive, or both treatments at baseline
+  - key: per_sd_hrs_medicated
+    value: per-SD HRs 1.44 / 1.46 / 1.42 for lipid-lowering / antihypertensive / both
+  - key: quintile_hrs_medicated
+    value: top-vs-bottom-quintile HRs 2.71 / 2.81 / 2.55 for lipid-lowering / antihypertensive / both
+  - key: causal_interpretation
+    value: paper does not claim medication causally attenuates genetic risk; reverse causation noted
+  - key: target_nature
+    value: DERIVED
+  - key: target_composition
+    value: AGGREGATE
+  - key: observed_outcome_measures
+    value: HAZARD_RATIO
+  - key: variant_ascertainment_note
+    value: 'SR-2 (curator review): variant_ascertainment does not cleanly apply to a score target; the
+      constituent metaGRS variants entered from prior GWAS summary statistics (CARDIoGRAMplusC4D; Metabochip)
+      and imputation reference panels (1000G/HRC/UK10K). The resulting SHACL unsatisfiability under target_type=VARIANT
+      is recorded as support for CE-IN1.'
+  flags:
+  - F-TT
+  - F-RES
+  - F-METH
+  - F-VA
+  - F-CRED
+  - F-MT
+  assertions:
+  - id: GE-3.A1
+    statement: Per-SD metaGRS hazard ratios were reduced but not negated by lipid-lowering or antihypertensive
+      therapy
+    source_span:
+      page: 8
+      phrase: reduced but not negated by these therapies
+  - id: GE-3.A2
+    statement: Among those on lipid-lowering therapy the per-SD HR was 1.44 (similar for antihypertensive
+      and both)
+    source_span:
+      page: 8
+      phrase: 'HRs of 1.44 (95% CI: 1.40 to 1.48)'
+  - id: GE-3.A3
+    statement: Top-versus-bottom-quintile hazard ratios remained substantial among the medicated (about
+      2.71)
+    source_span:
+      page: 8
+      phrase: 'HRs of 2.71 (95% CI: 2.47 to 2.98)'
+  - id: GE-3.A4
+    statement: The pooled top-vs-bottom HR among individuals on either medication was 2.83
+    source_span:
+      page: 1
+      phrase: '2.83 (95% CI: 2.61 to 3.07) among individuals on lipid-lowering or antihypertensive medications'
+  - id: GE-3.A5
+    statement: The metaGRS predicts CAD risk even among individuals already taking CAD therapies at baseline
+    source_span:
+      page: 9
+      phrase: metaGRS predicts CAD risk even among individuals taking CAD therapies
+  - id: GE-3.A6
+    statement: Without randomization this medicated-subgroup analysis is susceptible to reverse causation,
+      limiting causal interpretation
+    source_span:
+      page: 10
+      phrase: susceptible to reverse causation
+  target_resolution: VARIANT
+- id: GE-new-1
+  label: Combining three component scores into the metaGRS outperforms each component and prior published
+    GRS for CAD
+  source: review_added
+  knowledge_domain:
+  - POPULATION_GENETICS
+  method:
+  - META_ANALYSIS
+  - ASSOCIATION_STUDY
+  primary_method: META_ANALYSIS
+  target_type: VARIANT
+  target: metaGRS relative to its three component scores (GRS46K, FDR202, genome-wide 1000Genomes) and
+    prior published scores (Tikkanen, Tada)
+  target_resolution: VARIANT
+  variant_ascertainment: not_applicable_or_omitted
+  phenotype_scale: CLINICAL
+  credibility: MEDIUM
+  credibility_comment: 'MEDIUM (curator-set, review session). The empirical comparison is solid: components
+    and prior scores were re-computed in the same held-out UK Biobank set, so the head-to-head is fair.
+    But the paper offers no mechanistic account of WHY combining component scores improves prediction;
+    the gain could reflect overfitting (component scores weighted on a 3,000-person UKB training subset)
+    or simply capturing more variants rather than a genuine methodological advantage. The paper itself
+    flags overfitting risk to a single dataset/population and noise in GRS estimates (p10). Per Protocol
+    7 this assesses how the paper substantiates the combination-superiority claim, not whether combining
+    is ultimately superior.'
+  flags:
+  - F-TT
+  - F-RES
+  - F-METH
+  - F-VA
+  - F-MT
+  special_considerations:
+  - key: component_scores
+    value: GRS46K (46,000 SNPs, Metabochip study), FDR202, and a genome-wide score; the latter two from
+      the CARDIoGRAMplusC4D GWAS
+  - key: benchmark_comparators
+    value: metaGRS outperformed its component scores and prior published scores (Tikkanen, Tada) computed
+      in the same UKB set (re-homed from GE-1)
+  - key: overfitting_caveat
+    value: three component scores combined/weighted on a 3,000-person UKB training subset; potential overfitting/contamination
+      is the basis for the MEDIUM tier
+  - key: target_nature
+    value: DERIVED
+  - key: target_composition
+    value: AGGREGATE; also COMPOSITE (a composite of three component sub-scores)
+  - key: observed_outcome_measures
+    value: HAZARD_RATIO, POSITIVE_PREDICTIVE_VALUE
+  - key: variant_ascertainment_note
+    value: 'SR-2: not cleanly applicable to a score target; constituent variants from prior GWAS summary
+      statistics and reference panels.'
+  assertions:
+  - id: GE-new-1.A1
+    statement: The metaGRS is a meta-score built by combining three component genetic risk scores
+    source_span:
+      page: 4
+      phrase: based on 3 genetic risk scores
+  - id: GE-new-1.A2
+    statement: The metaGRS showed substantially greater per-SD CAD association than its component scores
+      and prior published scores
+    source_span:
+      page: 5
+      phrase: substantially greater association with CAD risk in terms of hazard ratio
+  - id: GE-new-1.A3
+    statement: This per-SD association exceeds that of any previously published, externally tested genetic
+      risk score (re-homed from GE-1.A2)
+    source_span:
+      page: 1
+      phrase: an association larger than any other externally tested genetic risk score previously published
+  - id: GE-new-1.A4
+    statement: In the discussion, the metaGRS achieved greater risk discrimination than previously published
+      GRS based on selected SNPs
+    source_span:
+      page: 8
+      phrase: greater risk discrimination than previously published genomic risk scores
+annotator_omitted_dimensions:
+- dimension: measurement_target
+  rationale: Activates only for knowledge_domain GENE_FUNCTION; this is POPULATION_GENETICS. Epidemiological
+    measures recorded via observed_outcome_measures + CE-IN4. See flag F-MT.
+- dimension: mode_of_inheritance
+  rationale: 'Conditional: HUMAN_GENETICS + GENE. Not met (POPULATION_GENETICS; target is a score).'
+- dimension: mendelian_segregation
+  rationale: 'Conditional: HUMAN_GENETICS + GENE. Not met.'
+- dimension: exact_variant
+  rationale: 'Conditional: HUMAN_GENETICS. Not met.'
+- dimension: subdomain
+  rationale: 'Conditional: HUMAN_GENETICS + GENE. Not met.'
+- dimension: environmental_factors
+  rationale: 'Conditional: HUMAN_GENETICS + VARIANT. Not met (knowledge_domain is POPULATION_GENETICS).
+    Note: gene-by-factor interaction analyses are captured as GE-2 assertions.'
+- dimension: penetrance
+  rationale: 'Conditional: HUMAN_GENETICS + VARIANT. Not met.'
+- dimension: genetic_background_considered
+  rationale: 'Conditional: HUMAN_GENETICS + VARIANT. Not met.'
+- dimension: organism
+  rationale: 'Conditional: method IN_VIVO or knowledge_domain MODEL_ORGANISM. Not met (human population
+    study).'
+- dimension: gene_relation
+  rationale: Not applicable; target is a polygenic score, not a gene-gene relation.
+- dimension: hpo_terms
+  rationale: Not populated; single clinical phenotype (CAD) captured by phenotype_scale CLINICAL and the
+    target/label.
+confidence_summary:
+  overall: medium_high
+  overall_note: 'Evidence extraction and source anchoring are high-confidence: every assertion is a verbatim,
+    sub-15-word span verified on its page. The medium component is concentrated in (a) the decomposition
+    (lumper vs splitter) and (b) the forced-fit dimension assignments for a polygenic score, all of which
+    are documented schema gaps rather than ambiguities in the paper. [Updated 2026-06-06 review: curator-approved
+    edits applied - SR-1 key strip/relocation, SR-2 variant_ascertainment marked not-applicable, GE-1
+    re-homing of A2 and addition of competing-risk and sex-interaction assertions, and the new GE-new-1
+    (combination-superiority, MEDIUM credibility).]'
+  decomposition_confidence: medium
+  per_item:
+  - item: GE-1
+    confidence: high
+    note: Central predictive/stratification claim; assertions are direct and unambiguous.
+  - item: GE-2
+    confidence: medium_high
+    note: Coherent independence/complementarity claim, but a large bundle; one could further split pure
+      discrimination (C-index) from joint metaGRS-plus-factors stratification.
+  - item: GE-3
+    confidence: medium_high
+    note: Clear medicated-subpopulation stratification; the reverse-causation caveat (A6) bounds interpretation,
+      which is reflected in the credibility_comment rather than the tier.
+  - item: GE-new-1
+    confidence: medium
+    note: Combination-superiority thesis; empirical comparison fair (same UKB set) but no mechanistic
+      account of why combining helps - hence MEDIUM (curator-set).
+  forced_fits:
+  - dimension: target_type
+    value_used: VARIANT
+    candidate_extension: CE-IN1
+    flag: F-TT
+  - dimension: resolution
+    value_used: VARIANT
+    candidate_extension:
+    - CE-IN2
+    - CE-IN3
+    flag: F-RES
+  - dimension: measurement_target
+    value_used: not_activated
+    candidate_extension: CE-IN4
+    flag: F-MT
+  - dimension: cohort_detail
+    value_used: special_considerations_text
+    candidate_extension: CE-IN5
+  - dimension: target_nature
+    value_used: DERIVED
+    candidate_extension: CE-IN6
+  - dimension: variant_ascertainment
+    value_used: not_applicable_or_omitted
+    candidate_extension: CE-IN1 (SHACL unsatisfiability)
+    flag: F-VA
+    note: 'SR-2 (curator review): VA does not cleanly apply to a score target; FROM_DATABASE withdrawn.'
+  - dimension: method
+    value_used: ASSOCIATION_STUDY (intermediate)
+    candidate_extension: null
+    flag: F-METH
+    note: Intermediate-level value recorded per Protocol 3.4 rule 2; no leaf for polygenic-score association
+      testing.
+  decomposition_alternatives_considered:
+  - alternative: Single merged item covering all metaGRS claims
+    considered_because: 'Strict lumper (Protocol 2.1): GE-1/2/3 share target and largely share method
+      and credibility.'
+    rejected_because: No single label can honestly cover prediction, independence, and persistence-under-medication
+      (Protocol 2.4). Kept as three. See flag F-DECOMP.
+  - alternative: Split GE-1 into discrimination (HR/AUROC/PPV) vs life-course stratification (quintiles/cumulative
+      incidence)
+    considered_because: Two distinguishable faces of the predictive claim.
+    rejected_because: Same target/method/credibility and a single coherent label ('metaGRS predicts and
+      stratifies CAD risk'); kept as one item.
+  - alternative: Separate cited-evidence items for component scores (GRS46K, FDR202, 1000Genomes) and
+      comparators (Tikkanen, Tada)
+    considered_because: These are distinct scores with their own provenance.
+    rejected_because: They are data inputs / benchmarks measured by this paper in the same UKB set, not
+      independently-cited evidence for the metaGRS claim. Captured as GE-1 special_considerations and
+      assertion A2.
+  - alternative: Separate the metaGRS-plus-conventional-factors joint-stratification assertions (GE-2.A12-A14)
+      into their own item
+    considered_because: They combine genomic and conventional risk.
+    rejected_because: They are the additive/complementarity claim of GE-2 illustrated at the extremes;
+      same target/method/credibility.
+promoted_dimensions_applied:
+- dimension: phenotype_scale
+  value: CLINICAL
+  note: Promoted after Jossin 2017; applied to all items (CAD is a human clinical phenotype).
+- dimension: variant_ascertainment
+  value: not_applicable_or_omitted
+  note: 'SR-2 (curator review): not cleanly applicable to a score target; the earlier FROM_DATABASE value
+    is withdrawn. NOTE for sync workflow: EXTENSIONS.md credits this paper toward VA''s promotion (Davis/Nelson/Duerr/Inouye);
+    if Inouye no longer exercises VA, that basis may rest on three papers - reviewer does not edit EXTENSIONS.md
+    (see review log PO-2).'

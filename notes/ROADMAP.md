@@ -62,7 +62,7 @@ Expected per-paper migrations:
 | Davis 2011     | GE-1 `STATISTICAL_GENETICS` → `CANDIDATE_GENE_STUDY` (resequencing, not genome-wide); experimental renames. |
 | Nelson 1992    | `IN_VITRO_EXPERIMENT` → `IN_VITRO`; segregation evidence may refine to `SEGREGATION_ANALYSIS`.            |
 | Gupta 2015     | No migration expected (existing flat values remain appropriate).                                         |
-| Duerr 2006     | GE-1, GE-2 → `GWAS`; GE-3 → `ASSOCIATION_STUDY`; GE-4 → `TRANSMISSION_DISEQUILIBRIUM_TEST`; GE-5 → `FINE_MAPPING`; GE-8 → `IN_VIVO`. |
+| Duerr 2006     | GE-1 → `GWAS`; GE-2 → `ASSOCIATION_STUDY`; GE-3 → `TRANSMISSION_DISEQUILIBRIUM_TEST`; GE-4 → `FINE_MAPPING`; GE-5 → `GWAS`; GE-6 → `IN_VIVO`/`IN_VITRO` (renames). Reconciled with the applied review (`annotations/reviews/duerr2006-review-2026-06-04.yaml`); the corpus has no GE-8. |
 | Inouye 2018    | GE-1 → `META_ANALYSIS` (polygenic-score construction).                                                   |
 
 Migration is best-effort and non-blocking. Annotations using

@@ -35,11 +35,12 @@ model exists, would yield a narrow resource: one that neither composes with
 other basic-science domains nor reuses OBO's orthogonal vocabularies cleanly,
 the redundancy that OBO's own emphasis on orthogonality and reuse exists to
 prevent. We therefore take the structural content model from FHIR, generalise
-it from clinical trials to basic science, and align the dimensions to ECO,
-SEPIO, IAO, and OBI at the term level (initial mapping in Supplementary
-Table~S2). Genetics is the first specialisation; broadening to other
-basic-science domains and completing the OBO term alignment are future work for
-other teams. Building the general content model first and the OBO-aligned
+it from clinical trials to basic science, and design the dimensions to align
+with ECO, SEPIO, IAO, and OBI; a term-level crosswalk to these
+vocabularies, with verified identifiers and the remaining gaps, is given
+in the supplementary material. Genetics is the first specialisation;
+broadening to other basic-science domains and completing the term
+alignment are future work for other teams. Building the general content model first and the OBO-aligned
 specialisation second is what keeps the eventual resource broad and reusable
 rather than narrow.
 
@@ -60,20 +61,22 @@ to \GeneticEvidence{}, \GeneticEvidenceVariable{}, and
 \GeneticEvidenceAssertion{}. \Cref{tab:fhir-alignment} gives the class-level
 correspondence; the field-level alignment, including the certainty
 subcomponents discussed in \cref{sec:model-dimensions}, is in Supplementary
-Table~S2.
-\footnote{Our \EvidenceAssertion{} is a structured, machine-checkable predicate, not the
-FHIR \texttt{Evidence.assertion} element (a human-readable summary).
-Structurally it belongs to the assertion-with-evidence family of the GA4GH VA
-\texttt{Statement} and the SEPIO assertion; the meta-predicate layer it
-supports~\cite{our_preprint} acts as a normative constraint over such
-assertions rather than as another description of one, with term-level alignment
-left to future work.}
+Table~S4.
+\footnote{We separate two notions the literature often merges. The
+\texttt{assertion} property of a \ScientificEvidence{} item holds the
+object-level claim a paper makes; it is what the pilot records, and it belongs
+to the assertion-with-evidence family of the GA4GH VA \texttt{Statement} and the
+SEPIO assertion, not to the FHIR \texttt{Evidence.assertion} element (a
+human-readable summary). \EvidenceAssertion{} is instead a meta-predicate over
+the decision rules that would consume such claims~\cite{our_preprint}; it has no
+direct analogue in FHIR, VA, or SEPIO and is not instantiated here. The property
+and the class share a name, which a future schema revision will resolve.}
 
 \begin{table}[tbp]
     \centering
     \caption{Class-level correspondence between the core model and FHIR Evidence
     R5. The alignment is architectural; the genetic dimensional frame replaces
-    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S3.}
+    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S4.}
     \label{tab:fhir-alignment}
     \small
     \begin{tabularx}{\linewidth}{@{}llX@{}}
@@ -87,11 +90,11 @@ This work & FHIR Evidence R5 & Relationship \\
 & \texttt{EvidenceVariable} ${+}$ \texttt{Evidence.statistic}
 & Variable definition and measured value, folded into one class \\
 \EvidenceAssertion
-& (no structural equivalent)
-& Structured predicate; closest analogue is GA4GH VA \texttt{Statement} \\
+& (no equivalent)
+& Meta-predicate over decision rules; the reasoning layer of~\cite{our_preprint}, out of scope here \\
 Credibility
 & \texttt{Evidence.certainty}
-& Structural parallel: overall rating plus separable, genetics-specific subcomponents (rating anchored on SEPIO confidence, not GRADE) \\
+& Structural parallel: overall rating plus separable, genetics-specific subcomponents (rating anchored on SEPIO confidence) \\
 \bottomrule
     \end{tabularx}
 \end{table}
