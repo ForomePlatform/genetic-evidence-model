@@ -40,7 +40,8 @@ evidence encountered in literature-based variant interpretation:
 The four manual annotations live at the top of `annotations/`. The two
 AI-drafted annotations are versioned: `annotations/v0/` holds the
 original protocol-v0 drafts (curator-reviewed), and `annotations/v1/`
-will hold their re-annotation under the current protocol.
+holds their re-annotation under the current protocol. The paper's
+corpus and appendices reference the v0 drafts.
 
 For manually annotated papers, PDF highlights and sticky-note callouts are the
 authoritative ground truth. The YAML is a structured transformation of those
@@ -74,9 +75,16 @@ unwritten conventions.
   AI annotation (single pass, no curator in the loop). Specifies input
   quality gating, self-consistency checks, mandatory confidence-summary
   emission, and failure handling.
-- `protocols/PROTOCOL_INTERACTIVE.md`: planned but not yet specified.
-  Staged AI annotation with curator review of the decomposition before
-  dimension filling.
+- `protocols/REVIEW_PROTOCOL.md` and
+  `protocols/REVIEW_PROTOCOL_INTERACTIVE.md`: the assertion-by-assertion
+  review protocol and its interactive, curator-in-the-loop variant, used
+  to adjudicate the AI-drafted annotations. Current version: 1.0.
+- `protocols/LABELING_EXAMPLES.md`: worked cases for the recurring
+  judgement calls referenced by the protocols above.
+
+A staged interactive *annotation* protocol (curator review of the
+decomposition before dimension filling) is planned but not yet
+specified.
 
 The two AI-drafted annotations in the corpus (Duerr 2006, Inouye 2018) were
 produced under what became `PROTOCOL_AUTONOMOUS.md` v1.0; their `provenance`
@@ -180,9 +188,13 @@ Two complementary representations:
   surfaced during corpus annotation, including their promotion or
   retraction status.
 
-Annotations in `annotations/` are validated against the SHACL shapes by the
-CI workflow in `.github/workflows/validate.yml`. A failing validation blocks
-merges and indicates either a schema bug or an annotation error.
+Annotations in `annotations/` are checked by the CI workflow in
+`.github/workflows/validate.yml`. The `parse-yaml` job verifies that every
+annotation YAML parses cleanly and blocks merges on failure. Full SHACL
+validation against the shapes is wired in as an advisory
+(`continue-on-error`) job that activates once the `extraction/yaml_to_rdf.py`
+converter lands; until then it is skipped. Flip the job to blocking once the
+schema stabilises.
 
 ## Citing this work
 
@@ -191,7 +203,7 @@ Zenodo and the CITATION file updated.
 
 ## License
 
-See `LICENSE` (content) and `LICENSE-CODE` (scripts and schema). Both are
+See `LICENSE.txt` (content) and `LICENSE-code.txt` (scripts and schema). Both are
 permissive and compatible with CEUR-WS publication terms.
 
 ## Contact

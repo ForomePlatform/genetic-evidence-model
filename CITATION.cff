@@ -13,10 +13,10 @@ authors:
     given-names: "TODO"
     affiliation: "TODO"
     # Replace with actual author list before pushing.
-repository-code: "https://github.com/TODO/genetic-evidence-model"
+repository-code: "https://github.com/ForomePlatform/genetic-evidence-model"
 license: CC-BY-4.0
 # Code within extraction/ and schema/ is released under a permissive code
-# license (see LICENSE-CODE). Content elsewhere is under CC-BY-4.0 unless
+# license (see LICENSE-code.txt). Content elsewhere is under CC-BY-4.0 unless
 # otherwise noted.
 keywords:
   - genetic evidence

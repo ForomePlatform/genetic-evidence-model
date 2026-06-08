@@ -41,3 +41,7 @@ Thumbs.db
 
 # Overleaf local sync (if using)
 .overleaf-sync/
+
+# Build artifacts
+*.zip
+*.egg-info/

@@ -8,7 +8,7 @@ parts:
    counts, with the definition of "applicable" for each dimension
    and the rationale for every zero-populated or under-populated
    cell. The aggregate counts are reported in §5.1 of the ICBO 2026
-   paper (`tab:coverage`).
+   paper (`tab:supp-coverage`).
 
 2. **Reviewer-flag counts** (final section): per-paper counts of the
    five flag types recorded during annotation. The ICBO 2026 paper
@@ -195,7 +195,7 @@ two AI-drafted annotations and were not all re-verified in the
 re-counted in those rows, and the inter-paper conditional totals
 should be regenerated end to end. Candidate future work: a small
 `scripts/compute_coverage.py` that regenerates this table from the
-YAML files, so the paper's `tab:coverage` can be kept in sync with
+YAML files, so the paper's `tab:supp-coverage` can be kept in sync with
 the annotations automatically.
 
 ## Reviewer-flag counts per paper
