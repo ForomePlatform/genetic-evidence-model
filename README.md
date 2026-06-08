@@ -17,7 +17,7 @@ D.C., July 15–17 2026). The paper is currently under revision.
 ├── annotations/    One YAML file per annotated publication + raw PDF extractions
 ├── case-reports/   Per-paper case reports (one for each of the six annotations)
 ├── protocols/      Annotation protocol documents (canonical rules + per-mode workflows)
-├── skills/         Claude skill(s) that operationalise the protocols
+├── skills/         Two Claude skills (annotation, review) that operationalise the protocols
 ├── extraction/     Scripts that extract highlights and callouts from annotated PDFs
 ├── figures/        Source files for figures used in the paper
 └── .github/        CI configuration validating annotations against the schema
@@ -82,40 +82,69 @@ The two AI-drafted annotations in the corpus (Duerr 2006, Inouye 2018) were
 produced under what became `PROTOCOL_AUTONOMOUS.md` v1.0; their `provenance`
 blocks record the protocol version retroactively.
 
-## Annotation skill
+## Skills
 
-A Claude skill in `skills/genetic-evidence-annotation/` operationalises the
-autonomous protocol. It triggers on requests like "annotate this paper under
-the genetic-evidence model" or "produce a GEM YAML annotation for paper X".
+Two Claude skills in `skills/` operationalise the protocols:
 
-The skill is portable across all major AI coding agents that have adopted
-the Agent Skills open standard (Claude Code, Cursor, Copilot, and others),
-not Claude-specific.
+- **`genetic-evidence-annotation/`** — autonomous drafting of a YAML annotation
+  for a paper (the autonomous protocol). Triggers on requests like "annotate
+  this paper under the genetic-evidence model" or "produce a GEM YAML annotation
+  for paper X".
+- **`genetic-evidence-review/`** — interactive, curator-in-the-loop review of an
+  existing annotation (the review protocol). Triggers on "review this GEM
+  annotation", "audit this annotation against the paper", and similar; it emits
+  a review log, a review report, and the updated annotation.
 
-### Installing the skill
+Both follow the Agent Skills open standard and are portable across agents that
+support it (Claude Code, Cursor, Copilot, and others), not Claude-specific.
+Each skill references shared material **outside** its own folder, the protocols
+in `protocols/`, the schema in `schema/`, and exemplar annotations in
+`annotations/`, so it has to be installed together with that material.
 
-**Claude Code:** copy or symlink `skills/genetic-evidence-annotation/` into
-your project's `.claude/skills/` directory (project-local) or
-`~/.claude/skills/` (user-global). Claude Code auto-discovers skills in
-either location.
+### Installing in Claude Code (or another in-repo agent)
 
-**Claude.ai (web/mobile/desktop):** zip the `skills/genetic-evidence-annotation/`
-folder and upload via Customize > Skills > + Create skill. The folder must
-be the root of the zip, not just its contents.
+Run the agent inside a checkout of this repository and copy or symlink the
+skill folder into your skills directory (project-local `.claude/skills/` or
+user-global `~/.claude/skills/`), for example:
 
-**Other agents:** check your agent's skill-installation documentation. The
-SKILL.md file is the entry point; supporting files in the same directory
-are loaded as referenced.
+```bash
+ln -s "$PWD/skills/genetic-evidence-annotation" .claude/skills/
+ln -s "$PWD/skills/genetic-evidence-review"     .claude/skills/
+```
 
-### Using the skill
+The skills' repo-relative references (`protocols/...`, `schema/...`,
+`annotations/...`) resolve because the agent runs at the repository root.
 
-Once installed, ask in natural language:
+### Installing on Claude.ai (web / mobile / desktop)
+
+Do **not** zip the `skills/<name>/` folder directly: the skill depends on files
+outside that folder (protocols, schema, exemplars) that a bare zip would miss.
+Instead build a self-contained bundle with the provided script:
+
+```bash
+./build_skill_bundle.sh --skill annotation   # -> genetic-evidence-annotation-skill.zip
+./build_skill_bundle.sh --skill review        # -> genetic-evidence-review-skill.zip
+# add --check for an input-validation dry run
+```
+
+The script gathers `SKILL.md`, the relevant protocols, the schema, and (for the
+annotation skill) the four curator-led exemplar annotations into one zip,
+rewriting the paths for the flat bundle layout. Upload the resulting zip via
+Customize > Skills > + Create skill (the bundle's top-level folder must be the
+root of the zip, which the script ensures).
+
+### Using the skills
+
+Once installed, ask in natural language, for example:
 
 > Annotate `papers/smith2024.pdf` under the genetic-evidence model.
 
-The skill will confirm the input paper, the target output path, and the
-schema location before proceeding. It produces a single YAML file matching
-the format of the existing annotations.
+> Review the GEM annotation in `annotations/smith2024.yaml` against the paper.
+
+The annotation skill confirms the input paper, output path, and schema location,
+then produces a single YAML file matching the existing annotations. The review
+skill walks the annotation item by item with the curator and emits its three
+artefacts (review log, review report, and the updated annotation).
 
 ## Extraction pipeline
 

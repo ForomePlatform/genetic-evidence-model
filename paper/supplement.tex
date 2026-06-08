@@ -8,6 +8,7 @@
 \documentclass[11pt]{article}
 \usepackage[numbers,sort&compress]{natbib}   % load BEFORE preamble (hyperref order)
 \usepackage[margin=1in]{geometry}
+\usepackage{tocloft}                          % control ToC/LoT number-box widths (SN1, ST1 are wider than the default)
 \input{preamble}                              % shared macros + tabularx/booktabs/cleveref/listings
 \usepackage{float}                            % [H] placement so supplement tables stay under their part heading
 \microtypesetup{expansion=false}              % protrusion only; expansion needs scalable fonts not guaranteed under article
@@ -17,7 +18,13 @@ A Semantic Model of Genetic Evidence}
 \author{Michael Bouzinier \and Dmitry Etin}
 \date{}
 
-\renewcommand{\thetable}{S\arabic{table}}   % supplement tables are S1, S2, ...
+\renewcommand{\thetable}{ST\arabic{table}}      % supplementary tables: ST1, ST2, ...
+\renewcommand{\thesection}{SN\arabic{section}}  % supplementary notes: SN1 .. SN5
+
+% Widen the ToC/LoT number boxes so the SN/ST prefixes do not overlap the titles.
+\setlength{\cftsecnumwidth}{2.8em}
+\setlength{\cftsubsecnumwidth}{3.6em}
+\setlength{\cfttabnumwidth}{2.8em}
 
 \begin{document}
     \maketitle
@@ -25,24 +32,28 @@ A Semantic Model of Genetic Evidence}
     \tableofcontents
 
     \clearpage
-    \part*{S1.\quad Supplementary Notes}
-    \addcontentsline{toc}{part}{S1.\quad Supplementary Notes}
-    \input{sections/s02_background}
-    \input{sections/s11_protocol_suite}
-    \input{sections/s12_skills_note}
-    \input{sections/s13_ai_review_note}
-
-    % Hard break so the S2 tables stay under their own part and do not
-    % float forward into the S3 Appendices.
-    \clearpage
-    \part*{S2.\quad Supplementary Tables}
-    \addcontentsline{toc}{part}{S2.\quad Supplementary Tables}
-    \input{sections/supplement_tables}
-    \input{sections/s14_crosswalk}
+    \listoftables
 
     \clearpage
-    \part*{S3.\quad Appendices}
-    \addcontentsline{toc}{part}{S3.\quad Appendices}
+    \part*{Supplementary Notes}
+    \addcontentsline{toc}{part}{Supplementary Notes}
+    \input{sections/s11_background}
+    \input{sections/s12_protocol_suite}
+    \input{sections/s13_skills_note}
+    \input{sections/s14_ai_review_note}
+    \input{sections/s15_crosswalk}
+    \input{sections/s16_case_reports}
+
+    % Hard break so the standalone tables stay under their own part and do
+    % not float forward into the Appendices.
+    \clearpage
+    \part*{Supplementary Tables}
+    \addcontentsline{toc}{part}{Supplementary Tables}
+    \input{sections/s2_tables}
+
+    \clearpage
+    \part*{Appendices}
+    \addcontentsline{toc}{part}{Appendices}
     \input{sections/s3_appendices}
 
     \bibliographystyle{plainnat}

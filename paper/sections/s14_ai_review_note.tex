@@ -1,0 +1,75 @@
+% =====================================================================
+%  S1 (Supplementary Notes): AI-track review outcomes.
+%  Referenced from the main text (sec:workflow-flags) as Supplementary Note S1.
+% =====================================================================
+\section{AI-track review outcomes}
+\label{sec:supp-ai-review}
+
+This note records the outcome of the independent expert review of the
+two AI-drafted annotations, Duerr et al.\ 2006 (the clean GWAS exemplar)
+and Inouye et al.\ 2018 (the polygenic-score stress test). Each draft was
+reviewed assertion by assertion, in interactive mode, against
+REVIEW\_PROTOCOL v1.0. The authoritative logs, with every flag and
+ruling, are in the repository under \texttt{annotations/reviews/}; the
+table below summarises the verdicts over the drafted items.
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    Paper & Drafted & Approved & With flags & Edited & Rejected & Added on review \\
+    \midrule
+    Duerr 2006   & 6 & 0 & 2 & 4 & 0 & 1 (approved) \\
+    Inouye 2018  & 3 & 1 & 1 & 1 & 0 & 1 (edited) \\
+    \midrule
+    Total        & 9 & 1 & 3 & 5 & 0 & 2 \\
+    \bottomrule
+  \end{tabular}
+  \caption[Per-paper AI-track review verdicts]{Per-paper review verdicts over the AI-drafted items. ``With
+  flags'' is approved-despite-non-blocking-flags (no edits applied);
+  ``Added on review'' is evidence the reviewer found the draft had
+  omitted and entered as a new item.}
+  \label{tab:ai-review}
+\end{table}
+
+The two drafts were produced under different protocol versions, and the
+later draft required markedly less correction. Two of Inouye's three
+items were accepted without edits and one was edited, against four of
+Duerr's six edited. Because Inouye is also the harder, polygenic-score
+case, the comparison is confounded by paper as well as by protocol and
+is offered as an observation rather than a controlled result; it
+nonetheless agrees with the provenance signal, where Inouye's
+thirty-seven cited spans were all verbatim and within the length limit,
+while Duerr's earlier-protocol spans carried notation drift and a single
+wrong page citation (recorded as forward notes, since they predate the
+current rules).
+
+A second pattern cuts across both papers. The items the reviewer had to
+add were not granular association findings, which the drafts captured
+well, but higher-level evidence: in Inouye, the paper's headline thesis
+that combining component scores outperforms each alone; in Duerr, the
+cited anti-p40 antibody trial that the discussion leans on for its
+therapeutic-target argument. The drafts were thus most reliable on
+specific, directly stated claims and weaker on a paper's synthetic
+conclusions and cited translational evidence, the cross-item and
+interpretive judgement that the human reviewer supplied.
+
+The edits to existing items were concentrated in schema-level judgement,
+not in the factual content of the assertions: knowledge-domain
+assignment (family-based versus allele-frequency evidence), method
+placement (a targeted replication recorded as an association study
+rather than a fresh scan), credibility calibration (the score-combination
+item lowered from high to medium for want of a stated mechanism), and the
+applicability of variant ascertainment to a polygenic-score target. In
+the last case the reviewer set the dimension to not applicable and
+recorded the resulting constraint as support for a candidate extension.
+No item was rejected, and no item was found to misrepresent its source.
+
+One consequence follows for the promotion record. With variant
+ascertainment no longer exercised by Inouye, its promotion rests on its
+first proposal in Davis and its independent reuse in Nelson and Duerr,
+which still satisfies the two-paper rule. Applying any change to the
+promotion record is a separate curation step and is not made here. Both
+reviews recommend a second pass over the changed items, since each paper
+gained a new item and several existing items were edited.

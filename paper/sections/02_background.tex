@@ -15,7 +15,7 @@ part of what a basic-science genetic publication reports, but none captures the
 whole: a single conditional-knockout study may report molecular, cellular, and
 clinical phenotypes at once, and a polygenic-score study may aggregate millions
 of variants into one score. A per-family review, with the specific coverage
-gaps that motivate our model, is given in Supplementary Note~S1. Of these
+gaps that motivate our model, is given in Supplementary Note~SN1. Of these
 families, FHIR Evidence is the closest structural relative of our model, and we
 position the model against it here.
 
@@ -61,7 +61,7 @@ to \GeneticEvidence{}, \GeneticEvidenceVariable{}, and
 \GeneticEvidenceAssertion{}. \Cref{tab:fhir-alignment} gives the class-level
 correspondence; the field-level alignment, including the certainty
 subcomponents discussed in \cref{sec:model-dimensions}, is in Supplementary
-Table~S4.
+Table~ST8.
 \footnote{We separate two notions the literature often merges. The
 \texttt{assertion} property of a \ScientificEvidence{} item holds the
 object-level claim a paper makes; it is what the pilot records, and it belongs
@@ -76,7 +76,7 @@ and the class share a name, which a future schema revision will resolve.}
     \centering
     \caption{Class-level correspondence between the core model and FHIR Evidence
     R5. The alignment is architectural; the genetic dimensional frame replaces
-    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~S4.}
+    FHIR's clinical-trial frame. Field-level detail is in Supplementary Table~ST8.}
     \label{tab:fhir-alignment}
     \small
     \begin{tabularx}{\linewidth}{@{}llX@{}}

@@ -1,0 +1,84 @@
+% =====================================================================
+%  Supplementary Notes (SN5): term-level standards crosswalk.
+%  Referenced from the main text (sec:background) as the supplementary
+%  material giving the term-level crosswalk.
+% =====================================================================
+\section{Case reports for Duerr and Inouye,}
+\label{sec:supp-crep}
+
+\subsection{A Genome-Wide Association Study: Duerr et al.\ 2006}
+\label{sec:supp-ex-duerr}
+
+Duerr and colleagues identified the \textit{IL23R} association with
+inflammatory bowel disease by typing 308{,}332 autosomal SNPs in 547
+non-Jewish European-ancestry cases with ileal Crohn's disease against
+548 matched controls. After observing a genome-wide-significant
+association, they carried out independent replication in a
+Jewish-ancestry cohort and family-based transmission disequilibrium
+testing in 883 nuclear families. The paper's central finding, that the
+Arg381Gln coding variant rs11209026 confers protection against
+Crohn's disease with an odds ratio of 0.26 in the discovery cohort, is
+the kind of result the model was designed to represent: a
+variant-level claim grounded in population-genetic methodology, with
+explicit cohort descriptors, a multiple-testing adjustment, and
+external replication.
+
+Our annotation decomposes the paper into seven \GeneticEvidence{} items:
+the GWAS discovery, the Jewish-cohort replication, the family-based
+transmission analysis, a conditional analysis showing that the IL23R
+signal comprises more than one independent variant, a negative result
+at three related IL-23 pathway genes, cited mouse-model evidence
+supporting a therapeutic rationale, and a cited anti-p40 antibody trial
+added during curator review. Six of the seven fit the schema as it
+stands; the seventh, the antibody trial, is drug-response evidence with
+no fitting genetic knowledge domain. Curator review surfaced three
+candidate extensions: a direction-of-effect dimension distinguishing
+protective from risk-conferring alleles, a construct for the paper's
+cross-item translational synthesis, and a widening of the
+conditional-activation scope to cover variant-level Mendelian context.
+In line with our two-papers rule (\cref{sec:workflow}), these
+extensions remain provisional until exercised by at least one
+additional publication.
+
+The Duerr annotation also illustrates two methodological points.
+First, \texttt{variant\_ascertainment} was promoted to the core
+schema because every variant-level annotation in the corpus requires
+some ascertainment value: rs11209026 is observed in both cases and
+controls by construction of the case--control design. Second, each
+assertion carries a \texttt{source\_span} pointing to a specific
+page and a short identifying phrase from the paper, so a reader
+disagreeing with our interpretation can check the underlying text
+directly.
+
+\subsection{A Polygenic Risk Score: Inouye et al.\ 2018}
+\label{sec:supp-ex-inouye}
+
+The polygenic risk score literature stresses the model in a different
+direction. Inouye and colleagues constructed a meta-genomic risk
+score (metaGRS) for coronary artery disease from 1{,}745{,}180 SNPs,
+weighted by effect size, combining three prior polygenic scores; they
+validated the score externally in 482{,}629 UK Biobank participants,
+reported a hazard ratio per standard deviation of 1.71, demonstrated
+substantial independence from conventional risk factors, and showed
+that the score's predictive power persists in medicated
+subpopulations. Every one of these claims is a genuine piece of
+genetic evidence, and every one of them stretches the model: the
+target is not a gene or a variant but a derived score, the resolution
+is not a locus but the whole genome in aggregate, and the measurement
+targets are epidemiological (hazard ratio, C-index, cumulative
+incidence) rather than molecular. The annotation surfaces six
+candidate extensions as a direct consequence.
+
+Four of the extensions (CE-IN1 through CE-IN4) propose, respectively,
+a \dimval{Score} value for Target Type, a \dimval{Whole Genome
+Aggregate} value for Resolution, a new \emph{target composition}
+dimension distinguishing single versus aggregate targets, and an
+extension of the measurement-target enumeration to cover
+epidemiological quantities such as \dimval{Hazard Ratio} and
+\dimval{C-Index}. Two further extensions (CE-IN5, on structured cohort
+descriptors, and CE-IN6, on distinguishing natural from
+derived-artifact targets) occur elsewhere in the annotation.
+Where the model strains is itself informative: rather than silently
+forcing a polygenic score into a variant-level field, the schema
+requires the curator (human or AI) to mark the forced fit and
+propose an extension.

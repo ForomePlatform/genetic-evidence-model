@@ -16,7 +16,7 @@
 To demonstrate the model's coverage and to see where it strains, we
 applied it to six published genetic-evidence papers that span the
 major epistemic shapes encountered in literature-based variant
-interpretation (Supplementary Table~S2). The six span the principal
+interpretation (Supplementary Table~ST6). The six span the principal
 epistemic shapes the model must accommodate: classical Mendelian human
 genetics (Gupta), population-scale association (Duerr) and case--control
 resequencing (Davis), model-organism and in vitro functional genetics
@@ -34,8 +34,8 @@ evaluation signal. All six annotations are available in the project
 repository; here we discuss two in detail.
 
 % The six-paper corpus table was moved to the supplement to keep the
-% main paper within the page limit; see Supplementary Table~S2
-% (paper/sections/supplement_tables.tex).
+% main paper within the page limit; see Supplementary Table~ST6
+% (paper/sections/s2_tables.tex).
 
 Duerr et al.\ 2006 (\cref{sec:ex-duerr}) serves as our reference
 example of a classical variant-level association study. Inouye et
@@ -46,79 +46,38 @@ annotations and per-paper case reports are in the repository's
 \texttt{annotations/} and \texttt{case-reports/}
 directories.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/case-reports}}
 
-\subsection{A Genome-Wide Association Study: Duerr et al.\ 2006}
+\subsection{A Genome-Wide Association Study Example}
 \label{sec:ex-duerr}
 
-Duerr and colleagues identified the \textit{IL23R} association with
-inflammatory bowel disease by typing 308{,}332 autosomal SNPs in 547
-non-Jewish European-ancestry cases with ileal Crohn's disease against
-548 matched controls. After observing a genome-wide-significant
-association, they carried out independent replication in a
-Jewish-ancestry cohort and family-based transmission disequilibrium
-testing in 883 nuclear families. The paper's central finding, that the
-Arg381Gln coding variant rs11209026 confers protection against
-Crohn's disease with an odds ratio of 0.26 in the discovery cohort, is
-the kind of result the model was designed to represent: a
-variant-level claim grounded in population-genetic methodology, with
-explicit cohort descriptors, a multiple-testing adjustment, and
-external replication.
+Duerr et al. 2006 identified IL23R as an inflammatory bowel disease gene through a genome‑wide association study in
+non‑Jewish cases with ileal Crohn’s disease, followed by independent replication and family‑based transmission
+testing. Under our decomposition the paper yields seven GeneticEvidence items (Supplementary Table ST6 and Case
+Report CR‑DU): variant‑level discovery and replication, a family‑based transmission analysis, conditional
+fine‑mapping within IL23R, negative results at related IL‑23 pathway genes, and cited functional and mouse‑model
+support. Six of the seven items fit the current schema without strain. The seventh, a cited anti‑p40 antibody trial,
+is drug‑response evidence that exercises no existing genetic knowledge domain and therefore surfaces a
+translational‑scope gap. Curator review of this annotation also motivated three candidate extensions that remain
+provisional under the two‑papers rule: an explicit direction‑of‑effect dimension for protective vs risk‑conferring
+alleles, a construct for cross‑item therapeutic synthesis, and an extension of the conditional‑activation scope from
+gene‑ to variant‑level Mendelian context.
 
-Our annotation decomposes the paper into seven \GeneticEvidence{} items:
-the GWAS discovery, the Jewish-cohort replication, the family-based
-transmission analysis, a conditional analysis showing that the IL23R
-signal comprises more than one independent variant, a negative result
-at three related IL-23 pathway genes, cited mouse-model evidence
-supporting a therapeutic rationale, and a cited anti-p40 antibody trial
-added during curator review. Six of the seven fit the schema as it
-stands; the seventh, the antibody trial, is drug-response evidence with
-no fitting genetic knowledge domain. Curator review surfaced three
-candidate extensions: a direction-of-effect dimension distinguishing
-protective from risk-conferring alleles, a construct for the paper's
-cross-item translational synthesis, and a widening of the
-conditional-activation scope to cover variant-level Mendelian context.
-In line with our two-papers rule (\cref{sec:workflow}), these
-extensions remain provisional until exercised by at least one
-additional publication.
+More details can be found in the Supplemental Note~SN6.
 
-The Duerr annotation also illustrates two methodological points.
-First, \texttt{variant\_ascertainment} was promoted to the core
-schema because every variant-level annotation in the corpus requires
-some ascertainment value: rs11209026 is observed in both cases and
-controls by construction of the case--control design. Second, each
-assertion carries a \texttt{source\_span} pointing to a specific
-page and a short identifying phrase from the paper, so a reader
-disagreeing with our interpretation can check the underlying text
-directly.
 
-\subsection{A Polygenic Risk Score: Inouye et al.\ 2018}
+\subsection{A Polygenic Risk Score Stress Test}
 \label{sec:ex-inouye}
 
-The polygenic risk score literature stresses the model in a different
-direction. Inouye and colleagues constructed a meta-genomic risk
-score (metaGRS) for coronary artery disease from 1{,}745{,}180 SNPs,
-weighted by effect size, combining three prior polygenic scores; they
-validated the score externally in 482{,}629 UK Biobank participants,
-reported a hazard ratio per standard deviation of 1.71, demonstrated
-substantial independence from conventional risk factors, and showed
-that the score's predictive power persists in medicated
-subpopulations. Every one of these claims is a genuine piece of
-genetic evidence, and every one of them stretches the model: the
-target is not a gene or a variant but a derived score, the resolution
-is not a locus but the whole genome in aggregate, and the measurement
-targets are epidemiological (hazard ratio, C-index, cumulative
-incidence) rather than molecular. The annotation surfaces six
-candidate extensions as a direct consequence.
+Inouye et al. 2018 constructed and externally validated a meta‑genomic risk score (metaGRS) for coronary artery
+disease from 1,745,180 SNPs, combining three prior scores and testing performance in 482,629 UK Biobank
+participants. Unlike Duerr’s variant‑level association, the target here is a derived score spanning the whole genome
+in aggregate, and the main measurements are epidemiological (hazard ratio, C‑index, cumulative incidence). Our
+annotation decomposes the paper into five GeneticEvidence items covering score construction, external validation,
+independence from conventional risk factors, age‑stratified cumulative risk, and performance in medicated subgroups (
+Case Report CR‑IN). All five items are representable in the current model but only through deliberate “least‑wrong”
+choices (for example, treating the score as a gene‑level target). These forced fits are recorded as six candidate
+extensions, including a score target type, a whole‑genome aggregate resolution, a target‑composition axis
+distinguishing single from aggregate targets, an epidemiological measurement‑target vocabulary, a structured cohort
+descriptor, and a flag for derived‑artifact targets. Where and how the model strains is thus made explicit rather
+than hidden.
 
-Four of the extensions (CE-IN1 through CE-IN4) propose, respectively,
-a \dimval{Score} value for Target Type, a \dimval{Whole Genome
-Aggregate} value for Resolution, a new \emph{target composition}
-dimension distinguishing single versus aggregate targets, and an
-extension of the measurement-target enumeration to cover
-epidemiological quantities such as \dimval{Hazard Ratio} and
-\dimval{C-Index}. Two further extensions (CE-IN5, on structured cohort
-descriptors, and CE-IN6, on distinguishing natural from
-derived-artifact targets) occur elsewhere in the annotation.
-Where the model strains is itself informative: rather than silently
-forcing a polygenic score into a variant-level field, the schema
-requires the curator (human or AI) to mark the forced fit and
-propose an extension.
+More details can be found in the Supplemental Note~SN6.
