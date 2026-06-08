@@ -1,0 +1,52 @@
+% =====================================================================
+%  SN7 (Supplementary Notes): Dimension coverage over the annotated corpus
+% =====================================================================
+\section{Dimension coverage over the annotated corpus}
+\label{sec:supp-coverage-note}
+
+This note reports how often each dimension is populated across the 29
+\GeneticEvidence{} items in the pilot corpus, and in how many
+items each dimension is applicable under the conditional-activation
+rules. The counts are computed from the released YAML annotations and
+the SHACL shapes, and a machine-readable report is provided in the
+repository under
+\texttt{annotations/coverage.md}.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/coverage.md}}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption[Dimension population across 29 \GeneticEvidence{} items]{Dimension population across 29 \GeneticEvidence{} items from six papers. The left block lists always-required dimensions; the right block lists representative conditional dimensions and how often their activation conditions apply.}
+  \label{tab:supp-coverage}
+  \begin{tabular}{@{}lcc@{\hspace{1em}}lcc@{}}
+    \toprule
+    \multicolumn{3}{c}{Always-required dimensions} &
+    \multicolumn{3}{c}{Conditional dimensions} \\
+    Dimension             & Populated & Applicable &
+    Dimension             & Populated & Applicable \\
+    \midrule
+    Knowledge Domain      & 28        & 29         &
+    Mode of Inheritance   & 1         & 0          \\
+    Method                & 29        & 29         &
+    Mendelian Segregation & 1         & 0          \\
+    Target Type           & 29        & 29         &
+    Penetrance            & 2         & 4          \\
+    Resolution            & 29        & 29         &
+    Measurement Target    & 10        & 11         \\
+    Credibility           & 29        & 29         &
+    Gene Relation         & 1         & 11         \\
+    Phenotype Scale       & 29        & 29         &
+    Organism              & 8         & 8          \\
+    Variant Ascertainment & 21        & 21         &
+    Knockout Type         & 1         & 6          \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The always-required dimensions are 29 of 29 by construction, with one
+exception: Knowledge Domain is 28 of 29, because a cited anti-p40
+antibody trial is drug-response evidence with no fitting genetic
+knowledge domain. Among conditional dimensions, well-calibrated ones
+such as Measurement Target (10 of 11) and Organism (8 of 8) are almost
+always populated when their activation conditions fire, whereas others
+highlight activation or enumeration gaps that motivate candidate
+extensions, as discussed in the main text.

@@ -1,34 +1,171 @@
 % =====================================================================
-%  S1 (Supplementary Notes): the annotation and review protocol suite.
-%  Fragment \input by supplement.tex under the S1 part. No preamble here.
+%  SN2 (Supplementary Notes): the annotation and review protocol suite.
+%  Fragment \input by supplement.tex under the Supplementary Notes part.
+%  No preamble here.
 % =====================================================================
 \section{The annotation and review protocol suite}
 \label{sec:supp-protocol-suite}
 
 The annotation workflow described in the main paper has been
 consolidated into a versioned, openly published protocol suite,
-available on GitHub in the project
+available in the project
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/protocols}}
-The suite separates the rules of
-annotation from their execution. A mode-agnostic annotation protocol
-(\texttt{PROTOCOL.md}) states what a well-formed annotation requires;
-two mode-specific protocols specialise it for autonomous drafting
-(\texttt{PROTOCOL\_AUTONOMOUS.md}) and for interactive,
-curator-in-the-loop work; and a separate review protocol
-(\texttt{REVIEW\_PROTOCOL.md}, with an interactive variant) governs the
-assertion-by-assertion review of drafted annotations. A
-labelling-examples document records worked cases for the recurring
-judgement calls. The protocols are packaged as two executable skills
+The suite separates \emph{what} a well-formed annotation or review must
+contain from \emph{how} it is executed (manually or with AI assistance),
+and is used in both tracks of the pilot: the manual curator-authored
+track and the AI-drafted track.
+
+A mode-agnostic annotation protocol (\texttt{PROTOCOL.md}) states the
+requirements for a valid annotation (classes, dimensions, source
+anchoring, and flag semantics). Two mode-specific specialisations adapt
+it for autonomous drafting (\texttt{PROTOCOL\_AUTONOMOUS.md}) and for
+interactive, curator-in-the-loop work. A separate review protocol
+(\texttt{REVIEW\_PROTOCOL.md}, with an interactive variant) governs
+assertion-by-assertion review of drafted annotations. A document of
+labelling examples records worked cases for the recurring judgement
+calls. These written protocols are also packaged as executable skills
 (defined in \cref{sec:supp-skills}), one for annotation and one for
 review, so that the same rules can be applied by a human curator or by
 an AI assistant working under curator supervision.
 
-Two points of provenance are recorded. First, the pilot corpus
-described in the main paper was annotated under an earlier procedure
-(protocol v0); the suite described here is the later formalisation, and
-the pilot annotations remain valid under it. Second, the AI-drafted
-annotations were drafted with Claude Opus 4.7 and reviewed with Claude
-Opus 4.8 under the review skill by an author whose expertise is in
-genomic data curation and the evidence model rather than in human
-or population genetics, with every verdict adjudicated by the curator; the
-curator, not the model, is the authority for the recorded annotations.
+\subsection{Manual-track protocol}
+
+In the \emph{manual track}, four of the six publications (Jossin 2017,
+Davis 2011, Nelson 1992, Gupta 2015) were annotated by Vladimir
+Seplyarskiy, a researcher in human and population genetics specialising
+in human germline mutation and mutational processes (Assistant
+Professor at UT~Southwestern; formerly Harvard Medical School and
+Brigham and Women's Hospital). This expertise covers the
+human-genetics and population-genetics knowledge domains exercised by
+the corpus.
+
+For each paper, the curator:
+
+\begin{enumerate}
+  \item read the PDF in full and marked relevant passages as highlights
+        and short callouts;
+  \item exported the marks with a helper script that converts PDF
+        annotations into a structured JSON record (page, offset,
+        highlighted text, free-text callout);
+  \item constructed a summary table with one row per paper capturing
+        high-level judgements (knowledge domain, method, credibility,
+        resolution, mode of inheritance, and so on); and
+  \item mapped the highlights and summary row into the schema,
+        producing a YAML file conforming to the
+        \texttt{GeneticEvidence} model.
+\end{enumerate}
+
+Whenever this mapping required a normalisation step, for example
+turning the free-text ``localisation and protein expression'' into the
+enumeration values \texttt{LOCALIZATION} and \texttt{EXISTENCE}, the
+change was recorded inline as a \texttt{normalization\_note} with
+\texttt{type: ai\_normalization} and the original text preserved.
+These notes make later audit and ontology alignment straightforward.
+
+All manual-track annotations were then validated against the SHACL
+schema (\texttt{schema/genetic\_evidence.shacl.ttl}). Violations, such
+as a missing always-required dimension or a conditional dimension whose
+activation condition fired but whose value was absent, had to be
+resolved before the annotation was admitted to the corpus.
+
+The four manual annotations are treated as \emph{ground truth} for the
+purposes of this work. They are not a gold standard in the statistical
+sense, because there is still only one annotator, but they are the
+authoritative reference against which the AI-drafted track is
+evaluated.
+
+\subsection{AI-drafted-track protocol}
+
+In the \emph{AI-drafted track}, two publications (Duerr 2006 and
+Inouye 2018) were annotated directly from their PDFs by an AI assistant
+following the same schema, using the four manual annotations as worked
+examples.
+
+Concretely, the assistant is provided with:
+
+\begin{itemize}
+  \item the schema (\texttt{schema/dimensions.md} and the SHACL file),
+  \item the four manual annotations,
+  \item the source PDFs, and
+  \item the autonomous-annotation skill (see \cref{sec:supp-skills}).
+\end{itemize}
+
+It then produces draft YAML annotations in the same format as the
+manual ones. When the assistant is uncertain about a mapping or has to
+make a judgement call that a human curator might reasonably contest, it
+records this inline using two flag types:
+
+\begin{itemize}
+  \item \texttt{ai\_uncertainty} for cases where the mapping is judged
+        unreliable and a human decision is preferred; and
+  \item \texttt{ai\_assumption} for judgements made without explicit
+        support in the text that should be revisited at review time
+        rather than silently absorbed.
+\end{itemize}
+
+The AI-drafted annotations are \emph{not} accepted as is. Each was
+reviewed assertion by assertion by one of the authors, a curator with
+expertise in genomic data curation and the evidence model rather than
+in human or population genetics, operating under the review skill. The
+reviewer checked:
+
+\begin{itemize}
+  \item faithful representation of the source text;
+  \item conformance to the schema, including conditional-activation
+        rules; and
+  \item appropriateness of any \texttt{ai\_uncertainty} or
+        \texttt{ai\_assumption} flags.
+\end{itemize}
+
+Corrections were applied directly to the YAML, with every change and
+ruling logged under \texttt{annotations/reviews/}. Table~ST1
+summarises the resulting verdicts per \texttt{GeneticEvidence} item,
+and Supplementary Note~SN4 analyses them qualitatively. In all cases,
+the \emph{curator}, not the model, is the authority for the recorded
+annotations.
+
+\subsection{Source anchoring and validation}
+
+A central epistemic commitment of the workflow is that every
+\emph{assertion} must be independently auditable back to its source.
+
+\begin{itemize}
+  \item Each assertion in a \texttt{GeneticEvidence} item carries a
+        \texttt{source\_span} with a page number and a concise key
+        phrase (typically under fifteen words) sufficient to locate the
+        passage by search in the PDF.
+  \item The phrase length limit is chosen to respect fair-use norms for
+        copyrighted publisher material while still making verification
+        practical.
+  \item The SHACL schema treats \texttt{source\_span} as mandatory, so
+        an annotation with any assertion lacking a source anchor is
+        rejected at validation time.
+\end{itemize}
+
+Across the six-paper pilot, 69 of 69 assertions (100\%) carry source
+spans by construction. Where a verbatim key phrase could not be
+reconstructed from the public PDF, for example a value taken from a
+table in a publisher PDF that is not checked into the repository, the
+annotation records this explicitly via a
+\texttt{source\_span\_is\_paraphrase} flag and an explanatory note, so
+that future curators can refine the anchor against the original file.
+
+\subsection{Provenance and protocol versions}
+
+Two provenance points are important for interpreting the corpus.
+
+First, the pilot corpus described in the main paper was initially
+annotated under an earlier procedure (``protocol~v0''). The suite
+described here is the subsequent, generalised formalisation. The pilot
+annotations remain valid under the current protocol, but some artefacts,
+such as slightly different span-selection conventions in the earliest
+AI-drafted annotations, are recorded as forward-looking notes rather
+than retro-fit edits.
+
+Second, the AI-drafted annotations were originally drafted with Claude
+Opus~4.7 and reviewed with Claude Opus~4.8, both operating under the
+executable skills. These implementation details are recorded only for
+reproducibility; they are not central to the scientific contribution.
+In all cases, every AI-produced annotation and every review verdict was
+adjudicated by the human curator, who remains the authority for the
+recorded annotations.

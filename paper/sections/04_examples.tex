@@ -16,7 +16,7 @@
 To demonstrate the model's coverage and to see where it strains, we
 applied it to six published genetic-evidence papers that span the
 major epistemic shapes encountered in literature-based variant
-interpretation (Supplementary Table~ST6). The six span the principal
+interpretation (Supplementary Table~ST9). The six span the principal
 epistemic shapes the model must accommodate: classical Mendelian human
 genetics (Gupta), population-scale association (Duerr) and case--control
 resequencing (Davis), model-organism and in vitro functional genetics
@@ -34,7 +34,7 @@ evaluation signal. All six annotations are available in the project
 repository; here we discuss two in detail.
 
 % The six-paper corpus table was moved to the supplement to keep the
-% main paper within the page limit; see Supplementary Table~ST6
+% main paper within the page limit; see Supplementary Table~ST9
 % (paper/sections/s2_tables.tex).
 
 Duerr et al.\ 2006 (\cref{sec:ex-duerr}) serves as our reference
@@ -49,35 +49,35 @@ directories.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-mo
 \subsection{A Genome-Wide Association Study Example}
 \label{sec:ex-duerr}
 
-Duerr et al. 2006 identified IL23R as an inflammatory bowel disease gene through a genome‑wide association study in
-non‑Jewish cases with ileal Crohn’s disease, followed by independent replication and family‑based transmission
-testing. Under our decomposition the paper yields seven GeneticEvidence items (Supplementary Table ST6 and Case
-Report CR‑DU): variant‑level discovery and replication, a family‑based transmission analysis, conditional
-fine‑mapping within IL23R, negative results at related IL‑23 pathway genes, and cited functional and mouse‑model
-support. Six of the seven items fit the current schema without strain. The seventh, a cited anti‑p40 antibody trial,
-is drug‑response evidence that exercises no existing genetic knowledge domain and therefore surfaces a
-translational‑scope gap. Curator review of this annotation also motivated three candidate extensions that remain
-provisional under the two‑papers rule: an explicit direction‑of‑effect dimension for protective vs risk‑conferring
-alleles, a construct for cross‑item therapeutic synthesis, and an extension of the conditional‑activation scope from
-gene‑ to variant‑level Mendelian context.
+Duerr et al. 2006 identified IL23R as an inflammatory bowel disease gene through a genome-wide association study in
+non-Jewish cases with ileal Crohn's disease, followed by independent replication and family-based transmission
+testing. Under our decomposition the paper yields seven GeneticEvidence items (Supplementary Table~ST9 and Case
+Report CR-DU): variant-level discovery and replication, a family-based transmission analysis, conditional
+fine-mapping within IL23R, negative results at related IL-23 pathway genes, and cited functional and mouse-model
+support. Six of the seven items fit the current schema without strain. The seventh, a cited anti-p40 antibody trial,
+is drug-response evidence that exercises no existing genetic knowledge domain and therefore surfaces a
+translational-scope gap. Curator review of this annotation also motivated three candidate extensions that remain
+provisional under the two-papers rule: an explicit direction-of-effect dimension for protective vs risk-conferring
+alleles, a construct for cross-item therapeutic synthesis, and an extension of the conditional-activation scope from
+gene- to variant-level Mendelian context.
 
-More details can be found in the Supplemental Note~SN6.
+More details can be found in the Supplementary Note~SN6.1.
 
 
 \subsection{A Polygenic Risk Score Stress Test}
 \label{sec:ex-inouye}
 
-Inouye et al. 2018 constructed and externally validated a meta‑genomic risk score (metaGRS) for coronary artery
+Inouye et al. 2018 constructed and externally validated a meta-genomic risk score (metaGRS) for coronary artery
 disease from 1,745,180 SNPs, combining three prior scores and testing performance in 482,629 UK Biobank
-participants. Unlike Duerr’s variant‑level association, the target here is a derived score spanning the whole genome
-in aggregate, and the main measurements are epidemiological (hazard ratio, C‑index, cumulative incidence). Our
+participants. Unlike Duerr's variant-level association, the target here is a derived score spanning the whole genome
+in aggregate, and the main measurements are epidemiological (hazard ratio, C-index, cumulative incidence). Our
 annotation decomposes the paper into five GeneticEvidence items covering score construction, external validation,
-independence from conventional risk factors, age‑stratified cumulative risk, and performance in medicated subgroups (
-Case Report CR‑IN). All five items are representable in the current model but only through deliberate “least‑wrong”
-choices (for example, treating the score as a gene‑level target). These forced fits are recorded as six candidate
-extensions, including a score target type, a whole‑genome aggregate resolution, a target‑composition axis
-distinguishing single from aggregate targets, an epidemiological measurement‑target vocabulary, a structured cohort
-descriptor, and a flag for derived‑artifact targets. Where and how the model strains is thus made explicit rather
+independence from conventional risk factors, age-stratified cumulative risk, and performance in medicated subgroups (
+Case Report CR-IN). All five items are representable in the current model but only through deliberate ``least-wrong''
+choices (for example, treating the score as a gene-level target). These forced fits are recorded as six candidate
+extensions, including a score target type, a whole-genome aggregate resolution, a target-composition axis
+distinguishing single from aggregate targets, an epidemiological measurement-target vocabulary, a structured cohort
+descriptor, and a flag for derived-artifact targets. Where and how the model strains is thus made explicit rather
 than hidden.
 
-More details can be found in the Supplemental Note~SN6.
+More details can be found in the Supplementary Note~SN6.2.
