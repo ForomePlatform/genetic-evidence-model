@@ -26,11 +26,11 @@ characterisation of basic and pre-clinical scientific evidence needed
 for automated reasoning and AI-ready infrastructures.
 
 Each scientific domain demands a tailored approach for structuring
-and communicating evidence, and this need is particularly prominent
-in clinical genomics, which is the focus of this paper. Genetic
-evidence is produced under diverse contexts, from experimental model
-systems to large-scale population studies, that are not fully
-supported by current standards. To properly use evidence derived from
+and communicating evidence. For example, the genetic evidence
+discussed in this paper is produced in diverse contexts, from
+experimental model systems to large-scale population studies, that
+are not fully supported by current standards.
+To properly use evidence derived from
 scientific literature in clinical workflows, two principal challenges
 require standardisation: \emph{Relevance and Specificity}, that is,
 how precisely a genetic finding maps to an individual patient,
@@ -57,16 +57,15 @@ automated parsing.
     specialisations, plus a compact dimensional vocabulary
     formalised using the W3C Shapes Constraint Language (SHACL)%
     ~\cite{w3c-shacl}.
-    \item A worked mapping of the model to six genetic-evidence papers
-    spanning human, population, model-organism, and polygenic-score
-    genetics, with annotations and extraction tooling.
+    \item A mapping of the model to six genetic-evidence papers
+        covering human, population, model-organism, and polygenic-score
+        genetics, with extraction tooling.
     \footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model}}
     \item A human--AI collaborative annotation workflow.
     \item A structural alignment of the core classes to HL7 FHIR Evidence, with a
-    credibility representation that decomposes certainty into separately rated
-    facets anchored on SEPIO confidence; the dimensions are
-    designed to align with ECO, SEPIO, IAO, and OBI, with a partial example of term-level mapping
-    provided in Supplementary Note~SN5.
+        credibility representation that decomposes certainty into SEPIO-anchored
+        facets; the dimensions are designed to align with ECO, SEPIO, IAO, and OBI,
+        with a partial term-level mapping provided in Supplementary Note~SN5.
 \end{itemize}
 
 The remainder of the paper reviews related standards
