@@ -99,16 +99,15 @@ encoded as such in the SHACL distribution and lift to OWL subsumption
 when the schema is later axiomatised. The choice of structure is thus
 part of each dimension's definition.
 
-Two additional dimensions, Phenotype Scale and Variant Ascertainment,
-were added to the core set during the annotation work described in
-\cref{sec:workflow}. Phenotype Scale distinguishes evidence about
+Two further dimensions emerged during the annotation work
+(\cref{sec:workflow}). Phenotype Scale distinguishes evidence about
 molecular phenotypes (for example, binding or activity) from cellular,
 histological, organismal, or clinical phenotypes, and is independent
-of the scale of the genetic target. Variant Ascertainment records how
-the variant entered the study, such as being observed in affected
-individuals or controls, drawn from a database of known polymorphisms,
-or constructed synthetically. Both dimensions applied across all six
-annotated publications and are revisited in \cref{sec:discussion}.
+of the scale of the genetic target. Variant Ascertainment,
+recording how the variant entered the
+study, is meaningful only for variant-level targets and is added as a
+\emph{conditional} dimension, required when Target Type is
+\dimval{Variant}. Both are revisited in \cref{sec:discussion}.
 
 The remaining dimensions are \emph{conditional}: they are required, or
 even meaningful, only when other dimensions take particular values. It
@@ -147,9 +146,9 @@ per question. Representing the three as one field would conflate them.
 \centering
 \caption{Always-required dimensions of the \GeneticEvidence{} model.
 These apply to every evidence item regardless of context. The final
-two rows (Phenotype Scale and Variant Ascertainment) were added to
-the always-required set during the annotation work in
-\cref{sec:workflow}. KD abbreviates Knowledge Domain.}
+row (Phenotype Scale) was added to the always-required set during the
+annotation work in \cref{sec:workflow}. KD abbreviates Knowledge
+Domain.}
 \label{tab:dimensions-core}
 \small
 \begin{tabularx}{\linewidth}{@{}llllX@{}}
@@ -162,7 +161,6 @@ Target Type            & categorical       & single   & obj.       & \dimval{Gen
 Resolution             & categorical       & single   & obj.       & \dimval{Window}, \dimval{Gene}, \dimval{Functional Element}, \dimval{Position}, \dimval{Variant} \\
 Credibility            & rating ${+}$ facets & multiple & subj.      & overall rating ${+}$ \texttt{sample\_size}, \texttt{replication}, \texttt{multiple\_testing}, \texttt{stratification\_control}, \ldots \\
 Phenotype Scale        & categorical       & single   & obj.       & \dimval{Molecular}, \dimval{Cellular}, \dimval{Histological}, \dimval{Organismal}, \dimval{Clinical} \\
-Variant Ascertainment  & categorical       & multiple & obj.       & \dimval{Observed in Cases}, \dimval{Observed in Controls}, \dimval{From Database}, \dimval{Synthetic} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -183,6 +181,7 @@ Dimension              & Value type   & Card.    & Activation condition \\
 Mode of Inheritance    & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
 Mendelian Segregation  & boolean      & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
 Penetrance             & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Variant} \\
+Variant Ascertainment  & categorical  & multiple & TT = \dimval{Variant} \\
 Measurement Target     & categorical  & multiple & KD $\supseteq$ \dimval{Gene Function} \\
 Gene Relation          & categorical  & single   & KD $\supseteq$ \dimval{Gene Function} \\
 Organism               & categorical  & multiple & MT $\supseteq$ \dimval{In Vivo} OR KD $\supseteq$ \dimval{Model Organism} \\
