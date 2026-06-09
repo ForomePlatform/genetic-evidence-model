@@ -63,7 +63,7 @@ change was recorded inline as a \texttt{normalization\_note} with
 These notes make later audit and ontology alignment straightforward.
 
 All manual-track annotations were then validated against the SHACL
-schema (\texttt{schema/genetic\_evidence.shacl.ttl}). Violations, such
+schema (\fpath{schema/genetic_evidence.shacl.ttl}). Violations, such
 as a missing always-required dimension or a conditional dimension whose
 activation condition fired but whose value was absent, had to be
 resolved before the annotation was admitted to the corpus.
@@ -84,7 +84,7 @@ examples.
 Concretely, the assistant is provided with:
 
 \begin{itemize}
-  \item the schema (\texttt{schema/dimensions.md} and the SHACL file),
+  \item the schema (\fpath{schema/dimensions.md} and the SHACL file),
   \item the four manual annotations,
   \item the source PDFs, and
   \item the autonomous-annotation skill (see \cref{sec:supp-skills}).
@@ -118,7 +118,7 @@ reviewer checked:
 \end{itemize}
 
 Corrections were applied directly to the YAML, with every change and
-ruling logged under \texttt{annotations/reviews/}. Table~ST1
+ruling logged under \fpath{annotations/reviews/}. Table~ST1
 summarises the resulting verdicts per \texttt{GeneticEvidence} item,
 and Supplementary Note~SN4 analyses them qualitatively. In all cases,
 the \emph{curator}, not the model, is the authority for the recorded

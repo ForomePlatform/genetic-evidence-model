@@ -17,6 +17,16 @@
 \usepackage{hyperref}         % load near last
 \usepackage{cleveref}         % load after hyperref; \cref{} auto-adds "Figure"/"Table"/etc.
 
+% ---------- breakable file paths ----------
+% \fpath{...} typesets a file path in typewriter that may wrap at path
+% separators, so long paths (e.g. schema/genetic_evidence.shacl.ttl) do
+% not run past the right margin. Verbatim-style: do NOT escape "_".
+\DeclareUrlCommand\fpath{\urlstyle{tt}}
+\Urlmuskip=0mu plus 1mu\relax      % allow a little stretch around break points
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\.\do\-}  % break at . and - as well as the default /
+\makeatother
+
 % ---------- listings setup for YAML annotations ----------
 % Define a lightweight YAML "language" for listings.
 \definecolor{yamlKey}{RGB}{0,90,156}
