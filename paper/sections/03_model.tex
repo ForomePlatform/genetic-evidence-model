@@ -13,7 +13,7 @@ The model comprises three parts: a small set of \emph{core classes}
 (\cref{sec:model-classes}) that define what a unit of evidence is and
 how evidence items compose; a \emph{dimensional vocabulary}
 (\cref{sec:model-dimensions}) that describes each evidence item along
-around twenty axes; and a \emph{conditional activation} mechanism
+roughly twenty axes; and a \emph{conditional activation} mechanism
 (\cref{sec:model-conditional}) that keeps the vocabulary compact by
 requiring dimensions only when they are semantically appropriate.
 
@@ -93,10 +93,11 @@ hierarchy: a single item may carry several at once (a functional study
 read in a clinical-genetics context), which the multi-valued
 cardinality captures directly. Phenotype Scale is an ordinal
 granularity (molecular through clinical), not a class hierarchy, and
-modelling it as subsumption would misrepresent it. Where a dimension
-genuinely is hierarchical, Method is, its \texttt{is\_a} relations are
-encoded as such in the SHACL distribution and lift to OWL subsumption
-when the schema is later axiomatised. The choice of structure is thus
+modelling it as subsumption would misrepresent it.
+Method is a genuinely hierarchical dimension; its \texttt{is\_a} relations
+are encoded as such in the SHACL distribution and lift to OWL
+subsumption when the schema is later axiomatised.
+The choice of structure is thus
 part of each dimension's definition.
 
 Two further dimensions emerged during the annotation work

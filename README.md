@@ -35,13 +35,15 @@ evidence encountered in literature-based variant interpretation:
 | `nelson1992.yaml`    (CD18)     | classical molecular genetics         | manual (ground truth)        |
 | `gupta2015.yaml`     (ATP6AP2)  | low-credibility edge case            | manual (ground truth)        |
 | `v0/duerr2006.yaml`  (IL23R)    | clean GWAS exemplar                  | AI-drafted, expert-reviewed  |
-| `v0/inouye2018.yaml` (metaGRS)  | polygenic-score model-extension case | AI-drafted, expert-reviewed  |
+| `v1/inouye2018.yaml` (metaGRS)  | polygenic-score model-extension case | AI-drafted, expert-reviewed  |
 
 The four manual annotations live at the top of `annotations/`. The two
 AI-drafted annotations are versioned: `annotations/v0/` holds the
 original protocol-v0 drafts (curator-reviewed), and `annotations/v1/`
-holds their re-annotation under the current protocol. The paper's
-corpus and appendices reference the v0 drafts.
+holds their re-annotation under the current protocol. The paper
+documents **Duerr `v0`** and **Inouye `v1`** (the protocol matured on
+the Duerr review and was then applied to Inouye); the other version of
+each is retained for comparison.
 
 For manually annotated papers, PDF highlights and sticky-note callouts are the
 authoritative ground truth. The YAML is a structured transformation of those

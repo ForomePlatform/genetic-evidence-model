@@ -17,8 +17,12 @@ evidence.
 
 Two dimensions have been promoted under this rule so far:
 Phenotype Scale (Jossin + Davis + Nelson) and Variant Ascertainment
-(Davis + Nelson + Duerr + Inouye). Both now appear in the
-always-required vocabulary.
+(Davis + Nelson + Duerr). Both predate the Inouye `v1` re-annotation,
+which marks variant ascertainment `not_applicable_or_omitted` for its
+score target (so Inouye no longer counts toward Variant Ascertainment's
+promotion); the dimension remains promoted on its three independent
+uses. Phenotype Scale is always-required; Variant Ascertainment is
+conditionally required when `target_type = VARIANT`.
 
 ## Candidate extensions, grouped by concern
 
@@ -92,7 +96,8 @@ aggregate-score-level evidence. Whether they become first-class
 dimensions or whether polygenic scores warrant a distinct
 `GeneticEvidence` subtype is a question for a second polygenic-score
 annotation. All six are currently exercised via placeholder values
-in `annotations/v0/inouye2018.yaml`.
+in `annotations/v1/inouye2018.yaml` (the `v0` draft is retained for
+comparison).
 
 #### CE-IN1: `SCORE` value for Target Type
 

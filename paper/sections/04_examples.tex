@@ -52,13 +52,15 @@ gene- to variant-level Mendelian context. Further detail is in Supplementary Not
 \label{sec:ex-inouye}
 
 Inouye et al. 2018 constructed a meta-genomic risk score (metaGRS) for coronary artery disease,
-combining three prior scores and testing performance in UK Biobank
+combining three component scores and testing performance in UK Biobank
 participants. Unlike Duerr's variant-level association, the target here is a derived score spanning the whole genome,
 and the main measurements are epidemiological. Our
-annotation decomposes the paper into five GeneticEvidence items covering score construction, external validation,
-independence from conventional risk factors, age-stratified cumulative risk, and performance in medicated subgroups
-(Case Report CR-IN). All five items are representable in the current model but only through deliberate ``least-wrong''
-choices (for example, treating the score as a gene-level target). These forced fits are recorded as six candidate
+annotation decomposes the paper into four GeneticEvidence items: the score's predictive and stratifying power, its
+independence from conventional risk factors, its persistence among medicated individuals, and the headline finding
+that combining three component scores outperforms each
+(Case Report CR-IN). All four are representable in the current model but only through deliberate ``least-wrong''
+choices (for example, forcing the score into the variant target type and leaving variant ascertainment
+not-applicable). These forced fits are recorded as six candidate
 extensions, including a score target type, a whole-genome resolution, a target-composition axis
 distinguishing single from aggregate targets, an epidemiological measurement-target vocabulary, a structured cohort
 descriptor, and a flag for derived-artefact targets. Where and how the model strains is thus recorded openly rather

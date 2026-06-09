@@ -126,67 +126,71 @@ Inouye and colleagues built and externally validated a meta-genomic risk
 score (metaGRS) for coronary artery disease from 1{,}745{,}180 variants,
 testing it in 482{,}629 UK Biobank participants. The target is a derived
 whole-genome score and the measurements are epidemiological (hazard
-ratio, C-index), so every item strains a variant-level model. The five
-items (\cref{tab:cr-inouye}) are representable only through deliberate
-``least-wrong'' placeholder choices, each recorded as a forced fit and a
-candidate extension rather than hidden.
+ratio, C-index), so every item strains a variant-level model. The
+annotation used here is the \texttt{v1} re-annotation produced under the
+current protocol, the one matured on the Duerr review (the original
+five-item \texttt{v0} draft is retained in the repository for
+comparison). It decomposes the paper into four claim-coherent items
+(\cref{tab:cr-inouye}), each representable only through deliberate
+``least-wrong'' placeholder choices that are recorded as forced fits and
+candidate extensions rather than hidden.
 
 \begin{table}[H]
   \centering
   \footnotesize
-  \caption[Inouye 2018: evidence-item decomposition]{Inouye 2018: the
-  five \GeneticEvidence{} items. Every item carries the same placeholder
-  target type and resolution (\dimval{Gene}), flagged against CE-IN1 and
-  CE-IN2; the true target is a whole-genome polygenic score.}
+  \caption[Inouye 2018: evidence-item decomposition]{Inouye 2018
+  (\texttt{v1}): the four \GeneticEvidence{} items. Every item forces the
+  same placeholder target type and resolution (\dimval{Variant}), flagged
+  against CE-IN1 and CE-IN2; the true target is a whole-genome polygenic
+  score.}
   \label{tab:cr-inouye}
   \begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X p{1.5cm} l@{}}
     \toprule
     ID & Claim & Target$^{\dagger}$ & Cred. \\
     \midrule
-    GE-1 & Construction and internal metrics of metaGRS & \dimval{Gene} & High \\
-    GE-2 & External validation in UK Biobank (HR, C-index) & \dimval{Gene} & High \\
-    GE-3 & Independence from conventional risk factors & \dimval{Gene} & High \\
-    GE-4 & Age-stratified risk trajectories by quintile & \dimval{Gene} & Medium \\
-    GE-5 & Predictive power persists under current therapy & \dimval{Gene} & Medium \\
+    GE-1     & Prediction and quintile stratification (HR 1.71/SD; 4.17-fold) & \dimval{Variant} & High \\
+    GE-2     & Independence from six conventional risk factors & \dimval{Variant} & High \\
+    GE-3     & Stratification persists among medicated individuals & \dimval{Variant} & High \\
+    GE-new-1 & Combining three component scores outperforms each & \dimval{Variant} & Medium \\
     \bottomrule
   \end{tabularx}
 
-  {\footnotesize $^{\dagger}$Placeholder; method is \dimval{Statistical
-  Genetics} throughout. The true target is a polygenic \dimval{Score}
-  (CE-IN1) at whole-genome-aggregate resolution (CE-IN2).}
+  {\footnotesize $^{\dagger}$Placeholder; the true target is a polygenic
+  \dimval{Score} (CE-IN1) at whole-genome-aggregate resolution (CE-IN2).
+  Method is recorded at the intermediate \dimval{Association Study} /
+  \dimval{Meta-Analysis} level (no leaf fits polygenic-score association;
+  flag F-METH), and variant ascertainment is marked not-applicable (the
+  CE-IN1 SHACL point).}
 \end{table}
 
-The validation item GE-2, shown abridged below, makes the strain
-concrete: the \texttt{target\_type} and \texttt{resolution} are
-placeholders flagged against CE-IN1 and CE-IN2, and the epidemiological
-measurements (hazard ratio, C-index) are carried against CE-IN4.
+The independence item GE-2, shown abridged below, makes the strain
+concrete: \texttt{target\_type} and \texttt{target\_resolution} are
+forced to \dimval{Variant} (flagged against CE-IN1 and CE-IN2), variant
+ascertainment is marked not-applicable (the CE-IN1 SHACL point), and the
+epidemiological measures are carried as candidate-extension targets
+(CE-IN4).
 
 \begin{lstlisting}[language=yaml]
 id: GE-2
-label: "External validation of metaGRS in UK Biobank"
+label: "metaGRS predicts incident CAD largely independently
+        of six conventional risk factors"
 knowledge_domain: [POPULATION_GENETICS]
-method: [STATISTICAL_GENETICS]
-target_type: GENE              # placeholder; CE-IN1 proposes SCORE
-resolution: GENE               # placeholder; CE-IN2 -> WHOLE_GENOME_AGGREGATE
-candidate_extension_exercised: [CE-IN1, CE-IN2, CE-IN3, CE-IN4]
-target: "metaGRS"
-variant_ascertainment: [FROM_DATABASE]
+method: [ASSOCIATION_STUDY]    # intermediate; no leaf fits PGS assoc. (F-METH)
+target_type: VARIANT           # forced; CE-IN1 proposes SCORE
+target_resolution: VARIANT     # forced; CE-IN2 -> WHOLE_GENOME_AGGREGATE
+variant_ascertainment: not_applicable_or_omitted  # CE-IN1 (SHACL); F-VA
 phenotype_scale: CLINICAL
 credibility: HIGH
-credibility_comment: >
-  Prospective cohort of 482,629 independent of training set;
-  <5% non-European ancestry limits generalisability.
+# epidemiological measures (C-index, HR) in special_considerations; CE-IN4
 assertions:
   - id: GE-2.A1
-    statement: "Hazard ratio per SD of metaGRS is 1.71"
-    measurement_type: HAZARD_RATIO        # candidate value, CE-IN4
-    source_span: {page: 1,
-      key_phrase: "HR for CAD was 1.71 (95% CI 1.68 to 1.73) per SD"}
-  - id: GE-2.A2
-    statement: "metaGRS C-index exceeds every conventional risk factor"
-    measurement_type: C_INDEX             # candidate value, CE-IN4
-    source_span: {page: 1,
-      key_phrase: "C-index = 0.623 (95% CI 0.615 to 0.631)"}
+    statement: "metaGRS has a higher C-index than any single factor"
+    source_span: {page: 6,
+      phrase: "higher C-index (C = 0.623; 95% CI: 0.615 to 0.630)"}
+  - id: GE-2.A3
+    statement: "Adding metaGRS to all six factors raised C-index to 0.696"
+    source_span: {page: 6,
+      phrase: "C-index of 0.696 (95% CI: 0.688 to 0.703)"}
 \end{lstlisting}
 
 \paragraph{Candidate extensions.} The annotation surfaces six, the most
@@ -194,7 +198,11 @@ of any paper in the corpus:
 \begin{itemize}
   \item \textbf{CE-IN1, \dimval{Score} target type:} a metaGRS is
   neither gene nor variant but a derived composite predictor; add a
-  \dimval{Score} value (possibly subtyped polygenic vs composite).
+  \dimval{Score} value (possibly subtyped polygenic vs composite). The
+  v1 review sharpened this: under the forced \dimval{Variant} target the
+  variant-ascertainment conditional is unsatisfiable either way (omitting
+  it fires the rule; marking it not-applicable violates the shape), so
+  only a \dimval{Score} target dissolves the contradiction.
   \item \textbf{CE-IN2, \dimval{Whole Genome Aggregate} resolution:} the
   score spans the whole genome non-contiguously, which the
   contiguous/pointwise resolution values do not capture.

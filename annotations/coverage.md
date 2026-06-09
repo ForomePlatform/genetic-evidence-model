@@ -25,12 +25,23 @@ parts:
 > "applicable" counts (which predate full integration of the
 > AI-drafted papers) is still pending the `compute_coverage.py`
 > tooling; see the Methodology note.
+>
+> **Updated 2026-06-08**: the paper now documents the Inouye **`v1`**
+> re-annotation (4 items), produced under the protocol matured on the
+> Duerr review, in place of the original `v0` draft (5 items). Corpus
+> 29 -> 28; assertions 69 -> 95 (Inouye `v1` is more granular: 37 vs
+> 11). The always-required and Variant Ascertainment cells and the
+> Inouye flag counts are recomputed below. The conditional rows are
+> unchanged: both `v0` and `v1` Inouye are `POPULATION_GENETICS`
+> score-target papers that activate no conditional dimension except
+> Variant Ascertainment. `v0` Inouye is retained in the repository for
+> comparison.
 
-- **6 papers, 29 `GeneticEvidence` items** in total.
+- **6 papers, 28 `GeneticEvidence` items** in total.
 - **4 manual annotations** (Jossin, Davis, Nelson, Gupta) treated as
   ground truth.
-- **2 AI-drafted annotations** (Duerr, Inouye); Duerr was
-  curator-reviewed 2026-06-04, Inouye pending.
+- **2 AI-drafted annotations** (Duerr, Inouye), both curator-reviewed
+  (Duerr 2026-06-04 / `v0`; Inouye 2026-06-06 / `v1`).
 
 | Paper | GE items | Source | Credibility | Role |
 | ----- | -------: | ------ | ----------- | ---- |
@@ -38,28 +49,30 @@ parts:
 | Davis 2011  | 6 | manual | High      | breadth exemplar |
 | Nelson 1992 | 3 | manual | Medium    | classical molecular genetics |
 | Gupta 2015  | 2 | manual | Low       | low-credibility edge case |
-| Duerr 2006  | 7 | AI-drafted, reviewed | High | clean GWAS exemplar |
-| Inouye 2018 | 5 | AI-drafted | High/Medium | model-extension stress test |
-| **Total**   | **29** | | | |
+| Duerr 2006  | 7 | AI-drafted, reviewed (`v0`) | High | clean GWAS exemplar |
+| Inouye 2018 | 4 | AI-drafted, reviewed (`v1`) | High/Medium | model-extension stress test |
+| **Total**   | **28** | | | |
 
 ## Always-required dimensions
 
-For every dimension in this group, "applicable" = all 29 items. The
-schema validator rejects annotations that leave any of these empty,
-so population is 29/29 by construction, with one exception
-introduced by Duerr GE-new-1 (see below).
+For the first six dimensions in this group, "applicable" = all 28
+items. The schema validator rejects annotations that leave any of these
+empty, so population is 28/28 by construction, with one exception
+introduced by Duerr GE-new-1 (see below). Variant Ascertainment is
+required only when `target_type = VARIANT`, so its "applicable" count is
+restricted (see below).
 
 | Dimension              | Populated | Applicable |
 | ---------------------- | --------: | ---------: |
-| Knowledge Domain       | 28 | 29 |
-| Method                 | 29 | 29 |
-| Target Type            | 29 | 29 |
-| Resolution             | 29 | 29 |
-| Credibility            | 29 | 29 |
-| Phenotype Scale        | 29 | 29 |
-| Variant Ascertainment  | 21 | 21 |
+| Knowledge Domain       | 27 | 28 |
+| Method                 | 28 | 28 |
+| Target Type            | 28 | 28 |
+| Resolution             | 28 | 28 |
+| Credibility            | 28 | 28 |
+| Phenotype Scale        | 28 | 28 |
+| Variant Ascertainment  | 21 | 25 |
 
-**Knowledge Domain (28/29)** is no longer fully populated. Duerr
+**Knowledge Domain (27/28)** is no longer fully populated. Duerr
 GE-new-1 (a cited anti-p40 antibody trial added in the 2026-06-04
 review) is drug-response evidence with no fitting genetic
 `knowledge_domain`; the dimension is left
@@ -69,11 +82,15 @@ not-populated (an uncertainty-flagged omission, distinct from a
 considered not-applicable). This is the first corpus item that does
 not populate an always-required dimension.
 
-**Variant Ascertainment** is required *when applicable*, and
+**Variant Ascertainment (21/25)** is required *when applicable*, and
 "applicable" is restricted to items whose `target_type` is `VARIANT`.
-Of the 29 items, 21 target a variant; for the remaining 8
-(target_type GENE, etc.) the dimension is not activated and is
-correctly empty.
+Of the 28 items, 25 are subject to the condition: 21 (the manual papers
+plus Duerr) target a variant and populate it; the 4 Inouye `v1` items
+force a `VARIANT` target but mark VA `not_applicable_or_omitted` with an
+`ai_uncertainty` (a polygenic score has no single ascertainment mode -
+the CE-IN1 SHACL-unsatisfiability point), so they count as applicable
+but not populated. The remaining 3 gene-target items do not activate the
+condition and are correctly empty.
 
 ## Conditional dimensions
 
@@ -212,9 +229,9 @@ ai_assumption) to the two AI-drafted papers.
 | Davis  | manual      |   2   |    1       |    1     |    —    |    —      |
 | Nelson | manual      |   0   |    3       |    0     |    —    |    —      |
 | Gupta  | manual      |   0   |    1       |    0     |    —    |    —      |
-| Duerr  | AI-drafted  |   —   |    —       |    —     |    3    |    2      |
-| Inouye | AI-drafted  |   —   |    —       |    —     |    0    |    2      |
-| **Total** |          | **5** | **6**      | **1**    | **3**   | **4**     |
+| Duerr  | AI-drafted (`v0`) |   —   |    —       |    —     |    3    |    2      |
+| Inouye | AI-drafted (`v1`) |   —   |    —       |    —     |    3    |    4      |
+| **Total** |          | **5** | **6**      | **1**    | **6**   | **6**     |
 
 ### Observations
 
@@ -240,13 +257,17 @@ ai_assumption) to the two AI-drafted papers.
   descriptions map naturally onto HPO terms the curator chose to
   propose rather than invent.
 
-- **Inouye generated 0 AI-uncertainties despite stressing the
-  model** (5 GE items, 6 candidate extensions). The AI identified
-  every stress-test point as a candidate extension (the model is
-  missing a feature) rather than an uncertain mapping (the AI is
-  unsure which existing value applies). This is consistent with
-  the paper being a polygenic-score study: the gaps are
-  structural, not enumerative.
+- **Inouye `v1` carries 3 AI-uncertainties and 4 AI-assumptions**
+  (4 GE items, 6 candidate extensions). This reverses the `v0` reading
+  (which had 0 uncertainties): the 2026-06-06 review explicitly added
+  `ai_uncertainty` flags where the score target makes a mapping
+  genuinely undecidable rather than merely a missing feature -
+  variant ascertainment (F-VA: no ascertainment mode applies to a
+  score), method (F-METH: no leaf fits polygenic-score association),
+  and measurement target (F-MT: epidemiological outcomes have no
+  activated home). The structural gaps remain captured as the six
+  candidate extensions; the uncertainties mark where even the
+  least-wrong placeholder is contestable.
 
 - **Duerr generated 3 AI-uncertainties** (post-2026-06-04 review;
   the count is unchanged but the content shifted):
@@ -264,10 +285,11 @@ ai_assumption) to the two AI-drafted papers.
   placeholder choice (recording `COMPLEX` while flagging the
   enumeration gap).
 
-- **Inouye `ai_assumption` cases (2)** are measurement-target
-  encoding choices (how to record hazard ratio and C-index while
-  flagging the epidemiological-measurement gap as a candidate
-  extension).
+- **Inouye `v1` `ai_assumption` cases (4)** are the forced target-type
+  (F-TT: `VARIANT` for a score), the forced resolution (F-RES:
+  `VARIANT` for a whole-genome aggregate), the holistic credibility
+  tier (F-CRED: curator to confirm), and the decomposition into four
+  label-coherent items (F-DECOMP).
 
 ### Methodology note (flag counts)
 
