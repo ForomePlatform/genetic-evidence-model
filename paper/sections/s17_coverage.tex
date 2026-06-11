@@ -7,15 +7,15 @@
 This note reports how often each dimension is populated across the 28
 \GeneticEvidence{} items in the pilot corpus, and in how many
 items each dimension is applicable under the conditional-activation
-rules. The counts are computed from the released YAML annotations and
-the SHACL shapes, and a machine-readable report is provided in the
-repository under
+rules. The counts are produced by \fpath{scripts/compute_coverage.py}
+from the released YAML annotations, and a per-paper report is provided in
+the repository under
 \fpath{annotations/coverage.md}.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/annotations/coverage.md}}
 
 \begin{table}[H]
   \centering
   \small
-  \caption[Dimension population across 28 \GeneticEvidence{} items]{Dimension population across 28 \GeneticEvidence{} items from six papers (Duerr \texttt{v0}, Inouye \texttt{v1}). The left block lists always-required dimensions; the right block lists representative conditional dimensions and how often their activation conditions apply.}
+  \caption[Dimension population across 28 \GeneticEvidence{} items]{Dimension population across 28 \GeneticEvidence{} items from six papers (Duerr \texttt{v0}, Inouye \texttt{v1}), computed by \texttt{compute\_coverage.py}. The left block lists always-required dimensions; the right block lists conditional dimensions and how often their activation conditions apply.}
   \label{tab:supp-coverage}
   \begin{tabular}{@{}lcc@{\hspace{1em}}lcc@{}}
     \toprule
@@ -25,33 +25,38 @@ repository under
     Dimension             & Populated & Applicable \\
     \midrule
     Knowledge Domain      & 27        & 28         &
-    Mode of Inheritance   & 1         & 0          \\
+    Variant Ascertainment & 14        & 18         \\
     Method                & 28        & 28         &
-    Mendelian Segregation & 1         & 0          \\
+    Mode of Inheritance   & 0         & 1          \\
     Target Type           & 28        & 28         &
-    Penetrance            & 2         & 4          \\
+    Mendelian Segregation & 0         & 1          \\
     Resolution            & 28        & 28         &
-    Measurement Target    & 10        & 11         \\
+    Penetrance            & 2         & 4          \\
     Credibility           & 28        & 28         &
-    Gene Relation         & 1         & 11         \\
+    Measurement Target    & 10        & 11         \\
     Phenotype Scale       & 28        & 28         &
+    Gene Relation         & 1         & 11         \\
+                          &           &            &
     Organism              & 8         & 8          \\
-    Variant Ascertainment & 21        & 25         &
+                          &           &            &
     Knockout Type         & 1         & 6          \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The first six always-required dimensions are 28 of 28 by construction,
-with one exception: Knowledge Domain is 27 of 28, because a cited
-anti-p40 antibody trial in Duerr is drug-response evidence with no
-fitting genetic knowledge domain. Variant Ascertainment, required only
-when the target type is \dimval{Variant}, is 21 of 25: the four Inouye
-\texttt{v1} items force a \dimval{Variant} target but deliberately leave
-ascertainment not-applicable (the polygenic score has no single
-ascertainment mode), which is itself the CE-IN1 gap. Among the other
-conditional dimensions, well-calibrated ones such as Measurement Target
-(10 of 11) and Organism (8 of 8) are almost always populated when their
-activation conditions fire, whereas others highlight activation or
-enumeration gaps that motivate candidate extensions, as discussed in the
-main text.
+The six always-required dimensions are 28 of 28 by construction, with one
+exception: Knowledge Domain is 27 of 28, because a cited anti-p40
+antibody trial in Duerr is drug-response evidence with no fitting genetic
+knowledge domain. Among the conditional dimensions, Variant
+Ascertainment (required when the target type is \dimval{Variant}) is 14
+of 18: the four Inouye \texttt{v1} items force a \dimval{Variant} target
+but leave ascertainment not-applicable (a polygenic score has no single
+ascertainment mode), the CE-IN1 gap. Well-calibrated conditionals such as
+Organism (8 of 8) and Measurement Target (10 of 11) are populated
+whenever their activation fires, whereas Gene Relation (1 of 11) and
+Knockout Type (1 of 6) expose enumeration and over-broad-activation gaps
+that motivate candidate extensions. Mode of Inheritance and Mendelian
+Segregation are 0 of 1: the single \dimval{Human Genetics}~$+$~\dimval{Gene}
+item (Davis's case--control burden test) addresses them as not-applicable,
+the activation condition firing more broadly than the dimension is
+meaningful.

@@ -1,6 +1,7 @@
 ---
 name: genetic-evidence-annotation
 description: Produce a YAML annotation of a genetics paper under the Genetic Evidence Model (GEM) schema. Use when the user asks to annotate, parse, or extract structured evidence from a genetics, model-organism, population-genetics, or polygenic-score publication, especially when they reference the GEM schema, the ForomePlatform/genetic-evidence-model repository, or files like dimensions.md, EXTENSIONS.md, or existing annotations in annotations/. Triggers on phrases like "annotate this paper with GEM", "produce a GEM annotation", "extract GeneticEvidence items", or "draft an annotation under the genetic-evidence model".
+version: 1.1.1
 ---
 
 # Genetic Evidence Model annotation
@@ -8,6 +9,12 @@ description: Produce a YAML annotation of a genetics paper under the Genetic Evi
 A skill for producing autonomous YAML annotations of genetics
 papers under the GEM schema, following the protocol documented in
 `protocols/PROTOCOL.md` and `protocols/PROTOCOL_AUTONOMOUS.md`.
+
+This skill (v1.1.1) targets **GEM schema v1.1** and **PROTOCOL v1.1**.
+The v1.1 schema machine-checks the always-required dimensions, the value
+enumerations, and a mandatory `source_span` on every assertion; output
+should conform to `schema/genetic_evidence.shacl.ttl` (validate with
+`scripts/validate_annotations.py`).
 
 ## What this skill does
 
@@ -50,8 +57,11 @@ stops. It does not invent a paper to annotate.
   without further questions.
 - It does not produce case reports. Case reports are a separate
   downstream artefact.
-- It does not validate the output against the SHACL schema.
-  SHACL validation is a separate step.
+- SHACL validation is a separate, optional step. The bundle ships the
+  canonical validator: after `pip install pyshacl rdflib pyyaml`, run
+  `python scripts/validate_annotations.py <annotation>.yaml` to check the
+  output against `schema/genetic_evidence.shacl.ttl`. Do not hand-roll the
+  YAML-to-RDF mapping; `scripts/yaml_to_rdf.py` is authoritative.
 - It does not modify the schema or `EXTENSIONS.md`. Candidate
   extensions are emitted in the annotation but schema changes
   require human action (per `protocols/PROTOCOL.md` section 5.2).

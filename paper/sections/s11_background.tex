@@ -1,8 +1,8 @@
 % =====================================================================
 %  §2 — Background and Related Work
 %
-%  Six families of standards: FHIR Evidence, ECO, SEPIO, GA4GH GKS,
-%  ACMG-AMP, IAO/OBI/PROV-O. Each in a compact paragraph. Closes
+%  Seven families of standards: FHIR Evidence, ECO, SEPIO, GA4GH GKS,
+%  ACMG-AMP, IAO/OBI, PROV-O. Each in a compact paragraph. Closes
 %  with a paragraph naming the gap this paper addresses.
 %
 %  Revised 2026-04-21: standards-mapping table dropped for space
@@ -21,7 +21,7 @@ toward downstream decision-making, grounded in formal constraints
 and explicit provenance, and treating target resolution (variant,
 gene, region, whole-genome aggregate, and so on) as a first-class
 concern while relying on GA4GH standards for sequence identifiers.
-This section positions the schema among the six families of standards
+This section positions the schema among the seven families of standards
 we have engaged with and closes by spelling out the coverage gap
 that motivated the work. A first term-level alignment is given in SN5;
 completing coverage and formalising the mappings in OWL
@@ -87,17 +87,21 @@ kind of input an ACMG/AMP-compatible classifier would consume.
 A term-level mapping from our Method and Credibility dimensions
 to the ACMG/AMP evidence codes is scoped as future work.
 
-\paragraph{Upper ontologies: IAO, OBI, PROV-O.}
+\paragraph{Upper ontologies: IAO and OBI.}
 The Information Artefact Ontology (IAO)~\cite{iao2015} and the
 Ontology for Biomedical Investigations (OBI)~\cite{obi2016} provide
 upper-level scaffolding for many OBO-compliant biomedical
 ontologies: IAO supplies classes such as
 \emph{information-content-entity} and \emph{textual-entity}, and OBI
 supplies the assay and protocol hierarchies relevant to our Method
-dimension. The W3C PROV Ontology (PROV-O)~\cite{prov_o} supplies
-standard provenance relationships. Formal alignment of our top-level
-classes with IAO, OBI, and PROV-O is scoped as future work, alongside
+dimension. Formal alignment of our top-level
+classes with IAO and OBI is scoped as future work, alongside
 a planned OWL/LinkML rendering of the schema.
+
+\paragraph{Provenance: PROV-O.}
+The W3C PROV Ontology (PROV-O)~\cite{prov_o} supplies standard
+provenance relationships; aligning our model with PROV-O is also
+scoped as future work.
 
 \paragraph{Related annotation efforts.}
 The Clinical Genome Resource (ClinGen) evidence curation

@@ -21,6 +21,8 @@
 #   genetic-evidence-annotation-skill.zip
 #   └── genetic-evidence-annotation/
 #       ├── SKILL.md
+#       ├── LICENSE.txt                 (CC BY 4.0: docs, protocols, annotations)
+#       ├── LICENSE-code.txt            (Apache 2.0: schema and tooling)
 #       ├── PROTOCOL.md
 #       ├── PROTOCOL_AUTONOMOUS.md
 #       ├── LABELING_EXAMPLES.md
@@ -28,6 +30,9 @@
 #       │   ├── dimensions.md
 #       │   ├── EXTENSIONS.md
 #       │   └── genetic_evidence.shacl.ttl
+#       ├── scripts/                    (canonical validator + converter)
+#       │   ├── validate_annotations.py
+#       │   └── yaml_to_rdf.py
 #       └── exemplars/                  (four curator-led annotations)
 #           ├── jossin2017.yaml
 #           ├── davis2011.yaml
@@ -39,15 +44,20 @@
 #   genetic-evidence-review-skill.zip
 #   └── genetic-evidence-review/
 #       ├── SKILL.md
+#       ├── LICENSE.txt                 (CC BY 4.0: docs, protocols, annotations)
+#       ├── LICENSE-code.txt            (Apache 2.0: schema and tooling)
 #       ├── REVIEW_PROTOCOL.md
 #       ├── REVIEW_PROTOCOL_INTERACTIVE.md
 #       ├── PROTOCOL.md                 (annotation protocol; reviewer needs it)
 #       ├── LABELING_EXAMPLES.md
 #       ├── ROADMAP.md
-#       └── schema/
-#           ├── dimensions.md
-#           ├── EXTENSIONS.md
-#           └── genetic_evidence.shacl.ttl
+#       ├── schema/
+#       │   ├── dimensions.md
+#       │   ├── EXTENSIONS.md
+#       │   └── genetic_evidence.shacl.ttl
+#       └── scripts/                    (canonical validator + converter)
+#           ├── validate_annotations.py
+#           └── yaml_to_rdf.py
 #
 # Path references in SKILL.md and the protocol files are rewritten
 # during bundling so the bundled skill is self-contained without
@@ -125,6 +135,19 @@ SCHEMA_FILES=(
   "schema/EXTENSIONS.md"
   "schema/genetic_evidence.shacl.ttl"
 )
+# License files shipped with every bundle: the documentation/protocols/
+# annotations are CC BY 4.0; the schema and tooling are Apache 2.0.
+LICENSE_FILES=(
+  "LICENSE.txt"
+  "LICENSE-code.txt"
+)
+# Validation tooling shipped with every bundle, so the skill can run the
+# canonical SHACL validation (convert YAML -> RDF, then pyshacl) instead of
+# re-deriving the mapping itself. Requires `pip install pyshacl rdflib pyyaml`.
+SCRIPT_FILES=(
+  "extraction/yaml_to_rdf.py"
+  "scripts/validate_annotations.py"
+)
 
 # Skill-specific files
 if [[ "$SKILL_KIND" == "annotation" ]]; then
@@ -169,7 +192,8 @@ done
 info "Checking input files..."
 
 ALL_INPUTS=("$SKILL_MD" "${TOP_LEVEL_MD_FILES[@]}"
-            "${SCHEMA_FILES[@]}" "${EXEMPLAR_FILES[@]:-}")
+            "${SCHEMA_FILES[@]}" "${LICENSE_FILES[@]}" "${SCRIPT_FILES[@]}"
+            "${EXEMPLAR_FILES[@]:-}")
 
 missing=0
 for f in "${ALL_INPUTS[@]}"; do
@@ -197,7 +221,7 @@ WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
 STAGE="$WORK_DIR/$SKILL_NAME"
-mkdir -p "$STAGE/schema"
+mkdir -p "$STAGE/schema" "$STAGE/scripts"
 [[ ${#EXEMPLAR_FILES[@]} -gt 0 ]] && mkdir -p "$STAGE/exemplars"
 
 info "Staging files in $STAGE..."
@@ -229,6 +253,17 @@ for f in "${SCHEMA_FILES[@]}"; do
   cp "$f" "$STAGE/schema/$(basename "$f")"
 done
 
+# License files: straight copy to the bundle root
+for f in "${LICENSE_FILES[@]}"; do
+  cp "$f" "$STAGE/$(basename "$f")"
+done
+
+# Validation tooling: straight copy into scripts/ (the validator finds the
+# schema at ../schema/ and the converter alongside it).
+for f in "${SCRIPT_FILES[@]}"; do
+  cp "$f" "$STAGE/scripts/$(basename "$f")"
+done
+
 # Exemplars: straight copy (annotation skill only)
 for f in "${EXEMPLAR_FILES[@]:-}"; do
   [[ -z "$f" ]] && continue
@@ -247,10 +282,13 @@ Entry point: SKILL.md
 
 Layout:
   SKILL.md                            Skill entry point
+  LICENSE.txt                         CC BY 4.0 (docs, protocols, annotations)
+  LICENSE-code.txt                    Apache 2.0 (schema and tooling)
   PROTOCOL.md                         Canonical protocol rules
   PROTOCOL_AUTONOMOUS.md              Autonomous-mode workflow
   LABELING_EXAMPLES.md                Concrete label patterns from exemplars
   schema/                             Schema files (read-only reference)
+  scripts/                            Canonical validator + YAML->RDF converter
   exemplars/                          Four curator-led exemplar annotations
 
 Exemplars policy: only the four curator-led annotations (Jossin,
@@ -264,6 +302,17 @@ rewritten for the bundled layout (e.g., `PROTOCOL.md` instead of
 `protocols/PROTOCOL.md`). They do not match the repository layout
 used by Claude Code; for Claude Code, install the skill folder
 from the repository directly, not this bundle.
+
+Validation: this bundle ships the canonical validator. After
+`pip install pyshacl rdflib pyyaml`, run
+`python scripts/validate_annotations.py path/to/annotation.yaml` to check
+an annotation against schema/genetic_evidence.shacl.ttl -- the same check
+the project CI runs. Do not re-derive the YAML-to-RDF mapping by hand;
+scripts/yaml_to_rdf.py is the authoritative one.
+
+Licensing: the documentation, protocols, and annotations in this bundle
+are licensed CC BY 4.0 (LICENSE.txt); the schema and tooling are licensed
+Apache 2.0 (LICENSE-code.txt).
 
 Canonical source repository:
 https://github.com/ForomePlatform/genetic-evidence-model
@@ -281,6 +330,8 @@ Entry point: SKILL.md
 
 Layout:
   SKILL.md                            Skill entry point
+  LICENSE.txt                         CC BY 4.0 (docs, protocols, annotations)
+  LICENSE-code.txt                    Apache 2.0 (schema and tooling)
   REVIEW_PROTOCOL.md                  Canonical review rules
   REVIEW_PROTOCOL_INTERACTIVE.md      Interactive review workflow
   PROTOCOL.md                         Annotation protocol (the rules under
@@ -291,6 +342,7 @@ Layout:
   ROADMAP.md                          Project roadmap; includes method-
                                       hierarchy migration plan
   schema/                             Schema files (read-only reference)
+  scripts/                            Canonical validator + YAML->RDF converter
 
 This bundle does not include exemplar annotations: the
 annotation under review is supplied by the user at runtime.
@@ -303,6 +355,17 @@ rewritten for the bundled layout (e.g., `PROTOCOL.md` instead of
 `protocols/PROTOCOL.md`). They do not match the repository layout
 used by Claude Code; for Claude Code, install the skill folder
 from the repository directly, not this bundle.
+
+Validation: this bundle ships the canonical validator. After
+`pip install pyshacl rdflib pyyaml`, run
+`python scripts/validate_annotations.py path/to/annotation.yaml` to check
+an annotation against schema/genetic_evidence.shacl.ttl -- the same check
+the project CI runs. Do not re-derive the YAML-to-RDF mapping by hand;
+scripts/yaml_to_rdf.py is the authoritative one.
+
+Licensing: the documentation, protocols, and annotations in this bundle
+are licensed CC BY 4.0 (LICENSE.txt); the schema and tooling are licensed
+Apache 2.0 (LICENSE-code.txt).
 
 Canonical source repository:
 https://github.com/ForomePlatform/genetic-evidence-model

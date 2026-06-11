@@ -13,15 +13,16 @@ conditions, and every judgement call that a downstream consumer
 might contest carries an explicit reviewer or AI flag. The same
 commitment extends to AI assistance: when an AI system drafts an
 annotation, its uncertainties and assumptions are not silently
-absorbed but recorded alongside the annotation for curator review.
-The manual and AI tracks play different epistemic roles (primary
+absorbed but recorded alongside the annotation for curator review;
+\cref{sec:workflow-flags} reports how much that review changed in
+practice. The manual and AI tracks play different epistemic roles (primary
 versus secondary knowledge work) and use distinct flag vocabularies
 to record provenance.
 
 We treat the pilot as a \emph{feasibility study} rather than a
 benchmark. Six papers with a single annotator are not enough to
 support claims about inter-annotator agreement or generalisability.
-The pilot does show that the workflow's epistemic commitments are
+The pilot shows that the workflow's epistemic commitments are
 practical to meet and that the schema's strain points are surfaced
 rather than hidden.
 
@@ -81,7 +82,7 @@ Supplementary Note~SN2.
 \paragraph{AI-drafted track.}
 For two publications (Duerr, Inouye) the annotation was drafted directly
 from the PDFs by an AI assistant operating under an executable
-annotation skill \cite{anthropic_skills}. The assistant was given the
+annotation skill~\cite{anthropic_skills}. The assistant was given the
 schema (\texttt{dimensions.md}), the ground-truth annotations of the
 four manual papers as exemplars, and the PDFs themselves, and produced
 YAML annotations in the same format. When the assistant judged that a
@@ -90,10 +91,10 @@ human reviewer, it recorded this inline as either
 \texttt{ai\_uncertainty} or \texttt{ai\_assumption}. These AI-drafted
 annotations were then reviewed assertion by assertion by one of the
 authors, whose expertise is in genomic data curation and the evidence
-model rather than in genetics domain science. The review checked
-faithful representation of the source and conformance to the schema, and
-did not re-adjudicate the underlying science, for which the manual
-annotations provide the domain-expert ground truth. The executable
+model rather than in genetics domain science. The review checked source fidelity
+and schema conformance, not the underlying science, for which the four
+manual annotations are domain-expert ground truth for their own papers
+and AI-drafting exemplars. The executable
 skills and review protocol are described in Supplementary Notes~SN2 and
 SN3.
 

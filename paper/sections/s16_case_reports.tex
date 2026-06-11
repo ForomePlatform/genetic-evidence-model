@@ -199,11 +199,11 @@ of any paper in the corpus:
 \begin{itemize}
   \item \textbf{CE-IN1, \dimval{Score} target type:} a metaGRS is
   neither gene nor variant but a derived composite predictor; add a
-  \dimval{Score} value (possibly subtyped polygenic vs composite). The
-  v1 review sharpened this: under the forced \dimval{Variant} target the
-  variant-ascertainment conditional is unsatisfiable either way (omitting
-  it fires the rule; marking it not-applicable violates the shape), so
-  only a \dimval{Score} target dissolves the contradiction.
+  \dimval{Score} value (possibly subtyped polygenic vs composite). Forced
+  into the \dimval{Variant} target, the four items mark variant
+  ascertainment not-applicable, which the schema accepts as an explicit
+  escape; a first-class \dimval{Score} target would remove the forced fit
+  rather than rely on that escape.
   \item \textbf{CE-IN2, \dimval{Whole Genome Aggregate} resolution:} the
   score spans the whole genome non-contiguously, which the
   contiguous/pointwise resolution values do not capture.

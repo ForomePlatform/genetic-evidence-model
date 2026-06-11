@@ -98,9 +98,10 @@ means "at least one value" (the multi-valued case, used here for
 means "exactly one value" (the single-valued case, used here for
 `targetType` and `phenotypeScale`).
 
-Two other always-required dimensions from the model, `Resolution` and
-`Credibility`, are not yet shaped here; they will be added as the
-corpus grows and the enumerations for them settle.
+The other two always-required dimensions, `Resolution` and
+`Credibility`, are shaped the same way (single-valued, drawn from their
+enumerations), as is the mandatory `source_span` on every assertion
+(see §3 below).
 
 
 ## 2. A simple conditional: `variant_ascertainment`
@@ -254,25 +255,29 @@ treats the returned bindings as violations. If the query returns the
 empty set, the shape is satisfied for every instance.
 
 
-## Completeness and future shapes
+## Completeness and remaining shapes
 
-The following shapes are still needed and are listed as `TODOs` at
-the end of `genetic_evidence.shacl.ttl`:
+The shapes now cover the always-required dimensions (Knowledge Domain,
+Method, Target Type, Resolution, Credibility, Phenotype Scale), the value
+enumerations for the categorical conditional dimensions
+(`measurement_target`, `gene_relation`, `knockout_type`), the three
+conditional-activation rules (`variant_ascertainment`,
+`mode_of_inheritance`, `organism`), and a mandatory `source_span` (page +
+phrase) on every assertion. Every released annotation is validated against
+them in CI (`scripts/validate_annotations.py`).
 
-- Enumerate `measurement_target` values for the Gene Function
-  dimension.
-- Enumerate `organism` values (the shape above requires *some*
-  value but does not constrain it to an enumeration).
-- A shape for `assertion.source_span` requiring both `page` and
-  `key_phrase` fields to be populated.
+Shapes deliberately left open, to be added as the corpus exercises them:
+
+- An enumeration constraint on `organism` (the shape requires *some*
+  value but does not yet constrain it to a controlled vocabulary).
 - Shapes for the reviewer-flag fields (`reviewer_query`,
-  `reviewer_suggestion`, `reviewer_disagreement`,
-  `ai_uncertainty`, `ai_assumption`).
-
-These will be added as the annotation corpus grows and the shapes'
-enumerations stabilise. The file is intended to be incremental; a
-shape is added when at least one annotation in the corpus would be
-meaningfully validated by it.
+  `reviewer_suggestion`, `reviewer_disagreement`, `ai_uncertainty`,
+  `ai_assumption`).
+- Presence requirements for the remaining conditional dimensions
+  (`penetrance`, `gene_relation`, `knockout_type`); these are recorded as
+  coverage gaps in `annotations/coverage.md` rather than enforced, because
+  the corpus deliberately under-populates them where the dimension is not
+  the operative claim.
 
 
 ## Candidate extensions not yet reflected in SHACL

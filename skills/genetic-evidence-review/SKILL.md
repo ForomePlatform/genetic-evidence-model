@@ -1,6 +1,7 @@
 ---
 name: genetic-evidence-review
 description: Review an existing YAML annotation of a genetics paper under the Genetic Evidence Model (GEM) schema in interactive dialogue with the curator. Use when the user asks to review, audit, evaluate, or curate a GEM annotation; when the user has an annotation YAML file and wants a structured second opinion; when the user mentions reviewing AI-drafted or manually-authored annotations against the schema and the source paper. Triggers on phrases like "review this annotation", "curate this GEM YAML", "audit the genetic-evidence annotation", "let's go through this annotation item by item", or "review the annotation of the paper".
+version: 1.1.1
 ---
 
 # Genetic Evidence Model annotation review
@@ -10,6 +11,12 @@ with a curator. Implements the protocol documented in
 `protocols/REVIEW_PROTOCOL.md` and
 `protocols/REVIEW_PROTOCOL_INTERACTIVE.md` at the repository
 root.
+
+This skill (v1.1.1) targets **GEM schema v1.1** and **REVIEW_PROTOCOL
+v1.0**. The v1.1 schema machine-checks the always-required dimensions,
+the value enumerations, and a mandatory `source_span`; the structural
+review can run `scripts/validate_annotations.py` against
+`schema/genetic_evidence.shacl.ttl`.
 
 ## What this skill does
 
@@ -103,8 +110,13 @@ with guesses.
   go to the relevant sync workflow.
 - It does not apply candidate-extension promotions to the schema;
   it only records promotion recommendations.
-- It does not validate against SHACL in a formal sense.
-  Structural checks are best-effort.
+- For formal SHACL validation, run the canonical validator shipped in the
+  bundle: after `pip install pyshacl rdflib pyyaml`, run
+  `python scripts/validate_annotations.py <annotation>.yaml` to check the
+  annotation against `schema/genetic_evidence.shacl.ttl` (the same check the
+  project CI runs). Do not re-derive the YAML-to-RDF mapping by hand;
+  `scripts/yaml_to_rdf.py` is authoritative. The interactive structural
+  checks remain a complementary, best-effort layer.
 - It does not silently approve. Every GE item gets an explicit
   curator verdict, even when the AI has no concerns.
 - It does not emit annotator flags (`ai_uncertainty`,

@@ -129,10 +129,12 @@ label should be generalised further.
 
 Every GE item must populate all always-required dimensions
 (`knowledge_domain`, `method`, `target_type`, `target`,
-`target_resolution`, `phenotype_scale`, `credibility`,
-`variant_ascertainment`). Conditional dimensions are populated
-only when their activation condition holds, as specified by the
-SHACL schema.
+`target_resolution`, `phenotype_scale`, `credibility`). Conditional
+dimensions — including `variant_ascertainment`, required when
+`target_type = VARIANT` — are populated only when their activation
+condition holds, as specified by the SHACL schema. Where a curator
+considers a dimension and chooses not to fill it, it is marked
+`not_applicable_or_omitted` rather than left silently absent.
 
 ### 3.1 Enumeration mapping
 
@@ -260,8 +262,10 @@ field.
 
 ### 4.2 Phrase length and form
 
-- **Length:** under 15 words. This is a hard limit. A phrase
-  longer than 15 words is rejected at validation time.
+- **Length:** under 15 words. This is a curation-time target checked
+  during annotation and review; the SHACL schema validates source-span
+  presence (page and phrase), not phrase word count or verbatimness.
+  Some legacy spans exceed the target and are recorded as forward notes.
 - **Form:** verbatim by default. The phrase must be a literal
   substring of the source text.
 - **Paraphrase exception:** if the verbatim phrase that captures
@@ -397,11 +401,20 @@ This protocol is versioned. Annotations produced under a given
 version of the protocol should record the version in their
 metadata block (`provenance.protocol_version`).
 
-**Current version: 1.0**
+**Current version: 1.1**
 
 Changes to the protocol that affect annotation outputs (rule
 changes, not editorial revisions) require a major-version bump.
 Editorial changes are minor-version bumps.
+
+- **1.1** — clarified that `variant_ascertainment` is conditional
+  (required when `target_type = VARIANT`) and that a curator who
+  considers a dimension and declines to fill it marks it
+  `not_applicable_or_omitted` rather than leaving it absent. These are
+  editorial clarifications; the GEM v1.1 SHACL schema now machine-checks
+  the always-required dimensions and source spans. Annotations produced
+  under 1.0 remain valid.
+- **1.0** — initial release.
 
 ---
 

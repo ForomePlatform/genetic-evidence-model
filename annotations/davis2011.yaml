@@ -79,6 +79,10 @@ evidence:
     target_type: GENE
     target: "TTC21B"
     resolution: GENE
+    # The HUMAN_GENETICS + GENE activation fires here, but for a
+    # population-scale case-control gene-burden item mode of inheritance is
+    # not the operative claim; addressed explicitly rather than left silent.
+    mode_of_inheritance: not_applicable_or_omitted
     variant_ascertainment: [OBSERVED_IN_CASES, OBSERVED_IN_CONTROLS]
     phenotype_scale: CLINICAL
     credibility: HIGH

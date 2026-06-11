@@ -8,10 +8,19 @@
 # =====================================================================
 #  SHACL shapes for the Genetic Evidence Model
 #
+#  Schema version: 1.1
+#  (1.1 adds enforceable shapes for resolution, credibility, and a
+#  mandatory source_span, enum value sets for the categorical
+#  conditional dimensions, and the not_applicable_or_omitted sentinel;
+#  1.0 shaped only knowledge_domain, method, target_type, phenotype_scale.)
+#
 #  This file encodes (a) the top-level class hierarchy, (b) the
-#  dimension enumerations, and (c) the conditional-activation rules.
-#  It is incremental: not every dimension in the paper is shaped here
-#  yet. The file grows as the annotation corpus grows.
+#  dimension enumerations, (c) the always-required and conditional
+#  dimension shapes, and (d) the mandatory source_span on every
+#  assertion. Every released annotation validates against it
+#  (scripts/validate_annotations.py, run in CI). Remaining open shapes
+#  (an organism vocabulary; reviewer-flag fields) are noted in
+#  schema/examples.md.
 #
 #  Namespace note: `gem:` is a placeholder. Register a persistent
 #  w3id redirect before the paper goes to camera-ready.
@@ -154,6 +163,24 @@ gem:GeneticEvidenceShape
     sh:maxCount 1 ;
     sh:class gem:PhenotypeScale ;
     sh:message "GeneticEvidence must declare exactly one phenotype_scale."
+  ] ;
+
+  # resolution: required, exactly one value.
+  sh:property [
+    sh:path gem:resolution ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:Resolution ;
+    sh:message "GeneticEvidence must declare exactly one resolution."
+  ] ;
+
+  # credibility: required overall rating (one tier from the enumeration).
+  sh:property [
+    sh:path gem:credibility ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:Credibility ;
+    sh:message "GeneticEvidence must declare exactly one credibility rating."
   ] .
 
 # ---------- optional shape: variant_ascertainment ----------
@@ -241,9 +268,120 @@ gem:OrganismConditionalShape
     """
   ] .
 
-# ---------- further shapes follow as the corpus grows ----------
-# TODOs:
-#   - enumerate measurement_target values
-#   - enumerate organism values
-#   - shape for assertion.source_span (require page + text)
-#   - shape for reviewer_* flag fields
+# ---------- enumeration of resolution values ----------
+
+gem:Resolution         a rdfs:Class .
+gem:WINDOW             a gem:Resolution .
+gem:FUNCTIONAL_ELEMENT a gem:Resolution .
+gem:POSITION           a gem:Resolution .
+# gem:GENE and gem:VARIANT are reused from the TargetType block above and are
+# also valid Resolution values (gene-level and variant-level resolution).
+gem:GENE               a gem:Resolution .
+gem:VARIANT            a gem:Resolution .
+
+# ---------- enumeration of credibility ratings (overall tier) ----------
+
+gem:Credibility a rdfs:Class .
+gem:VERY_HIGH   a gem:Credibility .
+gem:HIGH        a gem:Credibility .
+gem:MEDIUM      a gem:Credibility .
+gem:LOW         a gem:Credibility .
+
+# ---------- enumeration of conditional-dimension values ----------
+
+gem:MeasurementTarget a rdfs:Class .
+gem:EXISTENCE    a gem:MeasurementTarget .
+gem:EXPRESSION   a gem:MeasurementTarget .
+gem:STABILITY    a gem:MeasurementTarget .
+gem:BINDING      a gem:MeasurementTarget .
+gem:LOCALIZATION a gem:MeasurementTarget .
+gem:ACTIVITY     a gem:MeasurementTarget .
+gem:CATALYSIS    a gem:MeasurementTarget .
+
+gem:GeneRelation a rdfs:Class .
+gem:X_has_same_function_as_Y a gem:GeneRelation .
+gem:X_regulates_Y            a gem:GeneRelation .
+gem:X_inhibits_Y             a gem:GeneRelation .
+
+gem:KnockoutType  a rdfs:Class .
+gem:CONDITIONAL   a gem:KnockoutType .
+gem:UNCONDITIONAL a gem:KnockoutType .
+
+gem:Penetrance a rdfs:Class .
+gem:complete   a gem:Penetrance .
+gem:incomplete a gem:Penetrance .
+gem:unknown    a gem:Penetrance .
+
+# ---------- the "addressed but not populated" sentinel ----------
+# A curator may explicitly mark a dimension not_applicable_or_omitted after
+# considering it. This sentinel is a member of every dimension class, so a
+# dimension carrying it satisfies presence and class constraints: the
+# dimension was addressed, just not populated with a substantive value.
+
+gem:NOT_APPLICABLE_OR_OMITTED
+  a gem:KnowledgeDomain, gem:Method, gem:TargetType, gem:Resolution,
+    gem:Credibility, gem:PhenotypeScale, gem:VariantAscertainment,
+    gem:MeasurementTarget, gem:GeneRelation, gem:KnockoutType,
+    gem:Penetrance .
+
+# ---------- enum-validity shapes for conditional dimensions ----------
+# These constrain values to the enumeration when the dimension is present;
+# they do not force population (the conditional-activation shapes above and
+# the coverage analysis handle which dimensions are expected where).
+
+gem:MeasurementTargetShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:measurementTarget ;
+    sh:class gem:MeasurementTarget ;
+    sh:message "measurement_target values must come from the enumeration."
+  ] .
+
+gem:GeneRelationShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:geneRelation ;
+    sh:class gem:GeneRelation ;
+    sh:message "gene_relation must come from the enumeration."
+  ] .
+
+gem:KnockoutTypeShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:knockoutType ;
+    sh:class gem:KnockoutType ;
+    sh:message "knockout_type must come from the enumeration."
+  ] .
+
+# ---------- source anchoring: every assertion needs a source span ----------
+# This is the machine-checkable form of the paper's source-anchoring
+# requirement: an annotation with any assertion lacking a source_span (page +
+# phrase) is rejected at validation time.
+
+gem:AssertionShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidenceAssertion ;
+  sh:property [
+    sh:path gem:sourceSpan ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every assertion must carry exactly one source_span."
+  ] .
+
+gem:SourceSpanShape
+  a sh:NodeShape ;
+  sh:targetClass gem:SourceSpan ;
+  sh:property [
+    sh:path gem:page ;
+    sh:minCount 1 ;
+    sh:datatype xsd:integer ;
+    sh:message "A source_span must record a page number."
+  ] ;
+  sh:property [
+    sh:path gem:phrase ;
+    sh:minCount 1 ;
+    sh:message "A source_span must record a key phrase locating the passage."
+  ] .

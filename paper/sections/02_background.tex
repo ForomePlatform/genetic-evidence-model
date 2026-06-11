@@ -3,13 +3,14 @@
 
 The representation of scientific and clinical evidence has been developed
 across clinical informatics, biomedical ontology, and genomic knowledge
-representation. Six families of standards bear directly on our work: HL7 FHIR
+representation. Seven families of standards bear directly on our work: HL7 FHIR
 Evidence~\cite{fhir_evidence}; the Evidence and Conclusion Ontology
 (ECO)~\cite{eco2019} and the Scientific Evidence and Provenance Information
-Ontology (SEPIO)~\cite{sepio}; the GA4GH Variant Annotation and Variation
-Representation specifications~\cite{ga4gh_va,ga4gh_vrs}; the ACMG/AMP
-variant-interpretation guidelines~\cite{acmg2015}; the upper ontologies IAO,
-OBI, and PROV-O~\cite{iao2015,obi2016,prov_o}; and the ClinGen, MONDO, and HPO
+Ontology (SEPIO)~\cite{sepio}; the GA4GH Variant Annotation (VA) and Variation
+Representation (VRS) specifications~\cite{ga4gh_va,ga4gh_vrs}; the ACMG/AMP
+variant-interpretation guidelines~\cite{acmg2015}; the upper ontologies IAO
+and OBI~\cite{iao2015,obi2016}; the PROV-O provenance model~\cite{prov_o};
+and the ClinGen, MONDO, and HPO
 curation and terminology resources~\cite{clingen2018,mondo,hpo}. Each captures
 part of what a basic-science genetic publication reports, but none captures the
 whole: a single conditional-knockout study may report molecular, cellular, and
@@ -17,7 +18,7 @@ clinical phenotypes at once, and a polygenic-score study may aggregate millions
 of variants into one score. A per-family review, with the specific coverage
 gaps that motivate our model, is given in Supplementary Note~SN1. Of these
 families, FHIR Evidence is the closest structural relative of our model, and we
-position the model against it here.
+position the model relative to it here.
 
 \subsection{Relation to FHIR Evidence}
 \label{sec:background-fhir}
@@ -32,24 +33,23 @@ basic-science evidence needs in order to be carried from bench to bedside.
 
 Aligning a genetics-only model directly to OBO, before that general content
 model exists, would yield a narrow resource: one that neither composes with
-other basic-science domains nor reuses OBO's orthogonal vocabularies cleanly,
-the redundancy that OBO's own emphasis on orthogonality and reuse exists to
-prevent. We therefore take the structural content model from FHIR, generalise
+other basic-science domains nor reuses OBO's orthogonal vocabularies cleanly---
+producing exactly the redundancy that OBO's emphasis on orthogonality and reuse
+exists to prevent. We therefore take the structural content model from FHIR, generalise
 it from clinical trials to basic science, and design the dimensions to align
 with ECO, SEPIO, IAO, and OBI; a term-level crosswalk to these
 vocabularies, with verified identifiers and the remaining gaps, is given
 in the supplementary material. Genetics is the first specialisation;
 broadening to other basic-science domains and completing the term
-alignment are future work for other teams. Building the general content model first and the OBO-aligned
-specialisation second is what keeps the eventual resource broad and reusable
-rather than narrow.
+alignment are future work.
 
 The HL7 FHIR Evidence, EvidenceVariable, and EvidenceReport
 resources~\cite{fhir_evidence} were designed around systematic-review and
 guideline-development workflows in which evidence concerns an intervention
-tested in a population. Like the other standards above, FHIR Evidence does not
-represent the evidence produced by basic and pre-clinical research at all. Our
-three core classes address exactly that gap. They are a basic-science model,
+tested in a population. Like the other standards above, FHIR Evidence has
+a different native framing and does not by itself cover the evidence
+produced by basic and pre-clinical research. Our
+three core classes address exactly that gap. These classes are
 general across the basic sciences rather than specific to genetics: they keep
 FHIR's separation of the evidence variable from the certainty of the finding,
 fold FHIR's separate \texttt{statistic} into the variable (the measured value
