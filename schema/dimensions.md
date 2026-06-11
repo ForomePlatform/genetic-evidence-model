@@ -289,10 +289,17 @@ Gene relation enumeration: `X_has_same_function_as_Y`, `X_regulates_Y`,
 | Dimension                  | Value type   | Cardinality |
 | -------------------------- | ------------ | ----------- |
 | `organism`                 | categorical  | multiple    |
-| `knockout_type`            | categorical  | single      |
 | `specificity_of_phenotype` | free text    | single      |
 
-Knockout type enumeration: `CONDITIONAL`, `UNCONDITIONAL`.
+### When Knowledge Domain contains `MODEL_ORGANISM`
+
+| Dimension                  | Value type   | Cardinality |
+| -------------------------- | ------------ | ----------- |
+| `knockout_type`            | categorical  | single      |
+
+Knockout type enumeration: `CONDITIONAL`, `UNCONDITIONAL`. (Activation
+is narrower than `organism`: a knockout type is only meaningful for
+model-organism evidence, not for every in-vivo experiment.)
 
 ---
 

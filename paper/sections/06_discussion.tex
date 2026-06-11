@@ -11,10 +11,10 @@
 \section{Discussion}
 \label{sec:discussion}
 
-Two features of the proposal bear brief recapitulation. The
+Two features of the proposal bear brief recapitulation. First, the
 always-required vocabulary is small, and its conditional-activation
 mechanism keeps the extended vocabulary compact without sacrificing
-expressive power. And every assertion in every annotation is
+expressive power. Second, every assertion in every annotation is
 anchored to a specific source span in its underlying publication,
 making each annotation independently auditable.
 
@@ -22,12 +22,12 @@ making each annotation independently auditable.
 \label{sec:disc-icbo}
 \label{sec:disc-extensions}
 
-The conference call asks for contributions that advance trustworthy,
-interpretable, and AI-ready semantic infrastructure. Every schema
-conformance requirement is formalised as a SHACL shape, every
-activation condition is machine-checkable, and source anchoring
-makes each assertion verifiable against its origin rather than
-against a style guide. The flag vocabularies of
+The contribution aligns with ICBO's focus on trustworthy,
+interpretable, and AI-ready semantic infrastructure. The released
+schema formalises the implemented conformance requirements as SHACL
+shapes, makes the implemented activation conditions machine-checkable,
+and anchors each assertion to its source text rather than only to a
+style guide. The flag vocabularies of
 \cref{sec:workflow-flags} make provenance explicit: a reader can
 tell whether a value was drawn from the author's summary, proposed
 by a reviewer, added as an AI assumption, or left deliberately
@@ -66,11 +66,10 @@ for, and the schema accommodates it without strain.
 
 \begin{table}[tbp]
 \centering
-\caption{Candidate schema extensions surfaced by the six-paper
-pilot, grouped by concern. None has yet been promoted under the
-two-papers rule. Per-candidate detail is in the companion
-\texttt{schema/EXTENSIONS.md}; paper keys are J~=~Jossin, D~=~Davis,
-N~=~Nelson, DU~=~Duerr, IN~=~Inouye. Gupta surfaced none.}
+\caption{Unpromoted candidate schema extensions surfaced by the
+six-paper pilot, grouped by concern. Per-candidate detail is in the
+companion \texttt{schema/EXTENSIONS.md}; paper keys are J~=~Jossin,
+D~=~Davis, N~=~Nelson, DU~=~Duerr, IN~=~Inouye. Gupta surfaced none.}
 \label{tab:candidates}
 \small
 \begin{tabularx}{\linewidth}{@{}llX@{}}

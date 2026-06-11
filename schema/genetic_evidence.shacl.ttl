@@ -8,6 +8,12 @@
 # =====================================================================
 #  SHACL shapes for the Genetic Evidence Model
 #
+#  Schema version: 1.1
+#  (1.1 adds enforceable shapes for resolution, credibility, and a
+#  mandatory source_span, enum value sets for the categorical
+#  conditional dimensions, and the not_applicable_or_omitted sentinel;
+#  1.0 shaped only knowledge_domain, method, target_type, phenotype_scale.)
+#
 #  This file encodes (a) the top-level class hierarchy, (b) the
 #  dimension enumerations, (c) the always-required and conditional
 #  dimension shapes, and (d) the mandatory source_span on every

@@ -36,11 +36,11 @@ Three abstract classes anchor the model:
   \item[\EvidenceVariable] A named quantity extracted from one or more
       \ScientificEvidence{} items, for example the gnomAD allele
       frequency of a variant, the LOD score in a family, or the odds
-      ratio reported by a GWAS. They are the terms from which predicates
-      over Evidence are constructed. Evidence variables are also annotated by
-      dimensions, because the same quantity (for example, an odds ratio)
-      may carry different epistemic weight depending on how it was
-      obtained.
+      ratio reported by a GWAS. Evidence variables are the terms from
+      which predicates over Evidence are constructed. They are also
+      annotated by dimensions, because the same quantity (for example, an
+      odds ratio) may carry different epistemic weight depending on how it
+      was obtained.
   \item[\EvidenceAssertion] A meta-predicate, a predicate about a
       predicate, that ascertains that \EvidenceVariable{}s are used
       appropriately in a predicate constructed over Evidence, that is,
@@ -80,8 +80,8 @@ project repository at
 \url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/dimensions.md}.}
 A small subset of dimensions is
 \emph{always required}: Knowledge Domain, Method, Target Type,
-Resolution, and Credibility. No well-formed genetic-evidence item is
-fully specified without them. Together these dimensions tell a
+Resolution, Credibility, and Phenotype Scale. No well-formed
+genetic-evidence item is fully specified without them. Together these dimensions tell a
 downstream reader \emph{what kind} of evidence this is, \emph{how} it
 was obtained, \emph{what} it is about, and \emph{how} credible it is
 in context.
@@ -100,8 +100,8 @@ subsumption when the schema is later axiomatised.
 The choice of structure is thus
 part of each dimension's definition.
 
-Two further dimensions emerged during the annotation work
-(\cref{sec:workflow}). Phenotype Scale distinguishes evidence about
+Phenotype Scale and Variant Ascertainment were added during the
+annotation work (\cref{sec:workflow}). Phenotype Scale distinguishes evidence about
 molecular phenotypes (for example, binding or activity) from cellular,
 histological, organismal, or clinical phenotypes, and is independent
 of the scale of the genetic target. Variant Ascertainment,

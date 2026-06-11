@@ -198,9 +198,11 @@ and blocks merges on failure:
 - **`shacl-validate`** — `scripts/validate_annotations.py` converts each
   annotation to RDF (`extraction/yaml_to_rdf.py`) and runs `pyshacl` against
   `schema/genetic_evidence.shacl.ttl`. The shapes enforce the always-required
-  dimensions, the value enumerations, the conditional-activation rules, and a
+  dimensions, the value enumerations, the implemented conditional-activation
+  rules (variant ascertainment, mode of inheritance, organism), and a
   mandatory `source_span` on every assertion; an annotation that violates any
-  of these is rejected.
+  of these is rejected. Remaining conditional-presence and reviewer-flag
+  shapes are open work (see `schema/examples.md`).
 - **`coverage`** — `scripts/compute_coverage.py` regenerates the
   dimension-coverage table from the YAML annotations (the source of the
   paper's Supplementary Note SN7 and `annotations/coverage.md`).

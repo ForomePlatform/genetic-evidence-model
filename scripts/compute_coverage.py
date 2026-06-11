@@ -111,7 +111,7 @@ def main(argv):
         ("Organism", ["organism"],
          lambda it: bool(methods(it) & IN_VIVO) or "MODEL_ORGANISM" in kd(it)),
         ("Knockout Type", ["knockout_type"],
-         lambda it: bool(methods(it) & IN_VIVO) or "MODEL_ORGANISM" in kd(it)),
+         lambda it: "MODEL_ORGANISM" in kd(it)),
     ]
 
     results = []
