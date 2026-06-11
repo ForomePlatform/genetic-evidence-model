@@ -53,14 +53,17 @@ parts:
 | Inouye 2018 | 4 | AI-drafted, reviewed (`v1`) | High/Medium | model-extension stress test |
 | **Total**   | **28** | | | |
 
+> **The two coverage tables below are produced by
+> `scripts/compute_coverage.py` from the released YAML annotations.**
+> Re-run it after any annotation edit; the SHACL shapes in
+> `schema/genetic_evidence.shacl.ttl` enforce the always-required
+> dimensions and source spans on the same files (CI: `validate.yml`).
+
 ## Always-required dimensions
 
-For the first six dimensions in this group, "applicable" = all 28
-items. The schema validator rejects annotations that leave any of these
-empty, so population is 28/28 by construction, with one exception
-introduced by Duerr GE-new-1 (see below). Variant Ascertainment is
-required only when `target_type = VARIANT`, so its "applicable" count is
-restricted (see below).
+These six dimensions are required of every item, so "applicable" = all 28
+items. Population is 28/28 by construction, with one exception
+introduced by Duerr GE-new-1 (see below).
 
 | Dimension              | Populated | Applicable |
 | ---------------------- | --------: | ---------: |
@@ -70,71 +73,51 @@ restricted (see below).
 | Resolution             | 28 | 28 |
 | Credibility            | 28 | 28 |
 | Phenotype Scale        | 28 | 28 |
-| Variant Ascertainment  | 21 | 25 |
 
 **Knowledge Domain (27/28)** is no longer fully populated. Duerr
 GE-new-1 (a cited anti-p40 antibody trial added in the 2026-06-04
 review) is drug-response evidence with no fitting genetic
-`knowledge_domain`; the dimension is left
-`not_applicable_or_omitted` with an `ai_uncertainty`, which is the
-scope-gap candidate extension CE-DU3. It is counted here as
-not-populated (an uncertainty-flagged omission, distinct from a
-considered not-applicable). This is the first corpus item that does
-not populate an always-required dimension.
-
-**Variant Ascertainment (21/25)** is required *when applicable*, and
-"applicable" is restricted to items whose `target_type` is `VARIANT`.
-Of the 28 items, 25 are subject to the condition: 21 (the manual papers
-plus Duerr) target a variant and populate it; the 4 Inouye `v1` items
-force a `VARIANT` target but mark VA `not_applicable_or_omitted` with an
-`ai_uncertainty` (a polygenic score has no single ascertainment mode -
-the CE-IN1 SHACL-unsatisfiability point), so they count as applicable
-but not populated. The remaining 3 gene-target items do not activate the
-condition and are correctly empty.
+`knowledge_domain`; the dimension is left `not_applicable_or_omitted`
+with an `ai_uncertainty`, the scope-gap candidate extension CE-DU3. It is
+the only corpus item that does not populate an always-required dimension.
 
 ## Conditional dimensions
 
-For this group, "applicable" is item-specific: it depends on whether
-the dimension's activation condition holds for each item.
+For this group, "applicable" is item-specific: it depends on whether the
+dimension's activation condition holds for each item. Variant
+Ascertainment is conditional (required when `target_type = VARIANT`).
 
-| Dimension              | Populated | Applicable | Per-paper breakdown |
+| Dimension              | Populated | Applicable | Note |
 | ---------------------- | --------: | ---------: | --- |
-| Mode of Inheritance    |  1 |  0 | Duerr GE-3: populated but not activated (see below) |
-| Mendelian Segregation  |  1 |  0 | Duerr GE-3: populated but not activated (see below) |
-| Penetrance             |  2 |  4 | Jossin (1/2), Davis (1/2) |
-| Measurement Target     | 10 | 11 | Jossin (6/6), Davis (2/2), Nelson (2/3); Duerr GE-6 not re-counted (see caveat) |
-| Gene Relation          |  1 | 11 | Jossin only (see below); Duerr GE-6 not re-counted (see caveat) |
-| Organism               |  8 |  8 | Jossin (1/1), Davis (3/3), Nelson (2/2), Duerr GE-6 (1/1), other (1/1) |
-| Knockout Type          |  1 |  6 | Jossin GE-3 only |
+| Variant Ascertainment  | 14 | 18 | 18 variant-target items; the 4 Inouye `v1` items mark it `not_applicable_or_omitted` (CE-IN1) |
+| Mode of Inheritance    |  0 |  1 | Davis GE-1 (case-control burden) is the only `HUMAN_GENETICS`+`GENE` item; marked not-applicable |
+| Mendelian Segregation  |  0 |  1 | same single item |
+| Penetrance             |  2 |  4 | `HUMAN_GENETICS`+`VARIANT` items |
+| Measurement Target     | 10 | 11 | `GENE_FUNCTION` items |
+| Gene Relation          |  1 | 11 | enumeration gap (CE-J3): binding/trafficking not in the enum |
+| Organism               |  8 |  8 | IN_VIVO or MODEL_ORGANISM items |
+| Knockout Type          |  1 |  8 | activation fires on non-knockout in-vivo experiments |
 
 ## Commentary on the under-populated cells
 
-### Mode of Inheritance (1/0) and Mendelian Segregation (1/0)
+### Mode of Inheritance (0/1) and Mendelian Segregation (0/1)
 
 The activation condition (`HUMAN_GENETICS` AND `target_type = GENE`)
-is satisfied by **no** item in the corpus. (A prior version of this
-file attributed it to Duerr GE-3, but GE-3 targets a `VARIANT`, not a
-`GENE`, so it does not satisfy the condition; that entry was
-incorrect.)
+is satisfied by exactly **one** item: Davis GE-1, the population-scale
+case-control burden test of TTC21B
+(`[POPULATION_GENETICS, HUMAN_GENETICS]`, `target_type: GENE`). For a
+gene-burden item, mode of inheritance is not the operative claim, so
+both dimensions are marked `not_applicable_or_omitted` — addressed, not
+populated. Hence 0 populated / 1 applicable. This over-broad activation
+(the rule fires more widely than the dimension is meaningful) is the gap
+behind candidate extension **CE-DU4**.
 
-After the 2026-06-04 review, Duerr GE-3 (the family-based
-transmission disequilibrium analysis in 883 nuclear families)
-nonetheless **populates** both dimensions
-(`mode_of_inheritance: COMPLEX`, `mendelian_segregation: false`),
-kept by curator decision because mode of inheritance is genuinely
-relevant to a within-family transmission test on a specific variant.
-Hence the inversion in the table (populated 1, applicable 0): the
-dimensions are populated even though the current rule does not fire
-for a `VARIANT` target. This is exactly candidate extension
-**CE-DU4**, which proposes extending activation to `HUMAN_GENETICS` +
-(`GENE` or `VARIANT`) and adding a `COMPLEX` value to the
-`mode_of_inheritance` enumeration.
-
-Cross-paper note: the other gene-level items in the corpus
-(Jossin's *Llgl1* knockout, Davis's TTC21B pedigree, Nelson's CD18
-splice variant, Gupta's ATP6AP2 intellectual-disability family) all
-belong to `MODEL_ORGANISM` or mixed `HUMAN_GENETICS` +
-`IN_VIVO_EXPERIMENT` scopings that do not activate the HG+GENE rule.
+Duerr GE-3 (the family-based transmission test) does carry
+`mode_of_inheritance: COMPLEX` and `mendelian_segregation: false`, but it
+targets a `VARIANT`, so it does not activate the `GENE`-scoped rule and
+is not counted here; this is the complementary direction of CE-DU4,
+which proposes extending activation to `HUMAN_GENETICS` +
+(`GENE` or `VARIANT`) and adding a `COMPLEX` value to the enumeration.
 
 ### Penetrance (2/4)
 
@@ -177,11 +160,12 @@ version of this file counted GE-6 as empty; the annotation does
 populate it.) GE-6's method values were renamed to the leaf forms
 `IN_VIVO` / `IN_VITRO` in the 2026-06-04 review.
 
-### Knockout Type (1/6)
+### Knockout Type (1/8)
 
-Activation condition: `knowledge_domain` contains `MODEL_ORGANISM`.
+Activation condition: method contains `IN_VIVO` or `knowledge_domain`
+contains `MODEL_ORGANISM` (the same activation as Organism).
 Only Jossin GE-3 (the conditional Llgl1 knockout) populates the
-dimension. The other five applicable items are in vivo experiments
+dimension. The other seven applicable items are in vivo experiments
 that are not knockouts (dominant-negative injections, retinal
 electroporation, and so on). The low population is not a schema
 shortcoming but an artefact of the activation condition firing on
@@ -190,30 +174,18 @@ refinement could narrow the condition to knockout-specific methods.
 
 ## Methodology note
 
-Counts were computed by reading each annotation `.yaml` file and,
-for each item, checking whether the dimension value is a concrete
-value (populated) or one of `null`, the empty list,
-`{ annotated_as: not_applicable_or_omitted }`, or `ai_uncertainty`
-(not populated). A bare `annotated_as: not_applicable_or_omitted`
-case is counted as "populated" for always-required dimensions (the
-annotator considered and chose not to fill) and as "not populated"
-for conditional dimensions where the activation condition did not
-hold. **Exception:** when such an omission also carries an
-`ai_uncertainty` flag, it is a genuine scope gap and is counted as
-not-populated even for an always-required dimension (e.g. Duerr
-GE-new-1's `knowledge_domain`, the CE-DU3 gap).
-
-A reproducible script is not yet packaged in the repository; this
-file is maintained by hand. **Known limitation:** the conditional-
-dimension "applicable" counts above predate full integration of the
-two AI-drafted annotations and were not all re-verified in the
-2026-06-04 update. In particular, Duerr GE-6 carries `GENE_FUNCTION`
-(which activates Measurement Target and Gene Relation) but is not
-re-counted in those rows, and the inter-paper conditional totals
-should be regenerated end to end. Candidate future work: a small
-`scripts/compute_coverage.py` that regenerates this table from the
-YAML files, so the paper's `tab:supp-coverage` can be kept in sync with
-the annotations automatically.
+The two coverage tables are regenerated by
+`scripts/compute_coverage.py`, which reads each annotation `.yaml`,
+determines for every item whether each dimension's activation condition
+holds ("applicable") and whether it carries a concrete value
+("populated"). A value of `not_applicable_or_omitted` (or null/absent)
+counts as applicable-but-not-populated. The script is the source of
+truth for the paper's `tab:supp-coverage` (SN7); re-run it after any
+annotation edit. The SHACL shapes in
+`schema/genetic_evidence.shacl.ttl` enforce the always-required
+dimensions, the enumerations, and the mandatory `source_span` on the
+same files, and the `validate.yml` CI workflow converts each annotation
+to RDF (`extraction/yaml_to_rdf.py`) and runs `pyshacl` over it.
 
 ## Reviewer-flag counts per paper
 

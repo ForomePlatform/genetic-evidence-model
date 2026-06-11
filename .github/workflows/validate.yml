@@ -1,0 +1,82 @@
+name: validate-annotations
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'annotations/**'
+      - 'schema/**'
+      - 'extraction/**'
+      - 'scripts/**'
+      - '.github/workflows/validate.yml'
+  pull_request:
+    paths:
+      - 'annotations/**'
+      - 'schema/**'
+      - 'extraction/**'
+      - 'scripts/**'
+
+jobs:
+  parse-yaml:
+    name: Every annotation YAML parses cleanly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Parse every YAML file under annotations/
+        run: |
+          set -e
+          fail=0
+          for f in $(find annotations -name '*.yaml' -not -path '*/reviews/*'); do
+            if [ ! -f "$f" ]; then
+              continue
+            fi
+            echo "Parsing $f"
+            if ! python3 -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]))" "$f"; then
+              echo "::error file=$f::YAML failed to parse"
+              fail=1
+            fi
+          done
+          exit $fail
+
+  shacl-validate:
+    name: SHACL-validate every annotation against the schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pyshacl
+        run: pip install pyshacl rdflib pyyaml
+
+      - name: Convert each annotation to RDF and validate against the SHACL shapes
+        run: python3 scripts/validate_annotations.py
+
+  coverage:
+    name: Dimension-coverage report regenerates without error
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Recompute dimension coverage
+        run: python3 scripts/compute_coverage.py

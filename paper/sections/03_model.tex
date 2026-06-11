@@ -32,7 +32,7 @@ Three abstract classes anchor the model:
         \cref{sec:workflow} records. A single paper may
         give rise to multiple \ScientificEvidence{} items when it reports
         distinct evidential claims, for example a case--control association
-        and an in vivo functional assay for the same variant.
+        and an \emph{in vivo} functional assay for the same variant.
   \item[\EvidenceVariable] A named quantity extracted from one or more
       \ScientificEvidence{} items, for example the gnomAD allele
       frequency of a variant, the LOD score in a family, or the odds
@@ -48,10 +48,10 @@ Three abstract classes anchor the model:
       reasoning layer of~\cite{our_preprint},
       where such meta-predicates assert which evidence a rule may use.
       This paper constructs no decision rules and therefore instantiates
-      no \EvidenceAssertion{}: the class is part of the model, and of
-      the reasoning layer that the venue's interpretability and
-      AI-readiness focus concerns, but it is out of scope for the
-      present pilot.
+      no \EvidenceAssertion{}: the class is part of the model and of a
+      reasoning layer whose interpretability and AI-readiness are of
+      direct interest to ICBO; it is the primary focus of~\cite{our_preprint}
+      rather than of the present pilot.
 \end{description}
 
 The \texttt{assertion} property and the \EvidenceAssertion{} class share
@@ -237,7 +237,7 @@ sh:sparql [ sh:select """
 
 The second example encodes a cross-axis disjunction:
 \emph{organism} is required when the Method contains
-\dimval{In Vivo Experiment} \textbf{or} the Knowledge Domain contains
+\dimval{In Vivo} \textbf{or} the Knowledge Domain contains
 \dimval{Model Organism} (\cref{lst:shacl-org}). The two disjuncts
 refer to different axes, one a Method value and the other a
 Knowledge Domain value, illustrating that activation conditions can
@@ -247,7 +247,7 @@ single axis.
 \begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{organism}: the disjunction is expressed by a SPARQL \texttt{UNION} whose two branches refer to different dimensions.}, label={lst:shacl-org}]
 sh:sparql [ sh:select """
   SELECT $this WHERE {
-    { $this gem:method          gem:IN_VIVO_EXPERIMENT . }
+    { $this gem:method          gem:IN_VIVO . }
     UNION
     { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
     FILTER NOT EXISTS { $this gem:organism ?o }

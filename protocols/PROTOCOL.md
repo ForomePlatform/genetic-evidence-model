@@ -129,10 +129,12 @@ label should be generalised further.
 
 Every GE item must populate all always-required dimensions
 (`knowledge_domain`, `method`, `target_type`, `target`,
-`target_resolution`, `phenotype_scale`, `credibility`,
-`variant_ascertainment`). Conditional dimensions are populated
-only when their activation condition holds, as specified by the
-SHACL schema.
+`target_resolution`, `phenotype_scale`, `credibility`). Conditional
+dimensions — including `variant_ascertainment`, required when
+`target_type = VARIANT` — are populated only when their activation
+condition holds, as specified by the SHACL schema. Where a curator
+considers a dimension and chooses not to fill it, it is marked
+`not_applicable_or_omitted` rather than left silently absent.
 
 ### 3.1 Enumeration mapping
 

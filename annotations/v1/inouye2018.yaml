@@ -67,10 +67,12 @@ candidate_extensions:
     value: SCORE, with subtypes POLYGENIC_SCORE / COMPOSITE_SCORE. Forced here to VARIANT (nearest existing
     value) with a flag.
 
-    SHACL note (added in 2026-06-06 review): with target_type=VARIANT the variant_ascertainment conditional
-    cannot be satisfied cleanly either way - omitting VA fires the VARIANT->VA conditional shape, while
-    marking VA not_applicable violates sh:class gem:VariantAscertainment. Only target_type=SCORE dissolves
-    this unsatisfiability. This is the sharpest justification for CE-IN1.'
+    SHACL note (updated): under target_type=VARIANT the score has no genuine ascertainment mode, so
+    variant_ascertainment is marked not_applicable_or_omitted. The schema accepts this explicit escape
+    (NOT_APPLICABLE_OR_OMITTED is a recognized sentinel that satisfies presence and class for any
+    dimension), so the item validates while recording that the dimension was addressed, not populated.
+    A first-class target_type=SCORE would remove the forced fit rather than rely on the escape; this is
+    the sharpest justification for CE-IN1.'
   location_in_this_annotation: GE-1, GE-2, GE-3, GE-new-1 (target_type)
   status: single_paper_gap
 - id: CE-IN2

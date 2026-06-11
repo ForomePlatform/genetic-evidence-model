@@ -189,15 +189,18 @@ Cardinality: single. Objectivity: objective.
 
 ### Credibility
 
-Cardinality: multiple. Objectivity: subjective.
+Cardinality: one overall rating, plus optional facets. Objectivity: subjective.
 
-Expressed as fuzzy key-value pairs. Accompanying free-text
-`credibility_comment` supported. No closed enumeration — the keys grow with
-the corpus.
-
-Common keys observed so far: `cohort_size`, `replication_cohort`,
+The overall credibility is an ordinal rating from the enumeration
+`{VERY_HIGH, HIGH, MEDIUM, LOW}` (anchored on SEPIO confidence), optionally
+accompanied by a free-text `credibility_comment` and by separately rated
+facets — statistical power / sample size, independent replication,
+multiple-testing control, ancestry or population-stratification control,
+and ascertainment. The facet keys are not a closed set and grow with the
+corpus; facets observed so far include `cohort_size`, `replication_cohort`,
 `ancestry_composition`, `followup_duration`, `source_GWAS`,
-`n_variants_tested`, `multiple_testing_correction`.
+`n_variants_tested`, `multiple_testing_correction`. The SHACL shape enforces
+the overall ordinal rating; the facets remain open.
 
 ### **PROMOTED**: phenotype_scale
 
@@ -222,7 +225,11 @@ those vocabularies is flagged as future work.
 
 ### **PROMOTED**: variant_ascertainment
 
-Cardinality: multiple. Objectivity: objective.
+Cardinality: multiple. Objectivity: objective. **Conditional**: required
+only when `target_type = VARIANT` (a variant-level ascertainment route
+applies only to variant targets); the SHACL shape enforces it under that
+condition, and an explicit `not_applicable_or_omitted` is accepted where a
+variant target has no single ascertainment mode (e.g. a polygenic score).
 
 Promoted based on Davis 2011 annotation, where the paper explicitly studies
 two populations of variants with different epistemic status: variants

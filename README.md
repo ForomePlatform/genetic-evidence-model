@@ -190,13 +190,23 @@ Two complementary representations:
   surfaced during corpus annotation, including their promotion or
   retraction status.
 
-Annotations in `annotations/` are checked by the CI workflow in
-`.github/workflows/validate.yml`. The `parse-yaml` job verifies that every
-annotation YAML parses cleanly and blocks merges on failure. Full SHACL
-validation against the shapes is wired in as an advisory
-(`continue-on-error`) job that activates once the `extraction/yaml_to_rdf.py`
-converter lands; until then it is skipped. Flip the job to blocking once the
-schema stabilises.
+Annotations in `annotations/` are validated by the CI workflow in
+`.github/workflows/validate.yml`, which runs on every push and pull request
+and blocks merges on failure:
+
+- **`parse-yaml`** — every annotation YAML parses cleanly.
+- **`shacl-validate`** — `scripts/validate_annotations.py` converts each
+  annotation to RDF (`extraction/yaml_to_rdf.py`) and runs `pyshacl` against
+  `schema/genetic_evidence.shacl.ttl`. The shapes enforce the always-required
+  dimensions, the value enumerations, the conditional-activation rules, and a
+  mandatory `source_span` on every assertion; an annotation that violates any
+  of these is rejected.
+- **`coverage`** — `scripts/compute_coverage.py` regenerates the
+  dimension-coverage table from the YAML annotations (the source of the
+  paper's Supplementary Note SN7 and `annotations/coverage.md`).
+
+Run the same checks locally with `python3 scripts/validate_annotations.py`
+and `python3 scripts/compute_coverage.py` (requires `pyshacl rdflib pyyaml`).
 
 ## Citing this work
 

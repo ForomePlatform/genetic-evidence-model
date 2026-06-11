@@ -16,7 +16,7 @@ Resources (FHIR) Evidence and EvidenceVariable~\cite{fhir_evidence},
 the Evidence and Conclusion Ontology (ECO)~\cite{eco2019}, the
 Scientific Evidence and Provenance Information Ontology
 (SEPIO)~\cite{sepio}, and the Global Alliance for Genomics and
-Health (GA4GH) Genomic Knowledge Standards (GKS)~\cite{ga4gh_va}
+Health (GA4GH) Genomic Knowledge Standards~\cite{ga4gh_va}
 advance interoperability in clinical research. However, they do not
 comprehensively address the evidence types and workflows that
 originate in the basic sciences. Existing standards focus mainly on
@@ -32,7 +32,7 @@ experimental model systems to large-scale population studies, that
 are not fully supported by current standards.
 To properly use evidence derived from
 scientific literature in clinical workflows, two principal challenges
-require standardisation: \emph{Relevance and Specificity}. That is,
+require standardisation: \emph{Relevance and Specificity}, that is,
 how precisely a genetic finding maps to an individual patient,
 disease context, or biological hypothesis; and \emph{Confidence},
 that is, whether a given piece of evidence can be robustly and
@@ -61,7 +61,9 @@ automated parsing.
         covering human, population, model-organism, and polygenic-score
         genetics, with extraction tooling.
     \footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model}}
-    \item A human--AI collaborative annotation workflow.
+    \item A human--AI collaborative annotation workflow, packaged as
+        executable annotation and review skills that apply the model under
+        curator supervision.
     \item A structural alignment of the core classes to HL7 FHIR Evidence, with a
         credibility representation that decomposes certainty into SEPIO-anchored
         facets; the dimensions are designed to align with ECO, SEPIO, IAO, and OBI,

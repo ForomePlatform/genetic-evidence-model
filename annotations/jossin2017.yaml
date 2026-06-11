@@ -248,6 +248,7 @@ evidence:
     target_type: GENE
     target: "LLGL1 / N-cadherin"
     resolution: GENE
+    organism: "Mammal (mouse)"   # in vivo co-IP from E14.5 mouse brain
     candidate_extension_exercised: CE-J1  # PROTEIN_SUBDOMAIN would be preferred
     candidate_extension_note: >
       Paper resolves the interaction to the WD14 domain of LLGL1 —
