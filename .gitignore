@@ -15,6 +15,8 @@ paper/target/
 *.run.xml
 *.synctex.gz
 *.toc
+*.lot
+*.lof
 *.nav
 *.snm
 *.vrb
@@ -46,3 +48,11 @@ Thumbs.db
 # Build artifacts
 *.zip
 *.egg-info/
+
+# UMLS crosswalk harness: transient / synthetic / cached artifacts.
+# The inputs (dimensions_inventory.yaml, omop_cdm_examples.yaml), the code,
+# the tests + fixtures, and the populated umls_crosswalk.yaml are tracked;
+# the cache and the synthetic-CUI demo/preview files are not.
+mapping/cache/
+mapping/*.demo.yaml
+mapping/*.preview.tex

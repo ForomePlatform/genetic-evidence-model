@@ -1,0 +1,12 @@
+# Python dependencies for the genetic-evidence-model tooling.
+#
+# SHACL validation (scripts/validate_annotations.py, extraction/yaml_to_rdf.py):
+pyshacl>=0.27
+rdflib>=7.0
+pyyaml>=6.0
+
+# UMLS crosswalk harness (mapping/build_umls_crosswalk.py) live runs:
+requests>=2.28
+
+# Paper page-count inspection (optional):
+pypdf>=4.0

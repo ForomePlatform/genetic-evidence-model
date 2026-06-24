@@ -49,9 +49,9 @@ Three abstract classes anchor the model:
       where such meta-predicates assert which evidence a rule may use.
       This paper constructs no decision rules and therefore instantiates
       no \EvidenceAssertion{}: the class is part of the model and of a
-      reasoning layer whose interpretability and AI-readiness are of
-      direct interest to ICBO; it is the primary focus of~\cite{our_preprint}
-      rather than of the present pilot.
+      reasoning layer whose interpretability and AI-readiness are the
+      primary focus of~\cite{our_preprint} rather than of the present
+      pilot.
 \end{description}
 
 The \texttt{assertion} property and the \EvidenceAssertion{} class share
@@ -95,8 +95,7 @@ cardinality captures directly. Phenotype Scale is an ordinal
 granularity (molecular through clinical), not a class hierarchy, and
 modelling it as subsumption would misrepresent it.
 Method is a genuinely hierarchical dimension; its \texttt{is\_a} relations
-are encoded as such in the SHACL distribution and lift to OWL
-subsumption when the schema is later axiomatised.
+are encoded as such in the SHACL distribution.
 The choice of structure is thus
 part of each dimension's definition.
 

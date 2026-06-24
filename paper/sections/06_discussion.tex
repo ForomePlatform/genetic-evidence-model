@@ -2,7 +2,7 @@
 %  §6 — Discussion
 %
 %  Revised 2026-04-21: subsections collapsed from four to two.
-%  §6.1 ICBO Alignment + §6.2 Model Extensions → §6.1 Discussion.
+%  §6.1 (positioning) + §6.2 Model Extensions → §6.1 Discussion.
 %  §6.3 Limitations + §6.4 Future Work → §6.2 Limitations and
 %  Future Work. Labels preserved for all cross-section references
 %  (sec:disc-future is referenced from §2).
@@ -18,36 +18,30 @@ expressive power. Second, every assertion in every annotation is
 anchored to a specific source span in its underlying publication,
 making each annotation independently auditable.
 
-\subsection{ICBO Alignment and Model Extensions}
-\label{sec:disc-icbo}
+\subsection{Positioning and Model Extensions}
+\label{sec:disc-positioning}
 \label{sec:disc-extensions}
 
-The contribution aligns with ICBO's focus on trustworthy,
-interpretable, and AI-ready semantic infrastructure. The released
-schema formalises the implemented conformance requirements as SHACL
-shapes, makes the implemented activation conditions machine-checkable,
-and anchors each assertion to its source text rather than only to a
-style guide. The flag vocabularies of
-\cref{sec:workflow-flags} make provenance explicit: a reader can
+The released schema formalises the implemented conformance
+requirements as SHACL shapes, makes the implemented activation
+conditions machine-checkable, and anchors each assertion to its
+source text rather than only to a style guide. The flag vocabularies
+of \cref{sec:workflow-flags} make provenance explicit: a reader can
 tell whether a value was drawn from the author's summary, proposed
 by a reviewer, added as an AI assumption, or left deliberately
 unpopulated. A broader framing is that the schema is designed to
 make literature review tractable as a \emph{semantic-parsing}
 problem, the mapping of natural-language claims to a shared,
 source-anchored representation. This is not a task a language model
-can do in isolation: the target of each parse is an ontology, and
-the quality of the parse depends on the quality of the ontological
-grounding. We see the present contribution as one increment along
-a longer path, building on decades of biomedical-ontology work
-(ECO, SEPIO, HPO, IAO, OBI, VRS, and others), not as a replacement
-for any of it. We therefore offer the model, its SHACL schema, and
-the annotated corpus to the biomedical-ontology community as a concrete
-starting point, and invite collaboration on the axiomatisation and OWL
-rendering that would carry this reference data model toward a fully
-formal ontology. A complementary downstream layer, in which an
-epistemological type system and machine-checkable meta-predicates
-constrain the decision logic that consumes such evidence, is addressed
-in~\cite{our_preprint}.
+can do in isolation: the target of each parse is a structured,
+source-anchored representation, and the quality of the parse depends
+on the quality of that target language. We see the present
+contribution as one increment along a longer path, building on
+decades of biomedical-ontology work (ECO, SEPIO, HPO, IAO, OBI, VRS,
+and others), not as a replacement for any of it. A complementary
+downstream layer, in which an epistemological type system and
+machine-checkable meta-predicates constrain the decision logic that
+consumes such evidence, is addressed in~\cite{our_preprint}.
 
 The pilot surfaced two candidate dimensions that were exercised by
 multiple papers and promoted to first-class status
@@ -91,11 +85,7 @@ Cross-item and activation scope & DU & 2 (cross-item/translational synthesis, co
 The pilot has significant limitations. Six papers and a single
 annotator do not support claims about inter-annotator agreement or
 generalisability; we treat the work as a feasibility study, not a
-benchmark. The model has not been released as a fully
-OWL-formalised ontology: the present SHACL distribution covers
-class declarations, dimension enumerations, and activation rules,
-but not the axiomatisation that classification and subsumption
-inference would require. The evaluation is not a clinical
+benchmark. The evaluation is not a clinical
 deployment: although the model is motivated by variant
 interpretation in clinical-genomics programs, the pilot stops short
 of applying the model to a live workflow.
