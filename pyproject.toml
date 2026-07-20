@@ -3,22 +3,44 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "genetic-evidence-model"
+name = "forome-gem"
 version = "0.1.0"
-description = "Extract and model genetic evidence annotations from PDF sources"
+description = "Forome Genetic Evidence Model: a reference data model, UMLS/OMOP crosswalk tooling, and SHACL validation for basic-science genetic evidence"
 readme = "README.md"
 license = { file = "LICENSE-code.txt" }
 requires-python = ">=3.10"
 dependencies = [
+    "pyyaml>=6.0",
+    "rdflib>=7.0",
+    "pyshacl>=0.27",
+    "requests>=2.28",
     "PyMuPDF>=1.23",
     "pypdf>=4.0",
-    "pyyaml>=6.0",
 ]
 
+[project.optional-dependencies]
+dev = ["ruamel.yaml>=0.18", "pytest>=7"]
+
 [project.scripts]
-extract-annotations = "extraction.extract_annotations:main"
-extract-annotations-pypdf = "extraction.extract_annotations_pypdf:main"
+gem-validate = "forome.gem.validation.validate_annotations:main"
+gem-coverage = "forome.gem.validation.compute_coverage:main"
+gem-umls-crosswalk = "forome.gem.umls.build_umls_crosswalk:main"
+gem-umls-render = "forome.gem.umls.render_crosswalk_tex:main"
+gem-umls-adjudicate = "forome.gem.umls.adjudicate_ui:main"
+gem-umls-semantic-network = "forome.gem.umls.fetch_semantic_network:main"
+
+# src-layout: package roots live under src/python/main; tests under src/python/test.
+# `forome` and `forome.gem` are PEP 420 implicit namespace packages, so Forome
+# can publish sibling `forome-*` distributions sharing the `forome.` namespace.
+[tool.setuptools]
+package-dir = { "" = "src/python/main" }
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["extraction*", "annotations*"]
+where = ["src/python/main"]
+namespaces = true
+
+# NOTE (deferred): the SHACL schema lives at repo-root schema/ (shared by the
+# paper, CI, and skill bundles) and is located by walk-up discovery, which works
+# in-repo and inside the flat skill bundle. Shipping it as package_data for a
+# standalone `pip install` (no repo checkout) is a follow-up that needs a
+# decision on whether schema/ moves under the package.

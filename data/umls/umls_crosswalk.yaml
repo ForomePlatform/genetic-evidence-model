@@ -1,0 +1,1713 @@
+meta:
+  generated_by: mapping/build_umls_crosswalk.py
+  source_inventory: mapping/dimensions_inventory.yaml
+  live: true
+  total: 88
+  counts:
+    mapped: 39
+    review: 11
+    unmapped: 38
+    pending: 0
+    curated: 28
+    axis_typed: 12
+entries:
+- dimension: knowledge_domain
+  token: null
+  kind: axis
+  query: Genetics
+  expect: uncertain
+  sab: null
+  inventory_note: The dimension axis (the discipline a piece of evidence comes from).
+  status: mapped
+  curated: false
+  sty_tui: T091
+  sty_name: Biomedical Occupation or Discipline
+  sty_tree: A2.6.1
+  curator_note: null
+- dimension: knowledge_domain
+  token: HUMAN_GENETICS
+  kind: value
+  query: Human genetics
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C0020124
+  matched_name: Human Genetics
+  root_source: MSH
+  semantic_types: &id001
+  - Biomedical Occupation or Discipline
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0020124
+    name: Human Genetics
+    root_source: MSH
+    semantic_types: *id001
+- dimension: knowledge_domain
+  token: ANIMAL_GENETICS
+  kind: value
+  query: Animal genetics
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: mapped
+  cui: C1510895
+  matched_name: Animal Genetics
+  root_source: NCI
+  semantic_types: &id002
+  - Biomedical Occupation or Discipline
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C1510895
+    name: Animal Genetics
+    root_source: NCI
+    semantic_types: *id002
+- dimension: knowledge_domain
+  token: POPULATION_GENETICS
+  kind: value
+  query: Population genetics
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: unmapped
+- dimension: knowledge_domain
+  token: COMPARATIVE_GENOMICS
+  kind: value
+  query: Comparative genomics
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C4704937
+  matched_name: Comparative Genomics
+  root_source: MSH
+  semantic_types: &id003
+  - Biomedical Occupation or Discipline
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C4704937
+    name: Comparative Genomics
+    root_source: MSH
+    semantic_types: *id003
+- dimension: knowledge_domain
+  token: EPIGENETICS
+  kind: value
+  query: Epigenetics
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C1655731
+  matched_name: study of epigenetics
+  root_source: MTH
+  semantic_types: &id004
+  - Biomedical Occupation or Discipline
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C1655731
+    name: study of epigenetics
+    root_source: MTH
+    semantic_types: *id004
+  curated: true
+  curator_note: EPIGENETICS is a knowledge-domain (discipline) value; 'study of epigenetics' (Biomedical
+    Occupation or Discipline) faithfully denotes the...
+- dimension: knowledge_domain
+  token: GENE_FUNCTION
+  kind: value
+  query: Gene function
+  expect: uncertain
+  sab: null
+  inventory_note: Closest faithful concept may be 'molecular function' (GO).
+  status: unmapped
+- dimension: knowledge_domain
+  token: MODEL_ORGANISM
+  kind: value
+  query: Animal model
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: unmapped
+- dimension: method
+  token: null
+  kind: axis
+  query: Methods (research)
+  expect: uncertain
+  sab: null
+  inventory_note: How the evidence was generated; hierarchical (see dimensions.md).
+  status: mapped
+  curated: false
+  sty_tui: T062
+  sty_name: Research Activity
+  sty_tree: B1.3.2
+  curator_note: null
+- dimension: method
+  token: STATISTICAL_GENETICS
+  kind: value
+  query: Statistical genetics
+  expect: uncertain
+  sab: NCI
+  inventory_note: null
+  status: unmapped
+- dimension: method
+  token: ASSOCIATION_STUDY
+  kind: value
+  query: Genetic association study
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C2717878
+  matched_name: Genetic Association Studies
+  root_source: MSH
+  semantic_types: &id005
+  - Molecular Biology Research Technique
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C2717878
+    name: Genetic Association Studies
+    root_source: MSH
+    semantic_types: *id005
+  curated: true
+  curator_note: ASSOCIATION_STUDY = statistical test of association between genetic variation and phenotype;
+    'Genetic Association Studies' (Molecular Bio...
+- dimension: method
+  token: GWAS
+  kind: value
+  query: Genome-wide association study
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C2350277
+  matched_name: Genome-Wide Association Study
+  root_source: MSH
+  semantic_types: &id006
+  - Molecular Biology Research Technique
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C2350277
+    name: Genome-Wide Association Study
+    root_source: MSH
+    semantic_types: *id006
+- dimension: method
+  token: CANDIDATE_GENE_STUDY
+  kind: value
+  query: Candidate gene study
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: mapped
+  cui: C2717881
+  matched_name: Candidate Gene Identification
+  root_source: MSH
+  semantic_types: &id007
+  - Molecular Biology Research Technique
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C2717881
+    name: Candidate Gene Identification
+    root_source: MSH
+    semantic_types: *id007
+  curated: true
+  curator_note: CANDIDATE_GENE_STUDY = hypothesis-driven association study at candidate genes; 'Candidate
+    Gene Identification' (Molecular Biology Researc...
+- dimension: method
+  token: FINE_MAPPING
+  kind: value
+  query: Fine mapping
+  expect: uncertain
+  sab: NCI
+  inventory_note: null
+  status: unmapped
+- dimension: method
+  token: FAMILY_BASED
+  kind: value
+  query: Pedigree analysis
+  expect: uncertain
+  sab: MSH
+  inventory_note: Statistical inference from pedigree data; avoid the family-medicine sense.
+  status: unmapped
+  curated: true
+  curator_note: FAMILY_BASED denotes statistical inference from family/pedigree data; the 'genetic pedigree
+    analysis' candidates are clinical lab-test ca...
+- dimension: method
+  token: LINKAGE_ANALYSIS
+  kind: value
+  query: Genetic linkage analysis
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: unmapped
+- dimension: method
+  token: TRANSMISSION_DISEQUILIBRIUM_TEST
+  kind: value
+  query: Transmission disequilibrium test
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+  curated: true
+  curator_note: The exact-name query returned no candidates; TDT/FBAT are specific family-based transmission
+    tests with no faithful UMLS concept.
+- dimension: method
+  token: SEGREGATION_ANALYSIS
+  kind: value
+  query: Genetic segregation analysis
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+  curated: true
+  curator_note: No candidates returned; the segregation-analysis statistical method has no faithful UMLS
+    concept (only the segregation phenomenon exists,...
+- dimension: method
+  token: META_ANALYSIS
+  kind: value
+  query: Meta-Analysis as Topic
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C0920317
+  matched_name: Meta-Analysis (statistical procedure)
+  root_source: MTH
+  semantic_types: &id008
+  - Research Activity
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0920317
+    name: Meta-Analysis (statistical procedure)
+    root_source: MTH
+    semantic_types: *id008
+  curated: true
+  curator_note: Meta-Analysis (statistical procedure) is the analytic-method sense, faithful for the method
+    token.
+- dimension: method
+  token: EXPERIMENT
+  kind: value
+  query: Scientific experiment
+  expect: uncertain
+  sab: MSH
+  inventory_note: GEM EXPERIMENT is a broad family (in vivo/in vitro/in silico); a faithful 1:1 concept
+    is uncertain.
+  status: unmapped
+- dimension: method
+  token: IN_VIVO
+  kind: value
+  query: In vivo
+  expect: likely
+  sab: NCI
+  inventory_note: null
+  status: review
+  cui: C1515657
+  matched_name: In Vivo Model
+  root_source: NCI
+  semantic_types: &id009
+  - Research Activity
+  search_type: words
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C1515657
+    name: In Vivo Model
+    root_source: NCI
+    semantic_types: *id009
+  - cui: C6024565
+    name: Pediatric Preclinical in Vivo Testing Program
+    root_source: MTH
+    semantic_types:
+    - Research Activity
+- dimension: method
+  token: IN_VITRO
+  kind: value
+  query: In Vitro Techniques
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: unmapped
+- dimension: method
+  token: IN_SILICO
+  kind: value
+  query: Computer simulation
+  expect: likely
+  sab: MSH
+  inventory_note: GEM IN_SILICO = computational simulation.
+  status: review
+  cui: C0597818
+  matched_name: computer simulation replacing animals in research
+  root_source: CSP
+  semantic_types: &id010
+  - Research Activity
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0597818
+    name: computer simulation replacing animals in research
+    root_source: CSP
+    semantic_types: *id010
+- dimension: method
+  token: BIOINFORMATICS_INFERENCE
+  kind: value
+  query: Sequence analysis
+  expect: uncertain
+  sab: MSH
+  inventory_note: Analysis of existing data; keep distinct from IN_SILICO (simulation).
+  status: mapped
+  cui: C0162801
+  matched_name: Sequence Analysis
+  root_source: MTH
+  semantic_types: &id011
+  - Molecular Biology Research Technique
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0162801
+    name: Sequence Analysis
+    root_source: MTH
+    semantic_types: *id011
+- dimension: method
+  token: CLINICAL_EVIDENCE
+  kind: value
+  query: Clinical study
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: mapped
+  cui: C0008972
+  matched_name: Clinical Research
+  root_source: MTH
+  semantic_types: &id012
+  - Research Activity
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0008972
+    name: Clinical Research
+    root_source: MTH
+    semantic_types: *id012
+  curated: true
+  curator_note: CLINICAL_EVIDENCE is the clinical-observation evidence-generation method; 'Clinical Research'
+    (Research Activity) faithfully denotes evid...
+- dimension: target_type
+  token: null
+  kind: axis
+  query: Sequence feature
+  expect: uncertain
+  sab: NCI
+  inventory_note: null
+  status: mapped
+  curated: false
+  sty_tui: T028
+  sty_name: Gene or Genome
+  sty_tree: A1.2.3.5
+  curator_note: null
+- dimension: target_type
+  token: GENE
+  kind: value
+  query: Gene
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C0017337
+  matched_name: Genes
+  root_source: MTH
+  semantic_types: &id013
+  - Gene or Genome
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0017337
+    name: Genes
+    root_source: MTH
+    semantic_types: *id013
+  curated: true
+  curator_note: Token GENE = 'a single gene'; C0017337 'Genes' (Gene or Genome) faithfully denotes exactly
+    this concept.
+- dimension: target_type
+  token: RELATED_GENE
+  kind: value
+  query: Gene
+  expect: uncertain
+  sab: null
+  inventory_note: Relational nuance (a gene related to the primary target) is not a UMLS concept; resolves
+    to 'Gene'.
+  status: unmapped
+  cui: C0017337
+  matched_name: Genes
+  root_source: MTH
+  semantic_types: &id014
+  - Gene or Genome
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0017337
+    name: Genes
+    root_source: MTH
+    semantic_types: *id014
+  curated: true
+  curator_note: RELATED_GENE's defining meaning is the relational nuance 'another gene related to the
+    primary target', a composite relational token; gene...
+- dimension: target_type
+  token: VARIANT
+  kind: value
+  query: Sequence variant
+  expect: likely
+  sab: null
+  inventory_note: null
+  status: review
+  cui: C1419577
+  matched_name: RNU6V gene
+  root_source: MTH
+  semantic_types: &id015
+  - Gene or Genome
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C1419577
+    name: RNU6V gene
+    root_source: MTH
+    semantic_types: *id015
+- dimension: target_type
+  token: SEGMENT
+  kind: value
+  query: Genomic segment
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: review
+  cui: C6067264
+  matched_name: Influenza virus A whole genome segment sequence
+  root_source: LNC
+  semantic_types: &id016
+  - Gene or Genome
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C6067264
+    name: Influenza virus A whole genome segment sequence
+    root_source: LNC
+    semantic_types: *id016
+- dimension: target_type
+  token: INTERVAL
+  kind: value
+  query: Genomic interval
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+- dimension: target_type
+  token: TRANSCRIPT
+  kind: value
+  query: RNA, messenger
+  expect: uncertain
+  sab: null
+  inventory_note: GEM TRANSCRIPT = transcript isoform; closest UMLS concept may be mRNA / transcription
+    product.
+  status: review
+  cui: C1414351
+  matched_name: EIF4E gene
+  root_source: MTH
+  semantic_types: &id017
+  - Gene or Genome
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C1414351
+    name: EIF4E gene
+    root_source: MTH
+    semantic_types: *id017
+- dimension: resolution
+  token: null
+  kind: axis
+  query: Genomic resolution
+  expect: unlikely
+  sab: null
+  inventory_note: GEM-internal axis (genetic scale of the target); no faithful 1:1 UMLS concept expected.
+  status: mapped
+  curated: false
+  sty_tui: T082
+  sty_name: Spatial Concept
+  sty_tree: A2.1.5
+  curator_note: null
+- dimension: resolution
+  token: WINDOW
+  kind: value
+  query: Chromosome region
+  expect: uncertain
+  sab: NCI
+  inventory_note: null
+  status: unmapped
+  curated: true
+  curator_note: Coarse genomic window; queries return specific alleles/regions, no faithful generic concept.
+- dimension: resolution
+  token: GENE
+  kind: value
+  query: Gene
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: review
+  cui: C1708726
+  matched_name: Gene Locus
+  root_source: MTH
+  semantic_types: &id018
+  - Spatial Concept
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C1708726
+    name: Gene Locus
+    root_source: MTH
+    semantic_types: *id018
+  - cui: C1517493
+    name: Gene Physical Location
+    root_source: MTH
+    semantic_types:
+    - Spatial Concept
+  - cui: C1315047
+    name: Gene trinucleotide repeats
+    root_source: MTH
+    semantic_types:
+    - Nucleotide Sequence
+  - cui: C4300323
+    name: TRBV9 gene segments
+    root_source: LNC
+    semantic_types:
+    - Nucleotide Sequence
+  - cui: C4300324
+    name: TRBV6 gene segments
+    root_source: LNC
+    semantic_types:
+    - Nucleotide Sequence
+- dimension: resolution
+  token: FUNCTIONAL_ELEMENT
+  kind: value
+  query: Regulatory sequence
+  expect: uncertain
+  sab: MSH
+  inventory_note: Genomic regulatory region (promoter/enhancer), not physiological regulation.
+  status: mapped
+  cui: C0314642
+  matched_name: Regulatory sequence
+  root_source: SNOMEDCT_US
+  semantic_types: &id019
+  - Nucleotide Sequence
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0314642
+    name: Regulatory sequence
+    root_source: SNOMEDCT_US
+    semantic_types: *id019
+- dimension: resolution
+  token: POSITION
+  kind: value
+  query: Nucleotide position
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+  curated: true
+  curator_note: Token = 'Single-base position', a genomic granularity/coordinate descriptor; all candidates
+    are GO 'positive regulation of nucleotide ......
+- dimension: resolution
+  token: VARIANT
+  kind: value
+  query: Sequence variant
+  expect: likely
+  sab: null
+  inventory_note: null
+  status: unmapped
+- dimension: credibility
+  token: null
+  kind: axis
+  query: Certainty of evidence
+  expect: uncertain
+  sab: MSH
+  inventory_note: Overall ordinal rating anchored on SEPIO confidence; facets are open.
+  status: unmapped
+- dimension: credibility
+  token: VERY_HIGH
+  kind: value
+  query: High
+  expect: unlikely
+  sab: null
+  inventory_note: Ordinal rating; no faithful UMLS concept for the GEM tier.
+  status: unmapped
+  cui: C5202936
+  matched_name: IPSS-R Risk Category High
+  root_source: MTH
+  semantic_types: &id020
+  - Finding
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C5202936
+    name: IPSS-R Risk Category High
+    root_source: MTH
+    semantic_types: *id020
+  - cui: C0205250
+    name: High
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C3887512
+    name: high - ActExposureLevelCode
+    root_source: MTH
+    semantic_types:
+    - Idea or Concept
+  - cui: C1561957
+    name: Observation Value - High
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C1299351
+    name: Abnormally high
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  curated: true
+  curator_note: GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High'
+    finding (explicitly non-faithful) and bare 'High...
+- dimension: credibility
+  token: HIGH
+  kind: value
+  query: High
+  expect: unlikely
+  sab: null
+  inventory_note: Ordinal rating.
+  status: unmapped
+  cui: C5202936
+  matched_name: IPSS-R Risk Category High
+  root_source: MTH
+  semantic_types: &id021
+  - Finding
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C5202936
+    name: IPSS-R Risk Category High
+    root_source: MTH
+    semantic_types: *id021
+  - cui: C0205250
+    name: High
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C3887512
+    name: high - ActExposureLevelCode
+    root_source: MTH
+    semantic_types:
+    - Idea or Concept
+  - cui: C1561957
+    name: Observation Value - High
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C1299351
+    name: Abnormally high
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  curated: true
+  curator_note: GEM-internal ordinal credibility tier; 'IPSS-R Risk Category High' and the generic 'High'
+    qualitative qualifier do not denote a high evid...
+- dimension: credibility
+  token: MEDIUM
+  kind: value
+  query: Medium
+  expect: unlikely
+  sab: null
+  inventory_note: Ordinal rating.
+  status: unmapped
+  cui: C3244283
+  matched_name: medium exposure
+  root_source: MTH
+  semantic_types: &id022
+  - Qualitative Concept
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C3244283
+    name: medium exposure
+    root_source: MTH
+    semantic_types: *id022
+  - cui: C1705217
+    name: Medium (Substance)
+    root_source: MTH
+    semantic_types:
+    - Substance
+  - cui: C0439536
+    name: Medium
+    root_source: MTH
+    semantic_types:
+    - Quantitative Concept
+  - cui: C4522282
+    name: A Medium Amount of Time
+    root_source: MTH
+    semantic_types:
+    - Finding
+  - cui: C4522283
+    name: A Medium Amount
+    root_source: MTH
+    semantic_types:
+    - Finding
+  curated: true
+  curator_note: GEM-internal ordinal credibility tier; candidates ('medium exposure', 'Medium (Substance)',
+    generic 'Medium' quantity/amount concepts) ar...
+- dimension: credibility
+  token: LOW
+  kind: value
+  query: Low
+  expect: unlikely
+  sab: null
+  inventory_note: Ordinal rating.
+  status: unmapped
+  cui: C5203106
+  matched_name: IPSS-R Risk Category Low
+  root_source: MTH
+  semantic_types: &id023
+  - Finding
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C5203106
+    name: IPSS-R Risk Category Low
+    root_source: MTH
+    semantic_types: *id023
+  - cui: C0205251
+    name: low
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C1611820
+    name: Low - observation
+    root_source: MTH
+    semantic_types:
+    - Quantitative Concept
+  - cui: C1619811
+    name: Low - MessageWaitingPriority
+    root_source: MTH
+    semantic_types:
+    - Qualitative Concept
+  - cui: C4522223
+    name: IPSS Risk Category Low
+    root_source: MTH
+    semantic_types:
+    - Intellectual Product
+  curated: true
+  curator_note: GEM-internal ordinal credibility tier; candidates are IPSS/IPSS-R low risk categories
+    and generic 'low' qualifiers, none of which faithfu...
+- dimension: phenotype_scale
+  token: null
+  kind: axis
+  query: Phenotype
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  curated: false
+  sty_tui: T039
+  sty_name: Physiologic Function
+  sty_tree: B2.2.1.1
+  curator_note: null
+- dimension: phenotype_scale
+  token: MOLECULAR
+  kind: value
+  query: Molecular phenotype
+  expect: uncertain
+  sab: null
+  inventory_note: Phenotype at the molecular level; distinct from GO 'molecular function' used by measurement_target.
+  status: unmapped
+  curated: true
+  curator_note: MOLECULAR is a GEM-internal phenotype-scale bucket (molecular-level phenotype); the only
+    candidates are LOINC lab observation codes (DMPK...
+- dimension: phenotype_scale
+  token: CELLULAR
+  kind: value
+  query: Cell phenotype
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: review
+  cui: C4329048
+  matched_name: cell dedifferentiation involved in phenotypic switching
+  root_source: GO
+  semantic_types: &id024
+  - Cell Function
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C4329048
+    name: cell dedifferentiation involved in phenotypic switching
+    root_source: GO
+    semantic_types: *id024
+  - cui: C4329047
+    name: cell differentiation involved in phenotypic switching
+    root_source: GO
+    semantic_types:
+    - Cell Function
+  - cui: C4325680
+    name: activation of cell differentiation involved in phenotypic switching
+    root_source: GO
+    semantic_types:
+    - Cell Function
+  - cui: C4327325
+    name: regulation of cell differentiation involved in phenotypic switching
+    root_source: GO
+    semantic_types:
+    - Cell Function
+  - cui: C4325681
+    name: inhibition of cell differentiation involved in phenotypic switching
+    root_source: GO
+    semantic_types:
+    - Cell Function
+- dimension: phenotype_scale
+  token: HISTOLOGICAL
+  kind: value
+  query: Tissue structure
+  expect: uncertain
+  sab: null
+  inventory_note: Tissue-level phenotype, not the discipline 'histology'.
+  status: unmapped
+  cui: C0043240
+  matched_name: Wound Healing
+  root_source: MTH
+  semantic_types: &id025
+  - Organism Function
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0043240
+    name: Wound Healing
+    root_source: MTH
+    semantic_types: *id025
+  curated: true
+  curator_note: HISTOLOGICAL means tissue-level phenotype (not the discipline histology); candidates are
+    all specific anatomical tissue structures (brain...
+- dimension: phenotype_scale
+  token: ORGANISMAL
+  kind: value
+  query: Phenotype
+  expect: likely
+  sab: MSH
+  inventory_note: Whole-organism phenotype.
+  status: review
+  cui: C4505466
+  matched_name: Senescence-Associated Secretory Phenotype
+  root_source: MSH
+  semantic_types: &id026
+  - Cell Function
+  search_type: words
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C4505466
+    name: Senescence-Associated Secretory Phenotype
+    root_source: MSH
+    semantic_types: *id026
+  - cui: C4704854
+    name: Phenotypic Plasticity
+    root_source: MSH
+    semantic_types:
+    - Organism Function
+- dimension: phenotype_scale
+  token: CLINICAL
+  kind: value
+  query: Clinical finding
+  expect: likely
+  sab: SNOMEDCT_US
+  inventory_note: null
+  status: review
+  cui: C0232909
+  matched_name: Multiple conception
+  root_source: SNOMEDCT_US
+  semantic_types: &id027
+  - Organism Function
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0232909
+    name: Multiple conception
+    root_source: SNOMEDCT_US
+    semantic_types: *id027
+  - cui: C0038822
+    name: Superfetation
+    root_source: MSH
+    semantic_types:
+    - Organism Function
+  - cui: C0563168
+    name: Dangerous and harmful thoughts
+    root_source: SNOMEDCT_US
+    semantic_types:
+    - Mental Process
+- dimension: variant_ascertainment
+  token: null
+  kind: axis
+  query: Ascertainment
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+- dimension: variant_ascertainment
+  token: OBSERVED_IN_CASES
+  kind: value
+  query: Affected individual
+  expect: unlikely
+  sab: null
+  inventory_note: Study-design ascertainment route, not a 1:1 UMLS concept.
+  status: unmapped
+  cui: C2349887
+  matched_name: Encounter due to individual or family affected by other family member being on deployment
+  root_source: MTH
+  semantic_types: &id028
+  - Finding
+  search_type: words
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C2349887
+    name: Encounter due to individual or family affected by other family member being on deployment
+    root_source: MTH
+    semantic_types: *id028
+  - cui: C2911012
+    name: Individual or family affected by other family member being on military deployment
+    root_source: ICD10CM
+    semantic_types:
+    - Finding
+  - cui: C2911016
+    name: Individual or family affected by family member having returned from military deployment (current
+      or past conflict)
+    root_source: ICD10CM
+    semantic_types:
+    - Finding
+  - cui: C2349889
+    name: Encounter due to individual or family affected by other family member having returned from deployment
+      (current or past conflict)
+    root_source: MTH
+    semantic_types:
+    - Finding
+  - cui: C2674488
+    name: Low IgG in adolescence (2 of 4 affected individuals)
+    root_source: OMIM
+    semantic_types:
+    - Finding
+  curated: true
+  curator_note: OBSERVED_IN_CASES is a study-design ascertainment route (variant seen in affected individuals);
+    all candidates are unrelated ICD 'family ...
+- dimension: variant_ascertainment
+  token: OBSERVED_IN_CONTROLS
+  kind: value
+  query: Control group
+  expect: unlikely
+  sab: null
+  inventory_note: Study-design ascertainment route.
+  status: unmapped
+  cui: C0009932
+  matched_name: Control Groups
+  root_source: MTH
+  semantic_types: &id029
+  - Group
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C0009932
+    name: Control Groups
+    root_source: MTH
+    semantic_types: *id029
+  curated: true
+  curator_note: OBSERVED_IN_CONTROLS is an ascertainment route; C0009932 'Control Groups' denotes the
+    study-group object (Group), not the route by which ...
+- dimension: variant_ascertainment
+  token: FROM_DATABASE
+  kind: value
+  query: Database
+  expect: unlikely
+  sab: null
+  inventory_note: Provenance route, not a faithful concept.
+  status: unmapped
+  cui: C0242356
+  matched_name: Databases
+  root_source: MTH
+  semantic_types: &id030
+  - Intellectual Product
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C0242356
+    name: Databases
+    root_source: MTH
+    semantic_types: *id030
+  - cui: C0993637
+    name: Published Database
+    root_source: MTH
+    semantic_types:
+    - Intellectual Product
+  curated: true
+  curator_note: FROM_DATABASE is a provenance/ascertainment route; 'Databases'/'Published Database' denote
+    the database artifact, not the route by which ...
+- dimension: variant_ascertainment
+  token: SYNTHETIC
+  kind: value
+  query: Synthetic construct
+  expect: unlikely
+  sab: null
+  inventory_note: Engineered-variant route.
+  status: mapped
+  cui: C0598279
+  matched_name: synthetic construct
+  root_source: MTH
+  semantic_types: &id031
+  - Nucleic Acid, Nucleoside, or Nucleotide
+  search_type: exact
+  sab_filtered: false
+  sty_filtered: false
+  candidates:
+  - cui: C0598279
+    name: synthetic construct
+    root_source: MTH
+    semantic_types: *id031
+- dimension: mode_of_inheritance
+  token: null
+  kind: axis
+  query: Mode of inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: Conditional (HUMAN_GENETICS + GENE). The schema does not enumerate values; the entries
+    below are the standard inheritance modes (HPO "Mode of inheritance" subontology) recorded as informational
+    common_values, not schema-enumerated tokens.
+  status: mapped
+  curated: false
+  sty_tui: T045
+  sty_name: Genetic Function
+  sty_tree: B2.2.1.1.4.1
+  curator_note: null
+- dimension: mode_of_inheritance
+  token: autosomal_dominant
+  kind: common_value
+  query: Autosomal dominant inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: mapped
+  cui: C0443147
+  matched_name: Autosomal dominant inheritance
+  root_source: MTH
+  semantic_types: &id032
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0443147
+    name: Autosomal dominant inheritance
+    root_source: MTH
+    semantic_types: *id032
+- dimension: mode_of_inheritance
+  token: autosomal_recessive
+  kind: common_value
+  query: Autosomal recessive inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: mapped
+  cui: C0441748
+  matched_name: Autosomal recessive inheritance
+  root_source: SNOMEDCT_US
+  semantic_types: &id033
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0441748
+    name: Autosomal recessive inheritance
+    root_source: SNOMEDCT_US
+    semantic_types: *id033
+- dimension: mode_of_inheritance
+  token: x_linked_dominant
+  kind: common_value
+  query: X-linked dominant inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: unmapped
+- dimension: mode_of_inheritance
+  token: x_linked_recessive
+  kind: common_value
+  query: X-linked recessive inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: unmapped
+- dimension: mode_of_inheritance
+  token: mitochondrial
+  kind: common_value
+  query: Mitochondrial inheritance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: mapped
+  cui: C0887941
+  matched_name: Mitochondrial Inheritance
+  root_source: MTH
+  semantic_types: &id034
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0887941
+    name: Mitochondrial Inheritance
+    root_source: MTH
+    semantic_types: *id034
+- dimension: penetrance
+  token: null
+  kind: axis
+  query: Penetrance
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  curated: false
+  sty_tui: T045
+  sty_name: Genetic Function
+  sty_tree: B2.2.1.1.4.1
+  curator_note: null
+- dimension: penetrance
+  token: complete
+  kind: value
+  query: Complete penetrance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: mapped
+  cui: C5826795
+  matched_name: Typified by complete penetrance
+  root_source: HPO
+  semantic_types: &id035
+  - Genetic Function
+  search_type: words
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C5826795
+    name: Typified by complete penetrance
+    root_source: HPO
+    semantic_types: *id035
+  curated: true
+  curator_note: Token 'complete' = complete penetrance; HPO C5826795 'Typified by complete penetrance'
+    (Genetic Function) denotes exactly that.
+- dimension: penetrance
+  token: incomplete
+  kind: value
+  query: Incomplete penetrance
+  expect: likely
+  sab: HPO
+  inventory_note: null
+  status: unmapped
+- dimension: penetrance
+  token: unknown
+  kind: value
+  query: Unknown
+  expect: unlikely
+  sab: null
+  inventory_note: Sentinel, not a phenotypic concept.
+  status: unmapped
+- dimension: measurement_target
+  token: null
+  kind: axis
+  query: Molecular function
+  expect: likely
+  sab: GO
+  inventory_note: Conditional (GENE_FUNCTION); the aspect of gene-product function measured.
+  status: mapped
+  curated: false
+  sty_tui: T044
+  sty_name: Molecular Function
+  sty_tree: B2.2.1.1.4
+  curator_note: null
+- dimension: measurement_target
+  token: EXISTENCE
+  kind: value
+  query: Gene product
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: unmapped
+  cui: C2755856
+  matched_name: regulation of gene product expression
+  root_source: GO
+  semantic_types: &id036
+  - Genetic Function
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C2755856
+    name: regulation of gene product expression
+    root_source: GO
+    semantic_types: *id036
+  - cui: C5887109
+    name: miRNA-mediated gene silencing, production of miRNAs
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+  - cui: C5887519
+    name: gene silencing by RNA, production of guide RNA
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+  - cui: C2754001
+    name: production of small RNA involved in gene silencing by RNA
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+  - cui: C5888282
+    name: regulation of gene silencing by miRNA, production of miRNAs
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+  curated: true
+  curator_note: EXISTENCE is a measured property (whether the gene product is present); candidates 'Proteins'/'Genome
+    Encoded Entity' are substance/entit...
+- dimension: measurement_target
+  token: EXPRESSION
+  kind: value
+  query: Gene expression
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C0017262
+  matched_name: Gene Expression
+  root_source: MTH
+  semantic_types: &id037
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0017262
+    name: Gene Expression
+    root_source: MTH
+    semantic_types: *id037
+- dimension: measurement_target
+  token: STABILITY
+  kind: value
+  query: Protein stability
+  expect: likely
+  sab: null
+  inventory_note: null
+  status: review
+  cui: C5887110
+  matched_name: positive regulation of protein stability
+  root_source: GO
+  semantic_types: &id038
+  - Molecular Function
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C5887110
+    name: positive regulation of protein stability
+    root_source: GO
+    semantic_types: *id038
+  - cui: C1327386
+    name: protein stabilization
+    root_source: MTH
+    semantic_types:
+    - Molecular Function
+  - cui: C1152621
+    name: lysosomal protein stabilization
+    root_source: GO
+    semantic_types:
+    - Molecular Function
+  - cui: C5673027
+    name: protein-containing complex stabilizing activity
+    root_source: GO
+    semantic_types:
+    - Molecular Function
+- dimension: measurement_target
+  token: BINDING
+  kind: value
+  query: Protein binding
+  expect: likely
+  sab: GO
+  inventory_note: null
+  status: mapped
+  cui: C0033618
+  matched_name: Protein Binding
+  root_source: MSH
+  semantic_types: &id039
+  - Molecular Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0033618
+    name: Protein Binding
+    root_source: MSH
+    semantic_types: *id039
+- dimension: measurement_target
+  token: LOCALIZATION
+  kind: value
+  query: Protein localization
+  expect: likely
+  sab: GO
+  inventory_note: null
+  status: review
+  cui: C3548487
+  matched_name: protein localization to heterochromatin
+  root_source: GO
+  semantic_types: &id040
+  - Genetic Function
+  search_type: words
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C3548487
+    name: protein localization to heterochromatin
+    root_source: GO
+    semantic_types: *id040
+  - cui: C2754902
+    name: protein localization to extracellular region
+    root_source: GO
+    semantic_types:
+    - Molecular Function
+  - cui: C3894027
+    name: protein localization to subtelomeric heterochromatin
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+  - cui: C4236545
+    name: protein localization to cell wall
+    root_source: GO
+    semantic_types:
+    - Molecular Function
+  - cui: C3823031
+    name: protein localization to pericentric heterochromatin
+    root_source: GO
+    semantic_types:
+    - Genetic Function
+- dimension: measurement_target
+  token: ACTIVITY
+  kind: value
+  query: Molecular function
+  expect: uncertain
+  sab: GO
+  inventory_note: null
+  status: mapped
+  cui: C1148560
+  matched_name: molecular_function
+  root_source: GO
+  semantic_types: &id041
+  - Molecular Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C1148560
+    name: molecular_function
+    root_source: GO
+    semantic_types: *id041
+- dimension: measurement_target
+  token: CATALYSIS
+  kind: value
+  query: Catalytic activity
+  expect: likely
+  sab: GO
+  inventory_note: null
+  status: mapped
+  cui: C0243102
+  matched_name: enzyme activity
+  root_source: MTH
+  semantic_types: &id042
+  - Molecular Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0243102
+    name: enzyme activity
+    root_source: MTH
+    semantic_types: *id042
+  curated: true
+  curator_note: CATALYSIS measures catalytic/enzymatic activity of the gene product; C0243102 'enzyme
+    activity' (Molecular Function) faithfully denotes c...
+- dimension: gene_relation
+  token: null
+  kind: axis
+  query: Gene interaction
+  expect: uncertain
+  sab: MSH
+  inventory_note: Conditional (GENE_FUNCTION); relation between two gene products.
+  status: mapped
+  curated: false
+  sty_tui: T045
+  sty_name: Genetic Function
+  sty_tree: B2.2.1.1.4.1
+  curator_note: null
+- dimension: gene_relation
+  token: X_has_same_function_as_Y
+  kind: value
+  query: Functional equivalence
+  expect: unlikely
+  sab: null
+  inventory_note: Composite relational token; no faithful 1:1 concept.
+  status: unmapped
+  curated: true
+  curator_note: Composite relational predicate (two gene products sharing function); the sole candidate
+    'Immunologic equivalence' (Organism Function) is ...
+- dimension: gene_relation
+  token: X_regulates_Y
+  kind: value
+  query: Regulation of gene expression
+  expect: likely
+  sab: GO
+  inventory_note: null
+  status: mapped
+  cui: C0017263
+  matched_name: Gene Expression Regulation
+  root_source: MTH
+  semantic_types: &id043
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0017263
+    name: Gene Expression Regulation
+    root_source: MTH
+    semantic_types: *id043
+  curated: true
+  curator_note: X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression
+    Regulation' (Genetic Function) faithfully den...
+- dimension: gene_relation
+  token: X_inhibits_Y
+  kind: value
+  query: Negative regulation of gene expression
+  expect: uncertain
+  sab: GO
+  inventory_note: null
+  status: mapped
+  cui: C2611924
+  matched_name: negative regulation of gene expression
+  root_source: GO
+  semantic_types: &id044
+  - Genetic Function
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C2611924
+    name: negative regulation of gene expression
+    root_source: GO
+    semantic_types: *id044
+- dimension: organism
+  token: null
+  kind: axis
+  query: Organism
+  expect: likely
+  sab: null
+  inventory_note: Conditional (IN_VIVO or MODEL_ORGANISM). Values are species, mapped to NCBITaxon in
+    the existing s15 crosswalk; only the axis concept is resolved here to avoid duplicating that work.
+  status: mapped
+  curated: false
+  sty_tui: T001
+  sty_name: Organism
+  sty_tree: A1.1
+  curator_note: null
+- dimension: knockout_type
+  token: null
+  kind: axis
+  query: Gene knockout
+  expect: likely
+  sab: MSH
+  inventory_note: Conditional (MODEL_ORGANISM).
+  status: mapped
+  curated: false
+  sty_tui: T063
+  sty_name: Molecular Biology Research Technique
+  sty_tree: B1.3.2.1
+  curator_note: null
+- dimension: knockout_type
+  token: CONDITIONAL
+  kind: value
+  query: Conditional gene knockout
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: mapped
+  cui: C0814041
+  matched_name: conditional gene knockout technology
+  root_source: AOD
+  semantic_types: &id045
+  - Molecular Biology Research Technique
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C0814041
+    name: conditional gene knockout technology
+    root_source: AOD
+    semantic_types: *id045
+  curated: true
+  curator_note: Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology'
+    (Molecular Biology Research Technique) de...
+- dimension: knockout_type
+  token: UNCONDITIONAL
+  kind: value
+  query: constitutive gene knockout
+  expect: uncertain
+  sab: null
+  inventory_note: Constitutive knockout; closest concept is the general 'gene knockout'.
+  status: unmapped
+- dimension: subdomain
+  token: null
+  kind: axis
+  query: Study design
+  expect: uncertain
+  sab: null
+  inventory_note: Conditional (HUMAN_GENETICS + GENE); study-design subdomain.
+  status: mapped
+  curated: false
+  sty_tui: T063
+  sty_name: Molecular Biology Research Technique
+  sty_tree: B1.3.2.1
+  curator_note: null
+- dimension: subdomain
+  token: GWAS
+  kind: value
+  query: Genome-wide association study
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C2350277
+  matched_name: Genome-Wide Association Study
+  root_source: MSH
+  semantic_types: &id046
+  - Molecular Biology Research Technique
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C2350277
+    name: Genome-Wide Association Study
+    root_source: MSH
+    semantic_types: *id046
+- dimension: subdomain
+  token: Linkage Study
+  kind: value
+  query: Genetic linkage analysis
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: unmapped
+- dimension: subdomain
+  token: WGS-WES Study
+  kind: value
+  query: Whole genome sequencing
+  expect: likely
+  sab: MSH
+  inventory_note: null
+  status: mapped
+  cui: C3640076
+  matched_name: Whole Genome Sequencing
+  root_source: MSH
+  semantic_types: &id047
+  - Molecular Biology Research Technique
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C3640076
+    name: Whole Genome Sequencing
+    root_source: MSH
+    semantic_types: *id047
+- dimension: subdomain
+  token: Candidate Gene Study
+  kind: value
+  query: Candidate gene study
+  expect: uncertain
+  sab: null
+  inventory_note: null
+  status: mapped
+  cui: C2717881
+  matched_name: Candidate Gene Identification
+  root_source: MSH
+  semantic_types: &id048
+  - Molecular Biology Research Technique
+  search_type: words
+  sab_filtered: false
+  sty_filtered: true
+  candidates:
+  - cui: C2717881
+    name: Candidate Gene Identification
+    root_source: MSH
+    semantic_types: *id048
+  curated: true
+  curator_note: Value denotes the candidate-gene study design; 'Candidate Gene Identification' (Molecular
+    Biology Research Technique) is the standard MeS...
+- dimension: mendelian_segregation
+  token: null
+  kind: axis
+  query: Mendelian inheritance
+  expect: uncertain
+  sab: MSH
+  inventory_note: Boolean conditional dimension; only the axis concept is resolved.
+  status: unmapped
+- dimension: genetic_background_considered
+  token: null
+  kind: axis
+  query: Genetic background
+  expect: likely
+  sab: MSH
+  inventory_note: Boolean conditional dimension; only the axis concept is resolved.
+  status: unmapped
+- dimension: environmental_factors
+  token: null
+  kind: axis
+  query: Environmental exposure
+  expect: likely
+  sab: MSH
+  inventory_note: Quasi-categorical conditional dimension; values are open free text, so only the axis
+    concept is resolved.
+  status: unmapped

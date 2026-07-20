@@ -39,27 +39,20 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import sys
 import unicodedata
 from pathlib import Path
 
 import yaml
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+from forome.gem.umls import semantic_types as stylib
+from forome.gem.umls._paths import DATA_DIR, SCHEMA_DIR
 
-
-def _find_base() -> Path:
-    for cand in (SCRIPT_DIR, SCRIPT_DIR.parent, SCRIPT_DIR.parent.parent):
-        if (cand / "schema" / "genetic_evidence.shacl.ttl").is_file():
-            return cand
-    return SCRIPT_DIR.parent
-
-
-BASE = _find_base()
-INVENTORY = SCRIPT_DIR / "dimensions_inventory.yaml"
-SHACL = BASE / "schema" / "genetic_evidence.shacl.ttl"
-DEFAULT_OUT = SCRIPT_DIR / "umls_crosswalk.yaml"
-CACHE_DIR = SCRIPT_DIR / "cache"
+BASE = SCHEMA_DIR.parent
+INVENTORY = DATA_DIR / "dimensions_inventory.yaml"
+ADJUDICATIONS = DATA_DIR / "adjudications.yaml"
+SHACL = SCHEMA_DIR / "genetic_evidence.shacl.ttl"
+DEFAULT_OUT = DATA_DIR / "umls_crosswalk.yaml"
+CACHE_DIR = DATA_DIR / "cache"
 
 # SHACL enum members deliberately NOT expected in the inventory:
 #   - the sentinel, declared a member of every dimension class
@@ -116,14 +109,15 @@ def _entry(dim: str, token, kind: str, src: dict) -> dict:
 # Resolution: tiered UMLS search with honest status assignment.
 # --------------------------------------------------------------------------
 
-def resolve(client, query: str, sab: str | None, live: bool) -> dict:
+def resolve(client, query: str, sab: str | None, live: bool,
+            stys: str | None = None) -> dict:
     if not live:
         return {"status": "pending"}
 
     def tier(use_sab):
         s = sab if use_sab else None
         for st in ("exact", "normalizedString", "words"):
-            cands = client.search(query, search_type=st, sabs=s)
+            cands = client.search(query, search_type=st, sabs=s, semantic_types=stys)
             if cands:
                 return st, cands
         return None, []
@@ -153,6 +147,7 @@ def resolve(client, query: str, sab: str | None, live: bool) -> dict:
         "semantic_types": top["semantic_types"],
         "search_type": st,
         "sab_filtered": used_sab,
+        "sty_filtered": bool(stys),
         "candidates": [
             {k: c[k] for k in ("cui", "name", "root_source", "semantic_types")}
             for c in cands[:5]
@@ -160,15 +155,108 @@ def resolve(client, query: str, sab: str | None, live: bool) -> dict:
     }
 
 
-def build(client, live: bool, inventory_path: Path = INVENTORY) -> dict:
-    entries = load_entries(inventory_path)
+def _adj_key(dimension: str, token) -> str:
+    return f"{dimension}/{token if token is not None else '(axis)'}"
+
+
+def load_adjudications(path: Path = ADJUDICATIONS) -> dict:
+    """Curator decisions keyed by 'dimension/token' (or 'dimension/(axis)')."""
+    if not path.is_file():
+        return {}
+    doc = yaml.safe_load(path.read_text()) or {}
+    return doc.get("adjudications", {}) or {}
+
+
+def apply_adjudication(entry: dict, adj: dict, client=None) -> dict:
+    """Apply a curator decision. Honest by construction: an accepted CUI is used
+    only if it was among the query's candidates OR the harness can fetch it live
+    from UMLS (confirming it is a real concept). The harness never fabricates a
+    concept the curator merely named. A curator may also accept a concept found
+    via the adjudication UI's live search; such a CUI is fetched here."""
+    if adj.get("unmapped"):
+        return {**entry, "status": "unmapped", "curated": True,
+                "curator_note": adj.get("note")}
+    cui = adj.get("accept")
+    if cui:
+        for c in (entry.get("candidates") or []):
+            if c["cui"] == cui:
+                return {**entry, "status": "mapped", "curated": True,
+                        "cui": c["cui"], "matched_name": c["name"],
+                        "root_source": c["root_source"],
+                        "semantic_types": c["semantic_types"],
+                        "curator_note": adj.get("note")}
+        # Not among the query candidates: fetch it live to confirm it exists.
+        concept = client.get_concept(cui) if client is not None else None
+        if concept and concept.get("cui") == cui:
+            return {**entry, "status": "mapped", "curated": True, "fetched": True,
+                    "cui": cui, "matched_name": concept["name"],
+                    "root_source": concept.get("root_source", "MTH"),
+                    "semantic_types": concept.get("semantic_types", []),
+                    "curator_note": adj.get("note")}
+        # Cannot confirm the concept: refuse to fabricate it.
+        return {**entry, "status": "review", "curated": False,
+                "curator_error": f"accepted CUI {cui} not in candidates and not "
+                                 f"confirmable via UMLS"}
+    return entry
+
+
+def build(client, live: bool, inventory_path: Path = INVENTORY,
+          adjudications: dict | None = None) -> dict:
+    """Resolve the whole inventory. Each dimension AXIS maps to a UMLS semantic
+    type (from adjudication accept_sty, else the inventory's semantic_type), and
+    that type's subtree constrains the search for the dimension's VALUE concepts
+    -- so axis and values reconcile by construction (a value is only ever mapped
+    within its axis's semantic branch)."""
+    if adjudications is None:
+        adjudications = load_adjudications()
+    doc = yaml.safe_load(inventory_path.read_text())
     out_entries = []
-    for e in entries:
-        res = resolve(client, e["query"], e.get("sab"), live)
-        out_entries.append({**e, **res})
+    for dim, body in (doc.get("dimensions") or {}).items():
+        axis = body.get("axis")
+        axis_adj = adjudications.get(_adj_key(dim, None)) or {}
+        if axis_adj.get("unmapped"):
+            axis_sty = None                                   # curator: axis untyped
+        else:
+            axis_sty = axis_adj.get("accept_sty") or (axis or {}).get("semantic_type")
+        stys = stylib.filter_param(axis_sty)                  # value-search filter
+
+        if axis is not None:
+            e = _entry(dim, None, "axis", axis)
+            if not live:
+                e["status"] = "pending"
+            elif axis_sty:
+                sty = stylib.get(axis_sty)
+                if sty:
+                    e.update({"status": "mapped",
+                              "curated": bool(axis_adj.get("accept_sty")),
+                              "sty_tui": sty["tui"], "sty_name": sty["name"],
+                              "sty_tree": sty.get("tree_number"),
+                              "curator_note": axis_adj.get("note")})
+                else:
+                    e.update({"status": "review",
+                              "curator_error": f"semantic type {axis_sty} not in "
+                              "semantic_types.yaml (run fetch_semantic_network.py)"})
+            else:
+                e["status"] = "unmapped"
+                if axis_adj.get("unmapped"):
+                    e.update({"curated": True, "curator_note": axis_adj.get("note")})
+            out_entries.append(e)
+
+        for kind, seq in (("value", "values"), ("common_value", "common_values")):
+            for v in body.get(seq) or []:
+                e = _entry(dim, v["token"], kind, v)
+                res = resolve(client, e["query"], e.get("sab"), live, stys=stys)
+                entry = {**e, **res}
+                adj = adjudications.get(_adj_key(dim, v["token"]))
+                if adj and live:
+                    entry = apply_adjudication(entry, adj, client=client)
+                out_entries.append(entry)
+
     counts = {s: 0 for s in ("mapped", "review", "unmapped", "pending")}
     for e in out_entries:
         counts[e["status"]] += 1  # KeyError surfaces any unexpected status
+    counts["curated"] = sum(1 for e in out_entries if e.get("curated"))
+    counts["axis_typed"] = sum(1 for e in out_entries if e.get("sty_tui"))
     return {
         "meta": {
             "generated_by": "mapping/build_umls_crosswalk.py",
@@ -241,13 +329,13 @@ def _make_client(args):
     if args.check_inventory:
         return None, False
     if args.fixtures:
-        from uts_client import FixtureClient
+        from forome.gem.umls.uts_client import FixtureClient
         return FixtureClient(Path(args.fixtures)), True
     key = args.api_key or os.environ.get("UMLS_API_KEY", "")
     if key and not args.no_key:
-        from uts_client import UTSClient
+        from forome.gem.umls.uts_client import UTSClient
         return UTSClient(key, cache_dir=CACHE_DIR), True
-    from uts_client import NullClient
+    from forome.gem.umls.uts_client import NullClient
     return NullClient(), False
 
 
@@ -263,8 +351,6 @@ def main(argv=None) -> int:
                     help="Only verify the inventory still covers the SHACL enums; do not query.")
     args = ap.parse_args(argv)
 
-    sys.path.insert(0, str(SCRIPT_DIR))  # allow `import uts_client`
-
     if args.check_inventory:
         return check_inventory()
 
@@ -276,7 +362,8 @@ def main(argv=None) -> int:
     c = doc["meta"]["counts"]
     print(f"Wrote {args.out}")
     print(f"  total={doc['meta']['total']}  mapped={c['mapped']}  "
-          f"review={c['review']}  unmapped={c['unmapped']}  pending={c['pending']}")
+          f"review={c['review']}  unmapped={c['unmapped']}  pending={c['pending']}"
+          f"  (curated={c.get('curated', 0)})")
     if not live:
         print("  (scaffold mode: no UMLS key supplied -> all entries 'pending'. "
               "Set UMLS_API_KEY and rerun to resolve concepts.)")

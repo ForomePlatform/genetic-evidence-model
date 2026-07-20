@@ -18,7 +18,14 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
+def _repo_root() -> Path:
+    for cand in Path(__file__).resolve().parents:
+        if (cand / "annotations").is_dir() and (cand / "schema").is_dir():
+            return cand
+    return Path(__file__).resolve().parents[6]
+
+
+ROOT = _repo_root()
 # The documented corpus: 4 manual + Duerr v0 + Inouye v1.
 CORPUS = [
     "annotations/jossin2017.yaml",
@@ -83,7 +90,9 @@ def methods(item):
     return _strset(item.get("method"))
 
 
-def main(argv):
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
     items = load_items()
     n = len(items)
 
@@ -137,4 +146,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

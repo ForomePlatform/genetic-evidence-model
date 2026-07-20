@@ -34,6 +34,9 @@ venv/
 # Extraction scratch
 *.raw.json.bak
 
+# Local environment / secrets (direnv; may hold UMLS_API_KEY etc.)
+.envrc
+
 # Editors / OS
 .DS_Store
 Thumbs.db
@@ -53,6 +56,9 @@ Thumbs.db
 # The inputs (dimensions_inventory.yaml, omop_cdm_examples.yaml), the code,
 # the tests + fixtures, and the populated umls_crosswalk.yaml are tracked;
 # the cache and the synthetic-CUI demo/preview files are not.
-mapping/cache/
-mapping/*.demo.yaml
-mapping/*.preview.tex
+data/umls/cache/
+data/umls/*.demo.yaml
+data/umls/*.preview.tex
+
+# Archived handover / obsolete working notes
+internal/

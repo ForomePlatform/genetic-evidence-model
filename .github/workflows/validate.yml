@@ -6,15 +6,15 @@ on:
     paths:
       - 'annotations/**'
       - 'schema/**'
-      - 'extraction/**'
-      - 'scripts/**'
+      - 'src/python/**'
+      - 'pyproject.toml'
       - '.github/workflows/validate.yml'
   pull_request:
     paths:
       - 'annotations/**'
       - 'schema/**'
-      - 'extraction/**'
-      - 'scripts/**'
+      - 'src/python/**'
+      - 'pyproject.toml'
 
 jobs:
   parse-yaml:
@@ -62,7 +62,7 @@ jobs:
         run: pip install pyshacl rdflib pyyaml
 
       - name: Convert each annotation to RDF and validate against the SHACL shapes
-        run: python3 scripts/validate_annotations.py
+        run: python3 src/python/main/forome/gem/validation/validate_annotations.py
 
   coverage:
     name: Dimension-coverage report regenerates without error
@@ -79,4 +79,4 @@ jobs:
         run: pip install pyyaml
 
       - name: Recompute dimension coverage
-        run: python3 scripts/compute_coverage.py
+        run: python3 src/python/main/forome/gem/validation/compute_coverage.py
