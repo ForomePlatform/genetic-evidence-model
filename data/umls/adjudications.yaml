@@ -13,6 +13,7 @@ adjudications:
   "gene_relation/X_regulates_Y": {accept: C0017263, note: "X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression Regulation' (Genetic Function) faithfully den..."}
   "knockout_type/CONDITIONAL": {accept: C0814041, note: "Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology' (Molecular Biology Research Technique) de..."}
   "knowledge_domain/EPIGENETICS": {accept: C1655731, note: "EPIGENETICS is a knowledge-domain (discipline) value; 'study of epigenetics' (Biomedical Occupation or Discipline) faithfully denotes the..."}
+  "knowledge_domain/POPULATION_GENETICS": {accept: C0017404, note: "curator-accepted via UI"}
   "measurement_target/CATALYSIS": {accept: C0243102, note: "CATALYSIS measures catalytic/enzymatic activity of the gene product; C0243102 'enzyme activity' (Molecular Function) faithfully denotes c..."}
   "measurement_target/EXISTENCE": {unmapped: true, note: "EXISTENCE is a measured property (whether the gene product is present); candidates 'Proteins'/'Genome Encoded Entity' are substance/entit..."}
   "method/ASSOCIATION_STUDY": {accept: C2717878, note: "ASSOCIATION_STUDY = statistical test of association between genetic variation and phenotype; 'Genetic Association Studies' (Molecular Bio..."}

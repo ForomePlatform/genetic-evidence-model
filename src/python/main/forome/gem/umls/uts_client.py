@@ -80,7 +80,8 @@ class UTSClient:
 
     def search(self, term: str, search_type: str = "words",
                sabs: Optional[str] = None, page_size: int = 200,
-               semantic_types: Optional[str] = None) -> list[dict]:
+               semantic_types: Optional[str] = None,
+               partial: bool = False) -> list[dict]:
         """Return a list of candidate concept dicts for ``term``.
 
         Each candidate is normalised to:
@@ -90,6 +91,10 @@ class UTSClient:
         only value the UTS search endpoint supports; pagination is not).
         ``semantic_types`` (a comma-joined TUI list) restricts results to those
         semantic types -- used to constrain a value search to its axis's type.
+        ``search_type`` must be one the UTS endpoint accepts (words, exact,
+        normalizedWords, normalizedString, left/rightTruncation) -- an unknown
+        value silently returns nothing. ``partial`` sets partialSearch=true,
+        letting a subset of the query words match.
         """
         params = {
             "string": term,
@@ -100,6 +105,8 @@ class UTSClient:
             params["sabs"] = sabs
         if semantic_types:
             params["semanticTypes"] = semantic_types
+        if partial:
+            params["partialSearch"] = "true"
         data = self._get(f"/search/{self.version}", params)
         results = (data.get("result") or {}).get("results") or []
         out = []
@@ -289,7 +296,8 @@ class FixtureClient:
 
     def search(self, term: str, search_type: str = "words",
                sabs: Optional[str] = None, page_size: int = 200,
-               semantic_types: Optional[str] = None) -> list[dict]:
+               semantic_types: Optional[str] = None,
+               partial: bool = False) -> list[dict]:
         for cand in (self.dir / f"search_{self.slug(term)}__{search_type}.json",
                      self.dir / f"search_{self.slug(term)}.json"):
             if cand.is_file():
@@ -328,7 +336,8 @@ class NullClient:
 
     def search(self, term: str, search_type: str = "words",
                sabs: Optional[str] = None, page_size: int = 200,
-               semantic_types: Optional[str] = None) -> list[dict]:
+               semantic_types: Optional[str] = None,
+               partial: bool = False) -> list[dict]:
         return []
 
     def get_concept(self, cui: str) -> Optional[dict]:

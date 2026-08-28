@@ -212,6 +212,7 @@ def load_state() -> dict:
                 "sty_tui": e.get("sty_tui"), "sty_name": e.get("sty_name"),
                 "sty_tree": e.get("sty_tree"),
                 "dim_sty_tui": eff, "dim_sty_filter": filt,
+                "dim_sty_name": sty.get("name") if sty else None,
                 "decision": ("accept" if a.get("accept") else
                              "accept_sty" if a.get("accept_sty") else
                              "unmapped" if a.get("unmapped") else None),
@@ -219,15 +220,15 @@ def load_state() -> dict:
                 "note": a.get("note"), "error": e.get("curator_error"),
             })
 
-    if doc:
-        counts = doc["meta"]["counts"]
-    else:
-        vals = [e for e in entries if e["kind"] != "axis"]
-        counts = {"total": len(vals),
-                  "mapped": sum(e["status"] == "mapped" for e in vals),
-                  "unmapped": sum(e["status"] == "unmapped" for e in vals),
-                  "review": sum(e["status"] == "review" for e in vals),
-                  "curated": sum(bool(e["curated"]) for e in vals)}
+    # Always computed over VALUE entries (never axes), so the Home progress
+    # numbers mean what they say -- the crosswalk's meta.counts mixes axes in
+    # and carries no total.
+    vals = [e for e in entries if e["kind"] != "axis"]
+    counts = {"total": len(vals),
+              "mapped": sum(e["status"] == "mapped" for e in vals),
+              "unmapped": sum(e["status"] == "unmapped" for e in vals),
+              "review": sum(e["status"] == "review" for e in vals),
+              "curated": sum(bool(e["curated"]) for e in vals)}
     return {"entries": entries, "counts": counts,
             "workspace": str(DATA_DIR), "dimensions": sorted(dims)}
 
@@ -411,7 +412,12 @@ class Handler(BaseHTTPRequestHandler):
                 term = (q.get("string") or [""])[0]
                 sab = (q.get("sabs") or [""])[0] or None
                 stys = (q.get("stys") or [""])[0] or None
-                res = client.search(term, search_type="words", sabs=sab, semantic_types=stys)
+                stype = (q.get("stype") or [""])[0] or "words"
+                # "partial" is our alias for words + partialSearch=true; the
+                # rest pass through as UTS searchType values.
+                partial = stype == "partial"
+                res = client.search(term, search_type="words" if partial else stype,
+                                    sabs=sab, semantic_types=stys, partial=partial)
                 return self._send(200, json.dumps({"results": res}))
             if u.path == "/api/rollup":
                 cui = (q.get("cui") or [""])[0]
@@ -482,10 +488,47 @@ class Handler(BaseHTTPRequestHandler):
                     write_adjudications(adj)
                 return self._send(200, json.dumps({"ok": True, "axis": axis}))
             if u.path == "/api/rebuild":
-                doc = H.build(client, live=True)
+                dim = (data.get("dim") or "").strip() or None
+                if dim:
+                    # scoped rebuild: re-resolve one dimension, merge into the
+                    # existing crosswalk in place (other dimensions untouched).
+                    part = H.build(client, live=True, only_dims={dim})
+                    if not part["entries"]:
+                        # dim not in the inventory (renamed/removed by hand?):
+                        # merging an empty part would only DELETE its existing
+                        # crosswalk entries -- refuse instead of destroying data.
+                        return self._send(400, json.dumps({"error":
+                            f"dimension {dim!r} is not in the inventory; "
+                            "nothing to rebuild"}))
+                    doc = (yaml.safe_load(CROSSWALK.read_text())
+                           if CROSSWALK.is_file() else None)
+                    if doc and doc.get("entries"):
+                        merged, inserted = [], False
+                        for e in doc["entries"]:
+                            if e.get("dimension") == dim:
+                                if not inserted:
+                                    merged.extend(part["entries"])
+                                    inserted = True
+                                continue
+                            merged.append(e)
+                        if not inserted:
+                            merged.extend(part["entries"])
+                        doc["entries"] = merged
+                    else:
+                        doc = part
+                    counts = {s: 0 for s in ("mapped", "review", "unmapped", "pending")}
+                    for e in doc["entries"]:
+                        counts[e["status"]] += 1
+                    counts["curated"] = sum(1 for e in doc["entries"] if e.get("curated"))
+                    counts["axis_typed"] = sum(1 for e in doc["entries"] if e.get("sty_tui"))
+                    doc["meta"]["counts"] = counts
+                    doc["meta"]["total"] = len(doc["entries"])
+                else:
+                    doc = H.build(client, live=True)
                 CROSSWALK.write_text(yaml.safe_dump(doc, sort_keys=False,
                                                     allow_unicode=True, width=100))
-                return self._send(200, json.dumps({"ok": True, "counts": doc["meta"]["counts"]}))
+                return self._send(200, json.dumps({"ok": True, "dim": dim,
+                                                   "counts": doc["meta"]["counts"]}))
         except Exception as ex:  # noqa: BLE001
             return self._send(500, json.dumps({"error": str(ex)}))
         self._send(404, json.dumps({"error": "not found"}))
@@ -545,8 +588,8 @@ textarea{width:100%;min-height:44px}
 /* ---- main ---- */
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
 #head{padding:20px 32px 0}
-.crumb{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
-.crumb a{color:var(--faint)}.crumb a:hover{color:var(--accent)}
+.crumb{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.06em;color:#4c463a;text-transform:uppercase}
+.crumb a{color:#4c463a}.crumb a:hover{color:var(--accent)}
 .titlerow{display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap}
 .title-serif{font-family:var(--serif);font-size:24px;font-weight:700}
 .title-mono{font-family:var(--mono);font-size:21px;font-weight:500}
@@ -739,7 +782,7 @@ function head(crumbHTML,titleHTML,orient){$('#head').innerHTML=
 function renderHome(){const c=STATE.counts||{},g=grouped(),dims=dimList();
   head('WORKSPACE',
     `<span class="title-serif">Mapping workspace</span><span class="spacer"></span><span id="msg"></span>`+
-    `<button onclick="rebuild()">Rebuild crosswalk</button><button class="primary" onclick="newAxis()">New dimension</button>`,
+    `<button onclick="rebuild()" title="Re-queries UMLS for every dimension and value in the workspace and rewrites umls_crosswalk.yaml">Rebuild all</button><button class="primary" onclick="newAxis()">New dimension</button>`,
     `Define each dimension&rsquo;s <b>axis</b> as a UMLS semantic type, adjudicate its <b>values</b> to concepts, and export the crosswalk. Pick a dimension on the left to begin.`);
   const tot=c.total||0,m=c.mapped||0,r=c.review||0,u=c.unmapped||0;
   const pct=x=>tot?Math.round(100*x/tot):0;
@@ -801,7 +844,7 @@ function renderDim(){const isnew=!!ROUTE.isnew;
     `<span class="title-mono">${esc(AXB.dimension||'new dimension')}</span>${tierchip}`+
     (AXB.activation?`<span class="mini mono">${esc(AXB.activation)}</span>`:'')+
     `<span class="spacer"></span><span id="msg"></span>`+
-    `<button onclick="rebuild()">Rebuild</button>`+
+    (AXB.isnew?'':`<button onclick="rebuild('${jsq(AXB.dimension)}')" title="Re-queries UMLS for this dimension's values only; the rest of the crosswalk is untouched">Rebuild this dimension</button>`)+
     `<button class="primary" onclick="axbSave()">${AXB.isnew?'Create axis':'Save axis'}</button>`,
     isnew?'A dimension&rsquo;s axis maps it to a UMLS <b>semantic type</b>; the type&rsquo;s subtree becomes the search filter for every value of the dimension.':'');
   const ro=AXB.isnew?'':'readonly';
@@ -938,12 +981,14 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
     `<span class="title-mono">${esc(String(e.token))}</span>`+
     `<span class="mini">value of <span class="mono">${esc(e.dimension)}</span>${e.kind!=='value'?' · '+esc(e.kind):''}</span>`+
     `<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+(e.curated?' <span class="badge">curated</span>':'')+
-    `<span class="spacer"></span><span id="msg"></span><button onclick="rebuild()">Rebuild</button>`,'');
+    `<span class="spacer"></span><span id="msg"></span><button onclick="rebuild('${jsq(e.dimension)}')" title="Re-queries UMLS for this dimension's values only">Rebuild this dimension</button>`,
+    e.dim_sty_tui?`axis semantic type: <b>${esc(e.dim_sty_name||e.dim_sty_tui)}</b> <span class="mono" style="font-size:11px">${esc(e.dim_sty_tui)}</span> — value search is constrained to its subtree unless widened below`
+      :`the ${esc(e.dimension)} axis is untyped — value search runs unconstrained`);
   const cur=e.status==='mapped'?`<span class="now">mapped &rarr; <b>${esc(e.matched_name)}</b> <span class="cui">${esc(e.cui)}</span>`+
       (e.curated?` <span class="badge">${e.fetched?'curated · fetched':'curated'}</span>`:' <span class="mini">(auto)</span>')+`</span>`:
     e.status==='unmapped'?`<span class="now">unmapped${e.curated?' <span class="badge">curator</span>':''}</span>`:
     `<span class="now">review</span>`;
-  const filt=e.dim_sty_tui?`<span class="chip tui">&sub; axis type ${esc(e.dim_sty_tui)} subtree</span>`
+  const filt=e.dim_sty_tui?`<span class="chip">Semantic type: <b>&nbsp;${esc(e.dim_sty_name||e.dim_sty_tui)}</b>&nbsp;+ subtree</span>`
     :`<span class="chip warnc">${IC.warn} axis untyped — search unconstrained</span>`;
   $('#content').innerHTML=`
    <div class="card"><h3>GEM meaning</h3><div style="font-size:13.5px">${esc(e.meaning)||'<span class="mini">(no gloss)</span>'}</div>
@@ -959,15 +1004,23 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
    <div class="card"><h3>Query candidates · ${e.candidates.length}</h3>${e.candidates.map(c=>candHTML(c)).join('')||'<span class="mini">none returned by the harness query</span>'}</div>
    <div class="card"><h3>Search the Metathesaurus <span style="margin-left:6px">${filt}</span></h3>
      <div class="searchbar"><input id="sq" placeholder="concept term…" value="${esc(e.token?String(e.token).replace(/_/g,' ').toLowerCase():e.query)}">
+       <select id="sscope" title="widen the search beyond the axis subtree"${e.dim_sty_tui?'':' disabled'}>
+         <option value="axis"${e.dim_sty_tui?'':' disabled'}>within axis subtree</option>
+         <option value="all"${e.dim_sty_tui?'':' selected'}>all semantic types</option></select>
+       <select id="smatch" title="how the term is matched">
+         <option value="words">match: words</option><option value="exact">match: exact</option>
+         <option value="normalizedWords">match: normalized</option><option value="partial">match: partial (any word)</option></select>
        <select id="ssab"><option value="">all sources</option><option>MSH</option><option>NCI</option><option>SNOMEDCT_US</option><option>GO</option><option>HPO</option></select>
        <button class="primary" onclick="runSearch()">Search</button></div>
      <div id="sresults"></div></div>`;
   $('#sq').addEventListener('keydown',ev=>{if(ev.key==='Enter')runSearch();});}
-function candHTML(c){const acc=SEL&&SEL.decision_cui===c.cui;
-  return `<div class="cand ${acc?'acc':''}"><div class="row"><span class="n">${esc(c.name)} <span class="cui">${esc(c.cui)}</span></span>`+
+function candHTML(c,mark){const acc=SEL&&SEL.decision_cui===c.cui;
+  const badge=mark==='in'?' <span class="badge">in axis branch</span>'
+    :mark==='out'?' <span class="badge bad">outside axis</span>':'';
+  return `<div class="cand ${acc?'acc':''}" data-cui="${esc(c.cui)}"><div class="row"><span class="n">${esc(c.name)} <span class="cui">${esc(c.cui)}</span></span>`+
     `<button class="mini" onclick="loadDef('${c.cui}',this)">evidence</button>`+
     `<button class="ok" onclick="decide('accept','${c.cui}')">${acc?'✓ accepted':'accept'}</button></div>`+
-    `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?' · '+esc(c.src||c.root_source):''}</div>`+
+    `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?' · '+esc(c.src||c.root_source):''}${badge}</div>`+
     `<div class="def"></div></div>`;}
 let _semReq=null;
 async function loadSemTypes(){if(SEMTYPES)return SEMTYPES;
@@ -992,14 +1045,16 @@ function renderInfo(box,cui,e,defs){
   const vrows=(e.atom_rows||[]).map(a=>`<tr class="${a.obsolete?'obs':''}"><td>${esc(a.sab)}</td><td>${esc(a.str)}</td><td>${esc(a.tty)}</td><td class="cui">${esc(a.code)}</td></tr>`).join('');
   const vocBlock=`<div class="evsec"><div class="evh">Vocabularies (${(e.sabs||[]).length} sources, English)</div><table class="et"><tr><th>SAB</th><th>STR</th><th>TTY</th><th>Code</th></tr>${vrows||'<tr><td colspan=4><i>none</i></td></tr>'}</table></div>`;
   const rid=r=>esc(r.cui||r.code||'');
-  const rrows=(e.relations||[]).map(r=>`<tr><td class="dir ${r.dir}">${r.dir==='up'?'&uarr; is_a':'&darr; is_a'}</td><td>${esc(r.name)}</td><td class="cui">${rid(r)}</td><td>${esc((r.sabs||[]).join(', '))}</td></tr>`).join('');
-  const relBlock=`<div class="evsec"><div class="evh">Hierarchy (is_a)</div><table class="et"><tr><th>dir</th><th>concept</th><th>id</th><th>sources</th></tr>${rrows||'<tr><td colspan=4><i>no is_a parents or children in English vocabularies</i></td></tr>'}</table></div>`;
+  const act=r=>r.cui?`<button class="mini" onclick="openConcept('${r.cui}','${jsq(r.name)}')" title="pull this concept into the search results to inspect or accept it">open</button>`
+    :`<button class="mini" onclick="findByName('${jsq(r.name)}')" title="source-asserted (no CUI here) — search it by name">find</button>`;
+  const rrows=(e.relations||[]).map(r=>`<tr><td class="dir ${r.dir}">${r.dir==='up'?'&uarr; is_a':'&darr; is_a'}</td><td>${esc(r.name)}</td><td class="cui">${rid(r)}</td><td>${esc((r.sabs||[]).join(', '))}</td><td>${act(r)}</td></tr>`).join('');
+  const relBlock=`<div class="evsec"><div class="evh">Hierarchy (is_a)</div><table class="et"><tr><th>dir</th><th>concept</th><th>id</th><th>sources</th><th></th></tr>${rrows||'<tr><td colspan=5><i>no is_a parents or children in English vocabularies</i></td></tr>'}</table></div>`;
   const org=(e.other_relations||[]);
   const orInner=org.map(g=>{
-    const items=g.items.map(it=>`<tr><td>${esc(it.name)}</td><td class="cui">${rid(it)}</td><td>${esc((it.sabs||[]).join(', '))}</td></tr>`).join('');
-    const more=g.n>g.items.length?`<tr><td colspan=3 class="mut">+${g.n-g.items.length} more</td></tr>`:'';
-    return `<tr class="orh"><td colspan=3>${esc(g.rela)} <span class="mut">(${g.n})</span></td></tr>${items}${more}`;}).join('');
-  const otherBlock=org.length?`<div class="evsec"><div class="evh">Other relations<button class="mini" data-k="${org.length}" onclick="toggleOther(this)">show ${org.length} kinds</button></div><div class="otherbox" style="display:none"><table class="et"><tr><th>concept</th><th>id</th><th>sources</th></tr>${orInner}</table></div></div>`:'';
+    const items=g.items.map(it=>`<tr><td>${esc(it.name)}</td><td class="cui">${rid(it)}</td><td>${esc((it.sabs||[]).join(', '))}</td><td>${act(it)}</td></tr>`).join('');
+    const more=g.n>g.items.length?`<tr><td colspan=4 class="mut">+${g.n-g.items.length} more</td></tr>`:'';
+    return `<tr class="orh"><td colspan=4>${esc(g.rela)} <span class="mut">(${g.n})</span></td></tr>${items}${more}`;}).join('');
+  const otherBlock=org.length?`<div class="evsec"><div class="evh">Other relations<button class="mini" data-k="${org.length}" onclick="toggleOther(this)">show ${org.length} kinds</button></div><div class="otherbox" style="display:none"><table class="et"><tr><th>concept</th><th>id</th><th>sources</th><th></th></tr>${orInner}</table></div></div>`:'';
   const df=(defs||[]).map(d=>`<b>[${esc(d.source)}]</b> ${esc(d.value)}`).join('<br>')||'<i>no definition</i>';
   const rollBlock=`<div class="evsec"><div class="evh">Rollup<button class="mini" onclick="loadRollup(this.closest('.evsec').querySelector('.rollbox'),'${cui}')">roll up &darr;</button></div><div class="rollbox"></div></div>`;
   box.innerHTML=`<div class="evtop"><b>${esc(e.name)}</b> <span class="cui">${esc(cui)}</span> &middot; status ${esc(e.status||'?')} &middot; ${e.atom_count||0} atoms</div>`+
@@ -1020,24 +1075,55 @@ function toggleSubtree(btn,specTui,axisTui){const box=btn.closest('.evsec').quer
   box.innerHTML=render2(rt);}
 async function loadRollup(box,cui,sab){box.innerHTML='rolling up is_a ancestors…';
   const j=await (await fetch('/api/rollup?cui='+cui+(sab?'&use_sab='+encodeURIComponent(sab):''))).json();
-  const rows=(j.rollup||[]).map(a=>`<tr><td>${esc(a.name)}</td><td class="cui">${esc(a.code)}</td><td>${esc(a.sab)}</td></tr>`).join('');
+  const rows=(j.rollup||[]).map(a=>`<tr><td>${esc(a.name)}</td><td class="cui">${esc(a.code)}</td><td>${esc(a.sab)}</td>`+
+    `<td><button class="mini" onclick="findByName('${jsq(a.name)}')" title="search this ancestor by name to get its concept">find</button></td></tr>`).join('');
   const opts=j.sabs||[];
   const nav=opts.length?`<div class="mini2">vocabulary: <a href="#" data-cui="${cui}" onclick="rollNav(this,'');return false">auto</a>${opts.map(s=>` &middot; <a href="#" data-cui="${cui}" onclick="rollNav(this,'${esc(s)}');return false">${esc(s)}</a>`).join('')}${sab?' &mdash; <b>'+esc(sab)+'</b>':''}</div>`:'';
-  box.innerHTML=nav+`<table class="et"><tr><th>is_a ancestor</th><th>code</th><th>vocab</th></tr>${rows||'<tr><td colspan=3><i>no is_a ancestors in English vocabularies</i></td></tr>'}</table>`;}
+  box.innerHTML=nav+`<table class="et"><tr><th>is_a ancestor</th><th>code</th><th>vocab</th><th></th></tr>${rows||'<tr><td colspan=4><i>no is_a ancestors in English vocabularies</i></td></tr>'}</table>`;}
 function rollNav(a,sab){loadRollup(a.closest('.rollbox'),a.dataset.cui,sab||null);}
-async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;const box=$('#sresults');box.innerHTML='<span class="mini">searching…</span>';
-  const stys=SEL.dim_sty_filter||'';
-  const url='/api/search?string='+encodeURIComponent(q)+(sab?'&sabs='+sab:'')+(stys?'&stys='+encodeURIComponent(stys):'');
+async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;
+  const scope=($('#sscope')||{}).value||'axis',stype=($('#smatch')||{}).value||'words';
+  const box=$('#sresults');box.innerHTML='<span class="mini">searching…</span>';
+  const stys=scope==='axis'?(SEL.dim_sty_filter||''):'';
+  const url='/api/search?string='+encodeURIComponent(q)+(sab?'&sabs='+sab:'')+
+    (stys?'&stys='+encodeURIComponent(stys):'')+(stype!=='words'?'&stype='+encodeURIComponent(stype):'');
   const r=await fetch(url);const j=await r.json();
   if(j.error){box.innerHTML='<span style="color:var(--danger)">'+esc(j.error)+'</span>';return;}
-  box.innerHTML=(j.results||[]).slice(0,15).map(c=>candHTML(c)).join('')||'<span class="mini">no results (within the axis type)</span>';}
+  await loadSemTypes();
+  // when searching beyond the axis, mark each hit as inside/outside the axis branch
+  const axSet=new Set((SEL.dim_sty_filter||'').split(',').filter(Boolean));
+  const norm=s=>(s||'').toLowerCase();
+  const tuiOf=nm=>{const t=(SEMTYPES||[]).find(x=>norm(x.name)===norm(nm));return t?t.tui:null;};
+  const res=(j.results||[]).slice(0,20);
+  const rows=res.map(c=>{let mark=null;
+    if(axSet.size&&scope!=='axis'){const tus=(c.semantic_types||c.sty||[]).map(tuiOf).filter(Boolean);
+      mark=tus.some(t=>axSet.has(t))?'in':'out';}
+    return candHTML(c,mark);}).join('');
+  box.innerHTML=rows||( scope==='axis'
+    ?'<span class="mini">no results within the axis subtree.</span> <button class="mini" onclick="widen()">widen: search all semantic types</button>'
+    :'<span class="mini">no results — try match: partial (any word), or a different term</span>');}
+function widen(){const s=$('#sscope');if(s)s.value='all';runSearch();}
+function findByName(name){const q=$('#sq');if(!q)return;q.value=name;
+  const s=$('#sscope');if(s)s.value='all';runSearch();
+  msg('searching for “'+name+'” across all semantic types');}
+function openConcept(cui,name){const box=$('#sresults');if(!box)return;
+  if(box.querySelector('[data-cui="'+cui+'"]')){msg(cui+' already in results');return;}
+  const t=document.createElement('template');
+  t.innerHTML=candHTML({cui,name,sty:[],src:''}).trim();
+  box.prepend(t.content.firstChild);
+  msg('pulled '+cui+' into search results — accept it or open its evidence');}
 async function decide(verdict,cui){const note=($('#note')||{}).value||'';
   const body={key:SEL.key,verdict};if(cui)body.cui=cui;if(note)body.note=note;
   msg('saving…');const r=await fetch('/api/decide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json();if(j.error){msg('error: '+j.error);return;}
   await loadState();msg('saved '+SEL.key+' ('+verdict+') — Rebuild to refresh status');}
-async function rebuild(){msg('rebuilding (querying UMLS)…');const r=await fetch('/api/rebuild',{method:'POST'});const j=await r.json();
-  if(j.error){msg('error: '+j.error);return;}await loadState();msg('rebuilt: '+JSON.stringify(j.counts));}
+async function rebuild(dim){msg(dim?('rebuilding '+dim+' (querying UMLS)…'):'rebuilding ALL dimensions (querying UMLS)…');
+  const r=await fetch('/api/rebuild',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(dim?{dim}:{})});
+  const j=await r.json();
+  if(j.error){msg('error: '+j.error);return;}
+  await loadState();const c=STATE.counts||{};
+  msg((dim?dim+' rebuilt':'all rebuilt')+' — '+(c.mapped||0)+' mapped · '+(c.review||0)+' review · '+(c.unmapped||0)+' unmapped of '+(c.total||0)+' values');}
 loadState();
 </script></body></html>'''
 

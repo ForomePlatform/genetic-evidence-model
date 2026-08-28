@@ -161,6 +161,7 @@ class TestAdjudicateUI(unittest.TestCase):
         st = A.load_state()
         self.assertEqual(len(st["entries"]), 88)
         gwas = next(e for e in st["entries"] if e["token"] == "GWAS")
+        self.assertEqual(gwas["dim_sty_name"], "Research Activity")
         self.assertEqual(gwas["status"], "mapped")
         self.assertTrue(gwas["meaning"])
 
@@ -300,6 +301,20 @@ class TestBuildAndRender(unittest.TestCase):
         # a term with no fixture is honestly unmapped, not invented
         self.assertEqual(by[("gene_relation", "X_inhibits_Y")]["status"], "unmapped")
         self.assertGreaterEqual(doc["meta"]["counts"]["mapped"], 3)
+
+    def test_build_only_dims_is_scoped(self):
+        """A scoped rebuild resolves just the requested dimension; its entries
+        match the full build's entries for that dimension."""
+        part = H.build(FixtureClient(FIXTURES), live=True, only_dims={"method"})
+        self.assertTrue(part["entries"])
+        self.assertEqual({e["dimension"] for e in part["entries"]}, {"method"})
+        full = H.build(FixtureClient(FIXTURES), live=True)
+        want = [e for e in full["entries"] if e["dimension"] == "method"]
+        self.assertEqual(part["entries"], want)
+        counts = part["meta"]["counts"]
+        self.assertEqual(sum(counts[s] for s in
+                             ("mapped", "review", "unmapped", "pending")),
+                         len(part["entries"]))
 
     def test_render_produces_valid_latex(self):
         doc = H.build(FixtureClient(FIXTURES), live=True)

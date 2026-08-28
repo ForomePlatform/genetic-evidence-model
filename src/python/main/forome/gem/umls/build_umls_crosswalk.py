@@ -201,17 +201,24 @@ def apply_adjudication(entry: dict, adj: dict, client=None) -> dict:
 
 
 def build(client, live: bool, inventory_path: Path = INVENTORY,
-          adjudications: dict | None = None) -> dict:
+          adjudications: dict | None = None,
+          only_dims: set | None = None) -> dict:
     """Resolve the whole inventory. Each dimension AXIS maps to a UMLS semantic
     type (from adjudication accept_sty, else the inventory's semantic_type), and
     that type's subtree constrains the search for the dimension's VALUE concepts
     -- so axis and values reconcile by construction (a value is only ever mapped
-    within its axis's semantic branch)."""
+    within its axis's semantic branch).
+
+    ``only_dims`` restricts resolution to those dimensions (a scoped rebuild);
+    the returned doc then contains only their entries, and the caller is
+    responsible for merging into a full crosswalk."""
     if adjudications is None:
         adjudications = load_adjudications()
     doc = yaml.safe_load(inventory_path.read_text())
     out_entries = []
     for dim, body in (doc.get("dimensions") or {}).items():
+        if only_dims is not None and dim not in only_dims:
+            continue
         axis = body.get("axis")
         axis_adj = adjudications.get(_adj_key(dim, None)) or {}
         if axis_adj.get("unmapped"):

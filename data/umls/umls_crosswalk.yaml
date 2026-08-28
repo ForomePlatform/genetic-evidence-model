@@ -4,11 +4,11 @@ meta:
   live: true
   total: 88
   counts:
-    mapped: 39
+    mapped: 40
     review: 11
-    unmapped: 38
+    unmapped: 37
     pending: 0
-    curated: 28
+    curated: 29
     axis_typed: 12
 entries:
 - dimension: knowledge_domain
@@ -73,7 +73,15 @@ entries:
   expect: likely
   sab: MSH
   inventory_note: null
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0017404
+  matched_name: Genetics, Population
+  root_source: MTH
+  semantic_types:
+  - Occupation or Discipline
+  curator_note: curator-accepted via UI
 - dimension: knowledge_domain
   token: COMPARATIVE_GENOMICS
   kind: value
