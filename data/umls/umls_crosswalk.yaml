@@ -4,12 +4,12 @@ meta:
   live: true
   total: 88
   counts:
-    mapped: 40
+    mapped: 43
     review: 11
-    unmapped: 37
+    unmapped: 34
     pending: 0
     curated: 29
-    axis_typed: 12
+    axis_typed: 13
 entries:
 - dimension: knowledge_domain
   token: null
@@ -656,11 +656,16 @@ entries:
 - dimension: credibility
   token: null
   kind: axis
-  query: Certainty of evidence
+  query: confidence
   expect: uncertain
   sab: MSH
   inventory_note: Overall ordinal rating anchored on SEPIO confidence; facets are open.
-  status: unmapped
+  status: mapped
+  curated: false
+  sty_tui: T080
+  sty_name: Qualitative Concept
+  sty_tree: A2.1.2
+  curator_note: null
 - dimension: credibility
   token: VERY_HIGH
   kind: value
@@ -668,30 +673,21 @@ entries:
   expect: unlikely
   sab: null
   inventory_note: Ordinal rating; no faithful UMLS concept for the GEM tier.
-  status: unmapped
-  cui: C5202936
-  matched_name: IPSS-R Risk Category High
+  status: mapped
+  cui: C0442804
+  matched_name: Very high
   root_source: MTH
-  semantic_types: &id020
+  semantic_types:
   - Finding
   search_type: exact
   sab_filtered: false
-  sty_filtered: false
+  sty_filtered: true
   candidates:
-  - cui: C5202936
-    name: IPSS-R Risk Category High
-    root_source: MTH
-    semantic_types: *id020
   - cui: C0205250
     name: High
     root_source: MTH
     semantic_types:
     - Qualitative Concept
-  - cui: C3887512
-    name: high - ActExposureLevelCode
-    root_source: MTH
-    semantic_types:
-    - Idea or Concept
   - cui: C1561957
     name: Observation Value - High
     root_source: MTH
@@ -703,6 +699,7 @@ entries:
     semantic_types:
     - Qualitative Concept
   curated: true
+  fetched: true
   curator_note: GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High'
     finding (explicitly non-faithful) and bare 'High...
 - dimension: credibility
@@ -712,30 +709,20 @@ entries:
   expect: unlikely
   sab: null
   inventory_note: Ordinal rating.
-  status: unmapped
-  cui: C5202936
-  matched_name: IPSS-R Risk Category High
+  status: mapped
+  cui: C0205250
+  matched_name: High
   root_source: MTH
-  semantic_types: &id021
-  - Finding
+  semantic_types: &id020
+  - Qualitative Concept
   search_type: exact
   sab_filtered: false
-  sty_filtered: false
+  sty_filtered: true
   candidates:
-  - cui: C5202936
-    name: IPSS-R Risk Category High
-    root_source: MTH
-    semantic_types: *id021
   - cui: C0205250
     name: High
     root_source: MTH
-    semantic_types:
-    - Qualitative Concept
-  - cui: C3887512
-    name: high - ActExposureLevelCode
-    root_source: MTH
-    semantic_types:
-    - Idea or Concept
+    semantic_types: *id020
   - cui: C1561957
     name: Observation Value - High
     root_source: MTH
@@ -760,36 +747,21 @@ entries:
   cui: C3244283
   matched_name: medium exposure
   root_source: MTH
-  semantic_types: &id022
+  semantic_types: &id021
   - Qualitative Concept
   search_type: exact
   sab_filtered: false
-  sty_filtered: false
+  sty_filtered: true
   candidates:
   - cui: C3244283
     name: medium exposure
     root_source: MTH
-    semantic_types: *id022
-  - cui: C1705217
-    name: Medium (Substance)
+    semantic_types: *id021
+  - cui: C1561547
+    name: Message Waiting Priority - Medium
     root_source: MTH
     semantic_types:
-    - Substance
-  - cui: C0439536
-    name: Medium
-    root_source: MTH
-    semantic_types:
-    - Quantitative Concept
-  - cui: C4522282
-    name: A Medium Amount of Time
-    root_source: MTH
-    semantic_types:
-    - Finding
-  - cui: C4522283
-    name: A Medium Amount
-    root_source: MTH
-    semantic_types:
-    - Finding
+    - Qualitative Concept
   curated: true
   curator_note: GEM-internal ordinal credibility tier; candidates ('medium exposure', 'Medium (Substance)',
     generic 'Medium' quantity/amount concepts) ar...
@@ -801,39 +773,29 @@ entries:
   sab: null
   inventory_note: Ordinal rating.
   status: unmapped
-  cui: C5203106
-  matched_name: IPSS-R Risk Category Low
+  cui: C0205251
+  matched_name: low
   root_source: MTH
-  semantic_types: &id023
-  - Finding
+  semantic_types: &id022
+  - Qualitative Concept
   search_type: exact
   sab_filtered: false
-  sty_filtered: false
+  sty_filtered: true
   candidates:
-  - cui: C5203106
-    name: IPSS-R Risk Category Low
-    root_source: MTH
-    semantic_types: *id023
   - cui: C0205251
     name: low
     root_source: MTH
-    semantic_types:
-    - Qualitative Concept
-  - cui: C1611820
-    name: Low - observation
+    semantic_types: *id022
+  - cui: C4048187
+    name: low exposure
     root_source: MTH
     semantic_types:
-    - Quantitative Concept
+    - Qualitative Concept
   - cui: C1619811
     name: Low - MessageWaitingPriority
     root_source: MTH
     semantic_types:
     - Qualitative Concept
-  - cui: C4522223
-    name: IPSS Risk Category Low
-    root_source: MTH
-    semantic_types:
-    - Intellectual Product
   curated: true
   curator_note: GEM-internal ordinal credibility tier; candidates are IPSS/IPSS-R low risk categories
     and generic 'low' qualifiers, none of which faithfu...
@@ -872,7 +834,7 @@ entries:
   cui: C4329048
   matched_name: cell dedifferentiation involved in phenotypic switching
   root_source: GO
-  semantic_types: &id024
+  semantic_types: &id023
   - Cell Function
   search_type: words
   sab_filtered: false
@@ -881,7 +843,7 @@ entries:
   - cui: C4329048
     name: cell dedifferentiation involved in phenotypic switching
     root_source: GO
-    semantic_types: *id024
+    semantic_types: *id023
   - cui: C4329047
     name: cell differentiation involved in phenotypic switching
     root_source: GO
@@ -913,7 +875,7 @@ entries:
   cui: C0043240
   matched_name: Wound Healing
   root_source: MTH
-  semantic_types: &id025
+  semantic_types: &id024
   - Organism Function
   search_type: words
   sab_filtered: false
@@ -922,7 +884,7 @@ entries:
   - cui: C0043240
     name: Wound Healing
     root_source: MTH
-    semantic_types: *id025
+    semantic_types: *id024
   curated: true
   curator_note: HISTOLOGICAL means tissue-level phenotype (not the discipline histology); candidates are
     all specific anatomical tissue structures (brain...
@@ -937,7 +899,7 @@ entries:
   cui: C4505466
   matched_name: Senescence-Associated Secretory Phenotype
   root_source: MSH
-  semantic_types: &id026
+  semantic_types: &id025
   - Cell Function
   search_type: words
   sab_filtered: true
@@ -946,7 +908,7 @@ entries:
   - cui: C4505466
     name: Senescence-Associated Secretory Phenotype
     root_source: MSH
-    semantic_types: *id026
+    semantic_types: *id025
   - cui: C4704854
     name: Phenotypic Plasticity
     root_source: MSH
@@ -963,7 +925,7 @@ entries:
   cui: C0232909
   matched_name: Multiple conception
   root_source: SNOMEDCT_US
-  semantic_types: &id027
+  semantic_types: &id026
   - Organism Function
   search_type: words
   sab_filtered: false
@@ -972,7 +934,7 @@ entries:
   - cui: C0232909
     name: Multiple conception
     root_source: SNOMEDCT_US
-    semantic_types: *id027
+    semantic_types: *id026
   - cui: C0038822
     name: Superfetation
     root_source: MSH
@@ -1002,7 +964,7 @@ entries:
   cui: C2349887
   matched_name: Encounter due to individual or family affected by other family member being on deployment
   root_source: MTH
-  semantic_types: &id028
+  semantic_types: &id027
   - Finding
   search_type: words
   sab_filtered: false
@@ -1011,7 +973,7 @@ entries:
   - cui: C2349887
     name: Encounter due to individual or family affected by other family member being on deployment
     root_source: MTH
-    semantic_types: *id028
+    semantic_types: *id027
   - cui: C2911012
     name: Individual or family affected by other family member being on military deployment
     root_source: ICD10CM
@@ -1048,7 +1010,7 @@ entries:
   cui: C0009932
   matched_name: Control Groups
   root_source: MTH
-  semantic_types: &id029
+  semantic_types: &id028
   - Group
   search_type: exact
   sab_filtered: false
@@ -1057,7 +1019,7 @@ entries:
   - cui: C0009932
     name: Control Groups
     root_source: MTH
-    semantic_types: *id029
+    semantic_types: *id028
   curated: true
   curator_note: OBSERVED_IN_CONTROLS is an ascertainment route; C0009932 'Control Groups' denotes the
     study-group object (Group), not the route by which ...
@@ -1072,7 +1034,7 @@ entries:
   cui: C0242356
   matched_name: Databases
   root_source: MTH
-  semantic_types: &id030
+  semantic_types: &id029
   - Intellectual Product
   search_type: exact
   sab_filtered: false
@@ -1081,7 +1043,7 @@ entries:
   - cui: C0242356
     name: Databases
     root_source: MTH
-    semantic_types: *id030
+    semantic_types: *id029
   - cui: C0993637
     name: Published Database
     root_source: MTH
@@ -1101,7 +1063,7 @@ entries:
   cui: C0598279
   matched_name: synthetic construct
   root_source: MTH
-  semantic_types: &id031
+  semantic_types: &id030
   - Nucleic Acid, Nucleoside, or Nucleotide
   search_type: exact
   sab_filtered: false
@@ -1110,7 +1072,7 @@ entries:
   - cui: C0598279
     name: synthetic construct
     root_source: MTH
-    semantic_types: *id031
+    semantic_types: *id030
 - dimension: mode_of_inheritance
   token: null
   kind: axis
@@ -1137,7 +1099,7 @@ entries:
   cui: C0443147
   matched_name: Autosomal dominant inheritance
   root_source: MTH
-  semantic_types: &id032
+  semantic_types: &id031
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1146,7 +1108,7 @@ entries:
   - cui: C0443147
     name: Autosomal dominant inheritance
     root_source: MTH
-    semantic_types: *id032
+    semantic_types: *id031
 - dimension: mode_of_inheritance
   token: autosomal_recessive
   kind: common_value
@@ -1158,7 +1120,7 @@ entries:
   cui: C0441748
   matched_name: Autosomal recessive inheritance
   root_source: SNOMEDCT_US
-  semantic_types: &id033
+  semantic_types: &id032
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1167,7 +1129,7 @@ entries:
   - cui: C0441748
     name: Autosomal recessive inheritance
     root_source: SNOMEDCT_US
-    semantic_types: *id033
+    semantic_types: *id032
 - dimension: mode_of_inheritance
   token: x_linked_dominant
   kind: common_value
@@ -1195,7 +1157,7 @@ entries:
   cui: C0887941
   matched_name: Mitochondrial Inheritance
   root_source: MTH
-  semantic_types: &id034
+  semantic_types: &id033
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1204,7 +1166,7 @@ entries:
   - cui: C0887941
     name: Mitochondrial Inheritance
     root_source: MTH
-    semantic_types: *id034
+    semantic_types: *id033
 - dimension: penetrance
   token: null
   kind: axis
@@ -1229,7 +1191,7 @@ entries:
   cui: C5826795
   matched_name: Typified by complete penetrance
   root_source: HPO
-  semantic_types: &id035
+  semantic_types: &id034
   - Genetic Function
   search_type: words
   sab_filtered: true
@@ -1238,7 +1200,7 @@ entries:
   - cui: C5826795
     name: Typified by complete penetrance
     root_source: HPO
-    semantic_types: *id035
+    semantic_types: *id034
   curated: true
   curator_note: Token 'complete' = complete penetrance; HPO C5826795 'Typified by complete penetrance'
     (Genetic Function) denotes exactly that.
@@ -1282,7 +1244,7 @@ entries:
   cui: C2755856
   matched_name: regulation of gene product expression
   root_source: GO
-  semantic_types: &id036
+  semantic_types: &id035
   - Genetic Function
   search_type: words
   sab_filtered: false
@@ -1291,7 +1253,7 @@ entries:
   - cui: C2755856
     name: regulation of gene product expression
     root_source: GO
-    semantic_types: *id036
+    semantic_types: *id035
   - cui: C5887109
     name: miRNA-mediated gene silencing, production of miRNAs
     root_source: GO
@@ -1326,7 +1288,7 @@ entries:
   cui: C0017262
   matched_name: Gene Expression
   root_source: MTH
-  semantic_types: &id037
+  semantic_types: &id036
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1335,7 +1297,7 @@ entries:
   - cui: C0017262
     name: Gene Expression
     root_source: MTH
-    semantic_types: *id037
+    semantic_types: *id036
 - dimension: measurement_target
   token: STABILITY
   kind: value
@@ -1347,7 +1309,7 @@ entries:
   cui: C5887110
   matched_name: positive regulation of protein stability
   root_source: GO
-  semantic_types: &id038
+  semantic_types: &id037
   - Molecular Function
   search_type: words
   sab_filtered: false
@@ -1356,7 +1318,7 @@ entries:
   - cui: C5887110
     name: positive regulation of protein stability
     root_source: GO
-    semantic_types: *id038
+    semantic_types: *id037
   - cui: C1327386
     name: protein stabilization
     root_source: MTH
@@ -1383,7 +1345,7 @@ entries:
   cui: C0033618
   matched_name: Protein Binding
   root_source: MSH
-  semantic_types: &id039
+  semantic_types: &id038
   - Molecular Function
   search_type: exact
   sab_filtered: true
@@ -1392,7 +1354,7 @@ entries:
   - cui: C0033618
     name: Protein Binding
     root_source: MSH
-    semantic_types: *id039
+    semantic_types: *id038
 - dimension: measurement_target
   token: LOCALIZATION
   kind: value
@@ -1404,7 +1366,7 @@ entries:
   cui: C3548487
   matched_name: protein localization to heterochromatin
   root_source: GO
-  semantic_types: &id040
+  semantic_types: &id039
   - Genetic Function
   search_type: words
   sab_filtered: true
@@ -1413,7 +1375,7 @@ entries:
   - cui: C3548487
     name: protein localization to heterochromatin
     root_source: GO
-    semantic_types: *id040
+    semantic_types: *id039
   - cui: C2754902
     name: protein localization to extracellular region
     root_source: GO
@@ -1445,7 +1407,7 @@ entries:
   cui: C1148560
   matched_name: molecular_function
   root_source: GO
-  semantic_types: &id041
+  semantic_types: &id040
   - Molecular Function
   search_type: exact
   sab_filtered: true
@@ -1454,7 +1416,7 @@ entries:
   - cui: C1148560
     name: molecular_function
     root_source: GO
-    semantic_types: *id041
+    semantic_types: *id040
 - dimension: measurement_target
   token: CATALYSIS
   kind: value
@@ -1466,7 +1428,7 @@ entries:
   cui: C0243102
   matched_name: enzyme activity
   root_source: MTH
-  semantic_types: &id042
+  semantic_types: &id041
   - Molecular Function
   search_type: exact
   sab_filtered: true
@@ -1475,7 +1437,7 @@ entries:
   - cui: C0243102
     name: enzyme activity
     root_source: MTH
-    semantic_types: *id042
+    semantic_types: *id041
   curated: true
   curator_note: CATALYSIS measures catalytic/enzymatic activity of the gene product; C0243102 'enzyme
     activity' (Molecular Function) faithfully denotes c...
@@ -1514,7 +1476,7 @@ entries:
   cui: C0017263
   matched_name: Gene Expression Regulation
   root_source: MTH
-  semantic_types: &id043
+  semantic_types: &id042
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1523,7 +1485,7 @@ entries:
   - cui: C0017263
     name: Gene Expression Regulation
     root_source: MTH
-    semantic_types: *id043
+    semantic_types: *id042
   curated: true
   curator_note: X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression
     Regulation' (Genetic Function) faithfully den...
@@ -1538,7 +1500,7 @@ entries:
   cui: C2611924
   matched_name: negative regulation of gene expression
   root_source: GO
-  semantic_types: &id044
+  semantic_types: &id043
   - Genetic Function
   search_type: exact
   sab_filtered: true
@@ -1547,7 +1509,7 @@ entries:
   - cui: C2611924
     name: negative regulation of gene expression
     root_source: GO
-    semantic_types: *id044
+    semantic_types: *id043
 - dimension: organism
   token: null
   kind: axis
@@ -1586,7 +1548,7 @@ entries:
   cui: C0814041
   matched_name: conditional gene knockout technology
   root_source: AOD
-  semantic_types: &id045
+  semantic_types: &id044
   - Molecular Biology Research Technique
   search_type: words
   sab_filtered: false
@@ -1595,7 +1557,7 @@ entries:
   - cui: C0814041
     name: conditional gene knockout technology
     root_source: AOD
-    semantic_types: *id045
+    semantic_types: *id044
   curated: true
   curator_note: Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology'
     (Molecular Biology Research Technique) de...
@@ -1631,7 +1593,7 @@ entries:
   cui: C2350277
   matched_name: Genome-Wide Association Study
   root_source: MSH
-  semantic_types: &id046
+  semantic_types: &id045
   - Molecular Biology Research Technique
   search_type: exact
   sab_filtered: true
@@ -1640,7 +1602,7 @@ entries:
   - cui: C2350277
     name: Genome-Wide Association Study
     root_source: MSH
-    semantic_types: *id046
+    semantic_types: *id045
 - dimension: subdomain
   token: Linkage Study
   kind: value
@@ -1660,7 +1622,7 @@ entries:
   cui: C3640076
   matched_name: Whole Genome Sequencing
   root_source: MSH
-  semantic_types: &id047
+  semantic_types: &id046
   - Molecular Biology Research Technique
   search_type: exact
   sab_filtered: true
@@ -1669,7 +1631,7 @@ entries:
   - cui: C3640076
     name: Whole Genome Sequencing
     root_source: MSH
-    semantic_types: *id047
+    semantic_types: *id046
 - dimension: subdomain
   token: Candidate Gene Study
   kind: value
@@ -1681,7 +1643,7 @@ entries:
   cui: C2717881
   matched_name: Candidate Gene Identification
   root_source: MSH
-  semantic_types: &id048
+  semantic_types: &id047
   - Molecular Biology Research Technique
   search_type: words
   sab_filtered: false
@@ -1690,7 +1652,7 @@ entries:
   - cui: C2717881
     name: Candidate Gene Identification
     root_source: MSH
-    semantic_types: *id048
+    semantic_types: *id047
   curated: true
   curator_note: Value denotes the candidate-gene study design; 'Candidate Gene Identification' (Molecular
     Biology Research Technique) is the standard MeS...

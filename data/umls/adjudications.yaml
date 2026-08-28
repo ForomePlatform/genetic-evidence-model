@@ -5,10 +5,10 @@
 # records a considered 'no faithful UMLS concept' (honest finding). Edited via
 # mapping/adjudicate_ui.py.
 adjudications:
-  "credibility/HIGH": {unmapped: true, note: "GEM-internal ordinal credibility tier; 'IPSS-R Risk Category High' and the generic 'High' qualitative qualifier do not denote a high evid..."}
+  "credibility/HIGH": {accept: C0205250, note: "GEM-internal ordinal credibility tier; 'IPSS-R Risk Category High' and the generic 'High' qualitative qualifier do not denote a high evid..."}
   "credibility/LOW": {unmapped: true, note: "GEM-internal ordinal credibility tier; candidates are IPSS/IPSS-R low risk categories and generic 'low' qualifiers, none of which faithfu..."}
   "credibility/MEDIUM": {unmapped: true, note: "GEM-internal ordinal credibility tier; candidates ('medium exposure', 'Medium (Substance)', generic 'Medium' quantity/amount concepts) ar..."}
-  "credibility/VERY_HIGH": {unmapped: true, note: "GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High' finding (explicitly non-faithful) and bare 'High..."}
+  "credibility/VERY_HIGH": {accept: C0442804, note: "GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High' finding (explicitly non-faithful) and bare 'High..."}
   "gene_relation/X_has_same_function_as_Y": {unmapped: true, note: "Composite relational predicate (two gene products sharing function); the sole candidate 'Immunologic equivalence' (Organism Function) is ..."}
   "gene_relation/X_regulates_Y": {accept: C0017263, note: "X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression Regulation' (Genetic Function) faithfully den..."}
   "knockout_type/CONDITIONAL": {accept: C0814041, note: "Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology' (Molecular Biology Research Technique) de..."}

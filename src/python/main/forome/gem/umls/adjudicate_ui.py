@@ -213,6 +213,8 @@ def load_state() -> dict:
                 "sty_tree": e.get("sty_tree"),
                 "dim_sty_tui": eff, "dim_sty_filter": filt,
                 "dim_sty_name": sty.get("name") if sty else None,
+                "dim_sty_tree": sty.get("tree_number") if sty else None,
+                "sab_pref": e.get("sab"),
                 "decision": ("accept" if a.get("accept") else
                              "accept_sty" if a.get("accept_sty") else
                              "unmapped" if a.get("unmapped") else None),
@@ -431,6 +433,14 @@ class Handler(BaseHTTPRequestHandler):
                                    if r["rela"] == "isa" and r["sab"] in eng})
                 roll = client.rollup(cui, use_sab=sab, sab_allow=set(isa_sabs))
                 return self._send(200, json.dumps({"rollup": roll, "sabs": isa_sabs}))
+            if u.path == "/api/sabs":
+                # English vocabularies a concept has atoms in -- cheap (atoms
+                # are cached), used to enrich search-result cards so the curator
+                # sees membership without opening the evidence panel.
+                cui = (q.get("cui") or [""])[0]
+                sabs = sorted({a["sab"] for a in client.atoms(cui)
+                               if a.get("sab") and (a.get("language") or "ENG") == "ENG"})
+                return self._send(200, json.dumps({"sabs": sabs}))
             if u.path == "/api/semantictypes":
                 return self._send(200, json.dumps({"types": [
                     {"tui": t["tui"], "name": t["name"], "tree": t.get("tree_number"),
@@ -686,6 +696,13 @@ textarea{width:100%;min-height:44px}
 .stytree{font-family:var(--mono);color:var(--faint);margin-right:6px}
 .axtree{margin-top:5px;padding-top:5px;border-top:1px dashed var(--line)}
 .mini2{font-size:11px;color:var(--faint);margin-bottom:3px}.mini2 a{color:var(--link)}
+/* modal (Semantic Network popups) */
+#modal{position:fixed;inset:0;background:rgba(35,30,20,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+#modal .mbox{background:var(--card);border:1px solid var(--line);border-radius:12px;width:min(760px,92vw);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(35,30,20,.28)}
+#modal .mhead{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);font-size:13px}
+#modal .mbody{padding:12px 16px;overflow:auto;font-size:12.5px}
+.stnlink{font-family:var(--mono);font-size:11px;color:var(--link);cursor:pointer;text-decoration:none;border-bottom:1px dotted var(--link)}
+.stnlink:hover{text-decoration:none;border-bottom-style:solid}
 .vocab{display:inline-block;background:var(--link-bg);color:var(--link);border:1px solid #cfdce8;border-radius:4px;padding:0 4px;margin:1px;font-size:11px}
 </style></head><body>
 <div id="rail"></div>
@@ -706,6 +723,95 @@ const IC={
  right:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5 7 5 3 8.5" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
  down:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 3 5 7 8.5 3" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
  plus:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'};
+/* ---------- vocabulary helpers ---------- */
+const TTY={AB:'abbreviation',ACR:'acronym',BN:'brand name',DN:'display name',
+ EP:'print entry term (MeSH)',ET:'entry term',FN:'fully specified name',
+ HG:'high-level group term (MedDRA)',HT:'hierarchical term',IN:'ingredient name (RxNorm)',
+ LA:'LOINC answer',LLT:'lower-level term (MedDRA)',MH:'main heading (MeSH)',
+ NM:'supplementary concept name (MeSH)',OAF:'obsolete active fully specified name',
+ OAP:'obsolete active preferred term',OAS:'obsolete active synonym',
+ OF:'obsolete fully specified name',OL:'non-current lower-level term (MedDRA)',
+ OP:'obsolete preferred term',PEP:'preferred entry term (MeSH)',
+ PN:'Metathesaurus preferred name',PT:'preferred term',PTGB:'British preferred term',
+ RPT:'root preferred term',SCD:'semantic clinical drug (RxNorm)',SY:'synonym',
+ SYGB:'British synonym',TQ:'topical qualifier',XQ:'alternate qualifier name'};
+function ttyHTML(t){if(!t)return '';
+  let base=t,pre='';
+  if(t.startsWith('MTH_')){base=t.slice(4);pre='Metathesaurus ';}
+  const d=TTY[base];
+  return d?`<span class="mono">${esc(t)}</span> <span class="mut" style="font-size:10.5px">${esc(pre+d)}</span>`
+    :`<span class="mono" title="term type — see the UMLS TTY reference">${esc(t)}</span>`;}
+// Enrich candidate cards with the full English SAB membership (root_source is
+// only the name's highest-precedence source -- MTH means the Metathesaurus
+// itself -- so membership must come from the atoms). The dimension's preferred
+// SAB (inventory `sab:` hint) is ticked when present, flagged when absent.
+async function enrichSabs(root){const pref=SEL&&SEL.sab_pref;
+  const cards=[...(root||document).querySelectorAll('.cand[data-cui]:not([data-sabs])')];
+  cards.forEach(el=>el.setAttribute('data-sabs','1'));
+  await Promise.all(cards.map(async el=>{
+    const cui=el.getAttribute('data-cui');
+    try{const j=await (await fetch('/api/sabs?cui='+encodeURIComponent(cui))).json();
+      const sabs=j.sabs||[];if(!sabs.length||!el.isConnected)return;
+      const show=sabs.slice(0,10).map(s=>s===pref?`<b style="color:var(--ok)">${esc(s)} ✓</b>`:esc(s)).join(', ')
+        +(sabs.length>10?` +${sabs.length-10} more`:'');
+      const miss=pref&&!sabs.includes(pref)?` <span style="color:var(--rev)">(not in preferred ${esc(pref)})</span>`:'';
+      const box=el.querySelector('.sty');
+      if(box)box.insertAdjacentHTML('beforeend',` <span class="mini">· in: ${show}${miss}</span>`);
+    }catch(err){}}));}
+/* ---------- modal + Semantic Network views ---------- */
+function showModal(titleHTML,bodyHTML){closeModal();
+  const d=document.createElement('div');d.id='modal';
+  d.innerHTML=`<div class="mbox"><div class="mhead"><b>${titleHTML}</b><span style="flex:1"></span>`+
+    `<button class="mini" onclick="closeModal()">close</button></div><div class="mbody">${bodyHTML}</div></div>`;
+  d.addEventListener('click',ev=>{if(ev.target===d)closeModal();});
+  document.body.appendChild(d);}
+function closeModal(){const m=$('#modal');if(m)m.remove();}
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeModal();});
+function mostSpecificTui(names){if(!SEMTYPES)return null;const norm=s=>(s||'').toLowerCase();
+  let best=null;(names||[]).forEach(nm=>{const t=SEMTYPES.find(x=>norm(x.name)===norm(nm));
+    if(t&&t.tree&&(!best||t.tree.split('.').length>best.tree.split('.').length))best=t;});
+  return best;}
+function showAxisTree(){if(!SEL||!SEL.dim_sty_tui)return;
+  loadSemTypes().then(()=>showModal('Axis type in the Semantic Network — '+esc(SEL.dim_sty_name||SEL.dim_sty_tui),
+    `<div class="subtree" style="max-height:none;border:none;padding:0">${stnPlaceHTML(SEL.dim_sty_tui,true)}</div>`));}
+function showCompare(tui){loadSemTypes().then(()=>{
+  const t=(SEMTYPES||[]).find(x=>x.tui===tui);
+  showModal('Place in the Semantic Network — '+esc(t?t.name:tui),
+    stnCompareHTML(tui,SEL&&SEL.dim_sty_tui));});}
+// The result type's position relative to the axis type: shared ancestors as one
+// spine, then the branches fork (axis and result each labeled).
+function stnCompareHTML(tui,axisTui){
+  const find=x=>(SEMTYPES||[]).find(t=>t.tui===x);
+  const t=find(tui);if(!t||!t.tree)return '<i>type not in the Semantic Network</i>';
+  const nest=(nodes,mark,tail)=>{let h=tail||'';
+    for(let i=nodes.length-1;i>=0;i--){const n=nodes[i];const last=i===nodes.length-1;
+      const cls=last&&mark?' '+mark:'';
+      const lab=last&&mark==='hl'?' <span class="mini">← this result</span>'
+        :last&&mark==='ax'?' <span class="mini">← axis</span>':'';
+      h=`<div class="stn-node${cls}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)} <span class="cui">${esc(n.tui)}</span>${lab}`+
+        (h?`<div class="stn-kids">${h}</div>`:'')+`</div>`;}
+    return h;};
+  const chainOf=x=>{const segs=x.tree.split('.'),c=[];
+    for(let i=1;i<=segs.length;i++){const n=(SEMTYPES||[]).find(y=>y.tree===segs.slice(0,i).join('.'));if(n)c.push(n);}
+    return c;};
+  const ct=chainOf(t),a=axisTui?find(axisTui):null;
+  if(!a||!a.tree)return `<div class="stn-tree">${nest(ct,'hl')}</div><div class="mini" style="margin-top:6px">no axis type to compare against</div>`;
+  const ca=chainOf(a);
+  let k=0;while(k<ct.length&&k<ca.length&&ct[k].tui===ca[k].tui)k++;
+  if(k===ca.length&&k===ct.length)
+    return `<div class="stn-tree">${nest(ca,'ax')}</div><div class="mini" style="margin-top:6px">this result's type IS the axis type</div>`;
+  if(k===ca.length)   // result lies inside the axis subtree
+    return `<div class="stn-tree">${nest(ca,'ax',nest(ct.slice(k),'hl'))}</div>`+
+      `<div class="mini" style="margin-top:6px">inside the axis subtree — an in-scope mapping</div>`;
+  if(k===ct.length)   // result is an ancestor of the axis type
+    return `<div class="stn-tree">${nest(ct,'hl',nest(ca.slice(k),'ax'))}</div>`+
+      `<div class="mini" style="margin-top:6px">broader than the axis — an ancestor of the axis type</div>`;
+  const common=ct.slice(0,k);
+  const branches=nest(ca.slice(k),'ax')+nest(ct.slice(k),'hl');
+  const body=common.length?nest(common,null,branches):branches;
+  const note=k===0?'no common ancestor — a different branch of the Semantic Network'
+    :'branches diverge after <b>'+esc(common[common.length-1].name)+'</b>';
+  return `<div class="stn-tree">${body}</div><div class="mini" style="margin-top:6px">${note}</div>`;}
 async function loadState(){const r=await fetch('/api/state');STATE=await r.json();
   if(!r.ok||STATE.error){$('#head').innerHTML='';
     $('#content').innerHTML='<div class="card" style="border-color:#ecc8bd"><h3 style="color:var(--danger)">Workspace error</h3>'+
@@ -938,10 +1044,11 @@ function axbPicker(){const box=$('#styresults');if(!box)return;const q=(($('#sty
     `<button class="mini" onclick="stnToggle(this,'${t.tui}')">tree</button>`+
     (t.definition?`<div class="def show">${esc(t.definition)}</div>`:'')+`</div>`).join('');}
 function axbSet(tui){AXB.tui=tui;axbRenderSel();axbPicker();}
-function stnPlaceHTML(tui){const t=(SEMTYPES||[]).find(x=>x.tui===tui);if(!t)return '<i>type not found</i>';
+function stnPlaceHTML(tui,noclick){const t=(SEMTYPES||[]).find(x=>x.tui===tui);if(!t)return '<i>type not found</i>';
   const dep=s=>s.split('.').length;
+  const nm=n=>noclick?esc(n.name):`<a href="#" onclick="axbSet('${n.tui}');return false">${esc(n.name)}</a>`;
   const node=(n,inner)=>`<div class="stn-node${n.tui===tui?' hl':''}"><span class="stn-tree">${esc(n.tree)}</span> `+
-    `<a href="#" onclick="axbSet('${n.tui}');return false">${esc(n.name)}</a> <span class="cui">${esc(n.tui)}</span>`+
+    `${nm(n)} <span class="cui">${esc(n.tui)}</span>`+
     (inner?`<div class="stn-kids">${inner}</div>`:'')+`</div>`;
   const kidsOf=n=>(SEMTYPES||[]).filter(x=>x.tree.startsWith(n.tree+'.')&&dep(x.tree)===dep(n.tree)+1)
                                 .sort((a,b)=>a.tree<b.tree?-1:1);
@@ -988,7 +1095,9 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
       (e.curated?` <span class="badge">${e.fetched?'curated · fetched':'curated'}</span>`:' <span class="mini">(auto)</span>')+`</span>`:
     e.status==='unmapped'?`<span class="now">unmapped${e.curated?' <span class="badge">curator</span>':''}</span>`:
     `<span class="now">review</span>`;
-  const filt=e.dim_sty_tui?`<span class="chip">Semantic type: <b>&nbsp;${esc(e.dim_sty_name||e.dim_sty_tui)}</b>&nbsp;+ subtree</span>`
+  const filt=e.dim_sty_tui?`<span class="chip" style="cursor:pointer" onclick="showAxisTree()" `+
+      `title="click to see this type's place in the Semantic Network (ancestors, siblings, descendants)">`+
+      `Semantic type: <b>&nbsp;${esc(e.dim_sty_name||e.dim_sty_tui)}</b>&nbsp;· <span class="mono">${esc(e.dim_sty_tree||e.dim_sty_tui)}</span>&nbsp;+ subtree ▾</span>`
     :`<span class="chip warnc">${IC.warn} axis untyped — search unconstrained</span>`;
   $('#content').innerHTML=`
    <div class="card"><h3>GEM meaning</h3><div style="font-size:13.5px">${esc(e.meaning)||'<span class="mini">(no gloss)</span>'}</div>
@@ -1013,14 +1122,21 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
        <select id="ssab"><option value="">all sources</option><option>MSH</option><option>NCI</option><option>SNOMEDCT_US</option><option>GO</option><option>HPO</option></select>
        <button class="primary" onclick="runSearch()">Search</button></div>
      <div id="sresults"></div></div>`;
-  $('#sq').addEventListener('keydown',ev=>{if(ev.key==='Enter')runSearch();});}
+  $('#sq').addEventListener('keydown',ev=>{if(ev.key==='Enter')runSearch();});
+  enrichSabs($('#content'));
+  // the candidates' STN links need the Semantic Network; if it arrived after
+  // this render, paint once more (guarded to the same route)
+  if(!SEMTYPES)loadSemTypes().then(()=>{if(ROUTE.view==='value'&&ROUTE.key===e.key)renderValue();});}
 function candHTML(c,mark){const acc=SEL&&SEL.decision_cui===c.cui;
   const badge=mark==='in'?' <span class="badge">in axis branch</span>'
     :mark==='out'?' <span class="badge bad">outside axis</span>':'';
+  const st=mostSpecificTui(c.sty||c.semantic_types);
+  const stn=st?` · <a href="#" class="stnlink" onclick="showCompare('${st.tui}');return false" `+
+    `title="${esc(st.name)} — click to see its place relative to the axis type">${esc(st.tree)}</a>`:'';
   return `<div class="cand ${acc?'acc':''}" data-cui="${esc(c.cui)}"><div class="row"><span class="n">${esc(c.name)} <span class="cui">${esc(c.cui)}</span></span>`+
     `<button class="mini" onclick="loadDef('${c.cui}',this)">evidence</button>`+
     `<button class="ok" onclick="decide('accept','${c.cui}')">${acc?'✓ accepted':'accept'}</button></div>`+
-    `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?' · '+esc(c.src||c.root_source):''}${badge}</div>`+
+    `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?` · <span title="root source of the concept's preferred name (MTH = the Metathesaurus itself) — full vocabulary membership follows">${esc(c.src||c.root_source)}</span>`:''}${stn}${badge}</div>`+
     `<div class="def"></div></div>`;}
 let _semReq=null;
 async function loadSemTypes(){if(SEMTYPES)return SEMTYPES;
@@ -1042,7 +1158,7 @@ function renderInfo(box,cui,e,defs){
     `<table class="et"><tr><th></th><th>STY</th><th>TUI</th><th>STN</th></tr>${pathRows}`+
     (axis?`<tr class="axisrow"><td><b>axis</b></td><td>${esc(axis.name)}</td><td class="cui">${esc(axis.tui)}</td><td class="stn">${esc(axis.stn)}</td></tr>`:'')+
     `</table><div class="subtree" style="display:none"></div></div>`;
-  const vrows=(e.atom_rows||[]).map(a=>`<tr class="${a.obsolete?'obs':''}"><td>${esc(a.sab)}</td><td>${esc(a.str)}</td><td>${esc(a.tty)}</td><td class="cui">${esc(a.code)}</td></tr>`).join('');
+  const vrows=(e.atom_rows||[]).map(a=>`<tr class="${a.obsolete?'obs':''}"><td>${esc(a.sab)}</td><td>${esc(a.str)}</td><td style="white-space:nowrap">${ttyHTML(a.tty)}</td><td class="cui">${esc(a.code)}</td></tr>`).join('');
   const vocBlock=`<div class="evsec"><div class="evh">Vocabularies (${(e.sabs||[]).length} sources, English)</div><table class="et"><tr><th>SAB</th><th>STR</th><th>TTY</th><th>Code</th></tr>${vrows||'<tr><td colspan=4><i>none</i></td></tr>'}</table></div>`;
   const rid=r=>esc(r.cui||r.code||'');
   const act=r=>r.cui?`<button class="mini" onclick="openConcept('${r.cui}','${jsq(r.name)}')" title="pull this concept into the search results to inspect or accept it">open</button>`
@@ -1101,7 +1217,8 @@ async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;
     return candHTML(c,mark);}).join('');
   box.innerHTML=rows||( scope==='axis'
     ?'<span class="mini">no results within the axis subtree.</span> <button class="mini" onclick="widen()">widen: search all semantic types</button>'
-    :'<span class="mini">no results — try match: partial (any word), or a different term</span>');}
+    :'<span class="mini">no results — try match: partial (any word), or a different term</span>');
+  if(rows)enrichSabs(box);}
 function widen(){const s=$('#sscope');if(s)s.value='all';runSearch();}
 function findByName(name){const q=$('#sq');if(!q)return;q.value=name;
   const s=$('#sscope');if(s)s.value='all';runSearch();
@@ -1110,7 +1227,7 @@ function openConcept(cui,name){const box=$('#sresults');if(!box)return;
   if(box.querySelector('[data-cui="'+cui+'"]')){msg(cui+' already in results');return;}
   const t=document.createElement('template');
   t.innerHTML=candHTML({cui,name,sty:[],src:''}).trim();
-  box.prepend(t.content.firstChild);
+  box.prepend(t.content.firstChild);enrichSabs(box);
   msg('pulled '+cui+' into search results — accept it or open its evidence');}
 async function decide(verdict,cui){const note=($('#note')||{}).value||'';
   const body={key:SEL.key,verdict};if(cui)body.cui=cui;if(note)body.note=note;
@@ -1124,7 +1241,7 @@ async function rebuild(dim){msg(dim?('rebuilding '+dim+' (querying UMLS)…'):'r
   if(j.error){msg('error: '+j.error);return;}
   await loadState();const c=STATE.counts||{};
   msg((dim?dim+' rebuilt':'all rebuilt')+' — '+(c.mapped||0)+' mapped · '+(c.review||0)+' review · '+(c.unmapped||0)+' unmapped of '+(c.total||0)+' values');}
-loadState();
+loadState();loadSemTypes();
 </script></body></html>'''
 
 

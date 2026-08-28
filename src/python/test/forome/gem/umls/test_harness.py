@@ -162,6 +162,8 @@ class TestAdjudicateUI(unittest.TestCase):
         self.assertEqual(len(st["entries"]), 88)
         gwas = next(e for e in st["entries"] if e["token"] == "GWAS")
         self.assertEqual(gwas["dim_sty_name"], "Research Activity")
+        self.assertEqual(gwas["dim_sty_tree"], "B1.3.2")
+        self.assertEqual(gwas["sab_pref"], "MSH")
         self.assertEqual(gwas["status"], "mapped")
         self.assertTrue(gwas["meaning"])
 
