@@ -27,6 +27,7 @@ gem-coverage = "forome.gem.validation.compute_coverage:main"
 gem-umls-crosswalk = "forome.gem.umls.build_umls_crosswalk:main"
 gem-umls-render = "forome.gem.umls.render_crosswalk_tex:main"
 gem-umls-adjudicate = "forome.gem.umls.adjudicate_ui:main"
+gem-mapping-studio = "forome.gem.umls.adjudicate_ui:main"
 gem-umls-semantic-network = "forome.gem.umls.fetch_semantic_network:main"
 
 # src-layout: package roots live under src/python/main; tests under src/python/test.

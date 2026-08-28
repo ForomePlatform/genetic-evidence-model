@@ -42,6 +42,8 @@ meta:
 dimensions:
 
   knowledge_domain:
+    tier: core
+    order: 10
     axis:
       query: "Genetics"
       expect: uncertain
@@ -57,6 +59,8 @@ dimensions:
       - {token: MODEL_ORGANISM, query: "Animal model", expect: likely, sab: MSH}
 
   method:
+    tier: core
+    order: 20
     axis:
       query: "Methods (research)"
       expect: uncertain
@@ -81,6 +85,8 @@ dimensions:
       - {token: CLINICAL_EVIDENCE, query: "Clinical study", expect: uncertain}
 
   target_type:
+    tier: core
+    order: 30
     axis:
       query: "Sequence feature"
       expect: uncertain
@@ -95,6 +101,8 @@ dimensions:
       - {token: TRANSCRIPT, query: "RNA, messenger", expect: uncertain, note: "GEM TRANSCRIPT = transcript isoform; closest UMLS concept may be mRNA / transcription product."}
 
   resolution:
+    tier: core
+    order: 40
     axis:
       query: "Genomic resolution"
       expect: unlikely
@@ -108,6 +116,8 @@ dimensions:
       - {token: VARIANT, query: "Sequence variant", expect: likely}
 
   credibility:
+    tier: core
+    order: 50
     axis:
       query: "Certainty of evidence"
       expect: uncertain
@@ -120,6 +130,8 @@ dimensions:
       - {token: LOW, query: "Low", expect: unlikely, note: "Ordinal rating."}
 
   phenotype_scale:
+    tier: core
+    order: 60
     axis:
       query: "Phenotype"
       expect: likely
@@ -133,6 +145,9 @@ dimensions:
       - {token: CLINICAL, query: "Clinical finding", expect: likely, sab: SNOMEDCT_US}
 
   variant_ascertainment:
+    tier: core
+    order: 70
+    activation: "target_type: VARIANT (required; not_applicable_or_omitted accepted, e.g. polygenic scores)"
     axis:
       query: "Ascertainment"
       expect: uncertain
@@ -145,6 +160,9 @@ dimensions:
   # ---- conditional dimensions ----
 
   mode_of_inheritance:
+    tier: conditional
+    order: 110
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: GENE"
     axis:
       query: "Mode of inheritance"
       expect: likely
@@ -163,6 +181,9 @@ dimensions:
       - {token: mitochondrial, query: "Mitochondrial inheritance", expect: likely, sab: HPO}
 
   penetrance:
+    tier: conditional
+    order: 121
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: VARIANT"
     axis:
       query: "Penetrance"
       expect: likely
@@ -174,6 +195,9 @@ dimensions:
       - {token: unknown, query: "Unknown", expect: unlikely, note: "Sentinel, not a phenotypic concept."}
 
   measurement_target:
+    tier: conditional
+    order: 130
+    activation: "knowledge_domain: GENE_FUNCTION"
     axis:
       query: "Molecular function"
       expect: likely
@@ -190,6 +214,9 @@ dimensions:
       - {token: CATALYSIS, query: "Catalytic activity", expect: likely, sab: GO}
 
   gene_relation:
+    tier: conditional
+    order: 131
+    activation: "knowledge_domain: GENE_FUNCTION"
     axis:
       query: "Gene interaction"
       expect: uncertain
@@ -202,6 +229,9 @@ dimensions:
       - {token: X_inhibits_Y, query: "Negative regulation of gene expression", expect: uncertain, sab: GO}
 
   organism:
+    tier: conditional
+    order: 140
+    activation: "method: IN_VIVO OR knowledge_domain: MODEL_ORGANISM"
     axis:
       query: "Organism"
       expect: likely
@@ -212,6 +242,9 @@ dimensions:
 
       semantic_type: T001
   knockout_type:
+    tier: conditional
+    order: 150
+    activation: "knowledge_domain: MODEL_ORGANISM"
     axis:
       query: "Gene knockout"
       expect: likely
@@ -223,6 +256,9 @@ dimensions:
       - {token: UNCONDITIONAL, query: "constitutive gene knockout", expect: uncertain, note: "Constitutive knockout; closest concept is the general 'gene knockout'."}
 
   subdomain:
+    tier: conditional
+    order: 112
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: GENE"
     axis:
       query: "Study design"
       expect: uncertain
@@ -237,6 +273,9 @@ dimensions:
   # ---- boolean / quasi-categorical conditional dimensions (axis only) ----
 
   mendelian_segregation:
+    tier: conditional
+    order: 111
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: GENE"
     axis:
       query: "Mendelian inheritance"
       expect: uncertain
@@ -244,6 +283,9 @@ dimensions:
 
       sab: MSH
   genetic_background_considered:
+    tier: conditional
+    order: 122
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: VARIANT"
     axis:
       query: "Genetic background"
       expect: likely
@@ -251,6 +293,9 @@ dimensions:
       note: Boolean conditional dimension; only the axis concept is resolved.
 
   environmental_factors:
+    tier: conditional
+    order: 120
+    activation: "knowledge_domain: HUMAN_GENETICS AND target_type: VARIANT"
     axis:
       query: "Environmental exposure"
       expect: likely

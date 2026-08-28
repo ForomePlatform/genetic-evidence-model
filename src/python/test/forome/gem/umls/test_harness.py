@@ -362,6 +362,74 @@ class TestAxisBuilder(unittest.TestCase):
         finally:
             A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS = saved
 
+    def test_tiered_ordering_and_metadata(self):
+        """Dimensions order core -> conditional -> candidate by their `order`
+        keys (never the alphabet), axis entries carry tier/activation, and
+        save_axis persists tier metadata for the navigation."""
+        from forome.gem.umls import adjudicate_ui as A
+        ws = Path(tempfile.mkdtemp()) / "mapping"
+        saved = (A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS)
+        try:
+            A.CROSSWALK = ws / "umls_crosswalk.yaml"
+            H.INVENTORY = ws / "dimensions_inventory.yaml"
+            H.ADJUDICATIONS = ws / "adjudications.yaml"
+
+            # alphabetical would give: aaa_conditional, credibility, method
+            A.save_axis("method", semantic_type="T062", query="Methods",
+                        tier="core", order=20)
+            A.save_axis("credibility", query="Certainty of evidence",
+                        tier="core", order=50)
+            A.save_axis("aaa_conditional", query="x", tier="conditional",
+                        order=110, activation="knowledge_domain: GENE_FUNCTION")
+            st = A.load_state()
+            self.assertEqual([e["dimension"] for e in st["entries"]],
+                             ["method", "credibility", "aaa_conditional"])
+
+            by = {e["dimension"]: e for e in st["entries"]}
+            self.assertEqual(by["method"]["tier"], "core")
+            self.assertTrue(by["method"]["tier_explicit"])
+            self.assertIsNone(by["method"]["activation"])
+            self.assertEqual(by["aaa_conditional"]["tier"], "conditional")
+            self.assertEqual(by["aaa_conditional"]["activation"],
+                             "knowledge_domain: GENE_FUNCTION")
+
+            # a dimension saved without tier defaults to core, flagged implicit
+            A.save_axis("untiered", query="y")
+            e = next(x for x in A.load_state()["entries"]
+                     if x["dimension"] == "untiered")
+            self.assertEqual(e["tier"], "core")
+            self.assertFalse(e["tier_explicit"])
+
+            # an unknown tier is refused
+            with self.assertRaises(ValueError):
+                A.save_axis("bad", tier="fundamental")
+            # names that would break YAML keys / UI handlers are refused,
+            # and a non-integer order is a validation error, not a crash
+            with self.assertRaises(ValueError):
+                A.save_axis("curator's_pick")
+            with self.assertRaises(ValueError):
+                A.save_axis("method", order="abc")
+        finally:
+            A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS = saved
+
+    def test_repo_inventory_is_fully_tiered(self):
+        """The repo's own inventory carries explicit tier metadata on every
+        dimension, core ones ordered per the schema's canonical order."""
+        from forome.gem.umls import adjudicate_ui as A
+        axes = [e for e in A.load_state()["entries"] if e["kind"] == "axis"]
+        self.assertTrue(all(e["tier_explicit"] for e in axes),
+                        [e["dimension"] for e in axes if not e["tier_explicit"]])
+        core = [e["dimension"] for e in axes if e["tier"] == "core"]
+        self.assertEqual(core[:6], ["knowledge_domain", "method", "target_type",
+                                    "resolution", "credibility", "phenotype_scale"])
+        cond = [e for e in axes if e["tier"] == "conditional"]
+        self.assertTrue(all(e["activation"] for e in cond),
+                        [e["dimension"] for e in cond if not e["activation"]])
+        # core listed before every conditional
+        order = [e["tier"] for e in axes]
+        self.assertEqual(order, sorted(order, key=["core", "conditional",
+                                                   "candidate"].index))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
