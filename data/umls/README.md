@@ -41,7 +41,7 @@ The harness never invents concept identifiers.
 ## Prerequisites
 
 ```bash
-pip install -r requirements.txt   # pyyaml, rdflib (check), requests (live)
+pip install -e .                  # dependencies are declared in pyproject.toml
 ```
 
 A **UMLS licence** is required to resolve concepts. It is free but requires
@@ -142,3 +142,117 @@ Curate with the UI above (or, by hand: edit `adjudications.yaml`, or refine a
 `query`/`sab` in `dimensions_inventory.yaml` and rerun). Then regenerate the
 section (`render_crosswalk_tex.py`) and recheck the coverage line reported by
 the harness.
+
+## Local UMLS index (PostgreSQL)
+
+The UTS REST API is rate-limited, offers no fuzzy search and no "every concept
+of semantic type X" query. For bulk mapping work you can index a UMLS release
+locally and point the tooling at it through `PgUMLSClient`
+(`forome.gem.umls.local_umls`), which implements the same `search()` /
+`get_concept()` / `atoms()` / `sources()` contract as `UTSClient`, plus
+`concepts_by_tui()`, `strings_like()` (trigram fuzzy match) and `release()`.
+Relations, definitions and hierarchy rollups are **not** indexed locally and
+stay on UTS.
+
+### 1. Download the release
+
+From <https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html>
+(a UMLS licence is required) take either
+
+- the **UMLS Metathesaurus Full Release** (RRF; ~30 GB unpacked), or
+- a **MetamorphoSys subset** you built yourself (RRF format, e.g. English only,
+  a handful of vocabularies) — smaller and faster to load.
+
+Only two files are used: `MRCONSO.RRF` (atoms/strings) and `MRSTY.RRF`
+(semantic types). Gzipped copies (`MRCONSO.RRF.gz`) are read transparently.
+
+### 2. Keep it outside the repository
+
+The UMLS licence forbids redistribution: keep the files **outside** the
+checkout, e.g.
+
+```
+~/umls/2026AA/META/MRCONSO.RRF
+~/umls/2026AA/META/MRSTY.RRF
+```
+
+**Never commit the RRF files, a subset, or a database dump.** Nothing under
+`data/umls/` may contain Metathesaurus rows; the crosswalk only records the
+CUIs and names the harness resolved.
+
+### 3. PostgreSQL
+
+Postgres.app (15+) works as is. Once, as a superuser:
+
+```bash
+PSQL=/Applications/Postgres.app/Contents/Versions/15/bin/psql
+$PSQL -c 'CREATE DATABASE umls'
+$PSQL -d umls -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm'   # trigram fuzzy search
+# optional, for a later embedding index:  CREATE EXTENSION IF NOT EXISTS vector
+```
+
+Install the driver: `pip install -e '.[local]'` (psycopg 3).
+
+### 4. Load
+
+```bash
+export GEM_UMLS_DSN=postgresql:///umls          # default if unset
+gem-umls-load-local --rrf-dir ~/umls/2026AA/META --release 2026AA --dry-run   # counts + SQL, no DB
+gem-umls-load-local --rrf-dir ~/umls/2026AA/META --release 2026AA
+```
+
+Options: `--lang ENG` (default; `ALL` keeps every language), `--sabs
+SNOMEDCT_US,MSH,NCI` to keep only some vocabularies, `--skip-indexes` to load
+the tables only, `--replace` to truncate a previous load. The loader streams
+the files through `COPY` (never in memory), builds the indexes, prunes
+semantic-type rows for concepts with no loaded atom, and appends a row to
+`umls_release` (version, loaded_at, source_dir, row counts, filters).
+
+Expectations for the English full release (~9 M `MRCONSO` rows, ~4 M
+`MRSTY` rows) on a laptop: 10–20 minutes for the copy, a further 20–40
+minutes for the indexes (the trigram GIN is the slow one), and roughly 10 GB
+of database on disk (tables ~3 GB, indexes the rest). A MetamorphoSys subset is
+proportionally faster.
+
+### 5. Use it
+
+```python
+from forome.gem.umls.local_umls import PgUMLSClient
+c = PgUMLSClient()                                  # reads GEM_UMLS_DSN
+c.search("gene locus", search_type="exact")
+c.search("locus", partial=True, semantic_types="T082")   # fuzzy, within a TUI
+c.strings_like("genom wide assoc")                  # trigram neighbours
+c.concepts_by_tui("T028,T087", limit=50)
+c.release()
+```
+
+Search types map onto SQL as: `exact` → `lower(str) = lower(term)`; `words` →
+English full-text (`plainto_tsquery`); `normalizedWords` → the `simple`
+configuration (no stemming); `normalizedString` → whole punctuation-folded
+string equality; `partial=True` → any-word match OR trigram similarity > 0.3,
+ranked by similarity. `sabs` and `semantic_types` (TUIs) filter in SQL, as with
+UTS.
+
+### Loading straight from the full-release download (no MetamorphoSys)
+
+The full release (`2026AA-full/`) ships the Metathesaurus as zip archives
+(`2026aa-1-meta.nlm`, `2026aa-2-meta.nlm`) holding gzipped, split RRF parts. The two
+files the index needs can be pulled out directly:
+
+```bash
+mkdir -p /opt/local/umls/2026AA/META && cd /opt/local/umls/2026AA/META
+unzip -o -j /opt/local/umls/2026AA-full/2026aa-1-meta.nlm \
+  '2026AA/META/MRCONSO.RRF.aa.gz' '2026AA/META/MRCONSO.RRF.ab.gz' '2026AA/META/MRCONSO.RRF.ac.gz' \
+  '2026AA/META/MRSTY.RRF.gz' '2026AA/META/MRSAB.RRF.gz'
+gunzip -c MRCONSO.RRF.aa.gz MRCONSO.RRF.ab.gz MRCONSO.RRF.ac.gz > MRCONSO.RRF && rm MRCONSO.RRF.a?.gz
+gunzip -f MRSTY.RRF.gz MRSAB.RRF.gz
+createdb umls && psql -d umls -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm'
+gem-umls-load-local --rrf-dir /opt/local/umls/2026AA/META --release 2026AA \
+  --dsn postgresql://$USER@localhost/umls --lang ENG
+```
+
+Measured on 2026AA (Apple Silicon, Postgres.app 15): MRCONSO 18,064,970 rows read,
+10,755,691 English rows kept; MRSTY 3,876,406 rows; ~4 min COPY + ~5 min indexes;
+3.4 GB on disk. Note that the raw full-release `MRSTY.RRF` carries only `CUI|TUI` (STN/STY
+blank) — the loader fills the type names and tree numbers from the repository's Semantic
+Network reference (`semantic_types.yaml`) after loading.

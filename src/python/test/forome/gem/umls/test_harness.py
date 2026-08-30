@@ -429,6 +429,52 @@ class TestAxisBuilder(unittest.TestCase):
         finally:
             A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS = saved
 
+    def test_preferences_and_comment_preserving_writes(self):
+        """Preferred vocabularies resolve value hint > dimension override >
+        workspace list, and app writes keep the inventory's comments."""
+        import shutil
+        from forome.gem.umls import adjudicate_ui as A
+        ws = Path(tempfile.mkdtemp()) / "mapping"
+        ws.mkdir()
+        shutil.copy(DATA_DIR / "dimensions_inventory.yaml", ws / "dimensions_inventory.yaml")
+        shutil.copy(DATA_DIR / "umls_crosswalk.yaml", ws / "umls_crosswalk.yaml")
+        saved = (A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS)
+        try:
+            A.CROSSWALK = ws / "umls_crosswalk.yaml"
+            H.INVENTORY = ws / "dimensions_inventory.yaml"
+            H.ADJUDICATIONS = ws / "adjudications.yaml"
+            comments_before = sum(1 for l in H.INVENTORY.read_text().splitlines()
+                                  if l.lstrip().startswith("#"))
+            self.assertGreater(comments_before, 20)
+
+            self.assertEqual(A.save_prefs("snomedct_us, MSH, msh, NCI"),
+                             ["SNOMEDCT_US", "MSH", "NCI"])
+            A.save_axis("method", preferred_sabs=["NCI"])       # dimension override
+            st = A.load_state()
+            by = {(e["dimension"], e["token"]): e for e in st["entries"]}
+            self.assertEqual(st["prefs"]["workspace"], ["SNOMEDCT_US", "MSH", "NCI"])
+            # GWAS has its own sab: MSH hint -> first; then dim override; then ws
+            self.assertEqual(by[("method", "GWAS")]["sab_prefs"],
+                             ["MSH", "NCI", "SNOMEDCT_US"])
+            # credibility HIGH has no hint and no override -> workspace order
+            self.assertEqual(by[("credibility", "HIGH")]["sab_prefs"],
+                             ["SNOMEDCT_US", "MSH", "NCI"])
+            axis = by[("method", None)]
+            self.assertEqual(axis["preferred_sabs"], ["NCI"])
+
+            # comments survived two app writes; the axis type is intact
+            comments_after = sum(1 for l in H.INVENTORY.read_text().splitlines()
+                                 if l.lstrip().startswith("#"))
+            self.assertEqual(comments_after, comments_before)
+            self.assertEqual(axis["sty_tui"], "T062")
+            # clearing the override removes the key
+            A.save_axis("method", preferred_sabs=[])
+            e = next(x for x in A.load_state()["entries"]
+                     if x["dimension"] == "method" and x["kind"] == "axis")
+            self.assertEqual(e["preferred_sabs"], [])
+        finally:
+            A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS = saved
+
     def test_repo_inventory_is_fully_tiered(self):
         """The repo's own inventory carries explicit tier metadata on every
         dimension, core ones ordered per the schema's canonical order."""
@@ -446,6 +492,375 @@ class TestAxisBuilder(unittest.TestCase):
         order = [e["tier"] for e in axes]
         self.assertEqual(order, sorted(order, key=["core", "conditional",
                                                    "candidate"].index))
+
+
+class TestStructuredRationale(unittest.TestCase):
+    """Structured 'unmapped' / 'accept' rationale (relation / rejected /
+    protocol): validation, YAML round-trip in both file styles, exposure in
+    load_state, and the /api/decide endpoint end to end -- always against a
+    temp copy of the workspace, never the real adjudications.yaml."""
+
+    RATIONALE = {
+        "unmapped": True,
+        "note": 'GEM-internal tier; has "double" quotes, it\'s got: colons # and hash',
+        "relation": "none",
+        "rejected": [
+            {"cui": "C1234567", "name": "IPSS-R Risk Category, Low", "sab": "NCI",
+             "fails": "D", "why": "an MDS prognostic bucket, not \"epistemic\" credibility"},
+            {"cui": "C7654321", "name": "Low (qualifier)", "fails": "A",
+             "why": "measurand degree: it's a quantity, [not] a credibility {tier}"},
+        ],
+        "protocol": {"queries": ["low credibility", "low: evidence"],
+                     "scopes": ["axis", "all"], "match": ["words", "partial"],
+                     "sabs": ["MSH", "NCI"], "umls": "UTS current, queried 2026-08-30"},
+    }
+
+    def _ws(self, copy_data=False):
+        import shutil
+        from forome.gem.umls import adjudicate_ui as A
+        ws = Path(tempfile.mkdtemp()) / "mapping"
+        ws.mkdir()
+        if copy_data:
+            shutil.copy(DATA_DIR / "dimensions_inventory.yaml", ws / "dimensions_inventory.yaml")
+            shutil.copy(DATA_DIR / "umls_crosswalk.yaml", ws / "umls_crosswalk.yaml")
+        saved = (A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS)
+        A.CROSSWALK = ws / "umls_crosswalk.yaml"
+        H.INVENTORY = ws / "dimensions_inventory.yaml"
+        H.ADJUDICATIONS = ws / "adjudications.yaml"
+        self.addCleanup(lambda: setattr(A, "CROSSWALK", saved[0]))
+        self.addCleanup(lambda: setattr(H, "INVENTORY", saved[1]))
+        self.addCleanup(lambda: setattr(H, "ADJUDICATIONS", saved[2]))
+        return ws
+
+    def test_write_roundtrip_block_and_compact_styles(self):
+        from forome.gem.umls import adjudicate_ui as A
+        self._ws()
+        adj = {"credibility/LOW": dict(self.RATIONALE),
+               "method/GWAS": {"accept": "C9000001",
+                               "note": 'plain "quoted" note: with colon'},
+               "resolution/(axis)": {"accept_sty": "T082", "note": "axis"}}
+        A.write_adjudications(adj)
+        text = H.ADJUDICATIONS.read_text()
+        lines = text.splitlines()
+        # header comments kept, verbatim
+        self.assertEqual(lines[:len(A.ADJ_HEADER)], A.ADJ_HEADER)
+        # entries WITHOUT rationale stay one compact flow-style line each
+        gwas = [l for l in lines if l.startswith('  "method/GWAS":')]
+        self.assertEqual(len(gwas), 1)
+        self.assertIn("{accept: C9000001, note:", gwas[0])
+        axis = [l for l in lines if l.startswith('  "resolution/(axis)":')]
+        self.assertIn("{accept_sty: T082, note:", axis[0])
+        # the rationale entry is a block mapping under its quoted key
+        i = lines.index('  "credibility/LOW":')
+        self.assertTrue(lines[i + 1].startswith("    unmapped: true"))
+        self.assertTrue(any(l.startswith("    rejected:") for l in lines[i:]))
+        self.assertTrue(any(l.startswith("    protocol:") for l in lines[i:]))
+        # everything round-trips through the harness loader, quotes included
+        back = H.load_adjudications(H.ADJUDICATIONS)
+        self.assertEqual(back, adj)
+        self.assertEqual(back["credibility/LOW"]["rejected"][1]["why"],
+                         "measurand degree: it's a quantity, [not] a credibility {tier}")
+        # the harness treats the block entry like any unmapped adjudication
+        r = H.apply_adjudication({"dimension": "credibility", "token": "LOW",
+                                  "status": "review", "candidates": []},
+                                 back["credibility/LOW"])
+        self.assertEqual(r["status"], "unmapped")
+        self.assertTrue(r["curated"])
+
+    def test_validate_rationale(self):
+        from forome.gem.umls import adjudicate_ui as A
+        V = A.validate_rationale
+        # nothing given -> nothing stored (compact line preserved)
+        self.assertEqual(V("accept", {"cui": "C1"}), {})
+        self.assertEqual(V("unmapped", {}), {})
+        # accept: relation from the allowed set, never 'none'
+        self.assertEqual(V("accept", {"relation": "broader"}), {"relation": "broader"})
+        with self.assertRaises(ValueError):
+            V("accept", {"relation": "none"})
+        with self.assertRaises(ValueError):
+            V("accept", {"relation": "identical"})
+        # unmapped: relation is none (defaulted when a rationale is given)
+        out = V("unmapped", {"rejected": [{"cui": "C1", "fails": "b", "why": "x" * 400,
+                                          "name": "N", "sab": "msh"}],
+                             "protocol": {"queries": ["q", "", "q"], "scopes": ["axis"],
+                                          "match": ["words"], "sabs": ["msh"],
+                                          "umls": "u", "bogus": "dropped"}})
+        self.assertEqual(out["relation"], "none")
+        row = out["rejected"][0]
+        self.assertEqual((row["cui"], row["fails"], row["name"], row["sab"]),
+                         ("C1", "B", "N", "msh"))
+        self.assertEqual(len(row["why"]), A.RATIONALE_MAXLEN)     # capped
+        self.assertEqual(out["protocol"], {"queries": ["q"], "scopes": ["axis"],
+                                           "match": ["words"], "sabs": ["MSH"],
+                                           "umls": "u"})
+        with self.assertRaises(ValueError):
+            V("unmapped", {"relation": "exact"})
+        for bad in ({"rejected": "C1"},                       # not a list
+                    {"rejected": [{"fails": "A"}]},           # no cui
+                    {"rejected": [{"cui": "C 1", "fails": "A"}]},   # bad cui shape
+                    {"rejected": [{"cui": "C1"}]},            # no criterion
+                    {"rejected": [{"cui": "C1", "fails": "E"}]},
+                    {"rejected": ["C1"]},
+                    {"protocol": []},
+                    {"protocol": {"scopes": ["everywhere"]}},
+                    {"protocol": {"match": ["fuzzy"]}},
+                    {"protocol": {"queries": "q"}}):
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                V("unmapped", bad)
+
+    def test_load_state_exposes_rationale(self):
+        from forome.gem.umls import adjudicate_ui as A
+        self._ws(copy_data=True)
+        A.write_adjudications({"credibility/LOW": dict(self.RATIONALE),
+                               "method/GWAS": {"accept": "C9000001", "note": "n",
+                                               "relation": "close"}})
+        by = {(e["dimension"], e["token"]): e for e in A.load_state()["entries"]}
+        low = by[("credibility", "LOW")]
+        self.assertEqual(low["decision"], "unmapped")
+        self.assertEqual(low["relation"], "none")
+        self.assertEqual([r["cui"] for r in low["rejected"]], ["C1234567", "C7654321"])
+        self.assertEqual(low["protocol"]["scopes"], ["axis", "all"])
+        gwas = by[("method", "GWAS")]
+        self.assertEqual(gwas["relation"], "close")
+        self.assertEqual((gwas["rejected"], gwas["protocol"]), ([], {}))
+        # an entry with no adjudication at all: None / [] / {}
+        other = by[("credibility", "HIGH")]
+        self.assertIsNone(other["relation"])
+        self.assertEqual((other["rejected"], other["protocol"]), ([], {}))
+        # axis entries carry the keys too
+        self.assertEqual((by[("method", None)]["rejected"], by[("method", None)]["protocol"]), ([], {}))
+
+    def test_decide_endpoint_stores_validates_and_clears(self):
+        import json
+        import threading
+        from http.server import ThreadingHTTPServer
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError
+        from forome.gem.umls import adjudicate_ui as A
+        self._ws()
+        # an ephemeral port: never the user's 8765, and immune to collisions
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), A.Handler)
+        t = threading.Thread(target=srv.serve_forever, daemon=True)
+        t.start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        url = f"http://127.0.0.1:{srv.server_address[1]}/api/decide"
+
+        def post(body):
+            req = Request(url, data=json.dumps(body).encode(),
+                          headers={"Content-Type": "application/json"})
+            try:
+                with urlopen(req) as r:
+                    return r.status, json.loads(r.read())
+            except HTTPError as ex:
+                return ex.code, json.loads(ex.read())
+
+        # accept with a relation
+        code, j = post({"key": "method/GWAS", "verdict": "accept", "cui": "C9000001",
+                        "relation": "close", "note": "near enough"})
+        self.assertEqual((code, j), (200, {"ok": True}))
+        # unmapped with the full argument
+        code, j = post({"key": "credibility/LOW", "verdict": "unmapped",
+                        "note": self.RATIONALE["note"],
+                        "rejected": self.RATIONALE["rejected"],
+                        "protocol": self.RATIONALE["protocol"]})
+        self.assertEqual(code, 200, j)
+        adj = H.load_adjudications(H.ADJUDICATIONS)
+        self.assertEqual(adj["method/GWAS"],
+                         {"accept": "C9000001", "note": "near enough", "relation": "close"})
+        self.assertEqual(adj["credibility/LOW"], self.RATIONALE)   # relation defaulted to none
+        # validation errors are 400s and leave the file untouched
+        for bad in ({"key": "credibility/LOW", "verdict": "unmapped", "relation": "exact"},
+                    {"key": "credibility/LOW", "verdict": "unmapped",
+                     "rejected": [{"cui": "C1", "fails": "Z"}]},
+                    {"key": "method/GWAS", "verdict": "accept", "cui": "C9000001",
+                     "relation": "none"},
+                    {"key": "method/GWAS", "verdict": "accept", "cui": "not a cui"},
+                    {"key": "method/GWAS", "verdict": "maybe"}):
+            code, j = post(bad)
+            self.assertEqual(code, 400, bad)
+            self.assertIn("error", j)
+        self.assertEqual(H.load_adjudications(H.ADJUDICATIONS), adj)
+        # clear removes the decision AND its rationale
+        code, _ = post({"key": "credibility/LOW", "verdict": "clear"})
+        self.assertEqual(code, 200)
+        self.assertNotIn("credibility/LOW", H.load_adjudications(H.ADJUDICATIONS))
+
+    def test_embedded_js_parses(self):
+        """The Mapping Studio's inline script must at least parse (node --check)."""
+        import re
+        import shutil
+        import subprocess
+        from forome.gem.umls import adjudicate_ui as A
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node not installed")
+        js = A.HTML.split("<script>\n", 1)[1].split("\n</script></body></html>")[0]
+        self.assertIn("function openUnmapped", js)
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as fh:
+            fh.write(js)
+        r = subprocess.run([node, "--check", fh.name], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        # the criteria offered to the curator are the shared ones
+        for k in A.CRITERIA:
+            self.assertRegex(js, rf"\b{k}:\"")
+        # the worklist machinery is present and data-driven: the JS reads
+        # entry.needs / STATE.needs and never re-derives the definition
+        for fn in ("function worklist", "function wlFiltered", "function nextNeeding",
+                   "function needChips", "function wireWorklist", "function openEntry"):
+            self.assertIn(fn, js)
+        self.assertIn("e.needs||[]", js)
+        self.assertNotIn("x.status==='review'||!x.curated", js)
+        self.assertNotIn("e.status==='review'||!e.curated", js)
+
+
+class TestNeeds(unittest.TestCase):
+    """ONE server-side definition of 'what still needs a curator's eyes'
+    (adjudicate_ui.entry_needs, exposed by load_state as entries[].needs,
+    state.needs / need_codes / need_labels / counts.needs) -- every code, the
+    no-flag cases, totals and order -- against a synthetic temp workspace."""
+
+    def _ws(self):
+        from forome.gem.umls import adjudicate_ui as A
+        ws = Path(tempfile.mkdtemp()) / "mapping"
+        ws.mkdir()
+        saved = (A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS)
+        A.CROSSWALK = ws / "umls_crosswalk.yaml"
+        H.INVENTORY = ws / "dimensions_inventory.yaml"
+        H.ADJUDICATIONS = ws / "adjudications.yaml"
+        self.addCleanup(lambda: setattr(A, "CROSSWALK", saved[0]))
+        self.addCleanup(lambda: setattr(H, "INVENTORY", saved[1]))
+        self.addCleanup(lambda: setattr(H, "ADJUDICATIONS", saved[2]))
+        return ws
+
+    def _populate(self, ws):
+        """Three dimensions: 'typed' (axis T062) with one value per case,
+        'untyped' (no semantic type, one value), 'flag' (no type, no values)."""
+        import yaml
+        from forome.gem.umls import adjudicate_ui as A
+        inv = {"dimensions": {
+            "typed": {"tier": "core", "order": 10,
+                      "axis": {"query": "Methods", "semantic_type": "T062"}},
+            "untyped": {"tier": "core", "order": 20, "axis": {"query": "Whatever"}},
+            "flag": {"tier": "core", "order": 30, "axis": {"query": "Boolean"}},
+        }}
+        (ws / "dimensions_inventory.yaml").write_text(yaml.safe_dump(inv, sort_keys=False))
+
+        def val(dim, tok, status, curated=False, cui=None):
+            e = {"dimension": dim, "token": tok, "kind": "value", "query": tok.lower(),
+                 "status": status, "curated": curated, "candidates": []}
+            if cui:
+                e.update(cui=cui, matched_name=tok.title(), root_source="MSH")
+            return e
+        cw = {"entries": [
+            val("typed", "CONFIRMED", "mapped", True, "C9000001"),   # nothing to do
+            val("typed", "AUTO", "mapped", False, "C9000002"),       # unconfirmed
+            val("typed", "PENDING_REVIEW", "review"),                # review
+            val("typed", "NOTHING_FOUND", "unmapped"),               # unresolved
+            val("typed", "BARE_VERDICT", "unmapped", True),          # no-rationale
+            val("typed", "ARGUED", "unmapped", True),                # nothing to do
+            val("untyped", "X", "mapped", False, "C9000003"),        # unconfirmed
+        ]}
+        (ws / "umls_crosswalk.yaml").write_text(yaml.safe_dump(cw, sort_keys=False))
+        A.write_adjudications({
+            "typed/CONFIRMED": {"accept": "C9000001", "note": "yes"},
+            "typed/BARE_VERDICT": {"unmapped": True, "note": "no argument recorded"},
+            "typed/ARGUED": {"unmapped": True, "note": "", "relation": "none",
+                             "rejected": [{"cui": "C9000009", "fails": "A",
+                                           "why": "denotes something else"}]},
+        })
+
+    def test_need_codes_per_case(self):
+        from forome.gem.umls import adjudicate_ui as A
+        self._populate(self._ws())
+        st = A.load_state()
+        by = {(e["dimension"], e["token"]): e["needs"] for e in st["entries"]}
+        self.assertEqual(by[("typed", "CONFIRMED")], [])
+        self.assertEqual(by[("typed", "AUTO")], ["unconfirmed"])
+        self.assertEqual(by[("typed", "PENDING_REVIEW")], ["review"])
+        self.assertEqual(by[("typed", "NOTHING_FOUND")], ["unresolved"])
+        self.assertEqual(by[("typed", "BARE_VERDICT")], ["no-rationale"])
+        self.assertEqual(by[("typed", "ARGUED")], [])
+        self.assertEqual(by[("untyped", "X")], ["unconfirmed"])
+        # axes: flagged only when untyped AND there are values to search
+        self.assertEqual(by[("typed", None)], [])
+        self.assertEqual(by[("untyped", None)], ["untyped"])
+        self.assertEqual(by[("flag", None)], [])
+        # every entry carries the key (empty list = nothing to do)
+        self.assertTrue(all(isinstance(e["needs"], list) for e in st["entries"]))
+
+    def test_totals_labels_and_worklist_order(self):
+        import json
+        from forome.gem.umls import adjudicate_ui as A
+        self._populate(self._ws())
+        st = A.load_state()
+        self.assertEqual(st["needs"], {"review": 1, "unconfirmed": 2, "unresolved": 1,
+                                       "no-rationale": 1, "untyped": 1})
+        self.assertEqual(st["counts"]["needs"], 6)
+        # the fixed order is the server's, exposed for the UI as data
+        codes = [c[0] for c in A.NEED_CODES]
+        self.assertEqual(st["need_codes"], codes)
+        self.assertEqual(list(st["needs"]), codes)
+        self.assertEqual(set(st["need_labels"]), set(codes))
+        for c in codes:
+            lab = st["need_labels"][c]
+            self.assertTrue(lab["label"] and lab["desc"], c)
+            self.assertIn(lab["scope"], ("value", "axis"))
+        self.assertEqual(st["need_labels"]["untyped"]["scope"], "axis")
+        self.assertEqual(st["need_labels"]["no-rationale"]["desc"],
+                         "recorded as unmapped without an argument")
+        # worklist order = entries order: dimension order, axis before its values
+        self.assertEqual([e["key"] for e in st["entries"] if e["needs"]],
+                         ["typed/AUTO", "typed/PENDING_REVIEW", "typed/NOTHING_FOUND",
+                          "typed/BARE_VERDICT", "untyped/(axis)", "untyped/X"])
+        json.dumps(st)   # what /api/state serves
+
+    def test_entry_needs_edge_cases(self):
+        from forome.gem.umls import adjudicate_ui as A
+        N = A.entry_needs
+        self.assertEqual(N({"kind": "value", "status": "pending"}), [])      # not live
+        self.assertEqual(N({"kind": "value", "status": "review", "curated": True}), ["review"])
+        self.assertEqual(N({"kind": "axis", "sty_tui": None}, dim_has_values=False), [])
+        self.assertEqual(N({"kind": "axis", "sty_tui": None}, dim_has_values=True), ["untyped"])
+        self.assertEqual(N({"kind": "axis", "sty_tui": "T062"}, dim_has_values=True), [])
+        # a protocol alone (the modal's shape when nothing was seen) is an argument
+        self.assertEqual(N({"kind": "value", "status": "unmapped", "curated": True,
+                            "rejected": [], "protocol": {"queries": ["q"]}}), [])
+        self.assertEqual(N({"kind": "value", "status": "unmapped", "curated": True,
+                            "rejected": [], "protocol": {}}), ["no-rationale"])
+
+    def test_no_rationale_clears_once_argued(self):
+        from forome.gem.umls import adjudicate_ui as A
+        self._populate(self._ws())
+        adj = H.load_adjudications(H.ADJUDICATIONS)
+        adj["typed/BARE_VERDICT"] = {"unmapped": True, "note": "", "relation": "none",
+                                     "rejected": [],
+                                     "protocol": {"queries": ["bare verdict"],
+                                                  "scopes": ["axis"], "umls": "UTS current"}}
+        A.write_adjudications(adj)
+        st = A.load_state()
+        bare = next(e for e in st["entries"] if e["key"] == "typed/BARE_VERDICT")
+        self.assertEqual(bare["needs"], [])
+        self.assertEqual(st["needs"]["no-rationale"], 0)
+        self.assertEqual(st["counts"]["needs"], 5)
+
+    def test_repo_workspace_state_is_consistent(self):
+        """Against the repo's own data (read-only): totals agree with the
+        per-entry lists, and axes are flagged only when they have values."""
+        from forome.gem.umls import adjudicate_ui as A
+        st = A.load_state()
+        self.assertEqual(sum(st["needs"].values()),
+                         sum(len(e["needs"]) for e in st["entries"]))
+        self.assertEqual(st["counts"]["needs"], sum(1 for e in st["entries"] if e["needs"]))
+        vals_of = {}
+        for e in st["entries"]:
+            if e["kind"] != "axis":
+                vals_of[e["dimension"]] = vals_of.get(e["dimension"], 0) + 1
+        for e in st["entries"]:
+            if e["kind"] == "axis":
+                self.assertEqual("untyped" in e["needs"],
+                                 not e["sty_tui"] and vals_of.get(e["dimension"], 0) > 0,
+                                 e["dimension"])
 
 
 if __name__ == "__main__":

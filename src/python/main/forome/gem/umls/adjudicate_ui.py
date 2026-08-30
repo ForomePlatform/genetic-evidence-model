@@ -81,6 +81,18 @@ _LEXICAL_RELA = frozenset({
     "has_permuted_term_of", "has_multi_level_category", "mth_expanded_form_of",
 })
 
+# Offline fallback for the vocabulary picker (no key / no network): the
+# sources that matter for this crosswalk. Live runs use the full UTS list.
+BUILTIN_SABS = {
+    "MSH": "Medical Subject Headings", "MTH": "UMLS Metathesaurus names",
+    "NCI": "NCI Thesaurus", "SNOMEDCT_US": "SNOMED CT, US Edition",
+    "HPO": "Human Phenotype Ontology", "GO": "Gene Ontology",
+    "CSP": "CRISP Thesaurus", "MDR": "MedDRA", "OMIM": "Online Mendelian Inheritance in Man",
+    "LNC": "LOINC", "RXNORM": "RxNorm", "ICD10CM": "ICD-10-CM", "CHV": "Consumer Health Vocabulary",
+    "NCBI": "NCBI Taxonomy", "RCD": "Read Codes", "SNMI": "SNOMED International 1998",
+    "PDQ": "Physician Data Query", "AIR": "AI/RHEUM", "NCI_NCI-GLOSS": "NCI Dictionary of Cancer Terms",
+}
+
 ADJ_HEADER = [
     "# Curator adjudications for the UMLS crosswalk review/unmapped entries.",
     "# Applied by build_umls_crosswalk.py AFTER querying. 'accept' is used only if the",
@@ -89,6 +101,141 @@ ADJ_HEADER = [
     "# records a considered 'no faithful UMLS concept' (honest finding). Edited via",
     "# mapping/adjudicate_ui.py.",
 ]
+
+# ---- structured rationale (shared schema across the mapping workstreams) ----
+# Stored per entry alongside accept/unmapped/note:
+#   relation: how the CUI relates to the GEM token (accepts), or none (unmapped)
+#   rejected: [{cui, name, sab, fails, why}]  fails = criterion code A-D
+#   protocol: {queries, scopes, match, sabs, umls}  what was actually searched
+RELATIONS = ("exact", "close", "broader", "narrower", "related", "none")
+CRITERIA = {
+    "A": "denotation — the concept denotes a different thing or relation than "
+         "the GEM token (e.g. a measurand degree vs an epistemic degree)",
+    "B": "granularity — only a broader/narrower concept exists and the gap is "
+         "not acceptable as a proxy",
+    "C": "set membership — cannot serve as a point of the token's "
+         "scale/enumeration (not disjoint from / ordered with its siblings)",
+    "D": "domain sense — right words, wrong domain or context (e.g. an IPSS-R "
+         "risk category named 'High')",
+}
+SCOPES = ("axis", "all")
+MATCH_TYPES = ("words", "exact", "normalizedWords", "normalizedString", "partial")
+RATIONALE_KEYS = ("relation", "rejected", "protocol")
+RATIONALE_MAXLEN = 300      # cap on every free-text rationale string
+RATIONALE_MAXITEMS = 50     # cap on every rationale list
+_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}")   # CUI / SAB shape
+
+# ---- "what still needs a curator's eyes": ONE definition (entry_needs), computed
+# by the server and consumed as data by the whole UI -- the rail badges, the Home
+# worklist, the values-table filter, the value view's "next" button. Fixed order.
+# (code, short label, description, scope)
+NEED_CODES = (
+    ("review", "review",
+     "in review — the harness found candidates but no faithful match", "value"),
+    ("unconfirmed", "unconfirmed",
+     "auto-mapped by the harness, not yet confirmed by a curator", "value"),
+    ("unresolved", "unresolved",
+     "no candidates from the harness query — search wider (this is a gap, not a verdict)",
+     "value"),
+    ("no-rationale", "no rationale",
+     "recorded as unmapped without an argument", "value"),
+    ("untyped", "untyped axis",
+     "axis has no semantic type — value searches run unconstrained", "axis"),
+)
+NEED_LABELS = {c: {"label": l, "desc": d, "scope": s} for c, l, d, s in NEED_CODES}
+
+
+def _rs(x, what: str) -> str:
+    """A rationale string: must be a scalar, stripped, capped at RATIONALE_MAXLEN."""
+    if x is None:
+        return ""
+    if isinstance(x, (dict, list)):
+        raise ValueError(f"{what} must be a string")
+    return str(x).strip()[:RATIONALE_MAXLEN]
+
+
+def _rlist(x, what: str) -> list:
+    if x is None:
+        return []
+    if not isinstance(x, list):
+        raise ValueError(f"{what} must be a list")
+    if len(x) > RATIONALE_MAXITEMS:
+        raise ValueError(f"{what}: at most {RATIONALE_MAXITEMS} items (got {len(x)})")
+    return list(x)
+
+
+def validate_rationale(verdict: str, data: dict) -> dict:
+    """Validate the optional structured-rationale keys of a /api/decide body
+    and return the cleaned subset to store ({} when none were given).
+
+    * relation  -- one of RELATIONS; 'none' is required for unmapped verdicts
+                   and refused for accepts. Unmapped verdicts that carry a
+                   rejected list or protocol default to relation: none.
+    * rejected  -- list of {cui, name, sab, fails, why}: cui and fails (A-D)
+                   are mandatory, the rest optional; strings are capped.
+    * protocol  -- {queries, scopes, match, sabs, umls}: scopes/match values
+                   must come from SCOPES/MATCH_TYPES; unknown keys are dropped.
+    Raises ValueError with a curator-readable message on a malformed body."""
+    out: dict = {}
+    rel = data.get("relation")
+    if rel is not None:
+        if not isinstance(rel, str) or rel not in RELATIONS:
+            raise ValueError(f"relation must be one of {', '.join(RELATIONS)}")
+        if verdict == "unmapped" and rel != "none":
+            raise ValueError("an unmapped entry takes relation: none")
+        if verdict != "unmapped" and rel == "none":
+            raise ValueError("relation: none is only valid for unmapped entries")
+        out["relation"] = rel
+    elif verdict == "unmapped" and (data.get("rejected") is not None
+                                    or data.get("protocol") is not None):
+        out["relation"] = "none"
+
+    if data.get("rejected") is not None:
+        rows = []
+        for i, item in enumerate(_rlist(data["rejected"], "rejected")):
+            if not isinstance(item, dict):
+                raise ValueError(f"rejected[{i}] must be an object")
+            cui = _rs(item.get("cui"), "rejected cui")
+            if not cui or not _ID_RE.fullmatch(cui):
+                raise ValueError(f"rejected[{i}]: a CUI is required")
+            fails = _rs(item.get("fails"), "rejected fails").upper()
+            if fails not in CRITERIA:
+                raise ValueError(f"rejected[{i}] ({cui}): fails must be one of "
+                                 f"{', '.join(CRITERIA)}")
+            row = {"cui": cui, "fails": fails}
+            for k in ("name", "sab", "why"):
+                v = _rs(item.get(k), f"rejected {k}")
+                if v:
+                    row[k] = v
+            rows.append(row)
+        out["rejected"] = rows
+
+    if data.get("protocol") is not None:
+        proto = data["protocol"]
+        if not isinstance(proto, dict):
+            raise ValueError("protocol must be an object")
+        clean: dict = {}
+        for k, allowed in (("queries", None), ("scopes", SCOPES),
+                           ("match", MATCH_TYPES), ("sabs", None)):
+            vals = []
+            for v in _rlist(proto.get(k), f"protocol {k}"):
+                v = _rs(v, f"protocol {k}")
+                if not v:
+                    continue
+                if k == "sabs":
+                    v = v.upper()
+                if allowed is not None and v not in allowed:
+                    raise ValueError(f"protocol {k}: {v!r} is not one of "
+                                     f"{', '.join(allowed)}")
+                if v not in vals:
+                    vals.append(v)
+            if vals:
+                clean[k] = vals
+        umls = _rs(proto.get("umls"), "protocol umls")
+        if umls:
+            clean["umls"] = umls
+        out["protocol"] = clean
+    return out
 
 
 def api_key() -> str:
@@ -118,11 +265,100 @@ def load_meanings() -> dict:
 MEANINGS = load_meanings()
 
 
+def _inv_load() -> dict:
+    """The workspace inventory document ({} if absent). Loaded round-trip with
+    ruamel.yaml when available so writes preserve the file's comments and
+    layout; plain PyYAML otherwise."""
+    if not H.INVENTORY.is_file():
+        return {}
+    try:
+        from ruamel.yaml import YAML
+        return YAML(typ="rt").load(H.INVENTORY.read_text()) or {}
+    except ImportError:
+        return yaml.safe_load(H.INVENTORY.read_text()) or {}
+
+
+def _inv_save(doc: dict) -> None:
+    H.INVENTORY.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        from ruamel.yaml import YAML
+        y = YAML(typ="rt")
+        y.width = 100
+        y.preserve_quotes = True
+        with H.INVENTORY.open("w") as fh:
+            y.dump(doc, fh)
+    except ImportError:
+        H.INVENTORY.write_text(
+            yaml.safe_dump(doc, sort_keys=False, allow_unicode=True, width=100))
+
+
 def _dimensions() -> dict:
     """The inventory's dimensions block (empty if the workspace has no inventory)."""
-    if H.INVENTORY.is_file():
-        return (yaml.safe_load(H.INVENTORY.read_text()) or {}).get("dimensions") or {}
-    return {}
+    return dict(_inv_load().get("dimensions") or {})
+
+
+def _norm_sabs(x) -> list:
+    """Normalise a preferred-SAB list given as a list or a comma/space string:
+    upper-cased, stripped, de-duplicated, order kept."""
+    if not x:
+        return []
+    items = x if isinstance(x, (list, tuple)) else re.split(r"[,\s]+", str(x))
+    out = []
+    for it in items:
+        it = str(it).strip().upper()
+        if it and it not in out:
+            out.append(it)
+    return out
+
+
+def _rationale_view(a: dict) -> dict:
+    """The recorded argument of one adjudication, in the shape the UI renders:
+    relation (or None), rejected (always a list), protocol (always a dict)."""
+    rej = a.get("rejected")
+    proto = a.get("protocol")
+    return {"relation": a.get("relation") or None,
+            "rejected": list(rej) if isinstance(rej, list) else [],
+            "protocol": dict(proto) if isinstance(proto, dict) else {}}
+
+
+def entry_needs(e: dict, dim_has_values: bool = True) -> list:
+    """The need codes (NEED_CODES) of one state entry -- the single place that
+    says what still needs a curator's eyes. Empty list = nothing to do.
+
+    value entries: review        status review
+                   unconfirmed   auto-mapped by the harness, never confirmed
+                   unresolved    unmapped because the harness query returned
+                                 nothing (or it was all filtered out) -- a gap,
+                                 not a verdict
+                   no-rationale  a curator's unmapped verdict carrying neither
+                                 rejected candidates nor a protocol
+    axis entries:  untyped       no semantic type while the dimension has values
+                                 to search (boolean / free-text dimensions with
+                                 no values are not flagged)"""
+    if e.get("kind") == "axis":
+        return ["untyped"] if dim_has_values and not e.get("sty_tui") else []
+    status, curated = e.get("status"), bool(e.get("curated"))
+    # The crosswalk snapshot only changes on Rebuild; the live adjudication
+    # (entry["decision"]) wins so the flags follow decisions made in-session.
+    dec = e.get("decision")
+    if e.get("error"):                     # e.g. an accepted CUI the harness could not confirm
+        return ["review"]
+    if dec == "accept":
+        status, curated = "mapped", True
+    elif dec == "unmapped":
+        status, curated = "unmapped", True
+    elif "decision" in e and dec is None and curated:   # cleared since the last Rebuild
+        curated = False
+    if status == "review":
+        return ["review"]
+    if status == "mapped":
+        return [] if curated else ["unconfirmed"]
+    if status == "unmapped":
+        if not curated:
+            return ["unresolved"]
+        if not e.get("rejected") and not e.get("protocol"):
+            return ["no-rationale"]
+    return []
 
 
 def load_state() -> dict:
@@ -130,8 +366,10 @@ def load_state() -> dict:
     inventory (so they exist even before any crosswalk is built), values from the
     crosswalk when present. Every file is optional -- an empty workspace yields
     no dimensions, ready for the axis builder to create the first one."""
-    dims = _dimensions()
-    adj = H.load_adjudications()
+    inv_doc = _inv_load()
+    dims = dict(inv_doc.get("dimensions") or {})
+    ws_prefs = _norm_sabs((inv_doc.get("meta") or {}).get("preferred_sabs"))
+    adj = H.load_adjudications(H.ADJUDICATIONS)
     doc = yaml.safe_load(CROSSWALK.read_text()) if CROSSWALK.is_file() else None
 
     def dim_axis_tui(dim):
@@ -173,7 +411,7 @@ def load_state() -> dict:
         filt = stylib.filter_param(eff)
         sty = stylib.get(eff) if eff else None
         # axis entry (from the inventory)
-        entries.append({
+        ax = {
             "key": akey, "dimension": dim, "token": None, "kind": "axis",
             "query": axis.get("query") or "",
             "meaning": axis.get("note") or MEANINGS.get(dim) or "",
@@ -189,17 +427,21 @@ def load_state() -> dict:
             "tier_explicit": "tier" in block,
             "order": block.get("order", 999),
             "activation": block.get("activation"),
+            "preferred_sabs": _norm_sabs(block.get("preferred_sabs")),
             "dim_sty_tui": eff, "dim_sty_filter": filt,
             "decision": ("accept_sty" if aadj.get("accept_sty")
                          else "unmapped" if aadj.get("unmapped") else None),
             "decision_cui": None, "decision_sty": aadj.get("accept_sty"),
             "note": aadj.get("note"), "error": None,
-        })
+            **_rationale_view(aadj),
+        }
+        ax["needs"] = entry_needs(ax, bool(values_by_dim.get(dim)))
+        entries.append(ax)
         # value entries for this dimension (from the crosswalk)
         for e in values_by_dim.get(dim, []):
             key = H._adj_key(e["dimension"], e["token"])
             a = adj.get(key) or {}
-            entries.append({
+            v = {
                 "key": key, "dimension": e["dimension"], "token": e["token"],
                 "kind": e["kind"], "query": e["query"],
                 "meaning": MEANINGS.get(str(e["token"])) or e.get("inventory_note") or "",
@@ -215,12 +457,21 @@ def load_state() -> dict:
                 "dim_sty_name": sty.get("name") if sty else None,
                 "dim_sty_tree": sty.get("tree_number") if sty else None,
                 "sab_pref": e.get("sab"),
+                # effective preference order: the value's own hint, then the
+                # dimension override, then the workspace list
+                "sab_prefs": _norm_sabs(([e.get("sab")] if e.get("sab") else [])
+                                        + _norm_sabs(block.get("preferred_sabs"))
+                                        + ws_prefs),
                 "decision": ("accept" if a.get("accept") else
                              "accept_sty" if a.get("accept_sty") else
                              "unmapped" if a.get("unmapped") else None),
                 "decision_cui": a.get("accept"), "decision_sty": a.get("accept_sty"),
                 "note": a.get("note"), "error": e.get("curator_error"),
-            })
+                "search_type": e.get("search_type"),
+                **_rationale_view(a),
+            }
+            v["needs"] = entry_needs(v)
+            entries.append(v)
 
     # Always computed over VALUE entries (never axes), so the Home progress
     # numbers mean what they say -- the crosswalk's meta.counts mixes axes in
@@ -231,26 +482,58 @@ def load_state() -> dict:
               "unmapped": sum(e["status"] == "unmapped" for e in vals),
               "review": sum(e["status"] == "review" for e in vals),
               "curated": sum(bool(e["curated"]) for e in vals)}
+    # per-code totals over EVERY entry (axes included), in NEED_CODES order;
+    # counts.needs is the number of entries with anything left to do
+    needs = {c[0]: 0 for c in NEED_CODES}
+    for e in entries:
+        for c in e["needs"]:
+            needs[c] += 1
+    counts["needs"] = sum(1 for e in entries if e["needs"])
     return {"entries": entries, "counts": counts,
-            "workspace": str(DATA_DIR), "dimensions": sorted(dims)}
+            "needs": needs, "need_codes": [c[0] for c in NEED_CODES],
+            "need_labels": NEED_LABELS,
+            "workspace": str(DATA_DIR), "dimensions": sorted(dims),
+            "prefs": {"workspace": ws_prefs},
+            "search_backend": SEARCH_BACKEND,
+            "server": {"started": SERVER_STARTED, "code": CODE_STAMP},
+            "search_backend_note": SEARCH_BACKEND_NOTE}
 
 
 def write_adjudications(adj: dict) -> None:
+    """Write adjudications.yaml. Entries that carry only a decision and a note
+    stay one compact flow-style line each (as the file has always been);
+    entries with a structured rationale (relation / rejected / protocol) are
+    emitted as an indented block mapping so the argument stays readable. Both
+    forms load back through H.load_adjudications() unchanged."""
     L = list(ADJ_HEADER) + ["adjudications:"]
     for key in sorted(adj):
         v = adj[key]
-        note = (v.get("note") or "").replace('"', "'")
         if v.get("accept"):
-            L.append(f'  "{key}": {{accept: {v["accept"]}, note: "{note}"}}')
+            head = ("accept", v["accept"])
         elif v.get("accept_sty"):
-            L.append(f'  "{key}": {{accept_sty: {v["accept_sty"]}, note: "{note}"}}')
+            head = ("accept_sty", v["accept_sty"])
         elif v.get("unmapped"):
-            L.append(f'  "{key}": {{unmapped: true, note: "{note}"}}')
+            head = ("unmapped", True)
+        else:
+            continue
+        qkey = json.dumps(str(key), ensure_ascii=False)   # YAML double-quoted
+        note = v.get("note") or ""
+        rationale = {k: v[k] for k in RATIONALE_KEYS if v.get(k) is not None}
+        if not rationale:
+            hv = "true" if head[1] is True else head[1]
+            L.append(f'  {qkey}: {{{head[0]}: {hv}, '
+                     f'note: {json.dumps(note, ensure_ascii=False)}}}')
+            continue
+        entry = {head[0]: head[1], "note": note, **rationale}
+        block = yaml.safe_dump(entry, sort_keys=False, allow_unicode=True,
+                               width=100, default_flow_style=False)
+        L.append(f"  {qkey}:")
+        L.extend("    " + line for line in block.rstrip("\n").splitlines())
     H.ADJUDICATIONS.write_text("\n".join(L) + "\n")
 
 
 def save_axis(dimension: str, semantic_type=None, query=None, note=None,
-              tier=None, activation=None, order=None) -> dict:
+              tier=None, activation=None, order=None, preferred_sabs=None) -> dict:
     """Create or update a dimension's axis block in the workspace inventory,
     creating the inventory file (and directory) if absent. This is how a new
     axis is constructed from scratch and how an existing one is modified.
@@ -271,11 +554,16 @@ def save_axis(dimension: str, semantic_type=None, query=None, note=None,
             order = int(order)
         except (TypeError, ValueError):
             raise ValueError(f"order must be an integer, got {order!r}")
-    inv = yaml.safe_load(H.INVENTORY.read_text()) if H.INVENTORY.is_file() else {}
-    inv = inv or {}
+    inv = _inv_load()
     block = inv.setdefault("dimensions", {}).setdefault(dimension, {})
     if tier:
         block["tier"] = tier
+    if preferred_sabs is not None:          # [] clears the override
+        lst = _norm_sabs(preferred_sabs)
+        if lst:
+            block["preferred_sabs"] = lst
+        else:
+            block.pop("preferred_sabs", None)
     if order is not None:
         block["order"] = order
     if activation is not None:
@@ -290,10 +578,21 @@ def save_axis(dimension: str, semantic_type=None, query=None, note=None,
         axis["note"] = note
     if semantic_type:
         axis["semantic_type"] = semantic_type
-    H.INVENTORY.parent.mkdir(parents=True, exist_ok=True)
-    H.INVENTORY.write_text(
-        yaml.safe_dump(inv, sort_keys=False, allow_unicode=True, width=100))
-    return axis
+    _inv_save(inv)
+    return dict(axis)
+
+
+def save_prefs(preferred_sabs) -> list:
+    """Workspace-wide preferred vocabulary order (inventory meta.preferred_sabs)."""
+    inv = _inv_load()
+    lst = _norm_sabs(preferred_sabs)
+    meta = inv.setdefault("meta", {})
+    if lst:
+        meta["preferred_sabs"] = lst
+    else:
+        meta.pop("preferred_sabs", None)
+    _inv_save(inv)
+    return lst
 
 
 def order_defs(defs: list) -> list:
@@ -386,7 +685,175 @@ def concept_evidence(cui: str, axis_tui: str | None = None,
             "relations": isa_up + isa_down, "other_relations": other_relations}
 
 
+def descend_search(cli, sab: str, code: str, query: str,
+                   depth: int = 2, breadth: int = 60, limit: int = 20) -> list:
+    """Ontology-guided query expansion: when a direct search finds no faithful
+    match, walk DOWN the is_a children of an anchor concept within one source
+    vocabulary and rank every descendant's name against ``query``. BFS with a
+    visited-set (source hierarchies can be diamonds), at most ``breadth`` nodes
+    expanded and ``depth`` levels (each expansion is one cached UTS call).
+    Returns [{code, name, sab, depth, score, parent}] best-first."""
+    import difflib
+
+    def score(name: str) -> float:
+        a, b = (query or "").lower(), (name or "").lower()
+        if not a or not b:
+            return 0.0
+        r = difflib.SequenceMatcher(None, a, b).ratio()
+        ta, tb = set(re.findall(r"[a-z0-9]+", a)), set(re.findall(r"[a-z0-9]+", b))
+        overlap = len(ta & tb) / len(ta) if ta else 0.0
+        return round(0.6 * r + 0.4 * overlap, 4)
+
+    seen, out, frontier, expanded = {code}, [], [(code, None, 0)], 0
+    while frontier and expanded < breadth:
+        cur, parent, d = frontier.pop(0)
+        if d >= depth:
+            continue
+        expanded += 1
+        try:
+            kids = cli.source_children(sab, cur) or []
+        except Exception:  # noqa: BLE001 -- a leaf/forbidden node ends the branch
+            kids = []
+        for k in kids:
+            if k["code"] in seen:
+                continue
+            seen.add(k["code"])
+            out.append({"code": k["code"], "name": k["name"], "sab": k["sab"],
+                        "depth": d + 1, "score": score(k["name"]),
+                        "parent": parent if d else None})
+            frontier.append((k["code"], k["name"], d + 1))
+    # Direct children are the answer to "what are the descendants?" -- they are
+    # always kept (a query only orders them); deeper levels compete by score
+    # for the remaining slots. Sorted children-first, best-scored within depth.
+    d1 = sorted([x for x in out if x["depth"] == 1],
+                key=lambda x: (-x["score"], x["name"] or ""))
+    deeper = sorted([x for x in out if x["depth"] > 1],
+                    key=lambda x: (-x["score"], x["depth"], x["name"] or ""))
+    keep = d1[:max(limit, len(d1))] + deeper[:max(0, limit - len(d1))]
+    return keep
+
+
+EXPAND_MAJOR = ("SNOMEDCT_US", "MSH", "NCI", "GO", "HPO")
+
+
+def expand_search(cli, query: str, stys: str | None = None,
+                  per_word: int = 3, kids_per: int = 12,
+                  max_variants: int = 40) -> dict:
+    """Ontology-aware query expansion: for each content word of ``query``,
+    find the concepts literally named by that word, take their is_a
+    NEIGHBOURS (children and a few ancestors) from the source hierarchies,
+    substitute the neighbour's name for the word, and re-search every
+    variant. "model organism" -> organism's children (animal, plant, ...) ->
+    "model animal" -> Animal Model. Results carry their provenance
+    (word -> substituted term, and the variant searched)."""
+    words = [w for w in re.findall(r"[A-Za-z][A-Za-z-]+", query or "")
+             if len(w) > 2]
+    variants: list[tuple[str, str, str]] = []
+    seen_var = {(query or "").lower()}
+    # per-word budget: otherwise the first word's expansions starve the rest
+    quota = max(8, max_variants // max(1, len(words)))
+    for w in words:
+        n_word = 0
+        try:
+            named = cli.search(w, search_type="exact", page_size=10)[:per_word]
+        except Exception:  # noqa: BLE001
+            named = []
+        for c in named:
+            codes: dict = {}
+            try:
+                for a in cli.atoms(c["cui"]):
+                    if (a.get("sab") in EXPAND_MAJOR and a.get("code")
+                            and a.get("code") != "NOCODE"
+                            and (a.get("language") or "ENG") == "ENG"):
+                        codes.setdefault(a["sab"], a["code"])
+            except Exception:  # noqa: BLE001
+                continue
+            # hyponyms two levels down (animal is under organism via
+            # Eukaryota in NCI); ancestors are deliberately NOT substituted --
+            # they head straight for vocabulary roots and produce junk.
+            per_sab: list = []
+            for sab in [x for x in EXPAND_MAJOR if x in codes][:2]:
+                lst: list = []
+                try:
+                    d1 = cli.source_children(sab, codes[sab])[:kids_per]
+                    lst += d1
+                    for k in d1[:6]:
+                        lst += cli.source_children(sab, k["code"])[:6]
+                except Exception:  # noqa: BLE001
+                    pass
+                if lst:
+                    per_sab.append(lst)
+            # interleave the vocabularies: one tree's verbose taxa (SNOMED's
+            # "Kingdom Animalia") must not starve another's clean names
+            # (NCI's "Animal") out of the per-word budget
+            neigh = [n for tup in __import__("itertools").zip_longest(*per_sab)
+                     for n in tup if n is not None]
+            for n in neigh:
+                nm = re.sub(r"\s*\([^)]*\)$", "", (n.get("name") or "")).strip()
+                if not nm or len(nm.split()) > 3:
+                    continue
+                v = re.sub(rf"\b{re.escape(w)}\b", nm, query, flags=re.I)
+                if v.lower() in seen_var or n_word >= quota:
+                    continue
+                seen_var.add(v.lower())
+                variants.append((v, w, nm))
+                n_word += 1
+    variants = variants[:max_variants]
+    results, seen_cui = [], set()
+    for v, w, nm in variants:
+        try:
+            hits = cli.search(v, search_type="words", semantic_types=stys,
+                              page_size=30)[:5]
+        except Exception:  # noqa: BLE001
+            hits = []
+        for h in hits:
+            if h["cui"] in seen_cui:
+                continue
+            seen_cui.add(h["cui"])
+            results.append({**h, "via": f"{w} → {nm}", "variant": v})
+    return {"n_variants": len(variants), "results": results[:30]}
+
+
 client = None  # set in main()
+SEARCH_BACKEND = "UTS"
+SEARCH_BACKEND_NOTE = ""      # why the local-index probe failed, when it did
+import datetime as _dt
+SERVER_STARTED = _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+CODE_STAMP = _dt.datetime.fromtimestamp(
+    Path(__file__).stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+
+
+class HybridClient:
+    """Local-index search + UTS for everything else. search/atoms and the
+    axis-subtree browse come from the PostgreSQL index (exact, normalized and
+    trigram matching over the full release, no REST ranking cap); concept
+    details, relations, definitions, rollups and the source registry stay on
+    UTS. Attribute fallback delegates to the UTS client."""
+
+    def __init__(self, pg, uts):
+        self._pg, self._uts = pg, uts
+
+    def search(self, *a, **k):
+        return self._pg.search(*a, **k)
+
+    def atoms(self, *a, **k):
+        return self._pg.atoms(*a, **k)
+
+    def concepts_by_tui(self, *a, **k):
+        return self._pg.concepts_by_tui(*a, **k)
+
+    def release(self):
+        return self._pg.release()
+
+    def sources(self):
+        try:
+            src = self._uts.sources()
+        except Exception:  # noqa: BLE001
+            src = []
+        return src or self._pg.sources()
+
+    def __getattr__(self, name):
+        return getattr(self._uts, name)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -420,7 +887,11 @@ class Handler(BaseHTTPRequestHandler):
                 partial = stype == "partial"
                 res = client.search(term, search_type="words" if partial else stype,
                                     sabs=sab, semantic_types=stys, partial=partial)
-                return self._send(200, json.dumps({"results": res}))
+                out = {"results": res}
+                if not res and SEARCH_BACKEND.startswith("OFFLINE"):
+                    out["note"] = ("offline: no UMLS key and no local index — "
+                                   "every search is empty (see ⚙ Settings)")
+                return self._send(200, json.dumps(out))
             if u.path == "/api/rollup":
                 cui = (q.get("cui") or [""])[0]
                 sab = (q.get("use_sab") or [""])[0] or None
@@ -441,6 +912,62 @@ class Handler(BaseHTTPRequestHandler):
                 sabs = sorted({a["sab"] for a in client.atoms(cui)
                                if a.get("sab") and (a.get("language") or "ENG") == "ENG"})
                 return self._send(200, json.dumps({"sabs": sabs}))
+            if u.path == "/api/sources":
+                try:
+                    src = [x for x in client.sources() if (x.get("language") or "ENG") == "ENG"]
+                except Exception:  # noqa: BLE001 -- offline: fall back below
+                    src = []
+                if not src:
+                    src = [{"sab": k, "name": v} for k, v in BUILTIN_SABS.items()]
+                src.sort(key=lambda x: x["sab"])
+                return self._send(200, json.dumps({"sources": src}))
+            if u.path == "/api/expand":
+                term = (q.get("q") or [""])[0]
+                stys = (q.get("stys") or [""])[0] or None
+                cap = 16 if SEARCH_BACKEND.startswith(("UTS", "OFFLINE")) else 40
+                out = expand_search(client, term, stys, max_variants=cap)
+                return self._send(200, json.dumps(out))
+            if u.path == "/api/descend":
+                cui = (q.get("cui") or [""])[0]
+                want = (q.get("sab") or [""])[0] or None
+                term = (q.get("q") or [""])[0]
+                depth = min(int((q.get("depth") or ["2"])[0]), 3)
+                # The hierarchy rarely lives in the vocabulary that named the
+                # concept (MTH names have no tree): walk EVERY English source
+                # the concept has an atom in, requested/major sources first.
+                atoms = [a for a in client.atoms(cui)
+                         if a.get("sab") and a.get("code")
+                         and a.get("code") != "NOCODE"
+                         and (a.get("language") or "ENG") == "ENG"]
+                by_sab: dict = {}
+                for a in sorted(atoms, key=lambda a: (a.get("tty") != "PT",)):
+                    by_sab.setdefault(a["sab"], a["code"])
+                if not by_sab:
+                    return self._send(200, json.dumps({"error":
+                        f"{cui} has no source atom to descend from"}))
+                MAJOR = ("MSH", "NCI", "SNOMEDCT_US", "HPO", "GO", "LNC", "CSP")
+                order = ([want] if want in by_sab else []) +                     [x for x in MAJOR if x in by_sab and x != want] +                     [x for x in sorted(by_sab) if x not in MAJOR and x != want]
+                rows, anchors = [], []
+                for sab in order[:6]:
+                    got = descend_search(client, sab, by_sab[sab], term,
+                                         depth=depth, breadth=40, limit=12)
+                    if got:
+                        anchors.append({"sab": sab, "code": by_sab[sab]})
+                        rows.extend(got)
+                rows.sort(key=lambda x: (x["depth"], -x["score"], x["name"] or ""))
+                return self._send(200, json.dumps(
+                    {"anchors": anchors, "matches": rows[:48]}))
+            if u.path == "/api/axisbrowse":
+                stys = (q.get("stys") or [""])[0]
+                fn = getattr(client, "concepts_by_tui", None)
+                if not callable(fn) or not stys:
+                    return self._send(200, json.dumps({"error":
+                        "Axis browse needs the optional local UMLS index. "
+                        "Build it once from your own licensed UMLS release: "
+                        "see data/umls/README.md, section 'Local UMLS index "
+                        "(PostgreSQL)' — then restart the Studio."}))
+                return self._send(200, json.dumps(
+                    {"concepts": fn(stys, limit=3000)}))
             if u.path == "/api/semantictypes":
                 return self._send(200, json.dumps({"types": [
                     {"tui": t["tui"], "name": t["name"], "tree": t.get("tree_number"),
@@ -462,21 +989,31 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(ln) or b"{}")
             u = urlparse(self.path)
             if u.path == "/api/decide":
-                adj = H.load_adjudications()
+                adj = H.load_adjudications(H.ADJUDICATIONS)
                 key, verdict = data["key"], data.get("verdict")
-                if verdict == "accept":
-                    adj[key] = {"accept": data["cui"],
-                                "note": data.get("note") or "curator-accepted via UI"}
-                elif verdict == "accept_sty":
-                    adj[key] = {"accept_sty": data["tui"],
-                                "note": data.get("note") or "axis semantic type set via UI"}
-                elif verdict == "unmapped":
-                    adj[key] = {"unmapped": True,
-                                "note": data.get("note") or "no faithful UMLS concept (curator)"}
-                elif verdict == "clear":
-                    adj.pop(key, None)
-                else:
+                if verdict not in ("accept", "accept_sty", "unmapped", "clear"):
                     return self._send(400, json.dumps({"error": "bad verdict"}))
+                try:
+                    rationale = validate_rationale(verdict, data)
+                    if verdict == "accept":
+                        cui = _rs(data.get("cui"), "cui")
+                        if not cui or not _ID_RE.fullmatch(cui):
+                            raise ValueError("accept needs a CUI")
+                        adj[key] = {"accept": cui,
+                                    "note": data.get("note") or "curator-accepted via UI",
+                                    **rationale}
+                    elif verdict == "accept_sty":
+                        adj[key] = {"accept_sty": data["tui"],
+                                    "note": data.get("note") or "axis semantic type set via UI",
+                                    **rationale}
+                    elif verdict == "unmapped":
+                        adj[key] = {"unmapped": True,
+                                    "note": data.get("note") or "no faithful UMLS concept (curator)",
+                                    **rationale}
+                    else:                     # clear: decision AND rationale go
+                        adj.pop(key, None)
+                except ValueError as ve:
+                    return self._send(400, json.dumps({"error": str(ve)}))
                 write_adjudications(adj)
                 return self._send(200, json.dumps({"ok": True}))
             if u.path == "/api/axis":
@@ -486,17 +1023,21 @@ class Handler(BaseHTTPRequestHandler):
                                      query=data.get("query"), note=data.get("note"),
                                      tier=data.get("tier") or None,
                                      activation=data.get("activation"),
-                                     order=data.get("order"))
+                                     order=data.get("order"),
+                                     preferred_sabs=data.get("preferred_sabs"))
                 except ValueError as ve:
                     return self._send(400, json.dumps({"error": str(ve)}))
                 # the inventory is now authoritative for this axis's type; drop a
                 # stale accept_sty adjudication override so it takes effect.
-                adj = H.load_adjudications()
+                adj = H.load_adjudications(H.ADJUDICATIONS)
                 akey = H._adj_key((data.get("dimension") or "").strip(), None)
                 if (adj.get(akey) or {}).get("accept_sty"):
                     adj.pop(akey, None)
                     write_adjudications(adj)
                 return self._send(200, json.dumps({"ok": True, "axis": axis}))
+            if u.path == "/api/prefs":
+                lst = save_prefs(data.get("preferred_sabs"))
+                return self._send(200, json.dumps({"ok": True, "preferred_sabs": lst}))
             if u.path == "/api/rebuild":
                 dim = (data.get("dim") or "").strip() or None
                 if dim:
@@ -576,6 +1117,9 @@ textarea{width:100%;min-height:44px}
 #brand{display:flex;align-items:center;gap:10px;padding:18px 18px 12px;cursor:pointer}
 #brand .nm{font-family:var(--serif);font-size:16px;font-weight:700}
 #brand .ws{font-family:var(--mono);font-size:10.5px;color:var(--faint);word-break:break-all}
+#brand .txt{flex:1;min-width:0}
+#gear{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--faint);cursor:pointer;border:1px solid transparent}
+#gear:hover{color:var(--accent);background:#e9e5d8;border-color:var(--line)}
 #nav{flex:1;overflow:auto;padding:4px 0 8px}
 .tierhdr{padding:10px 18px 4px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)}
 .nitem{display:flex;align-items:center;gap:8px;padding:5px 18px;cursor:pointer}
@@ -622,7 +1166,8 @@ textarea{width:100%;min-height:44px}
 .mono{font-family:var(--mono)}.mut{color:var(--mut)}.mini{font-size:11.5px;color:var(--faint)}
 .cui{font-family:var(--mono);font-size:12px;color:var(--link)}
 .stn{font-family:var(--mono);color:var(--faint)}
-.sab{font-family:var(--mono);font-size:10px;color:var(--faint);border:1px solid var(--un-bd);border-radius:999px;padding:0 5px}
+.sab{font-family:var(--mono);font-size:10px;color:var(--faint);border:1px solid var(--un-bd);border-radius:999px;padding:0 5px;white-space:nowrap}
+.sab.ok{color:var(--ok);border-color:var(--ok-bd);background:var(--ok-bg);font-weight:600}
 .warnsvg{color:var(--warn)}
 .bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--un-bd)}
 .bar .m{background:var(--ok-dot)}.bar .r{background:var(--rev-dot)}.bar .u{background:var(--un-bd)}
@@ -701,9 +1246,32 @@ textarea{width:100%;min-height:44px}
 #modal .mbox{background:var(--card);border:1px solid var(--line);border-radius:12px;width:min(760px,92vw);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(35,30,20,.28)}
 #modal .mhead{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);font-size:13px}
 #modal .mbody{padding:12px 16px;overflow:auto;font-size:12.5px}
+.tawrap{position:relative;flex:1;min-width:0;display:flex}
+.tawrap input{width:100%}
+.tadrop{position:absolute;left:0;right:0;top:100%;margin-top:3px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(35,30,20,.18);max-height:240px;overflow:auto;z-index:60}
+.taitem{display:flex;gap:10px;align-items:baseline;padding:6px 10px;cursor:pointer;font-size:12.5px}
+.taitem:hover,.taitem.sel{background:#e9e5d8}
+.taitem .ab{font-family:var(--mono);font-weight:500;min-width:110px}
+.taitem .nm{color:var(--mut);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stnlink{font-family:var(--mono);font-size:11px;color:var(--link);cursor:pointer;text-decoration:none;border-bottom:1px dotted var(--link)}
 .stnlink:hover{text-decoration:none;border-bottom-style:solid}
 .vocab{display:inline-block;background:var(--link-bg);color:var(--link);border:1px solid #cfdce8;border-radius:4px;padding:0 4px;margin:1px;font-size:11px}
+/* needs: what still needs a curator's eyes (server-defined codes) */
+.chip.needc{color:var(--warn);background:#f7ecdd;border-color:#eddabb}
+.nbadge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;line-height:15px;color:var(--warn);background:#f7ecdd;border:1px solid #eddabb;border-radius:999px;padding:0 6px;margin-right:6px}
+.wlbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.wlbar input{margin-left:auto;width:190px;font-size:12px}
+.fchip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;border-radius:999px;padding:2px 10px;border:1px solid var(--line);color:var(--mut);cursor:pointer;user-select:none;background:var(--card)}
+.fchip:hover{background:#f4f1e8}
+.fchip b{font-family:var(--mono);font-weight:600}
+.fchip.on{color:#f6f3ea;background:var(--accent);border-color:var(--accent)}
+.fchip.zero{opacity:.55}
+.wlrow{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:7px 0;border-top:1px solid var(--hair);cursor:pointer;font-size:12.5px}
+.wlrow:hover{background:#f4f1e8;margin:0 -17px;padding-left:17px;padding-right:17px}
+.wlrow .dn{font-family:var(--mono);font-size:12px;display:flex;align-items:center;gap:7px;min-width:0}
+.wlrow .dn .tk{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wlrow .st{display:flex;align-items:center;gap:5px;justify-self:end;white-space:nowrap}
+.notice{display:flex;align-items:center;gap:7px;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:12.5px;color:var(--warn);background:#f7ecdd;border:1px solid #eddabb}
 </style></head><body>
 <div id="rail"></div>
 <div id="main"><div id="head"></div><div id="content"><div class="empty">Loading workspace…</div></div></div>
@@ -712,6 +1280,17 @@ let STATE=null,SEMTYPES=null,SEL=null,AXB=null;
 let ROUTE={view:'home'};
 let OPEN={};          // conditional-group open/closed, keyed by activation
 let FILTER={dim:null,status:'all',text:''};
+let WL={need:'all',text:''};   // Home worklist filter (need code or 'all', text)
+// per-value, in-session record of the adjudication protocol: the searches run
+// (SEARCHLOG) and every candidate card rendered (SEEN, cui -> concept) -- the
+// raw material of a structured "no faithful concept" argument.
+const SEARCHLOG={},SEEN={};
+const RELATIONS=['exact','close','broader','narrower','related'];
+const CRITERIA={
+  A:"denotation — the concept denotes a different thing or relation than the GEM token (e.g. a measurand degree vs an epistemic degree)",
+  B:"granularity — only a broader/narrower concept exists and the gap is not acceptable as a proxy",
+  C:"set membership — cannot serve as a point of the token’s scale/enumeration (not disjoint from / ordered with its siblings)",
+  D:"domain sense — right words, wrong domain or context (e.g. an IPSS-R risk category named ‘High’)"};
 const $=s=>document.querySelector(s);
 const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // for user-controlled strings interpolated into single-quoted JS inside onclick attributes
@@ -722,7 +1301,8 @@ const IC={
  warn:'<svg class="warnsvg" width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 2 12.6 11.5H1.4L7 2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 6v2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
  right:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5 7 5 3 8.5" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
  down:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 3 5 7 8.5 3" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
- plus:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'};
+ plus:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+ gear:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M3.5 12.5l1.3-1.3M11.2 4.8l1.3-1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'};
 /* ---------- vocabulary helpers ---------- */
 const TTY={AB:'abbreviation',ACR:'acronym',BN:'brand name',DN:'display name',
  EP:'print entry term (MeSH)',ET:'entry term',FN:'fully specified name',
@@ -745,19 +1325,82 @@ function ttyHTML(t){if(!t)return '';
 // only the name's highest-precedence source -- MTH means the Metathesaurus
 // itself -- so membership must come from the atoms). The dimension's preferred
 // SAB (inventory `sab:` hint) is ticked when present, flagged when absent.
-async function enrichSabs(root){const pref=SEL&&SEL.sab_pref;
+const SABCACHE={};
+async function fetchSabs(cui){if(SABCACHE[cui])return SABCACHE[cui];
+  try{const j=await (await fetch('/api/sabs?cui='+encodeURIComponent(cui))).json();SABCACHE[cui]=j.sabs||[];}
+  catch(err){SABCACHE[cui]=[];}
+  return SABCACHE[cui];}
+// ONE display rule for a concept's source, used everywhere a SAB is shown:
+// the first preferred vocabulary the concept is actually in (ticked), else all
+// of them; the search's root_source only until membership is known.
+function sabLabel(sabs,prefs,root){prefs=prefs||[];
+  if(!sabs||!sabs.length)return root?`<span class="sab" title="root source of the preferred name; membership not loaded">${esc(root)}</span>`:'';
+  const all=sabs.join(', ');
+  const p=prefs.find(x=>sabs.includes(x));
+  if(p)return `<span class="sab ok" title="preferred vocabulary · also in: ${esc(all)}">${esc(p)} ✓</span>`+
+    (sabs.length>1?`<span class="mini"> +${sabs.length-1}</span>`:'');
+  const shown=sabs.slice(0,5).join(', ');
+  return `<span class="sab" title="${esc(all)}">${esc(shown)}${sabs.length>5?' +'+(sabs.length-5):''}</span>`+
+    (prefs.length?`<span class="mini" style="color:var(--rev)"> not in preferred (${esc(prefs.join(' › '))})</span>`:'');}
+// fill every .sabslot[data-cui] under root with the membership-aware label
+async function enrichSlots(root){
+  const slots=[...(root||document).querySelectorAll('.sabslot[data-cui]:not([data-done])')];
+  slots.forEach(el=>el.setAttribute('data-done','1'));
+  await Promise.all(slots.map(async el=>{
+    const sabs=await fetchSabs(el.getAttribute('data-cui'));
+    if(!el.isConnected||!sabs.length)return;
+    const prefs=(el.getAttribute('data-prefs')||'').split(',').filter(Boolean);
+    el.innerHTML=sabLabel(sabs,prefs,el.getAttribute('data-root'));}));}
+// candidate cards: append the full membership list, preferred ones first + ticked
+async function enrichSabs(root){const prefs=(SEL&&SEL.sab_prefs)||[];
   const cards=[...(root||document).querySelectorAll('.cand[data-cui]:not([data-sabs])')];
   cards.forEach(el=>el.setAttribute('data-sabs','1'));
   await Promise.all(cards.map(async el=>{
-    const cui=el.getAttribute('data-cui');
-    try{const j=await (await fetch('/api/sabs?cui='+encodeURIComponent(cui))).json();
-      const sabs=j.sabs||[];if(!sabs.length||!el.isConnected)return;
-      const show=sabs.slice(0,10).map(s=>s===pref?`<b style="color:var(--ok)">${esc(s)} ✓</b>`:esc(s)).join(', ')
-        +(sabs.length>10?` +${sabs.length-10} more`:'');
-      const miss=pref&&!sabs.includes(pref)?` <span style="color:var(--rev)">(not in preferred ${esc(pref)})</span>`:'';
-      const box=el.querySelector('.sty');
-      if(box)box.insertAdjacentHTML('beforeend',` <span class="mini">· in: ${show}${miss}</span>`);
-    }catch(err){}}));}
+    const sabs=await fetchSabs(el.getAttribute('data-cui'));
+    if(!sabs.length||!el.isConnected)return;
+    const hit=prefs.filter(p=>sabs.includes(p)),rest=sabs.filter(x=>!hit.includes(x));
+    const show=hit.map(x=>`<b style="color:var(--ok)">${esc(x)} ✓</b>`).concat(rest.slice(0,10).map(esc)).join(', ')
+      +(rest.length>10?` +${rest.length-10} more`:'');
+    const miss=prefs.length&&!hit.length?` <span style="color:var(--rev)">(not in preferred: ${esc(prefs.join(' › '))})</span>`:'';
+    const box=el.querySelector('.sty');
+    if(box)box.insertAdjacentHTML('beforeend',` <span class="mini">· in: ${show}${miss}</span>`);}));}
+/* ---------- vocabulary typeahead (comma-separated SAB lists) ---------- */
+let SOURCES=null,_srcReq=null;
+function loadSources(){if(SOURCES)return Promise.resolve(SOURCES);
+  if(!_srcReq)_srcReq=fetch('/api/sources').then(r=>r.json()).then(j=>{SOURCES=j.sources||[];return SOURCES;}).catch(()=>{SOURCES=[];return SOURCES;});
+  return _srcReq;}
+// Attach to an <input>: the token being typed (after the last comma) narrows a
+// dropdown of vocabularies (abbreviation prefix first, then any substring of
+// abbreviation or name). Enter/click completes the token; Enter with the
+// dropdown closed falls through to onEnter (e.g. save).
+function attachSabTypeahead(input,onEnter){if(!input||input.dataset.ta)return;input.dataset.ta='1';
+  const wrap=document.createElement('div');wrap.className='tawrap';
+  input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
+  const drop=document.createElement('div');drop.className='tadrop';drop.style.display='none';wrap.appendChild(drop);
+  let items=[],sel=-1;
+  const token=()=>{const v=input.value,i=v.lastIndexOf(',');return v.slice(i+1).trim();};
+  const close=()=>{drop.style.display='none';items=[];sel=-1;};
+  const pick=i=>{const it=items[i];if(!it)return;const v=input.value,c=v.lastIndexOf(',');
+    input.value=(c>=0?v.slice(0,c+1)+' ':'')+it.sab+', ';close();input.focus();};
+  const render=()=>{if(!items.length){close();return;}
+    drop.innerHTML=items.map((it,i)=>`<div class="taitem ${i===sel?'sel':''}" data-i="${i}"><span class="ab">${esc(it.sab)}</span><span class="nm">${esc(it.name||'')}</span></div>`).join('');
+    drop.style.display='block';
+    drop.querySelectorAll('.taitem').forEach(el=>{el.onmousedown=ev=>{ev.preventDefault();pick(+el.dataset.i);};});};
+  const update=async()=>{const q=token().toUpperCase();if(!q){close();return;}
+    const src=await loadSources();
+    const chosen=new Set(input.value.toUpperCase().split(',').map(x=>x.trim()).filter(Boolean));
+    const pre=src.filter(x=>x.sab.toUpperCase().startsWith(q)&&!chosen.has(x.sab.toUpperCase()));
+    const sub=src.filter(x=>!pre.includes(x)&&!chosen.has(x.sab.toUpperCase())&&(x.sab+' '+(x.name||'')).toUpperCase().includes(q));
+    items=pre.concat(sub).slice(0,9);sel=items.length?0:-1;render();};
+  input.addEventListener('input',update);
+  input.addEventListener('blur',()=>setTimeout(close,120));
+  input.addEventListener('keydown',ev=>{
+    const open=drop.style.display!=='none'&&items.length;
+    if(ev.key==='ArrowDown'&&open){sel=(sel+1)%items.length;render();ev.preventDefault();}
+    else if(ev.key==='ArrowUp'&&open){sel=(sel-1+items.length)%items.length;render();ev.preventDefault();}
+    else if(ev.key==='Enter'){if(open){pick(sel<0?0:sel);ev.preventDefault();ev.stopPropagation();}else if(onEnter)onEnter();}
+    else if(ev.key==='Escape'&&open){close();ev.preventDefault();ev.stopPropagation();}
+    else if(ev.key==='Tab'&&open){pick(sel<0?0:sel);ev.preventDefault();}});}
 /* ---------- modal + Semantic Network views ---------- */
 function showModal(titleHTML,bodyHTML){closeModal();
   const d=document.createElement('div');d.id='modal';
@@ -774,10 +1417,10 @@ function mostSpecificTui(names){if(!SEMTYPES)return null;const norm=s=>(s||'').t
 function showAxisTree(){if(!SEL||!SEL.dim_sty_tui)return;
   loadSemTypes().then(()=>showModal('Axis type in the Semantic Network — '+esc(SEL.dim_sty_name||SEL.dim_sty_tui),
     `<div class="subtree" style="max-height:none;border:none;padding:0">${stnPlaceHTML(SEL.dim_sty_tui,true)}</div>`));}
-function showCompare(tui){loadSemTypes().then(()=>{
+function showCompare(tui,axisTui){loadSemTypes().then(()=>{
   const t=(SEMTYPES||[]).find(x=>x.tui===tui);
   showModal('Place in the Semantic Network — '+esc(t?t.name:tui),
-    stnCompareHTML(tui,SEL&&SEL.dim_sty_tui));});}
+    stnCompareHTML(tui,axisTui!==undefined?axisTui:(SEL&&SEL.dim_sty_tui)));});}
 // The result type's position relative to the axis type: shared ancestors as one
 // spine, then the branches fork (axis and result each labeled).
 function stnCompareHTML(tui,axisTui){
@@ -788,7 +1431,7 @@ function stnCompareHTML(tui,axisTui){
       const cls=last&&mark?' '+mark:'';
       const lab=last&&mark==='hl'?' <span class="mini">← this result</span>'
         :last&&mark==='ax'?' <span class="mini">← axis</span>':'';
-      h=`<div class="stn-node${cls}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)} <span class="cui">${esc(n.tui)}</span>${lab}`+
+      h=`<div class="stn-node${cls}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)}${lab}`+
         (h?`<div class="stn-kids">${h}</div>`:'')+`</div>`;}
     return h;};
   const chainOf=x=>{const segs=x.tree.split('.'),c=[];
@@ -828,7 +1471,9 @@ function dimList(){const out=[];
       total:vals.length,
       mapped:vals.filter(v=>v.status==='mapped').length,
       review:vals.filter(v=>v.status==='review').length,
-      unmapped:vals.filter(v=>v.status==='unmapped').length});});
+      unmapped:vals.filter(v=>v.status==='unmapped').length,
+      // items still needing a curator (server-defined entry.needs): values + the axis
+      needs:vals.reduce((n,v)=>n+(v.needs||[]).length,0)+(e.needs||[]).length});});
   return out;}   // server already ordered by tier/order
 function grouped(){const g={core:[],cond:[],candidate:[]},bykey={};
   dimList().forEach(d=>{
@@ -841,6 +1486,29 @@ function activeDim(){if(ROUTE.view==='dim')return ROUTE.dim;
   if(ROUTE.view==='value'&&SEL)return SEL.dimension;return null;}
 function dotFor(d){if(d.total===0)return d.tui?'none':'none';
   if(d.mapped===d.total)return 'mapped';if(d.mapped||d.review)return 'part';return 'none';}
+/* ---------- needs / worklist ----------
+   What still needs a curator's eyes is decided by the server: every entry
+   carries entry.needs (a list of codes), STATE.needs holds the per-code totals
+   and STATE.need_labels the labels. Nothing here re-derives the definition. */
+function needLabel(code){return ((STATE&&STATE.need_labels)||{})[code]||{label:code,desc:'',scope:'value'};}
+function needChips(e){return (e.needs||[]).map(n=>{const l=needLabel(n);
+  return `<span class="chip needc" title="${esc(l.desc)}">${esc(l.label)}</span>`;}).join(' ');}
+// worklist order = STATE.entries order: dimension order, each axis before its values
+function worklist(){return (STATE.entries||[]).filter(e=>(e.needs||[]).length);}
+function wlFiltered(){const t=WL.text.toLowerCase();
+  return worklist().filter(e=>(WL.need==='all'||(e.needs||[]).includes(WL.need))&&
+    (!t||(e.dimension+' '+(e.token==null?'axis':e.token)+' '+(e.matched_name||'')).toLowerCase().includes(t)));}
+function openEntry(e){if(!e)return;if(e.kind==='axis')gotoDim(e.dimension);else gotoValue(e.key);}
+// the next entry after fromKey (wrapping around) that still needs a curator, or null
+function nextNeeding(fromKey,need){need=need||WL.need||'all';const es=STATE.entries||[],n=es.length;
+  const i=es.findIndex(x=>x.key===fromKey);
+  const ok=e=>(e.needs||[]).length&&(need==='all'||e.needs.includes(need));
+  for(let k=1;k<=n;k++){const e=es[(i+k+n)%n];if(e.key!==fromKey&&ok(e))return e;}
+  return need==='all'?null:nextNeeding(fromKey,'all');}   // filtered chain exhausted: fall back to any need
+function nextBtn(fromKey){const nx=nextNeeding(fromKey);if(!nx)return '';
+  const what=(nx.needs||[]).map(c=>needLabel(c).label).join(', ');
+  return `<button id="btn-next" title="${esc(nx.dimension)} › ${esc(nx.token==null?'axis':String(nx.token))} — ${esc(what)}">Next needing review →</button>`;}
+function wireNext(fromKey){const b=$('#btn-next');if(b)b.addEventListener('click',()=>openEntry(nextNeeding(fromKey)));}
 /* ---------- navigation ---------- */
 function gotoHome(){ROUTE={view:'home'};SEL=null;render();}
 function gotoDim(dim){if(FILTER.dim!==dim)FILTER={dim,status:'all',text:''};
@@ -856,10 +1524,11 @@ function railItem(d,kid){const act=activeDim()===d.dim;
     `<span class="dot ${dotFor(d)}"></span><span class="nm">${esc(d.dim)}</span>`+
     (d.tier==='core'&&d.activation?`<span class="condchip">cond.</span>`:'')+
     (!d.tui?IC.warn:'')+
-    `<span class="fr">${frac}</span></div>`;}
+    `<span class="fr">${d.needs?`<span class="nbadge" title="${d.needs} item${d.needs===1?'':'s'} still need${d.needs===1?'s':''} a curator">${d.needs}</span>`:''}${frac}</span></div>`;}
 function renderRail(){const g=grouped();const box=$('#rail');
-  let h=`<div id="brand" onclick="gotoHome()">${IC.logo}<div><div class="nm">GEM Mapping Studio</div>`+
-    `<div class="ws">${esc(shortWs())} · ${(STATE.counts||{}).total||0} values</div></div></div><div id="nav">`;
+  let h=`<div id="brand" onclick="gotoHome()">${IC.logo}<div class="txt"><div class="nm">GEM Mapping Studio</div>`+
+    `<div class="ws">${esc(shortWs())} · ${(STATE.counts||{}).total||0} values</div></div>`+
+    `<div id="gear" title="Settings — preferred vocabularies" onclick="event.stopPropagation();openSettings()">${IC.gear}</div></div><div id="nav">`;
   h+=`<div class="tierhdr">CORE</div>`;
   h+=g.core.map(d=>railItem(d)).join('')||'<div class="navempty">none yet</div>';
   h+=`<div class="tierhdr">CONDITIONAL</div>`;
@@ -902,17 +1571,11 @@ function renderHome(){const c=STATE.counts||{},g=grouped(),dims=dimList();
      `<div class="legend"><span><span class="ldot" style="background:var(--ok-dot)"></span><b>${m}</b> mapped</span>`+
      `<span><span class="ldot" style="background:var(--rev-dot)"></span><b>${r}</b> in review</span>`+
      `<span><span class="ldot" style="background:var(--un-dot)"></span><b>${u}</b> unmapped</span>`+
+     `<span><span class="ldot" style="background:var(--warn)"></span><b>${c.needs||0}</b> item${(c.needs||0)===1?'':'s'} need${(c.needs||0)===1?'s':''} review</span>`+
      `<span style="margin-left:auto" class="mono mini">${tot} values · ${dims.length} dimensions · ${c.curated||0} curated</span></div></div>`;
-  const needs=STATE.entries.filter(x=>x.kind!=='axis'&&(x.status==='review'||!x.curated));
-  if(needs.length){h+=`<div class="card"><h3>Needs attention · ${needs.length}<span class="hint">review status or not yet curated — across all dimensions</span></h3>`+
-    `<div style="max-height:240px;overflow:auto">`+needs.map(x=>
-      `<div class="hrow" style="grid-template-columns:250px minmax(0,1fr) 104px" onclick="gotoValue('${jsq(x.key)}')">`+
-      `<div class="dn"><span class="dot ${esc(x.status)}"></span><span>${esc(String(x.token))}</span></div>`+
-      `<div class="mut" style="font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.dimension)}`+
-      `${x.cui?' · '+esc(x.matched_name||'')+' <span class="mini">(auto)</span>':''}</div>`+
-      `<div class="st"><span class="chip st-${esc(x.status)}">${esc(x.status)}</span></div></div>`).join('')+`</div></div>`;}
+  h+=worklistCard();
   const rowHTML=d=>{const axis=d.tui?
-      `<span class="chip tui">${esc(d.tui)}</span> <span>${esc(d.styName||'')}</span> <span class="stn" style="font-size:11px">${esc(d.styTree||'')}</span>`:
+      `<span class="chip tui">${esc(d.styTree||d.tui)}</span> <span>${esc(d.styName||'')}</span>`:
       `${IC.warn} <span style="color:var(--warn);font-weight:500">Axis type not set</span>`;
     const w=d.total?Math.round(100*d.mapped/d.total):0,wr=d.total?Math.round(100*d.review/d.total):0;
     const st=d.total===0?'<span class="chip st-unmapped">no values</span>':
@@ -936,20 +1599,51 @@ function renderHome(){const c=STATE.counts||{},g=grouped(),dims=dimList();
   h+=`<div class="card"><h3>Workspace</h3><div class="mono" style="font-size:11.5px;word-break:break-all">${esc(STATE.workspace||'')}</div>`+
      `<div class="mini" style="margin-top:5px">dimensions_inventory.yaml defines the structure (tier / order / activation live there); `+
      `umls_crosswalk.yaml holds the harness results; adjudications.yaml records your decisions.</div></div>`;
-  $('#content').innerHTML=h;}
+  $('#content').innerHTML=h;wireWorklist();}
+/* ---------- HOME: worklist card ---------- */
+function worklistCard(){const wl=worklist(),nc=STATE.needs||{};
+  const chip=(code,label,n,desc)=>`<span class="fchip ${WL.need===code?'on':''} ${n?'':'zero'}" data-need="${esc(code)}" title="${esc(desc)}">${esc(label)} <b>${n}</b></span>`;
+  return `<div class="card" id="wlcard"><h3>Worklist · ${wl.length}<span class="hint">what still needs a curator's eyes — every dimension, in dimension order</span></h3>`+
+    `<div class="wlbar">`+chip('all','all',wl.length,'everything that still needs a curator')+
+    (STATE.need_codes||[]).map(c=>chip(c,needLabel(c).label,nc[c]||0,needLabel(c).desc)).join('')+
+    `<input id="wltext" placeholder="filter dimension / token…" value="${esc(WL.text)}">`+
+    `<button class="primary" id="wlstart" title="open the first item of the current filter">Start review</button></div>`+
+    `<div id="wllist" style="max-height:300px;overflow:auto">${wlRows()}</div></div>`;}
+function wlRows(){const rows=wlFiltered();
+  if(!rows.length)return `<div class="mini" style="padding:8px 0;font-style:italic">${worklist().length?'nothing matches the filter':'nothing needs review — every value is confirmed or argued, every axis typed'}</div>`;
+  return rows.map(e=>`<div class="wlrow" data-key="${esc(e.key)}">`+
+    `<div class="dn"><span class="dot ${esc(e.status)}"></span><span class="mut">${esc(e.dimension)} ›</span>`+
+    `<span class="tk">${e.kind==='axis'?'<i>axis</i>':esc(String(e.token))}</span>`+
+    (e.kind!=='axis'&&e.kind!=='value'?`<span class="condchip">${esc(e.kind)}</span>`:'')+`</div>`+
+    `<div class="mut" style="font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">`+
+    (e.cui?esc(e.matched_name||'')+' <span class="cui">'+esc(e.cui)+'</span>':(e.kind==='axis'&&e.sty_name?esc(e.sty_name):''))+`</div>`+
+    `<div class="st">${needChips(e)}<span class="chip st-${esc(e.status)}">${esc(e.status)}</span></div></div>`).join('');}
+function wireWorklist(){const card=$('#wlcard');if(!card)return;
+  const list=$('#wllist');
+  card.querySelectorAll('.fchip').forEach(el=>el.addEventListener('click',()=>{const n=el.dataset.need;
+    WL.need=(n==='all'||WL.need===n)?'all':n;   // single-select; clicking the active chip returns to all
+    card.querySelectorAll('.fchip').forEach(x=>x.classList.toggle('on',x.dataset.need===WL.need));
+    list.innerHTML=wlRows();}));
+  const t=$('#wltext');if(t)t.addEventListener('input',()=>{WL.text=t.value;list.innerHTML=wlRows();});
+  list.addEventListener('click',ev=>{const row=ev.target.closest('.wlrow');if(!row)return;
+    openEntry(STATE.entries.find(x=>x.key===row.dataset.key));});
+  $('#wlstart').addEventListener('click',()=>{const first=wlFiltered()[0];
+    if(first)openEntry(first);else msg('nothing to review in this filter');});}
 /* ---------- DIMENSION view ---------- */
 function renderDim(){const isnew=!!ROUTE.isnew;
   const d=isnew?null:dimList().find(x=>x.dim===ROUTE.dim);
   if(!isnew&&!d){gotoHome();return;}
   const e=d?d.e:null;
   if(!AXB)AXB=e?{dimension:e.dimension,query:e.axis_query||'',note:e.axis_note||'',tui:e.sty_tui||null,
-                 isnew:!e.in_inventory,tier:e.tier||'core',activation:e.activation||''}
-              :{dimension:'',query:'',note:'',tui:null,isnew:true,tier:'core',activation:''};
+                 isnew:!e.in_inventory,tier:e.tier||'core',activation:e.activation||'',
+                 prefs:(e.preferred_sabs||[]).join(', ')}
+              :{dimension:'',query:'',note:'',tui:null,isnew:true,tier:'core',activation:'',prefs:''};
   const tierchip=`<span class="chip tier">${esc((AXB.tier||'core').toUpperCase())}</span>`;
   head(`<a href="#" onclick="gotoHome();return false">WORKSPACE</a> › ${esc((AXB.dimension||'NEW').toUpperCase())}`,
     `<span class="title-mono">${esc(AXB.dimension||'new dimension')}</span>${tierchip}`+
     (AXB.activation?`<span class="mini mono">${esc(AXB.activation)}</span>`:'')+
-    `<span class="spacer"></span><span id="msg"></span>`+
+    (e?needChips(e):'')+
+    `<span class="spacer"></span><span id="msg"></span>`+(e?nextBtn(e.key):'')+
     (AXB.isnew?'':`<button onclick="rebuild('${jsq(AXB.dimension)}')" title="Re-queries UMLS for this dimension's values only; the rest of the crosswalk is untouched">Rebuild this dimension</button>`)+
     `<button class="primary" onclick="axbSave()">${AXB.isnew?'Create axis':'Save axis'}</button>`,
     isnew?'A dimension&rsquo;s axis maps it to a UMLS <b>semantic type</b>; the type&rsquo;s subtree becomes the search filter for every value of the dimension.':'');
@@ -963,6 +1657,7 @@ function renderDim(){const isnew=!!ROUTE.isnew;
         `<div class="axrow"><label>activation</label><input id="axact" value="${esc(AXB.activation)}" placeholder="e.g. knowledge_domain: GENE_FUNCTION (conditional only)"></div>`:'')+
       `<div class="axrow"><label>query</label><input id="axq" value="${esc(AXB.query)}" placeholder="seed query, e.g. Spatial concept"><button onclick="axbRun()">Run query</button></div>`+
       `<div class="axrow"><label>note</label><input id="axnote" value="${esc(AXB.note)}" placeholder="what this axis means"></div>`+
+      `<div class="axrow"><label>preferred</label><input id="axprefs" value="${esc(AXB.prefs||'')}" style="font-family:var(--mono);font-size:12px" placeholder="vocabularies for this dimension, e.g. HPO, MSH — blank inherits workspace${((STATE.prefs||{}).workspace||[]).length?' ('+esc(STATE.prefs.workspace.join(', '))+')':''}"></div>`+
       `<div class="mini" style="margin-left:82px">Run query surfaces the semantic <i>types</i> of matching concepts — an axis maps to a type, not a concept.</div>`+
     `</div></div>`+
     `<div id="axprev" style="margin-top:10px"></div>`+
@@ -971,44 +1666,61 @@ function renderDim(){const isnew=!!ROUTE.isnew;
     `<div id="styresults" class="stylist"></div></details></div>`;
   if(e){const vals=STATE.entries.filter(x=>x.dimension===e.dimension&&x.kind!=='axis');
     h+=`<div class="card"><h3>Values · ${vals.length}`+
-      `<span class="hint">${d.mapped} mapped · ${d.review} in review · ${d.unmapped} unmapped</span></h3>`+
+      `<span class="hint">${d.mapped} mapped · ${d.review} in review · ${d.unmapped} unmapped · ${d.needs} need${d.needs===1?'s':''} review</span></h3>`+
       `<div style="display:flex;gap:8px;margin-bottom:6px">`+
       `<select id="fstatus" onchange="setFilter()" style="font-size:12px">`+
-        `<option value="all">All</option><option value="needs">Needs attention</option><option value="mapped">Mapped</option>`+
+        `<option value="all">All</option><option value="needs">Needs attention (any)</option>`+
+        (STATE.need_codes||[]).filter(c=>needLabel(c).scope!=='axis').map(c=>
+          `<option value="need:${esc(c)}" title="${esc(needLabel(c).desc)}">needs: ${esc(needLabel(c).label)}</option>`).join('')+
+        `<option value="mapped">Mapped</option>`+
         `<option value="unmapped">Unmapped</option><option value="curated">Curated</option><option value="auto">Auto (not curated)</option></select>`+
       `<input id="ftext" oninput="setFilter()" placeholder="filter token…" style="width:180px;font-size:12px">`+
       `</div><div id="vtbox">${valuesTable(vals)}</div></div>`;
     if(!vals.length)h+=`<div class="mini" style="margin:-6px 0 12px 4px">No values in the crosswalk yet — values come from the inventory/schema; <b>Rebuild</b> generates and resolves them.</div>`;}
   $('#content').innerHTML=h;
+  if(e)wireNext(e.key);
   if(AXB.isnew){['axdim','axtier','axact'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('input',()=>{
       AXB.dimension=($('#axdim')||{}).value||'';AXB.tier=($('#axtier')||{}).value||'core';AXB.activation=($('#axact')||{}).value||'';});});
     const t=$('#axtier');if(t)t.addEventListener('change',()=>{AXB.tier=t.value;});}
-  ['axq','axnote'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('input',()=>{
-      AXB.query=($('#axq')||{}).value||'';AXB.note=($('#axnote')||{}).value||'';});});
+  ['axq','axnote','axprefs'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('input',()=>{
+      AXB.query=($('#axq')||{}).value||'';AXB.note=($('#axnote')||{}).value||'';AXB.prefs=($('#axprefs')||{}).value||'';});});
   const q=$('#axq');if(q)q.addEventListener('keydown',ev=>{if(ev.key==='Enter')axbRun();});
   const sq=$('#styq');if(sq)sq.addEventListener('input',axbPicker);
+  attachSabTypeahead($('#axprefs'));
   const fs=$('#fstatus');if(fs)fs.value=FILTER.status;const ft=$('#ftext');if(ft)ft.value=FILTER.text;
-  loadSemTypes().then(()=>{axbPicker();axbRenderSel();});}
+  enrichSlots($('#vtbox'));
+  loadSemTypes().then(()=>{axbPicker();axbRenderSel();
+    if(ROUTE.view==='dim'&&!ROUTE.isnew&&$('#vtbox'))setFilter();});}
 function setFilter(){FILTER.dim=ROUTE.dim;FILTER.status=($('#fstatus')||{}).value||'all';FILTER.text=($('#ftext')||{}).value||'';
   const e=dimList().find(x=>x.dim===ROUTE.dim);if(!e)return;
   const vals=STATE.entries.filter(x=>x.dimension===ROUTE.dim&&x.kind!=='axis');
-  $('#vtbox').innerHTML=valuesTable(vals);}
+  $('#vtbox').innerHTML=valuesTable(vals);enrichSlots($('#vtbox'));}
 function passFilter(e){const f=FILTER.status,t=FILTER.text.toLowerCase();
   if(t&&!(String(e.token||'')+' '+e.dimension).toLowerCase().includes(t))return false;
   if(f==='all')return true;if(f==='mapped')return e.status==='mapped';if(f==='unmapped')return e.status==='unmapped';
   if(f==='curated')return e.curated;if(f==='auto')return e.status==='mapped'&&!e.curated;
-  if(f==='needs')return e.status==='review'||!e.curated;return true;}
+  if(f==='needs')return (e.needs||[]).length>0;               // server-defined
+  if(f.startsWith('need:'))return (e.needs||[]).includes(f.slice(5));return true;}
 function valuesTable(vals){const rows=vals.filter(passFilter).map(e=>{
-    const map=e.cui?`<span>${esc(e.matched_name||'')}</span> <span class="cui">${esc(e.cui)}</span>`+
-      (e.root_source?` <span class="sab">${esc(e.root_source)}</span>`:''):'<span class="mut">—</span>';
+    const map=e.cui?`<span>${esc(e.matched_name||'')}</span> <span class="cui">${esc(e.cui)}</span> `+
+      `<span class="sabslot" data-cui="${esc(e.cui)}" data-root="${esc(e.root_source||'')}" data-prefs="${esc((e.sab_prefs||[]).join(','))}">`+
+      (e.root_source?`<span class="sab">${esc(e.root_source)}</span>`:'')+`</span>`:'<span class="mut">—</span>';
     return `<tr class="vrow" onclick="gotoValue('${jsq(e.key)}')">`+
       `<td style="width:16px"><span class="dot ${esc(e.status)}" style="display:inline-block"></span></td>`+
       `<td class="tk">${esc(e.token)}${e.kind!=='value'?` <span class="condchip">${esc(e.kind)}</span>`:''}</td>`+
-      `<td class="mut">${esc(e.query)}</td><td>${map}</td>`+
-      `<td style="text-align:right"><span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+
+      `<td class="mut">${esc(e.query)}</td><td>${map}</td><td>${styCell(e)}</td>`+
+      `<td style="text-align:right;white-space:nowrap">${needChips(e)}${(e.needs||[]).length?' ':''}<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+
       (e.curated?' <span class="badge">curated</span>':'')+`</td></tr>`;}).join('');
-  return rows?`<table class="vt"><tr><th></th><th>TOKEN</th><th>QUERY</th><th>MAPPING</th><th style="text-align:right">STATUS</th></tr>${rows}</table>`
+  return rows?`<table class="vt"><tr><th></th><th>TOKEN</th><th>QUERY</th><th>MAPPING</th><th>STY</th><th style="text-align:right">STATUS</th></tr>${rows}</table>`
     :'<div class="mini" style="padding:8px 0">no values match the filter</div>';}
+// the mapped concept's most specific semantic type as STN + name (no TUI),
+// clickable: its place in the network relative to the dimension's axis type
+function styCell(e){if(!e.cui||!(e.semantic_types||[]).length)return '<span class="mut">—</span>';
+  const st=mostSpecificTui(e.semantic_types);
+  if(!st)return `<span class="mini">${esc(e.semantic_types.join(', '))}</span>`;
+  return `<a href="#" class="stnlink" title="${esc(st.name)} — click to see its place relative to the axis type" `+
+    `onclick="event.stopPropagation();showCompare('${st.tui}','${jsq(e.dim_sty_tui||'')}');return false">${esc(st.tree)}</a> `+
+    `<span style="font-size:11.5px">${esc(st.name)}</span>`;}
 /* ---------- axis builder internals ---------- */
 async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('#axprev');if(!box)return;
   if(!q){box.innerHTML='<span class="mini">enter a query first</span>';return;}
@@ -1024,7 +1736,7 @@ async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('
     g.n++;if(g.ex.length<5)g.ex.push(c.name);}));
   const types=Object.values(byT).sort((a,b)=>b.n-a.n);
   if(!types.length){box.innerHTML='<span class="mini">'+res.length+' concepts matched but none carried a recognised semantic type. Pick a type below.</span>';return;}
-  const rows=types.map(t=>`<div class="styrow ${t.tui===AXB.tui?'acc':''}"><span class="stytree">${esc(t.tree)}</span> ${esc(t.name)} <span class="cui">${esc(t.tui)}</span> <span class="mut">&times;${t.n}</span>`+
+  const rows=types.map(t=>`<div class="styrow ${t.tui===AXB.tui?'acc':''}"><span class="stytree">${esc(t.tree)}</span> ${esc(t.name)} <span class="mut">&times;${t.n}</span>`+
     `<button class="ok mini" onclick="axbSet('${t.tui}')">${t.tui===AXB.tui?'✓ axis type':'use as axis type'}</button>`+
     `<button class="mini" onclick="stnToggle(this,'${t.tui}')">tree</button>`+
     `<div class="mini">e.g. ${esc(t.ex.join(', '))}</div></div>`).join('');
@@ -1033,13 +1745,13 @@ function axbRenderSel(){const box=$('#axsel');if(!box)return;const t=(SEMTYPES||
   if(!t){box.innerHTML=`<div style="display:flex;align-items:center;gap:7px">${IC.warn}<span style="color:var(--warn);font-weight:500">Axis type not set</span></div>`+
     `<div class="mini" style="margin-top:5px">Run the query or browse the types to choose one — value searches are unconstrained until then.</div>`;return;}
   const sub=(SEMTYPES||[]).filter(x=>x.tree===t.tree||x.tree.startsWith(t.tree+'.'));
-  box.innerHTML=`<span class="tnm">${esc(t.name)}</span> <span class="chip tui">${esc(t.tui)}</span> <span class="stn" style="font-size:11.5px">${esc(t.tree)}</span>`+
+  box.innerHTML=`<span class="tnm">${esc(t.name)}</span> <span class="chip tui">${esc(t.tree)}</span>`+
     `<div class="mini" style="margin-top:4px">value searches constrained to <b>${sub.length}</b> semantic type${sub.length===1?'':'s'} (the axis subtree)</div>`+
     (t.definition?`<div class="def show" style="margin-top:7px">${esc(t.definition)}</div>`:'')+
     `<div class="subtree" style="margin-top:8px">${stnPlaceHTML(t.tui)}</div>`;}
 function axbPicker(){const box=$('#styresults');if(!box)return;const q=(($('#styq')||{}).value||'').toLowerCase();
   box.innerHTML=(SEMTYPES||[]).filter(t=>!q||(t.name+' '+t.tui+' '+t.tree).toLowerCase().includes(q)).slice(0,80).map(t=>
-    `<div class="styrow ${t.tui===AXB.tui?'acc':''}"><span class="stytree">${esc(t.tree)}</span> ${esc(t.name)} <span class="cui">${esc(t.tui)}</span>`+
+    `<div class="styrow ${t.tui===AXB.tui?'acc':''}"><span class="stytree">${esc(t.tree)}</span> ${esc(t.name)}`+
     `<button class="ok mini" onclick="axbSet('${t.tui}')">${t.tui===AXB.tui?'✓ chosen':'choose'}</button>`+
     `<button class="mini" onclick="stnToggle(this,'${t.tui}')">tree</button>`+
     (t.definition?`<div class="def show">${esc(t.definition)}</div>`:'')+`</div>`).join('');}
@@ -1048,7 +1760,7 @@ function stnPlaceHTML(tui,noclick){const t=(SEMTYPES||[]).find(x=>x.tui===tui);i
   const dep=s=>s.split('.').length;
   const nm=n=>noclick?esc(n.name):`<a href="#" onclick="axbSet('${n.tui}');return false">${esc(n.name)}</a>`;
   const node=(n,inner)=>`<div class="stn-node${n.tui===tui?' hl':''}"><span class="stn-tree">${esc(n.tree)}</span> `+
-    `${nm(n)} <span class="cui">${esc(n.tui)}</span>`+
+    `${nm(n)}`+
     (inner?`<div class="stn-kids">${inner}</div>`:'')+`</div>`;
   const kidsOf=n=>(SEMTYPES||[]).filter(x=>x.tree.startsWith(n.tree+'.')&&dep(x.tree)===dep(n.tree)+1)
                                 .sort((a,b)=>a.tree<b.tree?-1:1);
@@ -1071,7 +1783,9 @@ async function axbSave(){if(!AXB)return;
     AXB.tier=($('#axtier')||{}).value||AXB.tier;AXB.activation=($('#axact')||{}).value??AXB.activation;}
   if(!AXB.dimension.trim()){msg('dimension name required');return;}
   msg('saving axis…');
-  const body={dimension:AXB.dimension,semantic_type:AXB.tui||'',query:AXB.query,note:AXB.note};
+  AXB.prefs=($('#axprefs')||{}).value??AXB.prefs;
+  const body={dimension:AXB.dimension,semantic_type:AXB.tui||'',query:AXB.query,note:AXB.note,
+    preferred_sabs:AXB.prefs||''};
   if(AXB.isnew){body.tier=AXB.tier;if(AXB.activation)body.activation=AXB.activation;}
   const j=await (await fetch('/api/axis',{method:'POST',headers:{'Content-Type':'application/json'},
      body:JSON.stringify(body)})).json();
@@ -1087,31 +1801,44 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
        `<a href="#" onclick="gotoDim('${jsq(e.dimension)}');return false">${esc(e.dimension.toUpperCase())}</a> › ${esc(String(e.token))}`,
     `<span class="title-mono">${esc(String(e.token))}</span>`+
     `<span class="mini">value of <span class="mono">${esc(e.dimension)}</span>${e.kind!=='value'?' · '+esc(e.kind):''}</span>`+
-    `<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+(e.curated?' <span class="badge">curated</span>':'')+
-    `<span class="spacer"></span><span id="msg"></span><button onclick="rebuild('${jsq(e.dimension)}')" title="Re-queries UMLS for this dimension's values only">Rebuild this dimension</button>`,
-    e.dim_sty_tui?`axis semantic type: <b>${esc(e.dim_sty_name||e.dim_sty_tui)}</b> <span class="mono" style="font-size:11px">${esc(e.dim_sty_tui)}</span> — value search is constrained to its subtree unless widened below`
+    `<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+(e.curated?' <span class="badge">curated</span>':'')+needChips(e)+
+    `<span class="spacer"></span><span id="msg"></span>${nextBtn(e.key)}<button onclick="rebuild('${jsq(e.dimension)}')" title="Re-queries UMLS for this dimension's values only">Rebuild this dimension</button>`,
+    e.dim_sty_tui?`axis semantic type: <b>${esc(e.dim_sty_name||e.dim_sty_tui)}</b> <span class="mono" style="font-size:11px">${esc(e.dim_sty_tree||'')}</span> — value search is constrained to its subtree unless widened below`
       :`the ${esc(e.dimension)} axis is untyped — value search runs unconstrained`);
-  const cur=e.status==='mapped'?`<span class="now">mapped &rarr; <b>${esc(e.matched_name)}</b> <span class="cui">${esc(e.cui)}</span>`+
-      (e.curated?` <span class="badge">${e.fetched?'curated · fetched':'curated'}</span>`:' <span class="mini">(auto)</span>')+`</span>`:
+  const slot=e.cui?` <span class="sabslot" data-cui="${esc(e.cui)}" data-root="${esc(e.root_source||'')}" data-prefs="${esc((e.sab_prefs||[]).join(','))}">`+
+      (e.root_source?`<span class="sab">${esc(e.root_source)}</span>`:'')+`</span>`:'';
+  const cur=e.status==='mapped'?`<span class="now">mapped &rarr; <b>${esc(e.matched_name)}</b> <span class="cui">${esc(e.cui)}</span>${slot}`+
+      (e.curated?` <span class="badge">${e.fetched?'curated · fetched':'curated'}</span>`
+        :e.decision==='accept'?' <span class="badge">confirmed</span>':' <span class="mini">(auto)</span>')+`</span>`:
     e.status==='unmapped'?`<span class="now">unmapped${e.curated?' <span class="badge">curator</span>':''}</span>`:
     `<span class="now">review</span>`;
   const filt=e.dim_sty_tui?`<span class="chip" style="cursor:pointer" onclick="showAxisTree()" `+
       `title="click to see this type's place in the Semantic Network (ancestors, siblings, descendants)">`+
       `Semantic type: <b>&nbsp;${esc(e.dim_sty_name||e.dim_sty_tui)}</b>&nbsp;· <span class="mono">${esc(e.dim_sty_tree||e.dim_sty_tui)}</span>&nbsp;+ subtree ▾</span>`
     :`<span class="chip warnc">${IC.warn} axis untyped — search unconstrained</span>`;
+  const relSel=RELATIONS.map(r=>`<option value="${r}"${(e.decision==='accept'?e.relation||'exact':'exact')===r?' selected':''}>${r}</option>`).join('');
+  // a considered verdict without its argument (server code no-rationale)
+  const norat=(e.needs||[]).includes('no-rationale')?`<div class="notice">${IC.warn}<span>${esc(needLabel('no-rationale').desc)} — open <b>“No faithful concept”</b> to add one</span></div>`:'';
   $('#content').innerHTML=`
    <div class="card"><h3>GEM meaning</h3><div style="font-size:13.5px">${esc(e.meaning)||'<span class="mini">(no gloss)</span>'}</div>
      <div class="mini" style="margin-top:4px">query used: <b>${esc(e.query)}</b></div></div>
    <div class="card"><h3>Decision</h3>${cur}${e.error?` <span style="color:var(--danger)">${esc(e.error)}</span>`:''}
+     ${e.relation?` <span class="chip" title="how the recorded decision relates the concept to the GEM token">relation: <b>${esc(e.relation)}</b></span>`:''}
+     ${norat}
      <div class="curbar">
-       <button class="warn" onclick="decide('unmapped')">No faithful concept</button>
+       ${e.status==='mapped'&&e.cui&&!e.decision?`<button class="ok" onclick="decide('accept','${jsq(e.cui)}',{relation:(($('#arel')||{}).value||'exact')})" title="record the harness mapping as your accepted decision (with the 'accept as' relation)">Confirm mapping ✓</button>`:''}
+       <span class="mini" title="how an accepted concept relates to the GEM token — sent with the next accept">accept as</span>
+       <select id="arel" class="mini" title="how the accepted concept relates to the GEM token">${relSel}</select>
+       <button class="warn" id="btn-unmapped">No faithful concept</button>
        <button onclick="decide('clear')">Clear decision</button>
        ${e.note?`<span class="mini">note: ${esc(e.note)}</span>`:''}
      </div>
      <textarea id="note" placeholder="optional note / rationale">${esc(e.note||'')}</textarea>
+     ${rationaleHTML(e)}
    </div>
-   <div class="card"><h3>Query candidates · ${e.candidates.length}</h3>${e.candidates.map(c=>candHTML(c)).join('')||'<span class="mini">none returned by the harness query</span>'}</div>
-   <div class="card"><h3>Search the Metathesaurus <span style="margin-left:6px">${filt}</span></h3>
+   <div class="card"><h3>Query candidates · ${e.candidates.length}</h3>${e.candidates.map(c=>candHTML(c,null,'query')).join('')||'<span class="mini">none returned by the harness query</span>'}</div>
+   <div class="card"><h3>Search the Metathesaurus <span style="margin-left:6px">${filt}</span>`+
+     `<span class="hint">preferred: ${(e.sab_prefs||[]).length?esc(e.sab_prefs.join(' › ')):'none — set in ⚙ Settings'} · search: ${esc(STATE.search_backend||'UTS')}${(STATE.search_backend||'UTS')==='UTS'?' (local index not active — see ⚙)':''}</span></h3>
      <div class="searchbar"><input id="sq" placeholder="concept term…" value="${esc(e.token?String(e.token).replace(/_/g,' ').toLowerCase():e.query)}">
        <select id="sscope" title="widen the search beyond the axis subtree"${e.dim_sty_tui?'':' disabled'}>
          <option value="axis"${e.dim_sty_tui?'':' disabled'}>within axis subtree</option>
@@ -1120,14 +1847,86 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
          <option value="words">match: words</option><option value="exact">match: exact</option>
          <option value="normalizedWords">match: normalized</option><option value="partial">match: partial (any word)</option></select>
        <select id="ssab"><option value="">all sources</option><option>MSH</option><option>NCI</option><option>SNOMEDCT_US</option><option>GO</option><option>HPO</option></select>
-       <button class="primary" onclick="runSearch()">Search</button></div>
+       <button class="primary" onclick="runSearch()">Search</button>
+       ${e.dim_sty_filter?`<button class="mini" onclick="browseAxis()" title="list every concept of the axis subtree (local index); the search box narrows the list as you type">browse axis</button>`:''}
+       <button class="mini" onclick="expandTerms()" title="ontology-aware expansion: each query word is replaced by its is_a children/parents (organism → animal, …) and the variants are re-searched">expand terms</button></div>
      <div id="sresults"></div></div>`;
   $('#sq').addEventListener('keydown',ev=>{if(ev.key==='Enter')runSearch();});
-  enrichSabs($('#content'));
+  $('#btn-unmapped').addEventListener('click',openUnmapped);
+  wireNext(e.key);
+  enrichSabs($('#content'));enrichSlots($('#content'));
   // the candidates' STN links need the Semantic Network; if it arrived after
   // this render, paint once more (guarded to the same route)
   if(!SEMTYPES)loadSemTypes().then(()=>{if(ROUTE.view==='value'&&ROUTE.key===e.key)renderValue();});}
-function candHTML(c,mark){const acc=SEL&&SEL.decision_cui===c.cui;
+// The recorded argument for a decision: relation chip (above), the rejected
+// candidates with their failing criterion, and the protocol actually followed.
+function rationaleHTML(e){const rej=e.rejected||[],p=e.protocol||{};
+  if(!rej.length&&!Object.keys(p).length)return '';
+  const rows=rej.map(r=>`<tr><td>${esc(r.name||'')}</td><td class="cui">${esc(r.cui)}</td><td>${esc(r.sab||'')}</td>`+
+    `<td><b title="${esc(CRITERIA[r.fails]||'')}">${esc(r.fails)}</b></td><td>${esc(r.why||'')}</td></tr>`).join('');
+  const tbl=rej.length?`<table class="et" style="margin-top:6px"><tr><th>rejected candidate</th><th>CUI</th><th>SAB</th><th title="criterion: A denotation · B granularity · C set membership · D domain sense">fails</th><th>why</th></tr>${rows}</table>`:'';
+  return `<div class="evsec"><div class="evh">Recorded rationale</div>${tbl}${protocolLine(p)}</div>`;}
+function protocolLine(p){if(!p||!Object.keys(p).length)return '';
+  const part=[];
+  if((p.queries||[]).length)part.push('queries '+p.queries.map(q=>'“'+esc(q)+'”').join(', '));
+  if((p.scopes||[]).length)part.push('scope '+esc(p.scopes.join(', ')));
+  if((p.match||[]).length)part.push('match '+esc(p.match.join(', ')));
+  if((p.sabs||[]).length)part.push('sabs '+esc(p.sabs.join(', ')));
+  if(p.umls)part.push(esc(p.umls));
+  return `<div class="mini mono" style="margin-top:5px">protocol: ${part.join(' · ')}</div>`;}
+// remember every candidate card rendered for the selected value (query
+// candidates and search hits alike) so the unmapped argument can list them
+function noteSeen(c,origin){if(!SEL||!c||!c.cui)return;
+  const m=SEEN[SEL.key]||(SEEN[SEL.key]={});
+  if(!m[c.cui])m[c.cui]={cui:c.cui,name:c.name||'',root_source:c.src||c.root_source||'',
+    semantic_types:(c.sty||c.semantic_types||[]).slice(),origin:origin||'search'};
+  else if(c.name&&!m[c.cui].name)m[c.cui].name=c.name;}
+// auto-filled protocol for the selected value: the harness query (its scope
+// is the axis when the dimension is typed) plus every search run in-session
+function buildProtocol(){const log=SEARCHLOG[SEL.key]||[];
+  const uniq=a=>[...new Set(a.filter(Boolean))];
+  const hq=SEL.query?[SEL.query]:[],hs=SEL.query?[SEL.dim_sty_tui?'axis':'all']:[];
+  const hm=['words','exact','normalizedWords','normalizedString','partial'].includes(SEL.search_type)?[SEL.search_type]:[];
+  return {queries:uniq(hq.concat(log.map(l=>l.q))),scopes:uniq(hs.concat(log.map(l=>l.scope))),
+    match:uniq(hm.concat(log.map(l=>l.match))),sabs:uniq((SEL.sab_pref?[SEL.sab_pref]:[]).concat(log.map(l=>l.sab))),
+    umls:'UTS current, queried '+new Date().toISOString().slice(0,10)};}
+// "No faithful concept": argue it. Every candidate seen for this value gets a
+// failing criterion (A-D) and a one-line why; the protocol is auto-filled.
+function openUnmapped(){if(!SEL)return;const e=SEL;
+  const seen=Object.values(SEEN[e.key]||{});
+  const prev={};(e.rejected||[]).forEach(r=>{prev[r.cui]=r;
+    if(!seen.some(s=>s.cui===r.cui))seen.push({cui:r.cui,name:r.name||'',root_source:r.sab||'',semantic_types:[],origin:'recorded'});});
+  const rank={query:0,search:1,recorded:2};
+  seen.sort((a,b)=>(rank[a.origin]??9)-(rank[b.origin]??9));
+  const list=seen.slice(0,50),more=seen.length-list.length;   // server cap: RATIONALE_MAXITEMS
+  const opts=k=>`<option value="">—</option>`+Object.keys(CRITERIA).map(c=>`<option value="${c}" title="${esc(CRITERIA[c])}"${k===c?' selected':''}>${c}</option>`).join('');
+  const rows=list.map(c=>{const pr=prev[c.cui]||{};
+    return `<tr data-cui="${esc(c.cui)}" data-name="${esc(c.name)}" data-sab="${esc(c.root_source||'')}">`+
+      `<td>${esc(c.name)}<div class="mini">${esc((c.semantic_types||[]).join(', '))}${c.origin==='query'?' · harness query':c.origin==='recorded'?' · recorded earlier':''}</div></td>`+
+      `<td class="cui">${esc(c.cui)}</td><td>${esc(c.root_source||'')}</td>`+
+      `<td><select class="rj-fails" title="A · ${esc(CRITERIA.A)}&#10;B · ${esc(CRITERIA.B)}&#10;C · ${esc(CRITERIA.C)}&#10;D · ${esc(CRITERIA.D)}">${opts(pr.fails)}</select></td>`+
+      `<td><input class="rj-why" maxlength="300" placeholder="one line" value="${esc(pr.why||'')}" style="width:100%"></td></tr>`;}).join('');
+  const legend=Object.keys(CRITERIA).map(k=>`<div><b>${k}</b> ${esc(CRITERIA[k])}</div>`).join('');
+  const body=`<div class="mini" style="margin-bottom:8px">Record <b>${esc(String(e.token))}</b> as having no faithful UMLS concept. `+
+    `Say why each candidate you saw fails — the criterion it fails and one line of why.</div>`+
+    (list.length?`<div style="max-height:46vh;overflow:auto"><table class="et"><tr><th>candidate</th><th>CUI</th><th>SAB</th><th>fails</th><th>why</th></tr>${rows}</table></div>`+
+      (more>0?`<div class="mini">+${more} more candidates seen, not listed</div>`:'')
+     :`<div class="mini" style="font-style:italic">No candidates were seen for this value — the harness query returned none and no search has been run here. The finding is recorded with an empty rejected list.</div>`)+
+    `<details style="margin-top:6px"><summary class="mini" style="cursor:pointer">criteria</summary><div class="mini" style="margin:4px 0 0 8px">${legend}</div></details>`+
+    `<div class="evsec"><div class="evh">Protocol (auto-filled)</div>${protocolLine(buildProtocol())||'<span class="mini">nothing searched yet</span>'}</div>`+
+    `<div class="evsec"><div class="evh">Note</div><textarea id="unote" placeholder="optional note / rationale">${esc(($('#note')||{}).value||e.note||'')}</textarea></div>`+
+    `<div style="display:flex;align-items:center;gap:10px;margin-top:10px"><button class="warn" id="urec">Record: no faithful concept</button><span id="umsg" class="mini" style="color:var(--danger)"></span></div>`;
+  showModal('No faithful concept — '+esc(String(e.token)),body);
+  $('#urec').addEventListener('click',recordUnmapped);}
+async function recordUnmapped(){const rows=[...document.querySelectorAll('#modal tr[data-cui]')];
+  const rejected=[];
+  rows.forEach(tr=>{const f=tr.querySelector('.rj-fails').value;if(!f)return;
+    rejected.push({cui:tr.dataset.cui,name:tr.dataset.name,sab:tr.dataset.sab,fails:f,why:tr.querySelector('.rj-why').value.trim()});});
+  if(rows.length&&!rejected.length){$('#umsg').textContent='give at least one candidate a failing criterion (A–D) — or clear the list by accepting one';return;}
+  const note=($('#unote')||{}).value||'';
+  const ok=await decide('unmapped',null,{relation:'none',rejected,protocol:buildProtocol(),note});
+  if(ok)closeModal();else $('#umsg').textContent=($('#msg')||{}).textContent||'not saved';}
+function candHTML(c,mark,origin){const acc=SEL&&SEL.decision_cui===c.cui;noteSeen(c,origin);
   const badge=mark==='in'?' <span class="badge">in axis branch</span>'
     :mark==='out'?' <span class="badge bad">outside axis</span>':'';
   const st=mostSpecificTui(c.sty||c.semantic_types);
@@ -1135,7 +1934,8 @@ function candHTML(c,mark){const acc=SEL&&SEL.decision_cui===c.cui;
     `title="${esc(st.name)} — click to see its place relative to the axis type">${esc(st.tree)}</a>`:'';
   return `<div class="cand ${acc?'acc':''}" data-cui="${esc(c.cui)}"><div class="row"><span class="n">${esc(c.name)} <span class="cui">${esc(c.cui)}</span></span>`+
     `<button class="mini" onclick="loadDef('${c.cui}',this)">evidence</button>`+
-    `<button class="ok" onclick="decide('accept','${c.cui}')">${acc?'✓ accepted':'accept'}</button></div>`+
+    `<button class="mini" onclick="descendFrom(this,'${c.cui}')" title="walk this concept's is_a descendants across its vocabularies, ranked against the search text — for when the direct search misses a more specific match">↓ desc</button>`+
+    `<button class="ok" onclick="decide('accept','${c.cui}',{relation:(($('#arel')||{}).value||'exact')})">${acc?'✓ accepted':'accept'}</button></div>`+
     `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?` · <span title="root source of the concept's preferred name (MTH = the Metathesaurus itself) — full vocabulary membership follows">${esc(c.src||c.root_source)}</span>`:''}${stn}${badge}</div>`+
     `<div class="def"></div></div>`;}
 let _semReq=null;
@@ -1152,11 +1952,11 @@ async function loadDef(cui,btn){const box=btn.closest('.cand').querySelector('.d
 function renderInfo(box,cui,e,defs){
   if(e.error){box.innerHTML='<i>'+esc(e.error)+'</i>';return;}
   const spec=(e.sty_path&&e.sty_path[0])||{},axis=e.axis_sty;
-  const pathRows=(e.sty_path||[]).map((p,i)=>`<tr><td>${i?'<span class="mut">&uarr;</span>':'<b>STY</b>'}</td><td>${esc(p.name)}</td><td class="cui">${esc(p.tui)}</td><td class="stn">${esc(p.tree)}</td></tr>`).join('');
+  const pathRows=(e.sty_path||[]).map((p,i)=>`<tr><td>${i?'<span class="mut">&uarr;</span>':'<b>STY</b>'}</td><td>${esc(p.name)}</td><td class="stn">${esc(p.tree)}</td></tr>`).join('');
   const axbadge=axis?(e.under_axis?' <span class="badge">in axis branch</span>':' <span class="badge bad">outside axis branch</span>'):'';
   const styBlock=`<div class="evsec"><div class="evh">Semantic type${axbadge}<button class="mini" onclick="toggleSubtree(this,'${esc(spec.tui||'')}','${axis?esc(axis.tui):''}')">subtree</button></div>`+
-    `<table class="et"><tr><th></th><th>STY</th><th>TUI</th><th>STN</th></tr>${pathRows}`+
-    (axis?`<tr class="axisrow"><td><b>axis</b></td><td>${esc(axis.name)}</td><td class="cui">${esc(axis.tui)}</td><td class="stn">${esc(axis.stn)}</td></tr>`:'')+
+    `<table class="et"><tr><th></th><th>STY</th><th>STN</th></tr>${pathRows}`+
+    (axis?`<tr class="axisrow"><td><b>axis</b></td><td>${esc(axis.name)}</td><td class="stn">${esc(axis.stn)}</td></tr>`:'')+
     `</table><div class="subtree" style="display:none"></div></div>`;
   const vrows=(e.atom_rows||[]).map(a=>`<tr class="${a.obsolete?'obs':''}"><td>${esc(a.sab)}</td><td>${esc(a.str)}</td><td style="white-space:nowrap">${ttyHTML(a.tty)}</td><td class="cui">${esc(a.code)}</td></tr>`).join('');
   const vocBlock=`<div class="evsec"><div class="evh">Vocabularies (${(e.sabs||[]).length} sources, English)</div><table class="et"><tr><th>SAB</th><th>STR</th><th>TTY</th><th>Code</th></tr>${vrows||'<tr><td colspan=4><i>none</i></td></tr>'}</table></div>`;
@@ -1164,7 +1964,7 @@ function renderInfo(box,cui,e,defs){
   const act=r=>r.cui?`<button class="mini" onclick="openConcept('${r.cui}','${jsq(r.name)}')" title="pull this concept into the search results to inspect or accept it">open</button>`
     :`<button class="mini" onclick="findByName('${jsq(r.name)}')" title="source-asserted (no CUI here) — search it by name">find</button>`;
   const rrows=(e.relations||[]).map(r=>`<tr><td class="dir ${r.dir}">${r.dir==='up'?'&uarr; is_a':'&darr; is_a'}</td><td>${esc(r.name)}</td><td class="cui">${rid(r)}</td><td>${esc((r.sabs||[]).join(', '))}</td><td>${act(r)}</td></tr>`).join('');
-  const relBlock=`<div class="evsec"><div class="evh">Hierarchy (is_a)</div><table class="et"><tr><th>dir</th><th>concept</th><th>id</th><th>sources</th><th></th></tr>${rrows||'<tr><td colspan=5><i>no is_a parents or children in English vocabularies</i></td></tr>'}</table></div>`;
+  const relBlock=`<div class="evsec"><div class="evh">Hierarchy (is_a)</div><table class="et"><tr><th>dir</th><th>concept</th><th>id</th><th>sources</th><th></th></tr>${rrows||'<tr><td colspan=5><i>no concept-level is_a edges — hierarchies here are usually source-asserted: use the ↓ desc button for children, Rollup for ancestors</i></td></tr>'}</table></div>`;
   const org=(e.other_relations||[]);
   const orInner=org.map(g=>{
     const items=g.items.map(it=>`<tr><td>${esc(it.name)}</td><td class="cui">${rid(it)}</td><td>${esc((it.sabs||[]).join(', '))}</td><td>${act(it)}</td></tr>`).join('');
@@ -1186,7 +1986,7 @@ function toggleSubtree(btn,specTui,axisTui){const box=btn.closest('.evsec').quer
   const dep=s=>s.split('.').length;
   const render2=n=>{const kids=inSub.filter(t=>t.tree.startsWith(n.tree+'.')&&dep(t.tree)===dep(n.tree)+1);
     const hl=n.tui===specTui?' hl':(n.tui===axisTui?' ax':'');
-    return `<div class="stn-node${hl}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)} <span class="cui">${esc(n.tui)}</span>`+
+    return `<div class="stn-node${hl}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)}`+
       (kids.length?`<div class="stn-kids">${kids.map(render2).join('')}</div>`:'')+`</div>`;};
   box.innerHTML=render2(rt);}
 async function loadRollup(box,cui,sab){box.innerHTML='rolling up is_a ancestors…';
@@ -1199,7 +1999,9 @@ async function loadRollup(box,cui,sab){box.innerHTML='rolling up is_a ancestors�
 function rollNav(a,sab){loadRollup(a.closest('.rollbox'),a.dataset.cui,sab||null);}
 async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;
   const scope=($('#sscope')||{}).value||'axis',stype=($('#smatch')||{}).value||'words';
-  const box=$('#sresults');box.innerHTML='<span class="mini">searching…</span>';
+  if(SEL){const log=SEARCHLOG[SEL.key]||(SEARCHLOG[SEL.key]=[]);
+    if(!log.some(l=>l.q===q&&l.scope===scope&&l.match===stype&&l.sab===sab))log.push({q,scope,match:stype,sab});}
+  const box=$('#sresults');box.dataset.mode='search';box.innerHTML='<span class="mini">searching…</span>';
   const stys=scope==='axis'?(SEL.dim_sty_filter||''):'';
   const url='/api/search?string='+encodeURIComponent(q)+(sab?'&sabs='+sab:'')+
     (stys?'&stys='+encodeURIComponent(stys):'')+(stype!=='words'?'&stype='+encodeURIComponent(stype):'');
@@ -1215,32 +2017,106 @@ async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;
     if(axSet.size&&scope!=='axis'){const tus=(c.semantic_types||c.sty||[]).map(tuiOf).filter(Boolean);
       mark=tus.some(t=>axSet.has(t))?'in':'out';}
     return candHTML(c,mark);}).join('');
-  box.innerHTML=rows||( scope==='axis'
+  const count=`<div class="mini" style="margin-bottom:5px">${res.length} result${res.length===1?'':'s'} · ${esc(STATE.search_backend||'UTS')}${res.length>=20?' (top 20 shown)':''}</div>`;
+  box.innerHTML=rows?count+rows:( j.note?'<span class="mini" style="color:var(--warn)">'+esc(j.note)+'</span>'
+    :scope==='axis'
     ?'<span class="mini">no results within the axis subtree.</span> <button class="mini" onclick="widen()">widen: search all semantic types</button>'
     :'<span class="mini">no results — try match: partial (any word), or a different term</span>');
   if(rows)enrichSabs(box);}
 function widen(){const s=$('#sscope');if(s)s.value='all';runSearch();}
+async function expandTerms(){if(!SEL)return;const box=$('#sresults');if(!box)return;
+  const q=(($('#sq')||{}).value||'').trim();if(!q){box.innerHTML='<span class="mini">enter a query first</span>';return;}
+  const scope=($('#sscope')||{}).value||'axis';
+  const stys=scope==='axis'?(SEL.dim_sty_filter||''):'';
+  box.dataset.mode='search';box.innerHTML='<span class="mini">expanding query terms through the hierarchy…</span>';
+  const j=await (await fetch('/api/expand?q='+encodeURIComponent(q)+(stys?'&stys='+encodeURIComponent(stys):''))).json();
+  if(j.error){box.innerHTML='<span style="color:var(--danger)">'+esc(j.error)+'</span>';return;}
+  await loadSemTypes();
+  const res=j.results||[];
+  box.innerHTML=`<div class="mini" style="margin-bottom:5px">${res.length} concept${res.length===1?'':'s'} via ${j.n_variants} expanded variants of “${esc(q)}”${scope==='axis'&&stys?' (axis subtree — widen scope for more)':''}</div>`+
+    res.map(r=>`<div class="mini" style="margin:6px 0 2px;color:var(--accent)">via ${esc(r.via)} — “${esc(r.variant)}”</div>`+candHTML(r)).join('')
+    ||'<span class="mini">no variants matched — the query words may have no exactly-named concepts to pivot on</span>';
+  if(res.length)enrichSabs(box);}
+let AXBROWSE={};
+async function browseAxis(){if(!SEL||!SEL.dim_sty_filter)return;const box=$('#sresults');if(!box)return;
+  box.innerHTML='<span class="mini">loading the axis subtree…</span>';
+  const dim=SEL.dimension;
+  if(!AXBROWSE[dim]){
+    const j=await (await fetch('/api/axisbrowse?stys='+encodeURIComponent(SEL.dim_sty_filter))).json();
+    if(j.error){box.innerHTML='<span class="mini">'+esc(j.error)+'</span>';return;}
+    AXBROWSE[dim]=(j.concepts||[]);}
+  box.dataset.mode='browse';renderAxisBrowse();
+  const sq=$('#sq');
+  if(sq&&!sq.dataset.axb){sq.dataset.axb='1';
+    sq.addEventListener('input',()=>{const b=$('#sresults');
+      if(b&&b.dataset.mode==='browse'&&AXBROWSE[SEL&&SEL.dimension])renderAxisBrowse();});}}
+function renderAxisBrowse(){const box=$('#sresults');if(!box)return;
+  const all=AXBROWSE[SEL.dimension]||[];
+  const q=(($('#sq')||{}).value||'').toLowerCase().trim();
+  const hits=all.filter(c=>!q||(c.name||'').toLowerCase().includes(q));
+  const shown=hits.slice(0,40);
+  box.innerHTML=`<div class="mini" style="margin-bottom:6px">axis subtree: ${all.length} concepts · ${hits.length} match${q?' the filter':''} · showing ${shown.length} — type in the search box to narrow; Search returns to normal results</div>`+
+    shown.map(c=>candHTML(c)).join('');
+  enrichSabs(box);}
 function findByName(name){const q=$('#sq');if(!q)return;q.value=name;
   const s=$('#sscope');if(s)s.value='all';runSearch();
   msg('searching for “'+name+'” across all semantic types');}
+async function descendFrom(btn,cui){const box=btn.closest('.cand').querySelector('.def');
+  const q=(($('#sq')||{}).value||'').trim();
+  box.classList.add('show');box.innerHTML='<span class="mini">walking is_a descendants across vocabularies…</span>';
+  const j=await (await fetch('/api/descend?cui='+encodeURIComponent(cui)+'&q='+encodeURIComponent(q))).json();
+  if(j.error){box.innerHTML='<span class="mini">'+esc(j.error)+'</span>';return;}
+  const rows=(j.matches||[]).map(m=>`<tr><td>${esc(m.name)}${m.parent?`<div class="mini">under ${esc(m.parent)}</div>`:''}</td>`+
+    `<td class="cui">${esc(m.code)}</td><td>${esc(m.sab)}</td><td>${m.depth}</td><td>${m.score.toFixed(2)}</td>`+
+    `<td><button class="mini" onclick="findByName('${jsq(m.name)}')" title="search this name to get its concept">find</button></td></tr>`).join('');
+  const via=(j.anchors||[]).map(a=>a.sab).join(', ');
+  box.innerHTML=`<div class="evh">is_a descendants${via?` via ${esc(via)}`:''}${q?` ranked vs “${esc(q)}”`:''} (depth ≤2)</div>`+
+    (rows?`<table class="et"><tr><th>descendant</th><th>code</th><th>vocab</th><th>d</th><th>score</th><th></th></tr>${rows}</table>`
+      :'<span class="mini">no is_a descendants in any of this concept’s vocabularies</span>');}
 function openConcept(cui,name){const box=$('#sresults');if(!box)return;
   if(box.querySelector('[data-cui="'+cui+'"]')){msg(cui+' already in results');return;}
   const t=document.createElement('template');
   t.innerHTML=candHTML({cui,name,sty:[],src:''}).trim();
   box.prepend(t.content.firstChild);enrichSabs(box);
   msg('pulled '+cui+' into search results — accept it or open its evidence');}
-async function decide(verdict,cui){const note=($('#note')||{}).value||'';
+// extra: optional rationale keys (relation / rejected / protocol / note) that
+// travel with the verdict; a note given here wins over the Decision textarea.
+async function decide(verdict,cui,extra){extra=extra||{};
+  const note=extra.note!==undefined?extra.note:(($('#note')||{}).value||'');
   const body={key:SEL.key,verdict};if(cui)body.cui=cui;if(note)body.note=note;
+  ['relation','rejected','protocol'].forEach(k=>{if(extra[k]!==undefined)body[k]=extra[k];});
   msg('saving…');const r=await fetch('/api/decide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const j=await r.json();if(j.error){msg('error: '+j.error);return;}
-  await loadState();msg('saved '+SEL.key+' ('+verdict+') — Rebuild to refresh status');}
+  const j=await r.json();if(j.error){msg('error: '+j.error);return false;}
+  await loadState();msg('saved '+SEL.key+' ('+verdict+') — Rebuild to refresh status');return true;}
+function openSettings(){const wp=((STATE&&STATE.prefs||{}).workspace||[]).join(', ');
+  showModal('Settings',
+    `<div style="font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">PREFERRED VOCABULARIES</div>`+
+    `<div class="mini" style="margin:4px 0 8px">Ordered list. Decides which source is shown and ticked for every mapped concept and candidate, everywhere in the app.</div>`+
+    `<div style="display:flex;gap:8px"><input id="prefsabs" value="${esc(wp)}" placeholder="e.g. SNOMEDCT_US, MSH, NCI, HPO" style="flex:1;font-family:var(--mono);font-size:12.5px">`+
+    `<button class="primary" onclick="savePrefs()">Save</button></div>`+
+    `<div class="mini" style="margin-top:8px">Workspace default (inventory <span class="mono">meta.preferred_sabs</span>). A dimension can override it in its axis card; a value's own <span class="mono">sab:</span> hint in the inventory always comes first.</div>`+
+    `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SERVER</div>`+
+    `<div class="mini" style="margin-top:4px">started ${esc((STATE.server||{}).started||'?')} · running code saved ${esc((STATE.server||{}).code||'?')} — if the code date is older than your latest changes, restart the Studio (Ctrl-C, then <span class="mono">gem-umls-adjudicate</span>)</div>`+
+    `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SEARCH BACKEND</div>`+
+    `<div style="font-size:12.5px;margin-top:4px">${esc(STATE.search_backend||'UTS')}${(STATE.search_backend||'UTS')==='UTS'?' — the optional local index (faster search, typo-tolerant matching, axis browse) is not loaded':''}</div>`+
+    (STATE.search_backend_note?`<div class="mini" style="margin-top:3px;color:var(--warn)">probe: ${esc(STATE.search_backend_note)}</div>`:'')+
+    ((STATE.search_backend||'UTS')==='UTS'?`<div class="mini" style="margin-top:4px">To enable it: download a UMLS release with your licence, create the database (<span class="mono">createdb umls; psql -d umls -c 'CREATE EXTENSION pg_trgm'</span>), load it (<span class="mono">gem-umls-load-local --rrf-dir ~/umls/2026AA/META --release 2026AA</span>) and restart the Studio. Full recipe: <span class="mono">data/umls/README.md</span>.</div>`:'')+
+    `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">WORKSPACE</div>`+
+    `<div class="mono" style="font-size:11.5px;word-break:break-all;margin-top:4px">${esc(STATE.workspace||'')}</div>`);
+  const i=$('#prefsabs');if(i){attachSabTypeahead(i,savePrefs);i.focus();}}
+async function savePrefs(){const v=($('#prefsabs')||{}).value||'';msg('saving preferences…');
+  const j=await (await fetch('/api/prefs',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({preferred_sabs:v})})).json();
+  if(j.error){msg('error: '+j.error);return;}
+  for(const k in SABCACHE)delete SABCACHE[k];   // labels depend on prefs; recompute lazily
+  closeModal();await loadState();msg('preferred vocabularies: '+((j.preferred_sabs||[]).join(' › ')||'none'));}
 async function rebuild(dim){msg(dim?('rebuilding '+dim+' (querying UMLS)…'):'rebuilding ALL dimensions (querying UMLS)…');
   const r=await fetch('/api/rebuild',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify(dim?{dim}:{})});
   const j=await r.json();
   if(j.error){msg('error: '+j.error);return;}
   await loadState();const c=STATE.counts||{};
-  msg((dim?dim+' rebuilt':'all rebuilt')+' — '+(c.mapped||0)+' mapped · '+(c.review||0)+' review · '+(c.unmapped||0)+' unmapped of '+(c.total||0)+' values');}
+  msg((dim?dim+' rebuilt':'all rebuilt')+' — '+(c.mapped||0)+' mapped · '+(c.review||0)+' review · '+(c.unmapped||0)+' unmapped of '+(c.total||0)+' values · '+(c.needs||0)+' need review');}
 loadState();loadSemTypes();
 </script></body></html>'''
 
@@ -1257,6 +2133,12 @@ def main(argv=None):
     ap.add_argument("--data-dir", help="mapping workspace directory (inventory / "
                     "crosswalk / adjudications). May be empty. Defaults to the "
                     "repo's data/umls, or $GEM_DATA_DIR.")
+    ap.add_argument("--search-backend", choices=["auto", "uts", "local"],
+                    default="auto",
+                    help="auto (default): use a local UMLS index when one is "
+                         "loaded, else UTS — the released tool needs only a "
+                         "UTS key; 'uts' never touches the local index; "
+                         "'local' requires one and fails fast without it.")
     ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8765")))
     ap.add_argument("--no-browser", action="store_true", help="do not open a browser")
     args = ap.parse_args(argv)
@@ -1271,6 +2153,7 @@ def main(argv=None):
             os.execv(sys.executable,
                      [sys.executable, "-m", "forome.gem.umls.adjudicate_ui", *argv])
 
+    global SEARCH_BACKEND
     key = api_key()
     if key:
         client = UTSClient(key, cache_dir=H.CACHE_DIR)
@@ -1280,6 +2163,40 @@ def main(argv=None):
         print("WARNING: no UMLS_API_KEY found; running offline (axis construction "
               "works; live value search/concept info are disabled).")
         client = NullClient()
+        SEARCH_BACKEND = "OFFLINE — no UMLS key"
+        globals()["SEARCH_BACKEND_NOTE"] = ("no UMLS_API_KEY in the environment: "
+            "start the Studio from the repository directory (direnv exports the "
+            "key there) or export UMLS_API_KEY yourself")
+    # The local PostgreSQL index is an OPTIONAL accelerator each user builds
+    # from their own licensed UMLS copy (gem-umls-load-local; see
+    # data/umls/README.md) -- it is never distributed with the tool. Released
+    # behaviour needs only a UTS key: --search-backend auto silently falls
+    # back to UTS when no index is reachable; 'browse axis' then explains
+    # what it needs instead of appearing broken.
+    if args.search_backend != "uts":
+        try:
+            from forome.gem.umls.local_umls import PgUMLSClient
+            _pg = PgUMLSClient(os.environ.get("GEM_UMLS_DSN") or None)
+            _rel = _pg.release()
+            if _rel:
+                client = HybridClient(_pg, client)
+                SEARCH_BACKEND = f"local {_rel.get('version')}"
+                print(f"Search backend: local UMLS index {_rel.get('version')}; "
+                      "concept details via UTS.")
+            elif args.search_backend == "local":
+                raise SystemExit("--search-backend local: no umls_release row -- "
+                                 "load an index with gem-umls-load-local first.")
+            else:
+                globals()["SEARCH_BACKEND_NOTE"] = ("database reachable but no "
+                                                   "umls_release row (index not loaded)")
+        except SystemExit:
+            raise
+        except Exception as ex:  # noqa: BLE001 -- no driver / DB: UTS only
+            if args.search_backend == "local":
+                raise SystemExit(f"--search-backend local: {ex}")
+            globals()["SEARCH_BACKEND_NOTE"] = (f"{type(ex).__name__}: {ex} "
+                f"[python: {sys.executable}]")
+            print(f"Local index not used ({SEARCH_BACKEND_NOTE}); search via UTS.")
 
     if not H.INVENTORY.is_file() and not CROSSWALK.is_file():
         print(f"Workspace {DATA_DIR} has no inventory or crosswalk yet -- "

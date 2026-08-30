@@ -159,8 +159,11 @@ def _adj_key(dimension: str, token) -> str:
     return f"{dimension}/{token if token is not None else '(axis)'}"
 
 
-def load_adjudications(path: Path = ADJUDICATIONS) -> dict:
-    """Curator decisions keyed by 'dimension/token' (or 'dimension/(axis)')."""
+def load_adjudications(path: Path | None = None) -> dict:
+    """Curator decisions keyed by 'dimension/token' (or 'dimension/(axis)').
+    ``path`` defaults to the CURRENT ``ADJUDICATIONS`` (resolved at call time, so
+    tests/workspaces that repoint it are honoured)."""
+    path = ADJUDICATIONS if path is None else path
     if not path.is_file():
         return {}
     doc = yaml.safe_load(path.read_text()) or {}

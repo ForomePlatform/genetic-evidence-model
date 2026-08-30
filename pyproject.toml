@@ -11,6 +11,7 @@ license = { file = "LICENSE-code.txt" }
 requires-python = ">=3.10"
 dependencies = [
     "pyyaml>=6.0",
+    "ruamel.yaml>=0.18",
     "rdflib>=7.0",
     "pyshacl>=0.27",
     "requests>=2.28",
@@ -19,7 +20,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruamel.yaml>=0.18", "pytest>=7"]
+dev = ["pytest>=7"]
+# Local UMLS index on PostgreSQL (forome.gem.umls.local_umls).
+local = ["psycopg[binary]>=3.1"]
 
 [project.scripts]
 gem-validate = "forome.gem.validation.validate_annotations:main"
@@ -29,6 +32,9 @@ gem-umls-render = "forome.gem.umls.render_crosswalk_tex:main"
 gem-umls-adjudicate = "forome.gem.umls.adjudicate_ui:main"
 gem-mapping-studio = "forome.gem.umls.adjudicate_ui:main"
 gem-umls-semantic-network = "forome.gem.umls.fetch_semantic_network:main"
+gem-umls-load-local = "forome.gem.umls.local_umls:main"
+gem-umls-sweep = "forome.gem.umls.sweep:main"
+gem-umls-classify-credibility = "forome.gem.umls.classify_credibility_sweep:main"
 
 # src-layout: package roots live under src/python/main; tests under src/python/test.
 # `forome` and `forome.gem` are PEP 420 implicit namespace packages, so Forome

@@ -5,23 +5,586 @@
 # records a considered 'no faithful UMLS concept' (honest finding). Edited via
 # mapping/adjudicate_ui.py.
 adjudications:
-  "credibility/HIGH": {accept: C0205250, note: "GEM-internal ordinal credibility tier; 'IPSS-R Risk Category High' and the generic 'High' qualitative qualifier do not denote a high evid..."}
-  "credibility/LOW": {unmapped: true, note: "GEM-internal ordinal credibility tier; candidates are IPSS/IPSS-R low risk categories and generic 'low' qualifiers, none of which faithfu..."}
-  "credibility/MEDIUM": {unmapped: true, note: "GEM-internal ordinal credibility tier; candidates ('medium exposure', 'Medium (Substance)', generic 'Medium' quantity/amount concepts) ar..."}
-  "credibility/VERY_HIGH": {accept: C0442804, note: "GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High' finding (explicitly non-faithful) and bare 'High..."}
+  "credibility/HIGH":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0205250
+      fails: A
+      name: High
+      sab: MTH
+      why: 'SNOMED 75540009 |High (qualifier value)| IS-A Increased: magnitude of a measurand, not epistemic
+        degree (concept is live in UMLS 2026AA)'
+    - cui: C1522410
+      fails: A
+      name: Highest
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4330261
+      fails: D
+      name: High Confidence
+      sab: NCI
+      why: questionnaire response option (assessment answer), not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/LOW":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0205251
+      fails: A
+      name: low
+      sab: MTH
+      why: 'SNOMED qualifier value IS-A Decreased: magnitude of a measurand'
+    - cui: C0547040
+      fails: A
+      name: Minimal
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4330590
+      fails: D
+      name: Low Confidence
+      sab: NCI
+      why: questionnaire response option, not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/MEDIUM":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0439536
+      fails: A
+      name: Medium
+      sab: MTH
+      why: quantitative qualifier (amount/size), not epistemic degree
+    - cui: C5201148
+      fails: A
+      name: Moderate
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4036199
+      fails: D
+      name: Moderate Confidence
+      sab: NCI
+      why: questionnaire response option, not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/VERY_HIGH":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0442804
+      fails: A
+      name: Very high
+      sab: MTH
+      why: 'SNOMED 260360000 qualifier value IS-A High IS-A Increased: magnitude of a measurand'
+    - cui: C5787630
+      fails: A
+      name: Extremely high
+      sab: SNOMEDCT_US
+      why: qualifier value, measurand degree
+    - cui: C4331500
+      fails: D
+      name: Very High Confidence
+      sab: NCI
+      why: NCI Clinical or Research Assessment Answer (questionnaire response option), not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
   "gene_relation/X_has_same_function_as_Y": {unmapped: true, note: "Composite relational predicate (two gene products sharing function); the sole candidate 'Immunologic equivalence' (Organism Function) is ..."}
   "gene_relation/X_regulates_Y": {accept: C0017263, note: "X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression Regulation' (Genetic Function) faithfully den..."}
   "knockout_type/CONDITIONAL": {accept: C0814041, note: "Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology' (Molecular Biology Research Technique) de..."}
+  "knowledge_domain/ANIMAL_GENETICS":
+    accept: C1510895
+    note: NCI is specialized vocabulary, but we did find a match in a more general one. Still NCI is a relevant
+      vocabulary.
+    relation: exact
+  "knowledge_domain/COMPARATIVE_GENOMICS":
+    accept: C4704937
+    note: curator-accepted via UI
+    relation: exact
   "knowledge_domain/EPIGENETICS": {accept: C1655731, note: "EPIGENETICS is a knowledge-domain (discipline) value; 'study of epigenetics' (Biomedical Occupation or Discipline) faithfully denotes the..."}
+  "knowledge_domain/GENE_FUNCTION":
+    accept: C0872316
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/HUMAN_GENETICS":
+    accept: C0020124
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/MODEL_ORGANISM":
+    accept: C0599779
+    note: curator-accepted via UI
+    relation: exact
   "knowledge_domain/POPULATION_GENETICS": {accept: C0017404, note: "curator-accepted via UI"}
   "measurement_target/CATALYSIS": {accept: C0243102, note: "CATALYSIS measures catalytic/enzymatic activity of the gene product; C0243102 'enzyme activity' (Molecular Function) faithfully denotes c..."}
   "measurement_target/EXISTENCE": {unmapped: true, note: "EXISTENCE is a measured property (whether the gene product is present); candidates 'Proteins'/'Genome Encoded Entity' are substance/entit..."}
   "method/ASSOCIATION_STUDY": {accept: C2717878, note: "ASSOCIATION_STUDY = statistical test of association between genetic variation and phenotype; 'Genetic Association Studies' (Molecular Bio..."}
+  "method/BIOINFORMATICS_INFERENCE":
+    accept: C1140694
+    note: It should be a combination of C0679201 (Inference) and C1140694 (Bio-Informatics)
+    relation: exact
   "method/CANDIDATE_GENE_STUDY": {accept: C2717881, note: "CANDIDATE_GENE_STUDY = hypothesis-driven association study at candidate genes; 'Candidate Gene Identification' (Molecular Biology Researc..."}
   "method/CLINICAL_EVIDENCE": {accept: C0008972, note: "CLINICAL_EVIDENCE is the clinical-observation evidence-generation method; 'Clinical Research' (Research Activity) faithfully denotes evid..."}
-  "method/FAMILY_BASED": {unmapped: true, note: "FAMILY_BASED denotes statistical inference from family/pedigree data; the 'genetic pedigree analysis' candidates are clinical lab-test ca..."}
+  "method/EXPERIMENT":
+    accept: C0678323
+    note: curator-accepted via UI
+    relation: exact
+  "method/FAMILY_BASED":
+    unmapped: true
+    note: FAMILY_BASED denotes statistical inference from family/pedigree data; the 'genetic pedigree analysis'
+      candidates are clinical lab-test ca...
+    relation: none
+    rejected: []
+    protocol:
+      queries:
+      - Pedigree analysis
+      scopes:
+      - axis
+      sabs:
+      - MSH
+      umls: UTS current, queried 2026-08-30
+  "method/GWAS":
+    accept: C2350277
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_SILICO":
+    accept: C0597818
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_VITRO":
+    accept: C0681828
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_VIVO":
+    accept: C0681829
+    note: curator-accepted via UI
+    relation: exact
+  "method/LINKAGE_ANALYSIS":
+    accept: C0796345
+    note: curator-accepted via UI
+    relation: exact
   "method/META_ANALYSIS": {accept: C0920317, note: "Meta-Analysis (statistical procedure) is the analytic-method sense, faithful for the method token."}
   "method/SEGREGATION_ANALYSIS": {unmapped: true, note: "No candidates returned; the segregation-analysis statistical method has no faithful UMLS concept (only the segregation phenomenon exists,..."}
+  "method/STATISTICAL_GENETICS":
+    accept: C2717898
+    note: curator-accepted via UI
+    relation: exact
   "method/TRANSMISSION_DISEQUILIBRIUM_TEST": {unmapped: true, note: "The exact-name query returned no candidates; TDT/FBAT are specific family-based transmission tests with no faithful UMLS concept."}
   "penetrance/complete": {accept: C5826795, note: "Token 'complete' = complete penetrance; HPO C5826795 'Typified by complete penetrance' (Genetic Function) denotes exactly that."}
   "phenotype_scale/HISTOLOGICAL": {unmapped: true, note: "HISTOLOGICAL means tissue-level phenotype (not the discipline histology); candidates are all specific anatomical tissue structures (brain..."}

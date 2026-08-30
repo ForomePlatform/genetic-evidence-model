@@ -1,8 +1,49 @@
+# GEM dimension inventory for the UMLS crosswalk harness
+# =====================================================================
+# This file is the curated INPUT to mapping/build_umls_crosswalk.py. It
+# lists every GEM dimension (axis) and every enumerated value, together
+# with the natural-language `query` term the harness sends to the UMLS
+# UTS REST API to resolve a concept.
+#
+# Fields per entry:
+#   token   - the GEM token (axis name, or enumerated value). For axis
+#             rows, value is null and kind: axis.
+#   query   - the human-readable term submitted to UMLS search. Chosen to
+#             maximise a faithful match; the harness records whatever it
+#             actually finds (or nothing).
+#   expect  - the curator's honest prior on whether a *faithful* UMLS
+#             concept exists: likely | uncertain | unlikely. This is only
+#             a prior for triage; it never overrides the harness result.
+#             Entries marked `unlikely` are GEM-internal constructs
+#             (ordinal ratings, relational/composite tokens, study-design
+#             ascertainment routes) for which a 1:1 UMLS concept is not
+#             expected; the harness will report them honestly as
+#             review/unmapped rather than forcing a match.
+#   sab     - optional preferred source-vocabulary hint (UMLS `sabs`
+#             filter), e.g. HPO, MSH, NCI, GO, SNOMEDCT_US. Omit to search
+#             all sources.
+#   note    - optional curator note.
+#
+# The value set here is checked against the SHACL enumerations by
+# `build_umls_crosswalk.py --check-inventory`, so the inventory cannot
+# silently drift from schema/genetic_evidence.shacl.ttl.
+#
+# Values are NOT pre-filled with CUIs. Real concept identifiers are
+# produced only by running the harness against UMLS with a licensed API
+# key (see mapping/README.md). This keeps the repository honest: we claim
+# only mappings the harness actually verified.
+# =====================================================================
+
 meta:
   schema_version: '1.1'
   source_of_truth: schema/genetic_evidence.shacl.ttl
   description: GEM dimensional vocabulary, prepared for UMLS concept resolution.
+
+  preferred_sabs:
+  - MSH
+  - SNOMEDCT_US
 dimensions:
+
   knowledge_domain:
     tier: core
     order: 10
@@ -10,35 +51,17 @@ dimensions:
       query: Genetics
       expect: uncertain
       note: The dimension axis (the discipline a piece of evidence comes from).
-      semantic_type: T091
+      semantic_type: T090
     values:
-    - token: HUMAN_GENETICS
-      query: Human genetics
-      expect: likely
-      sab: MSH
-    - token: ANIMAL_GENETICS
-      query: Animal genetics
-      expect: uncertain
-    - token: POPULATION_GENETICS
-      query: Population genetics
-      expect: likely
-      sab: MSH
-    - token: COMPARATIVE_GENOMICS
-      query: Comparative genomics
-      expect: likely
-      sab: MSH
-    - token: EPIGENETICS
-      query: Epigenetics
-      expect: likely
-      sab: MSH
-    - token: GENE_FUNCTION
-      query: Gene function
-      expect: uncertain
-      note: Closest faithful concept may be 'molecular function' (GO).
-    - token: MODEL_ORGANISM
-      query: Animal model
-      expect: likely
-      sab: MSH
+    - {token: HUMAN_GENETICS, query: Human genetics, expect: likely, sab: MSH}
+    - {token: ANIMAL_GENETICS, query: Animal genetics, expect: uncertain}
+    - {token: POPULATION_GENETICS, query: Population genetics, expect: likely, sab: MSH}
+    - {token: COMPARATIVE_GENOMICS, query: Comparative genomics, expect: likely, sab: MSH}
+    - {token: EPIGENETICS, query: Epigenetics, expect: likely, sab: MSH}
+    - {token: GENE_FUNCTION, query: Gene function, expect: uncertain, note: Closest faithful concept
+        may be 'molecular function' (GO).}
+    - {token: MODEL_ORGANISM, query: Animal model, expect: likely, sab: MSH}
+
   method:
     tier: core
     order: 20
@@ -48,70 +71,29 @@ dimensions:
       note: How the evidence was generated; hierarchical (see dimensions.md).
       semantic_type: T062
     values:
-    - token: STATISTICAL_GENETICS
-      query: Statistical genetics
-      expect: uncertain
-      sab: NCI
-    - token: ASSOCIATION_STUDY
-      query: Genetic association study
-      expect: likely
-      sab: MSH
-    - token: GWAS
-      query: Genome-wide association study
-      expect: likely
-      sab: MSH
-    - token: CANDIDATE_GENE_STUDY
-      query: Candidate gene study
-      expect: uncertain
-    - token: FINE_MAPPING
-      query: Fine mapping
-      expect: uncertain
-      sab: NCI
-    - token: FAMILY_BASED
-      query: Pedigree analysis
-      expect: uncertain
-      sab: MSH
-      note: Statistical inference from pedigree data; avoid the family-medicine sense.
-    - token: LINKAGE_ANALYSIS
-      query: Genetic linkage analysis
-      expect: likely
-      sab: MSH
-    - token: TRANSMISSION_DISEQUILIBRIUM_TEST
-      query: Transmission disequilibrium test
-      expect: uncertain
-    - token: SEGREGATION_ANALYSIS
-      query: Genetic segregation analysis
-      expect: uncertain
-    - token: META_ANALYSIS
-      query: Meta-Analysis as Topic
-      expect: likely
-      sab: MSH
-    - token: EXPERIMENT
-      query: Scientific experiment
-      expect: uncertain
-      sab: MSH
-      note: GEM EXPERIMENT is a broad family (in vivo/in vitro/in silico); a faithful 1:1 concept is uncertain.
-    - token: IN_VIVO
-      query: In vivo
-      expect: likely
-      sab: NCI
-    - token: IN_VITRO
-      query: In Vitro Techniques
-      expect: likely
-      sab: MSH
-    - token: IN_SILICO
-      query: Computer simulation
-      expect: likely
-      sab: MSH
-      note: GEM IN_SILICO = computational simulation.
-    - token: BIOINFORMATICS_INFERENCE
-      query: Sequence analysis
-      expect: uncertain
-      sab: MSH
-      note: Analysis of existing data; keep distinct from IN_SILICO (simulation).
-    - token: CLINICAL_EVIDENCE
-      query: Clinical study
-      expect: uncertain
+    - {token: STATISTICAL_GENETICS, query: Statistical genetics, expect: uncertain, sab: NCI}
+    - {token: ASSOCIATION_STUDY, query: Genetic association study, expect: likely, sab: MSH}
+    - {token: GWAS, query: Genome-wide association study, expect: likely, sab: MSH}
+    - {token: CANDIDATE_GENE_STUDY, query: Candidate gene study, expect: uncertain}
+    - {token: FINE_MAPPING, query: Fine mapping, expect: uncertain, sab: NCI}
+    - {token: FAMILY_BASED, query: Pedigree analysis, expect: uncertain, sab: MSH, note: Statistical
+        inference from pedigree data; avoid the family-medicine sense.}
+    - {token: LINKAGE_ANALYSIS, query: Genetic linkage analysis, expect: likely, sab: MSH}
+    - {token: TRANSMISSION_DISEQUILIBRIUM_TEST, query: Transmission disequilibrium test, expect: 
+        uncertain}
+    - {token: SEGREGATION_ANALYSIS, query: Genetic segregation analysis, expect: uncertain}
+    - {token: META_ANALYSIS, query: Meta-Analysis as Topic, expect: likely, sab: MSH}
+    - {token: EXPERIMENT, query: Scientific experiment, expect: uncertain, sab: MSH, note: GEM 
+        EXPERIMENT is a broad family (in vivo/in vitro/in silico); a faithful 1:1 concept is 
+        uncertain.}
+    - {token: IN_VIVO, query: In vivo, expect: likely, sab: NCI}
+    - {token: IN_VITRO, query: In Vitro Techniques, expect: likely, sab: MSH}
+    - {token: IN_SILICO, query: Computer simulation, expect: likely, sab: MSH, note: GEM IN_SILICO =
+        computational simulation.}
+    - {token: BIOINFORMATICS_INFERENCE, query: Sequence analysis, expect: uncertain, sab: MSH, note: 
+        Analysis of existing data; keep distinct from IN_SILICO (simulation).}
+    - {token: CLINICAL_EVIDENCE, query: Clinical study, expect: uncertain}
+
   target_type:
     tier: core
     order: 30
@@ -121,28 +103,15 @@ dimensions:
       sab: NCI
       semantic_type: T028
     values:
-    - token: GENE
-      query: Gene
-      expect: likely
-      sab: MSH
-    - token: RELATED_GENE
-      query: Gene
-      expect: uncertain
-      note: Relational nuance (a gene related to the primary target) is not a UMLS concept; resolves to
-        'Gene'.
-    - token: VARIANT
-      query: Sequence variant
-      expect: likely
-    - token: SEGMENT
-      query: Genomic segment
-      expect: uncertain
-    - token: INTERVAL
-      query: Genomic interval
-      expect: uncertain
-    - token: TRANSCRIPT
-      query: RNA, messenger
-      expect: uncertain
-      note: GEM TRANSCRIPT = transcript isoform; closest UMLS concept may be mRNA / transcription product.
+    - {token: GENE, query: Gene, expect: likely, sab: MSH}
+    - {token: RELATED_GENE, query: Gene, expect: uncertain, note: Relational nuance (a gene related 
+        to the primary target) is not a UMLS concept; resolves to 'Gene'.}
+    - {token: VARIANT, query: Sequence variant, expect: likely}
+    - {token: SEGMENT, query: Genomic segment, expect: uncertain}
+    - {token: INTERVAL, query: Genomic interval, expect: uncertain}
+    - {token: TRANSCRIPT, query: 'RNA, messenger', expect: uncertain, note: GEM TRANSCRIPT = 
+        transcript isoform; closest UMLS concept may be mRNA / transcription product.}
+
   resolution:
     tier: core
     order: 40
@@ -152,25 +121,13 @@ dimensions:
       note: GEM-internal axis (genetic scale of the target); no faithful 1:1 UMLS concept expected.
       semantic_type: T082
     values:
-    - token: WINDOW
-      query: Chromosome region
-      expect: uncertain
-      sab: NCI
-    - token: GENE
-      query: Gene
-      expect: likely
-      sab: MSH
-    - token: FUNCTIONAL_ELEMENT
-      query: Regulatory sequence
-      expect: uncertain
-      sab: MSH
-      note: Genomic regulatory region (promoter/enhancer), not physiological regulation.
-    - token: POSITION
-      query: Nucleotide position
-      expect: uncertain
-    - token: VARIANT
-      query: Sequence variant
-      expect: likely
+    - {token: WINDOW, query: Chromosome region, expect: uncertain, sab: NCI}
+    - {token: GENE, query: Gene, expect: likely, sab: MSH}
+    - {token: FUNCTIONAL_ELEMENT, query: Regulatory sequence, expect: uncertain, sab: MSH, note: 'Genomic
+        regulatory region (promoter/enhancer), not physiological regulation.'}
+    - {token: POSITION, query: Nucleotide position, expect: uncertain}
+    - {token: VARIANT, query: Sequence variant, expect: likely}
+
   credibility:
     tier: core
     order: 50
@@ -181,22 +138,12 @@ dimensions:
       sab: MSH
       semantic_type: T080
     values:
-    - token: VERY_HIGH
-      query: High
-      expect: unlikely
-      note: Ordinal rating; no faithful UMLS concept for the GEM tier.
-    - token: HIGH
-      query: High
-      expect: unlikely
-      note: Ordinal rating.
-    - token: MEDIUM
-      query: Medium
-      expect: unlikely
-      note: Ordinal rating.
-    - token: LOW
-      query: Low
-      expect: unlikely
-      note: Ordinal rating.
+    - {token: VERY_HIGH, query: High, expect: unlikely, note: Ordinal rating; no faithful UMLS 
+        concept for the GEM tier.}
+    - {token: HIGH, query: High, expect: unlikely, note: Ordinal rating.}
+    - {token: MEDIUM, query: Medium, expect: unlikely, note: Ordinal rating.}
+    - {token: LOW, query: Low, expect: unlikely, note: Ordinal rating.}
+
   phenotype_scale:
     tier: core
     order: 60
@@ -206,26 +153,15 @@ dimensions:
       sab: MSH
       semantic_type: T039
     values:
-    - token: MOLECULAR
-      query: Molecular phenotype
-      expect: uncertain
-      note: Phenotype at the molecular level; distinct from GO 'molecular function' used by measurement_target.
-    - token: CELLULAR
-      query: Cell phenotype
-      expect: uncertain
-    - token: HISTOLOGICAL
-      query: Tissue structure
-      expect: uncertain
-      note: Tissue-level phenotype, not the discipline 'histology'.
-    - token: ORGANISMAL
-      query: Phenotype
-      expect: likely
-      sab: MSH
-      note: Whole-organism phenotype.
-    - token: CLINICAL
-      query: Clinical finding
-      expect: likely
-      sab: SNOMEDCT_US
+    - {token: MOLECULAR, query: Molecular phenotype, expect: uncertain, note: Phenotype at the 
+        molecular level; distinct from GO 'molecular function' used by measurement_target.}
+    - {token: CELLULAR, query: Cell phenotype, expect: uncertain}
+    - {token: HISTOLOGICAL, query: Tissue structure, expect: uncertain, note: "Tissue-level phenotype,
+        not the discipline 'histology'."}
+    - {token: ORGANISMAL, query: Phenotype, expect: likely, sab: MSH, note: Whole-organism 
+        phenotype.}
+    - {token: CLINICAL, query: Clinical finding, expect: likely, sab: SNOMEDCT_US}
+
   variant_ascertainment:
     tier: core
     order: 70
@@ -234,22 +170,17 @@ dimensions:
       query: Ascertainment
       expect: uncertain
     values:
-    - token: OBSERVED_IN_CASES
-      query: Affected individual
-      expect: unlikely
-      note: Study-design ascertainment route, not a 1:1 UMLS concept.
-    - token: OBSERVED_IN_CONTROLS
-      query: Control group
-      expect: unlikely
-      note: Study-design ascertainment route.
-    - token: FROM_DATABASE
-      query: Database
-      expect: unlikely
-      note: Provenance route, not a faithful concept.
-    - token: SYNTHETIC
-      query: Synthetic construct
-      expect: unlikely
-      note: Engineered-variant route.
+    - {token: OBSERVED_IN_CASES, query: Affected individual, expect: unlikely, note: 'Study-design ascertainment
+        route, not a 1:1 UMLS concept.'}
+    - {token: OBSERVED_IN_CONTROLS, query: Control group, expect: unlikely, note: Study-design 
+        ascertainment route.}
+    - {token: FROM_DATABASE, query: Database, expect: unlikely, note: 'Provenance route, not a faithful
+        concept.'}
+    - {token: SYNTHETIC, query: Synthetic construct, expect: unlikely, note: Engineered-variant 
+        route.}
+
+  # ---- conditional dimensions ----
+
   mode_of_inheritance:
     tier: conditional
     order: 110
@@ -258,31 +189,19 @@ dimensions:
       query: Mode of inheritance
       expect: likely
       sab: HPO
-      note: Conditional (HUMAN_GENETICS + GENE). The schema does not enumerate values; the entries below
-        are the standard inheritance modes (HPO "Mode of inheritance" subontology) recorded as informational
+      note: >-
+        Conditional (HUMAN_GENETICS + GENE). The schema does not enumerate
+        values; the entries below are the standard inheritance modes
+        (HPO "Mode of inheritance" subontology) recorded as informational
         common_values, not schema-enumerated tokens.
       semantic_type: T045
     common_values:
-    - token: autosomal_dominant
-      query: Autosomal dominant inheritance
-      expect: likely
-      sab: HPO
-    - token: autosomal_recessive
-      query: Autosomal recessive inheritance
-      expect: likely
-      sab: HPO
-    - token: x_linked_dominant
-      query: X-linked dominant inheritance
-      expect: likely
-      sab: HPO
-    - token: x_linked_recessive
-      query: X-linked recessive inheritance
-      expect: likely
-      sab: HPO
-    - token: mitochondrial
-      query: Mitochondrial inheritance
-      expect: likely
-      sab: HPO
+    - {token: autosomal_dominant, query: Autosomal dominant inheritance, expect: likely, sab: HPO}
+    - {token: autosomal_recessive, query: Autosomal recessive inheritance, expect: likely, sab: HPO}
+    - {token: x_linked_dominant, query: X-linked dominant inheritance, expect: likely, sab: HPO}
+    - {token: x_linked_recessive, query: X-linked recessive inheritance, expect: likely, sab: HPO}
+    - {token: mitochondrial, query: Mitochondrial inheritance, expect: likely, sab: HPO}
+
   penetrance:
     tier: conditional
     order: 121
@@ -293,18 +212,10 @@ dimensions:
       sab: MSH
       semantic_type: T045
     values:
-    - token: complete
-      query: Complete penetrance
-      expect: likely
-      sab: HPO
-    - token: incomplete
-      query: Incomplete penetrance
-      expect: likely
-      sab: HPO
-    - token: unknown
-      query: Unknown
-      expect: unlikely
-      note: Sentinel, not a phenotypic concept.
+    - {token: complete, query: Complete penetrance, expect: likely, sab: HPO}
+    - {token: incomplete, query: Incomplete penetrance, expect: likely, sab: HPO}
+    - {token: unknown, query: Unknown, expect: unlikely, note: 'Sentinel, not a phenotypic concept.'}
+
   measurement_target:
     tier: conditional
     order: 130
@@ -316,32 +227,14 @@ dimensions:
       note: Conditional (GENE_FUNCTION); the aspect of gene-product function measured.
       semantic_type: T044
     values:
-    - token: EXISTENCE
-      query: Gene product
-      expect: uncertain
-    - token: EXPRESSION
-      query: Gene expression
-      expect: likely
-      sab: MSH
-    - token: STABILITY
-      query: Protein stability
-      expect: likely
-    - token: BINDING
-      query: Protein binding
-      expect: likely
-      sab: GO
-    - token: LOCALIZATION
-      query: Protein localization
-      expect: likely
-      sab: GO
-    - token: ACTIVITY
-      query: Molecular function
-      expect: uncertain
-      sab: GO
-    - token: CATALYSIS
-      query: Catalytic activity
-      expect: likely
-      sab: GO
+    - {token: EXISTENCE, query: Gene product, expect: uncertain}
+    - {token: EXPRESSION, query: Gene expression, expect: likely, sab: MSH}
+    - {token: STABILITY, query: Protein stability, expect: likely}
+    - {token: BINDING, query: Protein binding, expect: likely, sab: GO}
+    - {token: LOCALIZATION, query: Protein localization, expect: likely, sab: GO}
+    - {token: ACTIVITY, query: Molecular function, expect: uncertain, sab: GO}
+    - {token: CATALYSIS, query: Catalytic activity, expect: likely, sab: GO}
+
   gene_relation:
     tier: conditional
     order: 131
@@ -353,18 +246,12 @@ dimensions:
       sab: MSH
       semantic_type: T045
     values:
-    - token: X_has_same_function_as_Y
-      query: Functional equivalence
-      expect: unlikely
-      note: Composite relational token; no faithful 1:1 concept.
-    - token: X_regulates_Y
-      query: Regulation of gene expression
-      expect: likely
-      sab: GO
-    - token: X_inhibits_Y
-      query: Negative regulation of gene expression
-      expect: uncertain
-      sab: GO
+    - {token: X_has_same_function_as_Y, query: Functional equivalence, expect: unlikely, note: 
+        Composite relational token; no faithful 1:1 concept.}
+    - {token: X_regulates_Y, query: Regulation of gene expression, expect: likely, sab: GO}
+    - {token: X_inhibits_Y, query: Negative regulation of gene expression, expect: uncertain, sab: 
+        GO}
+
   organism:
     tier: conditional
     order: 140
@@ -372,8 +259,11 @@ dimensions:
     axis:
       query: Organism
       expect: likely
-      note: Conditional (IN_VIVO or MODEL_ORGANISM). Values are species, mapped to NCBITaxon in the existing
-        s15 crosswalk; only the axis concept is resolved here to avoid duplicating that work.
+      note: >-
+        Conditional (IN_VIVO or MODEL_ORGANISM). Values are species, mapped
+        to NCBITaxon in the existing s15 crosswalk; only the axis concept is
+        resolved here to avoid duplicating that work.
+
       semantic_type: T001
   knockout_type:
     tier: conditional
@@ -386,13 +276,10 @@ dimensions:
       note: Conditional (MODEL_ORGANISM).
       semantic_type: T063
     values:
-    - token: CONDITIONAL
-      query: Conditional gene knockout
-      expect: uncertain
-    - token: UNCONDITIONAL
-      query: constitutive gene knockout
-      expect: uncertain
-      note: Constitutive knockout; closest concept is the general 'gene knockout'.
+    - {token: CONDITIONAL, query: Conditional gene knockout, expect: uncertain}
+    - {token: UNCONDITIONAL, query: constitutive gene knockout, expect: uncertain, note: 
+        Constitutive knockout; closest concept is the general 'gene knockout'.}
+
   subdomain:
     tier: conditional
     order: 112
@@ -403,21 +290,13 @@ dimensions:
       note: Conditional (HUMAN_GENETICS + GENE); study-design subdomain.
       semantic_type: T063
     values:
-    - token: GWAS
-      query: Genome-wide association study
-      expect: likely
-      sab: MSH
-    - token: Linkage Study
-      query: Genetic linkage analysis
-      expect: likely
-      sab: MSH
-    - token: WGS-WES Study
-      query: Whole genome sequencing
-      expect: likely
-      sab: MSH
-    - token: Candidate Gene Study
-      query: Candidate gene study
-      expect: uncertain
+    - {token: GWAS, query: Genome-wide association study, expect: likely, sab: MSH}
+    - {token: Linkage Study, query: Genetic linkage analysis, expect: likely, sab: MSH}
+    - {token: WGS-WES Study, query: Whole genome sequencing, expect: likely, sab: MSH}
+    - {token: Candidate Gene Study, query: Candidate gene study, expect: uncertain}
+
+  # ---- boolean / quasi-categorical conditional dimensions (axis only) ----
+
   mendelian_segregation:
     tier: conditional
     order: 111
@@ -426,6 +305,7 @@ dimensions:
       query: Mendelian inheritance
       expect: uncertain
       note: Boolean conditional dimension; only the axis concept is resolved.
+
       sab: MSH
   genetic_background_considered:
     tier: conditional
@@ -436,6 +316,7 @@ dimensions:
       expect: likely
       sab: MSH
       note: Boolean conditional dimension; only the axis concept is resolved.
+
   environmental_factors:
     tier: conditional
     order: 120
@@ -444,5 +325,6 @@ dimensions:
       query: Environmental exposure
       expect: likely
       sab: MSH
-      note: Quasi-categorical conditional dimension; values are open free text, so only the axis concept
-        is resolved.
+      note: >-
+        Quasi-categorical conditional dimension; values are open free text,
+        so only the axis concept is resolved.

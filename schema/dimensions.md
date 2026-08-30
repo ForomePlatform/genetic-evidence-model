@@ -202,6 +202,25 @@ corpus; facets observed so far include `cohort_size`, `replication_cohort`,
 `n_variants_tested`, `multiple_testing_correction`. The SHACL shape enforces
 the overall ordinal rating; the facets remain open.
 
+**Level definitions.** The levels are defined by *defeasibility* — what it
+would take for the curator to stop believing the evidence item — not by study
+design or by the authors' expressed certainty (see `stated certainty`, a
+candidate facet). Credibility is the curator's trust; interest or relevance is
+a separate judgment and must not colour it.
+
+| Level | Definition |
+| --- | --- |
+| `VERY_HIGH` | Believed by default even when directly contradicted; only an opposing argument of greater strength prompts re-examination. |
+| `HIGH`      | Believed unless directly contradicted by evidence of comparable strength; such a contradiction opens doubt. |
+| `MEDIUM`    | Not believed on its own; believed once corroborated by an independent source or an orthogonal evidence type. |
+| `LOW`       | Not relied upon; recorded pending independent replication. |
+
+The scale intensifies at the top (as ACMG *very strong* and ClinGen
+*definitive* do) whereas GRADE certainty intensifies at the bottom
+(*very low*): GRADE grades a body of evidence by its properties, GEM rates a
+single item by the curator's belief-revision policy, so alignment between the
+two is deliberately non-positional (Supplement S1).
+
 ### **PROMOTED**: phenotype_scale
 
 Cardinality: single per evidence item. Objectivity: objective.

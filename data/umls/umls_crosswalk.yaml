@@ -4,11 +4,11 @@ meta:
   live: true
   total: 88
   counts:
-    mapped: 43
-    review: 11
-    unmapped: 34
+    mapped: 49
+    review: 9
+    unmapped: 30
     pending: 0
-    curated: 29
+    curated: 42
     axis_typed: 13
 entries:
 - dimension: knowledge_domain
@@ -20,9 +20,9 @@ entries:
   inventory_note: The dimension axis (the discipline a piece of evidence comes from).
   status: mapped
   curated: false
-  sty_tui: T091
-  sty_name: Biomedical Occupation or Discipline
-  sty_tree: A2.6.1
+  sty_tui: T090
+  sty_name: Occupation or Discipline
+  sty_tree: A2.6
   curator_note: null
 - dimension: knowledge_domain
   token: HUMAN_GENETICS
@@ -45,6 +45,8 @@ entries:
     name: Human Genetics
     root_source: MSH
     semantic_types: *id001
+  curated: true
+  curator_note: curator-accepted via UI
 - dimension: knowledge_domain
   token: ANIMAL_GENETICS
   kind: value
@@ -66,6 +68,9 @@ entries:
     name: Animal Genetics
     root_source: NCI
     semantic_types: *id002
+  curated: true
+  curator_note: NCI is specialized vocabulary, but we did find a match in a more general one. Still NCI
+    is a relevant vocabulary.
 - dimension: knowledge_domain
   token: POPULATION_GENETICS
   kind: value
@@ -74,13 +79,20 @@ entries:
   sab: MSH
   inventory_note: null
   status: mapped
-  curated: true
-  fetched: true
   cui: C0017404
   matched_name: Genetics, Population
-  root_source: MTH
-  semantic_types:
+  root_source: MSH
+  semantic_types: &id003
   - Occupation or Discipline
+  search_type: exact
+  sab_filtered: true
+  sty_filtered: true
+  candidates:
+  - cui: C0017404
+    name: Genetics, Population
+    root_source: MSH
+    semantic_types: *id003
+  curated: true
   curator_note: curator-accepted via UI
 - dimension: knowledge_domain
   token: COMPARATIVE_GENOMICS
@@ -93,7 +105,7 @@ entries:
   cui: C4704937
   matched_name: Comparative Genomics
   root_source: MSH
-  semantic_types: &id003
+  semantic_types: &id004
   - Biomedical Occupation or Discipline
   search_type: exact
   sab_filtered: true
@@ -102,7 +114,9 @@ entries:
   - cui: C4704937
     name: Comparative Genomics
     root_source: MSH
-    semantic_types: *id003
+    semantic_types: *id004
+  curated: true
+  curator_note: curator-accepted via UI
 - dimension: knowledge_domain
   token: EPIGENETICS
   kind: value
@@ -114,7 +128,7 @@ entries:
   cui: C1655731
   matched_name: study of epigenetics
   root_source: MTH
-  semantic_types: &id004
+  semantic_types: &id005
   - Biomedical Occupation or Discipline
   search_type: exact
   sab_filtered: true
@@ -123,7 +137,7 @@ entries:
   - cui: C1655731
     name: study of epigenetics
     root_source: MTH
-    semantic_types: *id004
+    semantic_types: *id005
   curated: true
   curator_note: EPIGENETICS is a knowledge-domain (discipline) value; 'study of epigenetics' (Biomedical
     Occupation or Discipline) faithfully denotes the...
@@ -134,7 +148,15 @@ entries:
   expect: uncertain
   sab: null
   inventory_note: Closest faithful concept may be 'molecular function' (GO).
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0872316
+  matched_name: Functional Genomics
+  root_source: MTH
+  semantic_types:
+  - Biomedical Occupation or Discipline
+  curator_note: curator-accepted via UI
 - dimension: knowledge_domain
   token: MODEL_ORGANISM
   kind: value
@@ -142,7 +164,15 @@ entries:
   expect: likely
   sab: MSH
   inventory_note: null
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0599779
+  matched_name: Animal Model
+  root_source: MTH
+  semantic_types:
+  - Animal
+  curator_note: curator-accepted via UI
 - dimension: method
   token: null
   kind: axis
@@ -163,7 +193,15 @@ entries:
   expect: uncertain
   sab: NCI
   inventory_note: null
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C2717898
+  matched_name: Biostatistics
+  root_source: MTH
+  semantic_types:
+  - Research Activity
+  curator_note: curator-accepted via UI
 - dimension: method
   token: ASSOCIATION_STUDY
   kind: value
@@ -175,7 +213,7 @@ entries:
   cui: C2717878
   matched_name: Genetic Association Studies
   root_source: MSH
-  semantic_types: &id005
+  semantic_types: &id006
   - Molecular Biology Research Technique
   search_type: exact
   sab_filtered: true
@@ -184,7 +222,7 @@ entries:
   - cui: C2717878
     name: Genetic Association Studies
     root_source: MSH
-    semantic_types: *id005
+    semantic_types: *id006
   curated: true
   curator_note: ASSOCIATION_STUDY = statistical test of association between genetic variation and phenotype;
     'Genetic Association Studies' (Molecular Bio...
@@ -199,7 +237,7 @@ entries:
   cui: C2350277
   matched_name: Genome-Wide Association Study
   root_source: MSH
-  semantic_types: &id006
+  semantic_types: &id007
   - Molecular Biology Research Technique
   search_type: exact
   sab_filtered: true
@@ -208,7 +246,9 @@ entries:
   - cui: C2350277
     name: Genome-Wide Association Study
     root_source: MSH
-    semantic_types: *id006
+    semantic_types: *id007
+  curated: true
+  curator_note: curator-accepted via UI
 - dimension: method
   token: CANDIDATE_GENE_STUDY
   kind: value
@@ -220,7 +260,7 @@ entries:
   cui: C2717881
   matched_name: Candidate Gene Identification
   root_source: MSH
-  semantic_types: &id007
+  semantic_types: &id008
   - Molecular Biology Research Technique
   search_type: words
   sab_filtered: false
@@ -229,7 +269,7 @@ entries:
   - cui: C2717881
     name: Candidate Gene Identification
     root_source: MSH
-    semantic_types: *id007
+    semantic_types: *id008
   curated: true
   curator_note: CANDIDATE_GENE_STUDY = hypothesis-driven association study at candidate genes; 'Candidate
     Gene Identification' (Molecular Biology Researc...
@@ -259,7 +299,15 @@ entries:
   expect: likely
   sab: MSH
   inventory_note: null
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0796345
+  matched_name: genetic linkage analysis
+  root_source: MTH
+  semantic_types:
+  - Laboratory Procedure
+  curator_note: curator-accepted via UI
 - dimension: method
   token: TRANSMISSION_DISEQUILIBRIUM_TEST
   kind: value
@@ -293,7 +341,7 @@ entries:
   cui: C0920317
   matched_name: Meta-Analysis (statistical procedure)
   root_source: MTH
-  semantic_types: &id008
+  semantic_types: &id009
   - Research Activity
   search_type: exact
   sab_filtered: true
@@ -302,7 +350,7 @@ entries:
   - cui: C0920317
     name: Meta-Analysis (statistical procedure)
     root_source: MTH
-    semantic_types: *id008
+    semantic_types: *id009
   curated: true
   curator_note: Meta-Analysis (statistical procedure) is the analytic-method sense, faithful for the method
     token.
@@ -314,7 +362,15 @@ entries:
   sab: MSH
   inventory_note: GEM EXPERIMENT is a broad family (in vivo/in vitro/in silico); a faithful 1:1 concept
     is uncertain.
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0678323
+  matched_name: experimentation
+  root_source: MTH
+  semantic_types:
+  - Research Activity
+  curator_note: curator-accepted via UI
 - dimension: method
   token: IN_VIVO
   kind: value
@@ -322,11 +378,11 @@ entries:
   expect: likely
   sab: NCI
   inventory_note: null
-  status: review
-  cui: C1515657
-  matched_name: In Vivo Model
-  root_source: NCI
-  semantic_types: &id009
+  status: mapped
+  cui: C0681829
+  matched_name: in vivo study
+  root_source: MTH
+  semantic_types:
   - Research Activity
   search_type: words
   sab_filtered: true
@@ -335,12 +391,16 @@ entries:
   - cui: C1515657
     name: In Vivo Model
     root_source: NCI
-    semantic_types: *id009
+    semantic_types:
+    - Research Activity
   - cui: C6024565
     name: Pediatric Preclinical in Vivo Testing Program
     root_source: MTH
     semantic_types:
     - Research Activity
+  curated: true
+  fetched: true
+  curator_note: curator-accepted via UI
 - dimension: method
   token: IN_VITRO
   kind: value
@@ -348,7 +408,15 @@ entries:
   expect: likely
   sab: MSH
   inventory_note: null
-  status: unmapped
+  status: mapped
+  curated: true
+  fetched: true
+  cui: C0681828
+  matched_name: in vitro study
+  root_source: MTH
+  semantic_types:
+  - Research Activity
+  curator_note: curator-accepted via UI
 - dimension: method
   token: IN_SILICO
   kind: value
@@ -356,7 +424,7 @@ entries:
   expect: likely
   sab: MSH
   inventory_note: GEM IN_SILICO = computational simulation.
-  status: review
+  status: mapped
   cui: C0597818
   matched_name: computer simulation replacing animals in research
   root_source: CSP
@@ -370,6 +438,8 @@ entries:
     name: computer simulation replacing animals in research
     root_source: CSP
     semantic_types: *id010
+  curated: true
+  curator_note: curator-accepted via UI
 - dimension: method
   token: BIOINFORMATICS_INFERENCE
   kind: value
@@ -378,11 +448,11 @@ entries:
   sab: MSH
   inventory_note: Analysis of existing data; keep distinct from IN_SILICO (simulation).
   status: mapped
-  cui: C0162801
-  matched_name: Sequence Analysis
+  cui: C1140694
+  matched_name: Bio-Informatics
   root_source: MTH
-  semantic_types: &id011
-  - Molecular Biology Research Technique
+  semantic_types:
+  - Biomedical Occupation or Discipline
   search_type: exact
   sab_filtered: true
   sty_filtered: true
@@ -390,7 +460,11 @@ entries:
   - cui: C0162801
     name: Sequence Analysis
     root_source: MTH
-    semantic_types: *id011
+    semantic_types:
+    - Molecular Biology Research Technique
+  curated: true
+  fetched: true
+  curator_note: It should be a combination of C0679201 (Inference) and C1140694 (Bio-Informatics)
 - dimension: method
   token: CLINICAL_EVIDENCE
   kind: value
@@ -402,7 +476,7 @@ entries:
   cui: C0008972
   matched_name: Clinical Research
   root_source: MTH
-  semantic_types: &id012
+  semantic_types: &id011
   - Research Activity
   search_type: exact
   sab_filtered: false
@@ -411,7 +485,7 @@ entries:
   - cui: C0008972
     name: Clinical Research
     root_source: MTH
-    semantic_types: *id012
+    semantic_types: *id011
   curated: true
   curator_note: CLINICAL_EVIDENCE is the clinical-observation evidence-generation method; 'Clinical Research'
     (Research Activity) faithfully denotes evid...
@@ -439,7 +513,7 @@ entries:
   cui: C0017337
   matched_name: Genes
   root_source: MTH
-  semantic_types: &id013
+  semantic_types: &id012
   - Gene or Genome
   search_type: exact
   sab_filtered: true
@@ -448,7 +522,7 @@ entries:
   - cui: C0017337
     name: Genes
     root_source: MTH
-    semantic_types: *id013
+    semantic_types: *id012
   curated: true
   curator_note: Token GENE = 'a single gene'; C0017337 'Genes' (Gene or Genome) faithfully denotes exactly
     this concept.
@@ -464,7 +538,7 @@ entries:
   cui: C0017337
   matched_name: Genes
   root_source: MTH
-  semantic_types: &id014
+  semantic_types: &id013
   - Gene or Genome
   search_type: exact
   sab_filtered: false
@@ -473,7 +547,7 @@ entries:
   - cui: C0017337
     name: Genes
     root_source: MTH
-    semantic_types: *id014
+    semantic_types: *id013
   curated: true
   curator_note: RELATED_GENE's defining meaning is the relational nuance 'another gene related to the
     primary target', a composite relational token; gene...
@@ -488,7 +562,7 @@ entries:
   cui: C1419577
   matched_name: RNU6V gene
   root_source: MTH
-  semantic_types: &id015
+  semantic_types: &id014
   - Gene or Genome
   search_type: words
   sab_filtered: false
@@ -497,7 +571,7 @@ entries:
   - cui: C1419577
     name: RNU6V gene
     root_source: MTH
-    semantic_types: *id015
+    semantic_types: *id014
 - dimension: target_type
   token: SEGMENT
   kind: value
@@ -509,7 +583,7 @@ entries:
   cui: C6067264
   matched_name: Influenza virus A whole genome segment sequence
   root_source: LNC
-  semantic_types: &id016
+  semantic_types: &id015
   - Gene or Genome
   search_type: words
   sab_filtered: false
@@ -518,7 +592,7 @@ entries:
   - cui: C6067264
     name: Influenza virus A whole genome segment sequence
     root_source: LNC
-    semantic_types: *id016
+    semantic_types: *id015
 - dimension: target_type
   token: INTERVAL
   kind: value
@@ -539,7 +613,7 @@ entries:
   cui: C1414351
   matched_name: EIF4E gene
   root_source: MTH
-  semantic_types: &id017
+  semantic_types: &id016
   - Gene or Genome
   search_type: words
   sab_filtered: false
@@ -548,7 +622,7 @@ entries:
   - cui: C1414351
     name: EIF4E gene
     root_source: MTH
-    semantic_types: *id017
+    semantic_types: *id016
 - dimension: resolution
   token: null
   kind: axis
@@ -583,7 +657,7 @@ entries:
   cui: C1708726
   matched_name: Gene Locus
   root_source: MTH
-  semantic_types: &id018
+  semantic_types: &id017
   - Spatial Concept
   search_type: words
   sab_filtered: false
@@ -592,7 +666,7 @@ entries:
   - cui: C1708726
     name: Gene Locus
     root_source: MTH
-    semantic_types: *id018
+    semantic_types: *id017
   - cui: C1517493
     name: Gene Physical Location
     root_source: MTH
@@ -624,7 +698,7 @@ entries:
   cui: C0314642
   matched_name: Regulatory sequence
   root_source: SNOMEDCT_US
-  semantic_types: &id019
+  semantic_types: &id018
   - Nucleotide Sequence
   search_type: exact
   sab_filtered: false
@@ -633,7 +707,7 @@ entries:
   - cui: C0314642
     name: Regulatory sequence
     root_source: SNOMEDCT_US
-    semantic_types: *id019
+    semantic_types: *id018
 - dimension: resolution
   token: POSITION
   kind: value
@@ -673,12 +747,12 @@ entries:
   expect: unlikely
   sab: null
   inventory_note: Ordinal rating; no faithful UMLS concept for the GEM tier.
-  status: mapped
-  cui: C0442804
-  matched_name: Very high
+  status: unmapped
+  cui: C0205250
+  matched_name: High
   root_source: MTH
-  semantic_types:
-  - Finding
+  semantic_types: &id019
+  - Qualitative Concept
   search_type: exact
   sab_filtered: false
   sty_filtered: true
@@ -686,8 +760,7 @@ entries:
   - cui: C0205250
     name: High
     root_source: MTH
-    semantic_types:
-    - Qualitative Concept
+    semantic_types: *id019
   - cui: C1561957
     name: Observation Value - High
     root_source: MTH
@@ -699,9 +772,11 @@ entries:
     semantic_types:
     - Qualitative Concept
   curated: true
-  fetched: true
-  curator_note: GEM-internal ordinal credibility tier; candidates are an MDS 'IPSS-R Risk Category High'
-    finding (explicitly non-faithful) and bare 'High...
+  curator_note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note).
+    The pre-registered sweep found no UMLS concept denoting a degree of epistemic warrant usable as a
+    point of this scale: qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design
+    hierarchy (A/C); the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire
+    responses (D); SNOMED definite/probable/possible are diagnostic-certainty modality (C).'
 - dimension: credibility
   token: HIGH
   kind: value
@@ -709,7 +784,7 @@ entries:
   expect: unlikely
   sab: null
   inventory_note: Ordinal rating.
-  status: mapped
+  status: unmapped
   cui: C0205250
   matched_name: High
   root_source: MTH
@@ -734,8 +809,11 @@ entries:
     semantic_types:
     - Qualitative Concept
   curated: true
-  curator_note: GEM-internal ordinal credibility tier; 'IPSS-R Risk Category High' and the generic 'High'
-    qualitative qualifier do not denote a high evid...
+  curator_note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note).
+    The pre-registered sweep found no UMLS concept denoting a degree of epistemic warrant usable as a
+    point of this scale: qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design
+    hierarchy (A/C); the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire
+    responses (D); SNOMED definite/probable/possible are diagnostic-certainty modality (C).'
 - dimension: credibility
   token: MEDIUM
   kind: value
@@ -763,8 +841,11 @@ entries:
     semantic_types:
     - Qualitative Concept
   curated: true
-  curator_note: GEM-internal ordinal credibility tier; candidates ('medium exposure', 'Medium (Substance)',
-    generic 'Medium' quantity/amount concepts) ar...
+  curator_note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note).
+    The pre-registered sweep found no UMLS concept denoting a degree of epistemic warrant usable as a
+    point of this scale: qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design
+    hierarchy (A/C); the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire
+    responses (D); SNOMED definite/probable/possible are diagnostic-certainty modality (C).'
 - dimension: credibility
   token: LOW
   kind: value
@@ -797,8 +878,11 @@ entries:
     semantic_types:
     - Qualitative Concept
   curated: true
-  curator_note: GEM-internal ordinal credibility tier; candidates are IPSS/IPSS-R low risk categories
-    and generic 'low' qualifiers, none of which faithfu...
+  curator_note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note).
+    The pre-registered sweep found no UMLS concept denoting a degree of epistemic warrant usable as a
+    point of this scale: qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design
+    hierarchy (A/C); the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire
+    responses (D); SNOMED definite/probable/possible are diagnostic-certainty modality (C).'
 - dimension: phenotype_scale
   token: null
   kind: axis

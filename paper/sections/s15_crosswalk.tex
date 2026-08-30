@@ -18,6 +18,13 @@ one of \emph{exact} (same scope), \emph{narrower} (GEM is more specific),
 coverage gap). The crosswalk is selective: it lists the dimensions with
 external matches and the principled gaps, not every conditional field.
 
+Where the faithful concept exists only in a specialized vocabulary, the
+crosswalk keeps the exact match and records its source rather than
+substituting a broader concept from a preferred vocabulary --- e.g.
+\dimval{ANIMAL\_GENETICS} maps exactly to NCI \texttt{C1510895} (Animal
+Genetics), which no MeSH descriptor covers; the mapping's \emph{relation}
+field is where such tradeoffs are recorded, not the vocabulary choice.
+
 \begin{table}[H]
   \centering
   \small

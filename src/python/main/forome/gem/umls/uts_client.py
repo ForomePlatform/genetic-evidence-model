@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import time
 from pathlib import Path
 from typing import Optional
@@ -121,6 +122,27 @@ class UTSClient:
             out.append(_normalise(r))
         return out
 
+    def sources(self) -> list[dict]:
+        """Source vocabularies of this UMLS version ->
+        [{sab, name, language}], for the vocabulary picker. Cached like every
+        other response."""
+        data = self._get(f"/metadata/{self.version}/sources", {})
+        res = data.get("result")
+        if not isinstance(res, list):
+            return []
+        out = []
+        for r in res:
+            sab = r.get("abbreviation")
+            if not sab:
+                continue
+            name = r.get("preferredName") or r.get("expandedForm") or ""
+            name = re.sub(r",\s*\d{4}[_\d.-]*\s*$", "", name)   # drop version stamp
+            lang = r.get("language")
+            if isinstance(lang, dict):
+                lang = lang.get("abbreviation")
+            out.append({"sab": sab, "name": name, "language": lang or ""})
+        return out
+
     def get_concept(self, cui: str) -> Optional[dict]:
         """Fetch a single concept by CUI (name, semantic types incl. TUIs,
         status, atom count). None if absent."""
@@ -189,6 +211,24 @@ class UTSClient:
         """
         data = self._get(
             f"/content/{self.version}/source/{sab}/{code}/ancestors",
+            {"pageSize": page_size})
+        res = data.get("result")
+        if not isinstance(res, list):
+            return []
+        out = []
+        for a in res:
+            if a.get("rootSource") == "SRC" or not a.get("ui") or not a.get("name"):
+                continue
+            out.append({"code": a.get("ui"), "name": a.get("name"),
+                        "sab": a.get("rootSource")})
+        return out
+
+    def source_children(self, sab: str, code: str,
+                        page_size: int = 120) -> list[dict]:
+        """Direct is_a children of a source-vocabulary code via the UTS source
+        ``/children`` endpoint. Returns [{code, name, sab}]."""
+        data = self._get(
+            f"/content/{self.version}/source/{sab}/{code}/children",
             {"pageSize": page_size})
         res = data.get("result")
         if not isinstance(res, list):
@@ -308,6 +348,9 @@ class FixtureClient:
                         and r.get("rootSource") != "SRC" and r.get("name")]
         return []
 
+    def sources(self) -> list[dict]:
+        return []
+
     def get_concept(self, cui: str) -> Optional[dict]:
         return None
 
@@ -324,6 +367,9 @@ class FixtureClient:
         return []
 
     def source_ancestors(self, sab: str, code: str, page_size: int = 120) -> list[dict]:
+        return []
+
+    def source_children(self, sab: str, code: str, page_size: int = 120) -> list[dict]:
         return []
 
     def rollup(self, cui: str, use_sab=None, sab_allow=None,
@@ -340,6 +386,9 @@ class NullClient:
                partial: bool = False) -> list[dict]:
         return []
 
+    def sources(self) -> list[dict]:
+        return []
+
     def get_concept(self, cui: str) -> Optional[dict]:
         return None
 
@@ -356,6 +405,9 @@ class NullClient:
         return []
 
     def source_ancestors(self, sab: str, code: str, page_size: int = 120) -> list[dict]:
+        return []
+
+    def source_children(self, sab: str, code: str, page_size: int = 120) -> list[dict]:
         return []
 
     def rollup(self, cui: str, use_sab=None, sab_allow=None,
