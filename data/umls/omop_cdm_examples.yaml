@@ -20,11 +20,7 @@ meta:
   model: OMOP CDM
   status: illustrative
   note: >-
-    OMOP CDM is built around observational patient-level clinical data
-    (conditions, drugs, measurements, observations). GEM describes
-    basic-science genetic evidence about gene-phenotype relationships, much
-    of which has no patient-level home in the CDM. The examples below show
-    the partial alignment that does exist and flag the gaps.
+    OMOP CDM is built around observational, patient-level clinical data, including conditions, drugs, measurements, and observations. GEM describes basic-science genetic evidence about gene--phenotype relationships, much of which has no native patient-level representation in the CDM.
 
 examples:
   - gem_dimension: phenotype_scale (CLINICAL)
@@ -71,7 +67,7 @@ examples:
       has no concept of a model organism.
     gap: >-
       Model-organism evidence is entirely out of scope for the CDM; GEM's
-      organism dimension maps to NCBITaxon (see the s15 crosswalk), not OMOP.
+      organism dimension maps to NCBITaxon ([[supp-crosswalk]]), not OMOP.
 
   - gem_dimension: method (GWAS, ASSOCIATION_STUDY, ...)
     omop_domain: (metadata / study-level, not CDM clinical domains)

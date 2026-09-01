@@ -51,9 +51,19 @@ def subtree_tuis(tui: str) -> set[str]:
     if not root or not root.get("tree_number"):
         return {tui} if tui else set()
     prefix = root["tree_number"]
-    return {t["tui"] for t in types.values()
-            if (t.get("tree_number") or "") == prefix
-            or (t.get("tree_number") or "").startswith(prefix + ".")}
+
+    def under(tree: str) -> bool:
+        # descendant iff equal, or extends the prefix at a level boundary.
+        # Levels below a single-letter root (A -> A1 -> A1.1) have no dot,
+        # so "A1" is a child of "A" even though "A." is not its prefix.
+        if not tree:
+            return False
+        if tree == prefix:
+            return True
+        return tree.startswith(prefix) and (len(prefix) == 1
+                                            or tree[len(prefix)] == ".")
+
+    return {t["tui"] for t in types.values() if under(t.get("tree_number") or "")}
 
 
 def filter_param(tui: str | None) -> str | None:
@@ -98,9 +108,12 @@ def path_to(tui: str, axis_tui: str | None) -> list[dict]:
             path.append(_row(node))
         if axis_tree and cur == axis_tree:
             break
-        if "." not in cur:
+        if "." in cur:
+            cur = cur.rsplit(".", 1)[0]
+        elif len(cur) > 1:
+            cur = cur[0]          # A1 -> A, B2 -> B: the single-letter root
+        else:
             break
-        cur = cur.rsplit(".", 1)[0]
     return path
 
 

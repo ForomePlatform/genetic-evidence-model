@@ -134,7 +134,8 @@ dimensions:
     axis:
       query: confidence
       expect: uncertain
-      note: Overall ordinal rating anchored on SEPIO confidence; facets are open.
+      note: Overall ordinal rating; levels defined by defeasibility (belief-revision policy, SEPIO 
+        confidence attribute); values argued unmapped via the pre-registered sweep. Facets are open.
       sab: MSH
       semantic_type: T080
     values:
@@ -151,7 +152,7 @@ dimensions:
       query: Phenotype
       expect: likely
       sab: MSH
-      semantic_type: T039
+      semantic_type: T071
     values:
     - {token: MOLECULAR, query: Molecular phenotype, expect: uncertain, note: Phenotype at the 
         molecular level; distinct from GO 'molecular function' used by measurement_target.}
@@ -169,6 +170,7 @@ dimensions:
     axis:
       query: Ascertainment
       expect: uncertain
+      semantic_type: T062
     values:
     - {token: OBSERVED_IN_CASES, query: Affected individual, expect: unlikely, note: 'Study-design ascertainment
         route, not a 1:1 UMLS concept.'}

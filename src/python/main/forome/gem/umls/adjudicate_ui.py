@@ -1434,9 +1434,8 @@ function stnCompareHTML(tui,axisTui){
       h=`<div class="stn-node${cls}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)}${lab}`+
         (h?`<div class="stn-kids">${h}</div>`:'')+`</div>`;}
     return h;};
-  const chainOf=x=>{const segs=x.tree.split('.'),c=[];
-    for(let i=1;i<=segs.length;i++){const n=(SEMTYPES||[]).find(y=>y.tree===segs.slice(0,i).join('.'));if(n)c.push(n);}
-    return c;};
+  const chainOf=x=>{const c=stnParents(x.tree).map(pt=>(SEMTYPES||[]).find(y=>y.tree===pt)).filter(Boolean);
+    c.push(x);return c;};
   const ct=chainOf(t),a=axisTui?find(axisTui):null;
   if(!a||!a.tree)return `<div class="stn-tree">${nest(ct,'hl')}</div><div class="mini" style="margin-top:6px">no axis type to compare against</div>`;
   const ca=chainOf(a);
@@ -1744,7 +1743,7 @@ async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('
 function axbRenderSel(){const box=$('#axsel');if(!box)return;const t=(SEMTYPES||[]).find(x=>x.tui===AXB.tui);
   if(!t){box.innerHTML=`<div style="display:flex;align-items:center;gap:7px">${IC.warn}<span style="color:var(--warn);font-weight:500">Axis type not set</span></div>`+
     `<div class="mini" style="margin-top:5px">Run the query or browse the types to choose one — value searches are unconstrained until then.</div>`;return;}
-  const sub=(SEMTYPES||[]).filter(x=>x.tree===t.tree||x.tree.startsWith(t.tree+'.'));
+  const sub=(SEMTYPES||[]).filter(x=>stnUnder(x.tree,t.tree));
   box.innerHTML=`<span class="tnm">${esc(t.name)}</span> <span class="chip tui">${esc(t.tree)}</span>`+
     `<div class="mini" style="margin-top:4px">value searches constrained to <b>${sub.length}</b> semantic type${sub.length===1?'':'s'} (the axis subtree)</div>`+
     (t.definition?`<div class="def show" style="margin-top:7px">${esc(t.definition)}</div>`:'')+
@@ -1756,17 +1755,21 @@ function axbPicker(){const box=$('#styresults');if(!box)return;const q=(($('#sty
     `<button class="mini" onclick="stnToggle(this,'${t.tui}')">tree</button>`+
     (t.definition?`<div class="def show">${esc(t.definition)}</div>`:'')+`</div>`).join('');}
 function axbSet(tui){AXB.tui=tui;axbRenderSel();axbPicker();}
+// tree-number topology: levels below a letter root have no dot (A -> A1 -> A1.1)
+function stnUnder(tree,p){return !!tree&&(tree===p||(tree.startsWith(p)&&(p.length===1||tree[p.length]==='.')));}
+function stnParents(tree){const ps=[];if(!tree)return ps;const segs=tree.split('.');
+  if(segs[0].length>1)ps.push(segs[0][0]);
+  for(let i=1;i<segs.length;i++)ps.push(segs.slice(0,i).join('.'));return ps;}
+function stnParentOf(tree){const ps=stnParents(tree);return ps.length?ps[ps.length-1]:null;}
 function stnPlaceHTML(tui,noclick){const t=(SEMTYPES||[]).find(x=>x.tui===tui);if(!t)return '<i>type not found</i>';
-  const dep=s=>s.split('.').length;
   const nm=n=>noclick?esc(n.name):`<a href="#" onclick="axbSet('${n.tui}');return false">${esc(n.name)}</a>`;
   const node=(n,inner)=>`<div class="stn-node${n.tui===tui?' hl':''}"><span class="stn-tree">${esc(n.tree)}</span> `+
     `${nm(n)}`+
     (inner?`<div class="stn-kids">${inner}</div>`:'')+`</div>`;
-  const kidsOf=n=>(SEMTYPES||[]).filter(x=>x.tree.startsWith(n.tree+'.')&&dep(x.tree)===dep(n.tree)+1)
+  const kidsOf=n=>(SEMTYPES||[]).filter(x=>stnParentOf(x.tree)===n.tree)
                                 .sort((a,b)=>a.tree<b.tree?-1:1);
   const sub=n=>node(n,kidsOf(n).map(sub).join(''));
-  const segs=t.tree.split('.'),chain=[];
-  for(let i=1;i<segs.length;i++){const a=(SEMTYPES||[]).find(x=>x.tree===segs.slice(0,i).join('.'));if(a)chain.push(a);}
+  const chain=stnParents(t.tree).map(pt=>(SEMTYPES||[]).find(x=>x.tree===pt)).filter(Boolean);
   const parent=chain.length?chain[chain.length-1]:null;
   let core;
   if(parent){core=node(parent,kidsOf(parent).map(s=>s.tui===t.tui?sub(t):node(s,'')).join(''));
@@ -1807,7 +1810,10 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
       :`the ${esc(e.dimension)} axis is untyped — value search runs unconstrained`);
   const slot=e.cui?` <span class="sabslot" data-cui="${esc(e.cui)}" data-root="${esc(e.root_source||'')}" data-prefs="${esc((e.sab_prefs||[]).join(','))}">`+
       (e.root_source?`<span class="sab">${esc(e.root_source)}</span>`:'')+`</span>`:'';
-  const cur=e.status==='mapped'?`<span class="now">mapped &rarr; <b>${esc(e.matched_name)}</b> <span class="cui">${esc(e.cui)}</span>${slot}`+
+  const pend=e.decision==='accept'&&(e.status!=='mapped'||e.decision_cui!==e.cui);
+  const cur=pend?`<span class="now">accepted &rarr; <b id="decname"><span class="cui">${esc(e.decision_cui)}</span></b>`+
+      ` <span class="chip">${esc(e.relation||'exact')}</span> <span class="mini">— Rebuild folds it into the crosswalk</span></span>`
+    :e.status==='mapped'?`<span class="now">mapped &rarr; <b>${esc(e.matched_name)}</b> <span class="cui">${esc(e.cui)}</span>${slot}`+
       (e.curated?` <span class="badge">${e.fetched?'curated · fetched':'curated'}</span>`
         :e.decision==='accept'?' <span class="badge">confirmed</span>':' <span class="mini">(auto)</span>')+`</span>`:
     e.status==='unmapped'?`<span class="now">unmapped${e.curated?' <span class="badge">curator</span>':''}</span>`:
@@ -1854,7 +1860,23 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
   $('#sq').addEventListener('keydown',ev=>{if(ev.key==='Enter')runSearch();});
   $('#btn-unmapped').addEventListener('click',openUnmapped);
   wireNext(e.key);
+  // changing "accept as" on an existing acceptance re-records it live
+  const ar=$('#arel');
+  if(ar)ar.addEventListener('change',()=>{
+    if(SEL&&SEL.decision==='accept'&&SEL.decision_cui){
+      decide('accept',SEL.decision_cui,{relation:ar.value});
+      msg('relation → '+ar.value);}
+    else if(SEL&&SEL.status==='mapped'&&SEL.cui&&!SEL.decision){
+      // no decision yet: changing "accept as" on a harness mapping accepts it at that relation
+      decide('accept',SEL.cui,{relation:ar.value});
+      msg('accepted '+SEL.cui+' as '+ar.value);}});
   enrichSabs($('#content'));enrichSlots($('#content'));
+  // resolve the accepted CUI's name for the pending-decision line
+  if(pend&&e.decision_cui){(async()=>{try{
+    const j=await (await fetch('/api/concept?cui='+encodeURIComponent(e.decision_cui))).json();
+    const el=$('#decname');
+    if(el&&j&&j.evidence&&j.evidence.name)el.innerHTML=esc(j.evidence.name)+' <span class="cui">'+esc(e.decision_cui)+'</span>';
+  }catch(err){}})();}
   // the candidates' STN links need the Semantic Network; if it arrived after
   // this render, paint once more (guarded to the same route)
   if(!SEMTYPES)loadSemTypes().then(()=>{if(ROUTE.view==='value'&&ROUTE.key===e.key)renderValue();});}
@@ -1982,9 +2004,8 @@ function toggleSubtree(btn,specTui,axisTui){const box=btn.closest('.evsec').quer
   box.style.display='block';
   const root=axisTui||specTui,rt=(SEMTYPES||[]).find(t=>t.tui===root);
   if(!rt){box.innerHTML='<i>semantic type not found</i>';return;}
-  const inSub=(SEMTYPES||[]).filter(t=>t.tree===rt.tree||t.tree.startsWith(rt.tree+'.'));
-  const dep=s=>s.split('.').length;
-  const render2=n=>{const kids=inSub.filter(t=>t.tree.startsWith(n.tree+'.')&&dep(t.tree)===dep(n.tree)+1);
+  const inSub=(SEMTYPES||[]).filter(t=>stnUnder(t.tree,rt.tree));
+  const render2=n=>{const kids=inSub.filter(t=>stnParentOf(t.tree)===n.tree);
     const hl=n.tui===specTui?' hl':(n.tui===axisTui?' ax':'');
     return `<div class="stn-node${hl}"><span class="stn-tree">${esc(n.tree)}</span> ${esc(n.name)}`+
       (kids.length?`<div class="stn-kids">${kids.map(render2).join('')}</div>`:'')+`</div>`;};
@@ -1998,6 +2019,17 @@ async function loadRollup(box,cui,sab){box.innerHTML='rolling up is_a ancestors�
   box.innerHTML=nav+`<table class="et"><tr><th>is_a ancestor</th><th>code</th><th>vocab</th><th></th></tr>${rows||'<tr><td colspan=4><i>no is_a ancestors in English vocabularies</i></td></tr>'}</table>`;}
 function rollNav(a,sab){loadRollup(a.closest('.rollbox'),a.dataset.cui,sab||null);}
 async function runSearch(){const q=$('#sq').value,sab=$('#ssab').value;
+  // direct CUI lookup: paste a CUI to pull that exact concept as a candidate
+  // card (then evidence / ↓ desc / relations work from it)
+  const cuiM=(q||'').trim().match(/^C\d{7}$/i);
+  if(cuiM){const box=$('#sresults');box.dataset.mode='search';
+    box.innerHTML='<span class="mini">fetching '+esc(cuiM[0].toUpperCase())+'…</span>';
+    const j=await (await fetch('/api/concept?cui='+cuiM[0].toUpperCase()+(SEL&&SEL.dim_sty_tui?'&axis='+SEL.dim_sty_tui:''))).json();
+    const ev=(j||{}).evidence||{};
+    if(ev.error||!ev.name){box.innerHTML='<span class="mini">'+esc(ev.error||'concept not found')+'</span>';return;}
+    box.innerHTML='<div class="mini" style="margin-bottom:5px">1 concept by CUI · '+esc(STATE.search_backend||'UTS')+'</div>'
+      +candHTML({cui:cuiM[0].toUpperCase(),name:ev.name,root_source:'',semantic_types:(ev.semantic_types||[]).map(x=>x.name||x)});
+    enrichSabs(box);return;}
   const scope=($('#sscope')||{}).value||'axis',stype=($('#smatch')||{}).value||'words';
   if(SEL){const log=SEARCHLOG[SEL.key]||(SEARCHLOG[SEL.key]=[]);
     if(!log.some(l=>l.q===q&&l.scope===scope&&l.match===stype&&l.sab===sab))log.push({q,scope,match:stype,sab});}

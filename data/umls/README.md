@@ -6,6 +6,13 @@ positions it against the **OMOP CDM** (a few hand-authored illustrative
 examples). It produces a new supplement section and a machine-readable
 crosswalk.
 
+The narrative record of the mapping decisions --- the evidence weighed,
+the alternatives rejected, and the argument for each verdict --- lives in
+[`DECISIONS.md`](DECISIONS.md).
+
+The curation app itself is documented in the usage guide
+[`STUDIO.md`](STUDIO.md).
+
 It is **separate from** `paper/sections/s15_crosswalk.tex`, the existing
 structural crosswalk (SO / HPO / NCBITaxon / ECO / SEPIO / GA4GH-VA / FHIR),
 which it does not modify.

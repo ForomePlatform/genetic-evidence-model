@@ -238,7 +238,7 @@ class TestSemanticTypes(unittest.TestCase):
         self.assertIsNone(S.filter_param(None))
 
     def test_build_types_axes_and_resolution_is_spatial(self):
-        doc = H.build(FixtureClient(FIXTURES), live=True)
+        doc = H.build(FixtureClient(FIXTURES), live=True, adjudications={})
         axes = [e for e in doc["entries"] if e["kind"] == "axis"]
         typed = [e for e in axes if e.get("sty_tui")]
         self.assertGreaterEqual(len(typed), 8)
@@ -294,7 +294,7 @@ class TestBuildAndRender(unittest.TestCase):
         self.assertEqual(doc["meta"]["counts"]["mapped"], 0)
 
     def test_build_with_fixtures_maps_known_terms(self):
-        doc = H.build(FixtureClient(FIXTURES), live=True)
+        doc = H.build(FixtureClient(FIXTURES), live=True, adjudications={})
         by = {(e["dimension"], e["token"]): e for e in doc["entries"]}
         gwas = by[("method", "GWAS")]
         self.assertEqual(gwas["status"], "mapped")
@@ -307,10 +307,10 @@ class TestBuildAndRender(unittest.TestCase):
     def test_build_only_dims_is_scoped(self):
         """A scoped rebuild resolves just the requested dimension; its entries
         match the full build's entries for that dimension."""
-        part = H.build(FixtureClient(FIXTURES), live=True, only_dims={"method"})
+        part = H.build(FixtureClient(FIXTURES), live=True, adjudications={}, only_dims={"method"})
         self.assertTrue(part["entries"])
         self.assertEqual({e["dimension"] for e in part["entries"]}, {"method"})
-        full = H.build(FixtureClient(FIXTURES), live=True)
+        full = H.build(FixtureClient(FIXTURES), live=True, adjudications={})
         want = [e for e in full["entries"] if e["dimension"] == "method"]
         self.assertEqual(part["entries"], want)
         counts = part["meta"]["counts"]
@@ -319,13 +319,13 @@ class TestBuildAndRender(unittest.TestCase):
                          len(part["entries"]))
 
     def test_render_produces_valid_latex(self):
-        doc = H.build(FixtureClient(FIXTURES), live=True)
+        doc = H.build(FixtureClient(FIXTURES), live=True, adjudications={})
         with tempfile.TemporaryDirectory() as d:
             cw = Path(d) / "cw.yaml"
             import yaml
             cw.write_text(yaml.safe_dump(doc, sort_keys=False, allow_unicode=True))
             out = R.render(cw, R.DEFAULT_OMOP)
-        self.assertIn(r"\section{UMLS and OMOP/CDM crosswalk}", out)
+        self.assertIn(r"\section{UMLS crosswalk and illustrative OMOP CDM positioning}", out)
         self.assertEqual(out.count(r"\begin{longtable}"),
                          out.count(r"\end{longtable}"))
         self.assertEqual(out.count(r"\begin{longtable}"), 2)
@@ -334,6 +334,40 @@ class TestBuildAndRender(unittest.TestCase):
 
     def test_render_escapes_special_chars(self):
         self.assertEqual(R.tex("a_b & c% {d}"), r"a\_b \& c\% \{d\}")
+
+    def test_render_relation_column_and_argued_gap(self):
+        """The relation column comes from the adjudications overlay, and an
+        unmapped verdict that carries a rationale renders as an argued gap,
+        distinct from an unresolved one."""
+        import yaml
+        doc = H.build(FixtureClient(FIXTURES), live=True, adjudications={})
+        vals = [e for e in doc["entries"] if e["kind"] != "axis"]
+        mapped = next(e for e in vals if e["status"] == "mapped")
+        gap, unresolved = vals[-1], vals[-2]
+        gap["status"] = unresolved["status"] = "unmapped"
+        gap["cui"] = unresolved["cui"] = None
+        adj = {H._adj_key(mapped["dimension"], mapped["token"]):
+                   {"accept": mapped["cui"], "relation": "close", "note": "t"},
+               H._adj_key(gap["dimension"], gap["token"]):
+                   {"unmapped": True, "relation": "none", "note": "t",
+                    "rejected": [{"cui": "C0000009", "fails": "A", "why": "x"}]}}
+        with tempfile.TemporaryDirectory() as d:
+            cw, aj = Path(d) / "cw.yaml", Path(d) / "adj.yaml"
+            cw.write_text(yaml.safe_dump(doc, sort_keys=False, allow_unicode=True))
+            aj.write_text(yaml.safe_dump({"adjudications": adj}))
+            out = R.render(cw, R.DEFAULT_OMOP, aj)
+        self.assertIn("& Relation &", out)
+        row = next(l for l in out.splitlines()
+                   if l.startswith(rf"\quad {R.tex(mapped['token'])} &"))
+        self.assertIn("& close &", row)
+        gap_row = next(l for l in out.splitlines()
+                       if l.startswith(rf"\quad {R.tex(gap['token'])} &"))
+        self.assertIn("argued gap (1 rejected near-miss)", gap_row)
+        self.assertIn(r"\emph{none}", gap_row)
+        unr_row = next(l for l in out.splitlines()
+                       if l.startswith(rf"\quad {R.tex(unresolved['token'])} &"))
+        self.assertIn("unresolved", unr_row)
+        self.assertIn(r"\Cref{sec:supp-crosswalk}", out)   # s15's real label
 
 
 class TestAxisBuilder(unittest.TestCase):

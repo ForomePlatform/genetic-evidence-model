@@ -1,0 +1,189 @@
+% =====================================================================
+%  Supplementary Note (\input by supplement.tex after the generated UMLS crosswalk):
+%  credibility tiers, why UMLS has no proxy, and the external alignment.
+%  Generated from the credibility sweep (protocol data/umls/sweeps/
+%  credibility.yaml; results are not redistributed -- regenerate with
+%  gem-umls-sweep + gem-umls-classify-credibility against a licensed UMLS
+%  copy) and data/umls/adjudications.yaml (credibility/*). Review before use.
+% =====================================================================
+\section{Credibility tiers: definitions, the UMLS finding, and external alignment}
+\label{sec:supp-credibility}
+
+\subsection{What the tiers mean}
+\label{sec:supp-credibility-defs}
+
+The overall credibility rating is the model's only subjective core
+dimension. Its four levels are defined by \emph{defeasibility}: what
+would lead a curator to stop accepting an evidence item. They are not
+defined by study design or by the certainty expressed by the authors:
+
+\begin{description}
+  \item[\dimval{VERY\_HIGH}] accepted by default even in the face of direct
+    contradiction; reconsidered only in light of a stronger opposing
+    argument;
+  \item[\dimval{HIGH}] accepted unless directly contradicted by evidence of
+    comparable strength; such a contradiction calls the item into question;
+  \item[\dimval{MEDIUM}] not accepted on its own; accepted when corroborated
+    by an independent source or an orthogonal type of evidence;
+  \item[\dimval{LOW}] not relied upon; recorded pending independent
+    replication.
+\end{description}
+
+The distinction between \dimval{HIGH} and \dimval{VERY\_HIGH} is
+deliberate. Evidence of comparable strength is sufficient to call a
+\dimval{HIGH} item into question, whereas a \dimval{VERY\_HIGH} item
+remains the default position unless the opposing case is stronger.
+
+This definition is a belief-revision policy. It therefore corresponds to
+SEPIO's confidence attribute: the degree of belief that an asserted
+proposition is true~\cite{sepio}. The credibility facets, including cohort
+size, replication, multiple-testing control, ancestry control, and
+ascertainment, inform that judgment but remain separate.
+
+This separation is inspired by GRADE's general practice of assessing the
+factors that affect certainty separately~\cite{grade2008}. GEM does not
+adopt the GRADE framework or its rating rules, which were developed for
+bodies of clinical evidence, particularly evidence from randomized and
+observational studies. The GEM facets instead support credibility judgments
+about individual evidence items from basic and pre-clinical research.
+
+The scale intensifies at the top, as ACMG evidence strength
+(\emph{supporting} to \emph{very strong})~\cite{acmg2015} and ClinGen
+gene--disease validity (\emph{limited} to \emph{definitive})~\cite{clingen2018}
+do. GRADE certainty instead extends downward to \emph{very low}, because it
+rates a body of evidence by downgrading from a starting level determined by
+study design. The GEM and GRADE scales therefore address related but
+non-equivalent constructs; their alignment in \cref{tab:cred-alignment} is
+deliberately non-positional.
+
+\subsection{Why the tiers have no UMLS proxy}
+\label{sec:supp-credibility-umls}
+
+The four credibility tiers have no adequate UMLS proxy. This is a curation
+conclusion, not merely a missing mapping: the tiers were tested in a
+pre-registered sweep (\texttt{data/umls/sweeps/credibility.yaml}).
+
+The adequacy criteria were fixed before the search. A candidate concept had
+to (A) denote a degree of epistemic warrant rather than the magnitude of a
+measured property; (B) represent a scale point rather than the scale
+dimension itself; (C) belong to a set that is disjoint and ordered in the
+same way as the GEM scale; and (D) carry that meaning in the relevant domain
+rather than as a homonym.
+
+The sweep used a local index of UMLS 2026AA and comprised 174 queries that
+returned 497 distinct concepts. The results were replicated through the UTS
+REST API, which returned 505 concepts. The search had three passes:
+whole-string searches for intensified and degree qualifiers; searches for
+the names of evidence-grading vocabularies; and searches for the same terms
+within the UMLS semantic types most likely to contain scale values:
+Qualitative Concept, Quantitative Concept, Idea or Concept, Intellectual
+Product, and Finding. Each
+retrieved concept was assigned the criterion it failed
+(\cref{tab:cred-families}); the full generated table is available in the
+results file.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption[Credibility sweep: rejected concept families]{Concepts retrieved by
+  the credibility sweep (UMLS 2026AA), grouped by the adequacy criterion they
+  failed. Criterion codes are defined in the text.}
+  \label{tab:cred-families}
+  \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X r c >{\raggedright\arraybackslash}X@{}}
+    \toprule
+    Concept family & $n$ & Criterion failed & Examples \\
+    \midrule
+        “grade” (tumour, school, or product) & 202 & D & Astrocytoma, low grade (C1314694) \\
+        LOINC/PROMIS self-efficacy items & 191 & D & Current level of confidence I can drive a car (C5142440) \\
+        SNOMED degree qualifier values & 21 & A & Very high (C0442804); Extremely high (C5787630) \\
+        clinical “evidence of” expressions (presence of a sign) & 20 & D & Blood alcohol level of less than 20 mg/100 ml (C0481372); Blood alcohol level of 20--39 mg/100 ml (C0481373) \\
+        qualifiers denoting the degree of a measured property & 12 & A & Observation Value - High (C1561957); Message Waiting Priority - High (C1561958) \\
+        scores, probabilities, risk categories & 8 & A & IPSS-R Risk Category Very High (C5202916); IPSS Risk Category High (C4522209) \\
+        patient-perceived credibility of information & 7 & D & Establish teacher credibility, as appropriate (C0511083); credibility (C0870373) \\
+        NCI/PDQ Level of Evidence I--IV & 6 & A & Level of Evidence (C0393009); Level of Evidence I (C2986612) \\
+        metabolite-identification confidence levels & 6 & D & Level 1 Metabolite Identification Confidence (C5551417); Level 3 Metabolite Identification Confidence (C5551419) \\
+        SNOMED diagnostic-certainty modality & 5 & C & Definite (C0439544); Probable diagnosis (C0332148) \\
+        NCI confidence answer set & 4 & D & Very High Confidence (C4331500); High Confidence (C4330261) \\
+        psychological self-confidence & 2 & D & Euphoric mood (C0235146); Confidence level (self-esteem) (C0518578) \\
+        lexical collisions (“media”, “lower”) & 2 & D & Communications Media (C0009458); Culture Media (C0010454) \\
+        degree of a measured property & 2 & A & A Medium Amount of Time (C4522282); A Medium Amount (C4522283) \\
+        NCI adverse-event causality ladder & 2 & D & Definitely Related to Intervention (C1704787); Possibly Related to Intervention (C1705910) \\
+        LOINC molecular-pathology “level of evidence” & 2 & D & Level of evidence:Find:Pt:Bld/Tiss:Nom (C4760312) \\
+        diagnostic-certainty rating items & 2 & D & UHDRS 1999 Version - Diagnosis Confidence Level (C4744064); Level of Diagnostic Certainty (C5909371) \\
+        TNM certainty factor & 2 & D & Degree of certainty of TNM classification (C0456878); Qualifier for TNM degree of certainty (C1302640) \\
+        statistical confidence measures & 1 & A & Level of Confidence (statistical) (C5702556) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Four families merit explicit discussion because they are the closest
+constructs retrieved from UMLS. First, the SNOMED qualifier values
+\emph{High}~(C0205250, SNOMED 75540009), \emph{Very high}~(C0442804), and
+\emph{Low}~(C0205251), together with related terms, occur under
+\emph{Increased} and \emph{Decreased}. The source terminology therefore
+treats them as degrees of a measured property, not as degrees of epistemic
+warrant (A). Second, NCI Thesaurus \emph{Level of Evidence I--IV} is a
+study-design hierarchy. Mapping GEM credibility to it would collapse the
+model's separate \emph{method} and credibility dimensions (A, and C for the
+scale). Third, the NCI \emph{Very High / High / Moderate / Low Confidence}
+set has the same four-level, top-intensified form as the GEM scale, but it is
+a \emph{Clinical or Research Assessment Answer}: a questionnaire response
+that records a respondent's confidence in performing an activity (D).
+
+The SNOMED diagnostic-certainty terms \emph{definite}, \emph{probable}, and
+\emph{possible} are the closest epistemic candidates. They express the
+likelihood that a proposition is true, but they form a three-level scale with
+no intensified top category, apply in their source terminologies to
+diagnostic assertions, and assess likelihood rather than defeasibility (C,
+D). The same limitation applies to the TNM certainty factor, the LOINC
+molecular-pathology \emph{level of evidence}, which is an
+AMP/ASCO/CAP actionability tier for variant reports, and
+metabolite-identification confidence levels. These are ordered epistemic scales, but
+each is defined for a different object.
+
+Lexical post-coordination does not supply the missing identifiers. Combining
+a qualifier concept with an intensifier from the SPECIALIST Lexicon
+(\texttt{LRMOD}) would add only a lexical modifier. The lexicon's
+\emph{intensifier} class is a syntactic category that includes
+\emph{very}, \emph{slightly}, \emph{about}, and \emph{ago}; it encodes
+neither magnitude nor direction. Such an identifier therefore adds no
+semantic content beyond the corresponding text string. This is a conceptual
+argument about the role of identifiers, not an empirical finding.
+
+\subsection{External alignment}
+\label{sec:supp-credibility-align}
+
+The following table gives a conceptual, non-positional alignment between the
+GEM tiers and selected external scales. It does not define equivalences or a
+common numerical conversion. In particular, the FHIR values are export codes:
+\dimval{VERY\_HIGH} must be represented as \texttt{high}, and that export is
+therefore lossy.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption[Credibility: external alignment]{Conceptual, non-positional
+  alignment of the GEM credibility tiers with selected external scales.
+  ``---'' indicates that no counterpart is proposed. The FHIR column gives the
+  lossy export used when a \texttt{certainty-rating} code is
+  required~\cite{fhir_evidence}. CIO = Confidence Information
+  Ontology~\cite{cio2015}.}
+  \label{tab:cred-alignment}
+  \begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+    \toprule
+    GEM & GRADE certainty~\cite{grade2008} & FHIR \texttt{certainty-rating} & CIO confidence level~\cite{cio2015} & ACMG evidence strength~\cite{acmg2015} & ClinGen validity~\cite{clingen2018} \\
+    \midrule
+    \dimval{VERY\_HIGH} & --- (GRADE caps at \emph{high}) & \texttt{high} (lossy export) & high (partial) & very
+    strong & definitive \\
+    \dimval{HIGH}       & high     & \texttt{high}     & high   & strong     & strong \\
+    \dimval{MEDIUM}     & moderate & \texttt{moderate} & medium & moderate   & moderate \\
+    \dimval{LOW}        & low      & \texttt{low}      & low (``absence of trust'', closer to none) & supporting &
+    limited \\
+    ---                 & very low & \texttt{very-low} & ---    & ---        & --- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+These alignments are part of the GEM model, not of the UMLS crosswalk. The
+crosswalk records UMLS mappings, or a considered conclusion that no adequate
+mapping exists.

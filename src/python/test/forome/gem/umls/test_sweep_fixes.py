@@ -136,6 +136,29 @@ class TestDescendSearch(unittest.TestCase):
         self.assertEqual(max(r["depth"] for r in rows), 2)
 
 
+class TestLetterRootTopology(unittest.TestCase):
+    """Single-letter roots (A Entity, B Event) have dotless children (A1, B2):
+    subtree and ancestor computations must handle that level."""
+    def test_subtree_of_A_covers_the_whole_branch(self):
+        from forome.gem.umls import semantic_types as stylib
+        sub = stylib.subtree_tuis("T071")            # Entity, tree "A"
+        self.assertGreater(len(sub), 30)
+        self.assertIn("T072", sub)                   # Physical Object, A1
+        self.assertIn("T080", sub)                   # Qualitative Concept, A2.1.2
+        self.assertNotIn("T051", sub)                # Event, tree "B"
+        self.assertNotIn("T062", sub)                # Research Activity, B1.3.2
+        sub1 = stylib.subtree_tuis("T072")           # A1 subtree unchanged
+        self.assertIn("T028", sub1)
+        self.assertNotIn("T077", sub1)               # A2 not under A1
+
+    def test_path_to_reaches_the_letter_root(self):
+        from forome.gem.umls import semantic_types as stylib
+        path = stylib.path_to("T039", None)          # B2.2.1.1
+        self.assertEqual(path[-1]["tree"], "B")
+        path = stylib.path_to("T039", "T051")        # climb to Event stops there
+        self.assertEqual(path[-1]["tui"], "T051")
+
+
 class TestExpandSearch(unittest.TestCase):
     class Cli:
         def search(self, term, search_type="words", sabs=None, page_size=200,
