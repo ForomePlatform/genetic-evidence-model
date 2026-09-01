@@ -93,6 +93,37 @@ for entry in "${DOCS[@]}"; do
   fi
 done
 
+# ----- cross-document reference guard -------------------------------
+# Main-text references to supplement numbering (Table~STn, Note~SNn) are
+# hard-coded, so a supplement renumbering silently mispoints them. Verify
+# every STn/SNn used in the main sections against the freshly built
+# supplement .lot/.toc, using paper/xrefs.tsv (number <TAB> required
+# caption substring) as the declaration of intent.
+XREFS="$PAPER_DIR/xrefs.tsv"
+SUPP_LOT="$TARGET/Semantic-GEM-SupplementaryMaterial.lot"
+SUPP_TOC="$TARGET/Semantic-GEM-SupplementaryMaterial.toc"
+if [ "$status" -eq 0 ] && [ -f "$XREFS" ] && [ -f "$SUPP_LOT" ] && [ -f "$SUPP_TOC" ]; then
+  xref_bad=0
+  for ref in $(perl -ne 'print "$1\n" while /\b(S[TN][0-9]+)(?:\.[0-9]+)?\b/g' \
+               "$PAPER_DIR"/sections/0*.tex | sort -u); do
+    want=$(awk -F'\t' -v r="$ref" '$1==r{print $2}' "$XREFS")
+    if [ -z "$want" ]; then
+      echo "XREF: $ref is used in the main text but has no line in paper/xrefs.tsv" >&2
+      xref_bad=1; continue
+    fi
+    case "$ref" in SN*) src="$SUPP_TOC" ;; *) src="$SUPP_LOT" ;; esac
+    if ! grep "numberline {$ref}" "$src" | grep -q "$want"; then
+      echo "XREF: main text expects $ref = '$want' but the built supplement disagrees" >&2
+      echo "      (renumbering? update paper/sections/0*.tex and paper/xrefs.tsv)" >&2
+      xref_bad=1
+    fi
+  done
+  if [ "$xref_bad" -ne 0 ]; then
+    err "stale supplement cross-references in the main text"
+  fi
+  echo "==> xref guard: main-text ST/SN references match the built supplement"
+fi
+
 if [ "$status" -eq 0 ]; then
   echo "==> Done. PDFs in $TARGET/"
 else

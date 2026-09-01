@@ -5,8 +5,8 @@ evidence weighed, the alternatives rejected, and the argument for each
 verdict — at a level of detail the paper and supplements deliberately omit.
 The YAML `note` fields hold the compressed verdicts; this log holds the
 discussion. Newest entries first. The relation vocabulary and the A–D
-adequacy criteria are defined in the supplement (S2) and in
-`notes → adjudications.yaml` protocol records.
+adequacy criteria are defined in the supplement (note SN8, the generated
+UMLS crosswalk) and in `notes → adjudications.yaml` protocol records.
 
 Recurring principles that emerged from these discussions:
 
@@ -286,7 +286,7 @@ genuine judgment call awaiting the curator's ruling.
 
 - **credibility/**: all four tiers argued `unmapped` via a pre-registered
   sweep (protocol `sweeps/credibility.yaml`, classifier
-  `gem-umls-classify-credibility`); the full argument is the S1 credibility
+  `gem-umls-classify-credibility`); the full argument is the SN9 credibility
   note (`paper/sections/s19_credibility_umls.tex`). Nineteen rejected
   families; the four closest constructs (SNOMED degree qualifiers, NCI
   Level of Evidence, NCI Confidence answer set, SNOMED diagnostic-certainty

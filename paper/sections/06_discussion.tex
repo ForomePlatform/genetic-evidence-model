@@ -134,6 +134,24 @@ is preserved in the mapping's curator note; where the relation is the
 semantic core, the operator concept itself is recorded as the anchor with
 relation \emph{related}.
 
+The crosswalk review also highlighted a representational limitation of the
+Resolution axis. Its current enumeration presupposes genomic coordinates, but
+genetic evidence may be localized in several coordinate systems. A variant
+may be described at the genomic level (HGVS~\texttt{g.}), the transcript
+level (\texttt{c.}), or the protein level (\texttt{p.}).
+
+For example, an assertion of the form ``variant $V$ has effect $E$ in
+transcript $T$'' is resolved in transcript coordinates. Such assertions are
+often tissue-restricted and are characteristic of bioinformatics inference.
+The domain mapping underlying the \dimval{PROTEIN\_SUBDOMAIN} candidate is
+instead resolved in protein coordinates. In addition, \dimval{VARIANT}
+itself has two components: a position and a discrete nucleotide change.
+
+We therefore record \dimval{VARIANT\_IN\_TRANSCRIPT} as a curator-surfaced
+candidate value for Resolution. It is separate from the fifteen
+pilot-surfaced extensions listed in \cref{tab:candidates} and awaits
+independent use in a corpus paper under the promotion rule.
+
 \section{Availability of Code, Data, and Artefacts}
 \label{sec:availability}
 

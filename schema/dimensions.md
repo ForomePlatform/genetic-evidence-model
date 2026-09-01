@@ -324,14 +324,30 @@ model-organism evidence, not for every in-vivo experiment.)
 
 ## Candidate dimensions and enumeration values
 
-The following have been surfaced once during annotation but have not yet been
-independently confirmed by a second paper. They are recorded here for
-traceability; each promotion requires a second paper exercising the same gap.
+The following have been surfaced once --- during annotation or curator
+review --- but have not yet been independently confirmed by a paper from the
+corpus. They are recorded here for traceability; each promotion requires a
+corpus paper exercising the same gap.
 
 ### Candidate: `PROTEIN_SUBDOMAIN` value for Resolution
 
 Source: Jossin 2017, WD14/WD10 domain mapping for LLGL1–N-cadherin
 interaction.
+
+### Candidate: `VARIANT_IN_TRANSCRIPT` value for Resolution
+
+Source: curator review during the UMLS crosswalk round (2026-09-01), not a
+corpus annotation. There is a recurring evidence pattern asserting that a
+variant has a given effect *in a specific transcript*, usually
+tissue-restricted, and especially where Method is
+`BIOINFORMATICS_INFERENCE` (splice-effect prediction, isoform-level
+expression). This is resolution in transcript coordinates (HGVS `c.`),
+alongside genomic coordinates (`g.`, the current scale) and the protein
+coordinates (`p.`) of the `PROTEIN_SUBDOMAIN` candidate --- the Resolution
+axis spans multiple coordinate systems, not just granularities. Tissue
+context itself stays in `special_considerations` (existing `cell_type`
+key). Promotion follows the standard rule: a corpus paper must exercise
+the gap.
 
 ### Candidate: `INTERACTION` and `COMPLEX` values for Target type
 

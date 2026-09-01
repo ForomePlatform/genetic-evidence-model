@@ -2,8 +2,10 @@
 
 This file documents the candidate extensions to the Genetic Evidence
 Model that were surfaced by the six-paper annotation pilot reported
-in the ICBO 2026 paper. It is the detail companion to the grouped
-summary table in §6.2 of the paper.
+in the ICBO 2026 paper, plus curator-surfaced candidates recorded
+after it (kept outside the pilot counts). It is the detail companion to the grouped
+summary table in §6.1 of the paper (Discussion, Positioning and
+Model Extensions).
 
 ## Promotion rule recap
 
@@ -240,6 +242,26 @@ have a named place for.
   and `subdomain` has no family-based value.
 
 
+## Curator-surfaced candidates (outside the pilot)
+
+### CE-C1: `VARIANT_IN_TRANSCRIPT` value for Resolution
+
+- **Source:** curator review during the UMLS crosswalk round
+  (2026-09-01), not a corpus annotation.
+- **Triggering evidence:** the recurring pattern "variant V has
+  effect E in transcript T", usually tissue-restricted, and
+  especially where Method is `BIOINFORMATICS_INFERENCE`
+  (splice-effect prediction, isoform-level expression). Part of the
+  model's original design intention that did not survive into the
+  first schema draft for lack of corpus support.
+- **Proposal:** add `VARIANT_IN_TRANSCRIPT` to the Resolution
+  enumeration -- resolution in transcript coordinates (HGVS `c.`),
+  alongside genomic `g.` (the current scale) and the protein `p.`
+  coordinates of CE-J1. Tissue context stays in
+  `special_considerations` (`cell_type`).
+- **Status:** awaiting a corpus paper under the promotion rule;
+  discussed in the main text (Limitations and Future Work).
+
 ## Withdrawn candidates
 
 ### CE-DU2: Negated-assertion handling
@@ -266,5 +288,6 @@ polarity field.
   CE-D2; plus CE-N1 resolved by external reference). CE-DU3 and CE-DU4
   were added in the 2026-06-04 Duerr review, after paper submission;
   the submitted paper states thirteen (see `PAPER_ERRATA.md` E1.3).
+- **Curator-surfaced, outside the pilot counts:** 1 (CE-C1).
 - **Withdrawn after review:** 1 (CE-DU2).
 
