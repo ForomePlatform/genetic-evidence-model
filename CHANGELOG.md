@@ -11,6 +11,22 @@ Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
 ## [Unreleased]
 
 ### Added
+- Mapping Studio: **value curation**. A dimension's values could only ever be
+  added by hand-editing `dimensions_inventory.yaml`, so a workspace built from
+  scratch in the UI could acquire dimensions but never a single value, and the
+  empty-state hint pointed at **Rebuild**, which only re-resolves values the
+  inventory already defines. The dimension page now has **Add value** and
+  per-row edit / remove controls (`POST /api/value`, `/api/value/delete`),
+  writing token / query / `expect` / `sab` / note to the inventory through the
+  comment-preserving round-trip and re-resolving that dimension on the spot.
+  Renaming a token re-keys its adjudication; deleting a value drops its
+  adjudication, so a re-added token cannot resurrect a mapping nobody re-made.
+- Mapping Studio: a **?** control in the brand row opening the usage guide
+  (`docs/STUDIO.md`); `$GEM_STUDIO_HELP_URL` repoints it.
+- Mapping Studio: a value defined in the inventory but absent from the
+  crosswalk (just added, or a rebuild that failed) now appears as `pending`
+  with a new **not resolved** (`unbuilt`) need code, instead of not appearing
+  at all.
 - Supplementary Table ST1, a requirements × standards coverage matrix: ten
   evidence patterns against HL7 FHIR Evidence R5, GA4GH VA 1.0 / VRS, SEPIO,
   ECO, ClinGen / ACMG-AMP, and GEM, with per-row notes and identifiers
@@ -20,6 +36,13 @@ Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
 - This changelog.
 
 ### Changed
+- Mapping Studio: **a connected UMLS key is now required to change anything.**
+  Without one the workspace is fully browsable but read-only: every mutating
+  endpoint (`/api/decide`, `/api/axis`, `/api/prefs`, `/api/rebuild`,
+  `/api/value*`) answers `needs_key`, and every control that writes is disabled
+  in the browser with the reason. `/api/state` and `/api/umls-key` stay open so
+  the workspace still renders and a key can still be entered. Rationale: an
+  axis, value or decision the Metathesaurus has not confirmed is not a mapping.
 - Mapping Studio: UMLS-backed `/api/*` requests without a key now return an
   explicit `needs_key` error instead of failing silently; a "Connect UMLS"
   dialog walks through obtaining a free UTS key, tests it, and optionally
@@ -32,8 +55,16 @@ Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
   version DOIs and the PyPI distribution.
 
 ### Documentation
-- `data/umls/STUDIO.md`, `data/umls/README.md`: Connect UMLS walkthrough and
-  key-file location.
+- The Mapping Studio guide moved from `data/umls/STUDIO.md` to
+  **`docs/STUDIO.md`** and is linked from `README.md`. Rewritten around the
+  two ways the tool is used: building a new mapping from scratch in any domain
+  (install from PyPI → UMLS key → create a dimension → add values), and working
+  on the GEM mapping in this repository (from a checkout with
+  `pip install -e .`, or with the released tool pointed at `data/umls`). New
+  material on value curation and on what rename and delete do to a recorded
+  decision; the UMLS key is documented as a precondition rather than an
+  accelerator.
+- `data/umls/README.md`: Connect UMLS walkthrough and key-file location.
 - Manuscript: "ground truth" replaced by "curator-authored reference
   annotations" throughout; one formulation of human-curator authority over
   AI drafts and AI-assisted review in §5, SN2, and SN4; the `resolution` /

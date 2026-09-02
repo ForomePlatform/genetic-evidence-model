@@ -528,6 +528,173 @@ class TestAxisBuilder(unittest.TestCase):
                                                    "candidate"].index))
 
 
+class TestValueCuration(unittest.TestCase):
+    """Values are curated through the Studio, not by hand-editing YAML: a
+    workspace built from scratch must be able to acquire values, and the
+    inventory must survive every edit with its comments and layout intact."""
+
+    def _ws(self, seed=False):
+        import shutil
+        from forome.gem.umls import adjudicate_ui as A
+        ws = Path(tempfile.mkdtemp()) / "mapping"
+        ws.mkdir()
+        if seed:
+            shutil.copy(DATA_DIR / "dimensions_inventory.yaml",
+                        ws / "dimensions_inventory.yaml")
+        saved = (A.CROSSWALK, H.INVENTORY, H.ADJUDICATIONS)
+        A.CROSSWALK = ws / "umls_crosswalk.yaml"
+        H.INVENTORY = ws / "dimensions_inventory.yaml"
+        H.ADJUDICATIONS = ws / "adjudications.yaml"
+        self.addCleanup(lambda: setattr(A, "CROSSWALK", saved[0]))
+        self.addCleanup(lambda: setattr(H, "INVENTORY", saved[1]))
+        self.addCleanup(lambda: setattr(H, "ADJUDICATIONS", saved[2]))
+        return ws
+
+    def test_build_a_dimension_with_values_from_an_empty_workspace(self):
+        """The whole point: an empty directory in, a usable workspace out."""
+        import yaml
+        from forome.gem.umls import adjudicate_ui as A
+        ws = self._ws()
+        A.save_axis("severity", semantic_type="T080", query="Qualitative concept",
+                    tier="core", order=10)
+        A.save_value("severity", "MILD", query="Mild")
+        A.save_value("severity", "SEVERE", query="Severe", expect="likely", sab="msh")
+        A.save_value("severity", "OTHER", query="Other severity", kind="common_value")
+
+        blk = yaml.safe_load((ws / "dimensions_inventory.yaml").read_text())["dimensions"]["severity"]
+        self.assertEqual([v["token"] for v in blk["values"]], ["MILD", "SEVERE"])
+        self.assertEqual([v["token"] for v in blk["common_values"]], ["OTHER"])
+        self.assertEqual(blk["values"][1]["sab"], "MSH")        # normalised
+
+        # and they are all visible in the UI before any rebuild has run
+        st = A.load_state()
+        self.assertEqual([(e["token"], e["status"], e["needs"], e["kind"])
+                          for e in st["entries"] if e["kind"] != "axis"],
+                         [("MILD", "pending", ["unbuilt"], "value"),
+                          ("SEVERE", "pending", ["unbuilt"], "value"),
+                          ("OTHER", "pending", ["unbuilt"], "common_value")])
+        self.assertTrue(all(e["in_inventory"] for e in st["entries"]
+                            if e["kind"] != "axis"))
+
+    def test_edit_rename_and_delete(self):
+        import yaml
+        from forome.gem.umls import adjudicate_ui as A
+        ws = self._ws()
+        A.save_axis("severity", semantic_type="T080", query="Qualitative concept")
+        A.save_value("severity", "MILD", query="Mild", expect="likely",
+                     sab="MSH", note="a note")
+
+        # editing clears the optional fields it is given empty
+        A.save_value("severity", "MILD", query="Mild severity", expect="uncertain",
+                     sab="", note="", old_token="MILD")
+        vals = yaml.safe_load((ws / "dimensions_inventory.yaml").read_text()
+                              )["dimensions"]["severity"]["values"]
+        self.assertEqual(vals, [{"token": "MILD", "query": "Mild severity",
+                                 "expect": "uncertain"}])
+
+        # a rename carries the curator's decision to the new key
+        adj = H.load_adjudications(H.ADJUDICATIONS)
+        adj[H._adj_key("severity", "MILD")] = {"accept": "C9000001", "note": "n",
+                                               "relation": "close"}
+        A.write_adjudications(adj)
+        A.save_value("severity", "SLIGHT", query="Mild severity", old_token="MILD")
+        adj = H.load_adjudications(H.ADJUDICATIONS)
+        self.assertNotIn(H._adj_key("severity", "MILD"), adj)
+        self.assertEqual(adj[H._adj_key("severity", "SLIGHT")]["accept"], "C9000001")
+
+        # deleting takes the decision with it -- so re-adding the token never
+        # resurrects a mapping the curator did not re-make
+        res = A.delete_value("severity", "SLIGHT")
+        self.assertTrue(res["dropped_adjudication"])
+        self.assertNotIn(H._adj_key("severity", "SLIGHT"),
+                         H.load_adjudications(H.ADJUDICATIONS))
+        blk = yaml.safe_load((ws / "dimensions_inventory.yaml").read_text()
+                             )["dimensions"]["severity"]
+        self.assertNotIn("values", blk)      # emptied, not left as []
+
+    def test_rejects_what_would_corrupt_the_workspace(self):
+        from forome.gem.umls import adjudicate_ui as A
+        self._ws()
+        A.save_axis("severity", semantic_type="T080", query="Qualitative concept")
+        A.save_value("severity", "MILD", query="Mild")
+        for kwargs, frag in (
+                (dict(dimension="severity", token="MILD", query="x"),
+                 "already has a value"),
+                (dict(dimension="severity", token="TWO WORDS", query="x"),
+                 "identifier"),
+                (dict(dimension="severity", token="NOQUERY"),
+                 "query is required"),      # the harness reads query unconditionally
+                (dict(dimension="severity", token="X", query="x", expect="maybe"),
+                 "expect must be"),
+                (dict(dimension="nope", token="X", query="x"),
+                 "not in the inventory"),
+                (dict(dimension="severity", token="X", query="x", kind="axis"),
+                 "unknown value kind"),
+                (dict(dimension="severity", token="Y", query="x",
+                      old_token="GHOST"), "is not a value of")):
+            with self.assertRaises(ValueError) as cm:
+                A.save_value(**kwargs)
+            self.assertIn(frag, str(cm.exception), kwargs)
+        with self.assertRaises(ValueError):
+            A.delete_value("severity", "GHOST")
+
+    def test_inventory_comments_and_layout_survive_a_full_cycle(self):
+        """The repo's own inventory, through create -> edit -> rename -> delete,
+        must come back byte-identical: curators read those comments."""
+        from forome.gem.umls import adjudicate_ui as A
+        ws = self._ws(seed=True)
+        inv = ws / "dimensions_inventory.yaml"
+        before = inv.read_text()
+        A.save_value("knowledge_domain", "SYNTHETIC_BIOLOGY",
+                     query="Synthetic biology", expect="likely", sab="MSH",
+                     note="added through the Studio")
+        text = inv.read_text()
+        self.assertIn("{token: SYNTHETIC_BIOLOGY, query: Synthetic biology, "
+                      "expect: likely, sab: MSH,", text)     # flow style, as the file has always been
+        self.assertIn("# GEM dimension inventory for the UMLS crosswalk harness", text)
+        self.assertGreaterEqual(text.count("#"), before.count("#"))
+        A.save_value("knowledge_domain", "SYNTHBIO", query="Synthetic biology",
+                     expect="likely", sab="MSH", note="added through the Studio",
+                     old_token="SYNTHETIC_BIOLOGY")
+        A.delete_value("knowledge_domain", "SYNTHBIO")
+        self.assertEqual(inv.read_text(), before)
+
+    def test_state_carries_the_help_url(self):
+        """The ? control is served the guide's location, so a deployment can
+        repoint it without a code change."""
+        import os
+        from forome.gem.umls import adjudicate_ui as A
+        self._ws()
+        self.assertTrue(A.load_state()["help_url"].endswith("/docs/STUDIO.md"),
+                        A.HELP_URL)
+        self.assertEqual(A.HELP_URL,
+                         os.environ.get("GEM_STUDIO_HELP_URL") or A.HELP_URL)
+
+    def test_every_write_needs_a_connected_key(self):
+        """A workspace may be browsed without a key and changed only with one --
+        while /api/state and /api/umls-key stay open, or the browser could
+        neither render the workspace nor let the curator enter a key."""
+        from forome.gem.umls import adjudicate_ui as A
+        online, index = A.UTS_ONLINE, A.LOCAL_INDEX
+        self.addCleanup(lambda: setattr(A, "UTS_ONLINE", online))
+        self.addCleanup(lambda: setattr(A, "LOCAL_INDEX", index))
+
+        A.UTS_ONLINE, A.LOCAL_INDEX = False, False
+        for path in ("/api/value", "/api/value/delete", "/api/decide", "/api/axis",
+                     "/api/prefs", "/api/rebuild"):
+            self.assertTrue(A.uts_required(path), path)
+        for path in ("/api/state", "/api/umls-key", "/api/semantictypes"):
+            self.assertFalse(A.uts_required(path), path)
+
+        A.LOCAL_INDEX = True          # a local index serves search, never writes
+        self.assertTrue(A.uts_required("/api/value"))
+        self.assertFalse(A.uts_required("/api/search"))
+
+        A.UTS_ONLINE = True
+        for path in ("/api/value", "/api/decide", "/api/rebuild"):
+            self.assertFalse(A.uts_required(path), path)
+
+
 class TestStructuredRationale(unittest.TestCase):
     """Structured 'unmapped' / 'accept' rationale (relation / rejected /
     protocol): validation, YAML round-trip in both file styles, exposure in
@@ -672,6 +839,11 @@ class TestStructuredRationale(unittest.TestCase):
         from urllib.error import HTTPError
         from forome.gem.umls import adjudicate_ui as A
         self._ws()
+        # Writing needs a connected key (uts_required covers every mutating
+        # path), so this exercises the endpoint as a curator with UMLS on.
+        was_online = A.UTS_ONLINE
+        A.UTS_ONLINE = True
+        self.addCleanup(lambda: setattr(A, "UTS_ONLINE", was_online))
         # an ephemeral port: never the user's 8765, and immune to collisions
         srv = ThreadingHTTPServer(("127.0.0.1", 0), A.Handler)
         t = threading.Thread(target=srv.serve_forever, daemon=True)
@@ -828,7 +1000,8 @@ class TestNeeds(unittest.TestCase):
         from forome.gem.umls import adjudicate_ui as A
         self._populate(self._ws())
         st = A.load_state()
-        self.assertEqual(st["needs"], {"review": 1, "unconfirmed": 2, "unresolved": 1,
+        self.assertEqual(st["needs"], {"unbuilt": 0,
+                                       "review": 1, "unconfirmed": 2, "unresolved": 1,
                                        "no-rationale": 1, "untyped": 1})
         self.assertEqual(st["counts"]["needs"], 6)
         # the fixed order is the server's, exposed for the UI as data
@@ -852,7 +1025,9 @@ class TestNeeds(unittest.TestCase):
     def test_entry_needs_edge_cases(self):
         from forome.gem.umls import adjudicate_ui as A
         N = A.entry_needs
-        self.assertEqual(N({"kind": "value", "status": "pending"}), [])      # not live
+        # pending = in the inventory, never queried (offline scaffold, or a
+        # value just added): unfinished work, not an empty verdict
+        self.assertEqual(N({"kind": "value", "status": "pending"}), ["unbuilt"])
         self.assertEqual(N({"kind": "value", "status": "review", "curated": True}), ["review"])
         self.assertEqual(N({"kind": "axis", "sty_tui": None}, dim_has_values=False), [])
         self.assertEqual(N({"kind": "axis", "sty_tui": None}, dim_has_values=True), ["untyped"])

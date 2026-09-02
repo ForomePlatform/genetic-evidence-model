@@ -16,6 +16,12 @@ activation metadata (missing tier defaults to core).
   workspace's dimensions_inventory.yaml -- so the tool works against an EMPTY
   directory (build from scratch) or a populated one (modify).
 
+* Curate VALUES. "Add value" defines one (token + the query to search UMLS
+  for, an honest prior, an optional source hint and note); the row controls
+  edit or remove it. Values are written to the same inventory as the axes and
+  the dimension is re-resolved on the spot, so a workspace can be taken from an
+  empty directory to a built crosswalk without hand-editing YAML.
+
 * Adjudicate VALUES. For each value it shows the GEM meaning (from
   dimensions.md), the query used, the current decision, and the candidate
   concepts. You can search the UMLS Metathesaurus live, read each concept's
@@ -36,13 +42,19 @@ It runs locally (not a hosted artifact) because it must reach the licensed UTS
 API with your key and write files. The key is read from UMLS_API_KEY, the repo
 .envrc, or the per-user key file (~/.config/forome-gem/umls_api_key, written by
 the Connect UMLS dialog) and never sent to the browser; the browser calls local
-/api/* endpoints that proxy UMLS. Without a key every UMLS-backed request
-answers with needs_key and the browser walks the curator through obtaining
-one (UTS sign-up, license approval, profile page) instead of failing silently.
+/api/* endpoints that proxy UMLS.
+
+A key is required to CHANGE anything. Without one the Studio still starts and
+the workspace is fully browsable -- dimensions, values, axes, recorded
+decisions -- but every write answers needs_key and every control that would
+write is disabled, because an axis, a value or a decision the Metathesaurus has
+not confirmed is not a mapping. The browser then walks the curator through
+obtaining a key (UTS sign-up, license approval, profile page) rather than
+failing silently.
 
 Usage:
-    export UMLS_API_KEY=...            # or .envrc / key file; optional -- axis
-                                       # construction works offline
+    export UMLS_API_KEY=...            # or .envrc / key file, or the Studio's
+                                       # Connect UMLS dialog
     gem-umls-adjudicate [--data-dir DIR] [--port N] [--no-browser]
         DIR is a mapping workspace (inventory / crosswalk / adjudications); it
         may be empty. Defaults to the repo's data/umls, or $GEM_DATA_DIR.
@@ -128,11 +140,23 @@ RATIONALE_MAXLEN = 300      # cap on every free-text rationale string
 RATIONALE_MAXITEMS = 50     # cap on every rationale list
 _ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}")   # CUI / SAB shape
 
+# Where a dimension's values live in the inventory: schema-enumerated tokens
+# under `values`, conventions on an open dimension under `common_values`.
+VALUE_SEQS = {"value": "values", "common_value": "common_values"}
+EXPECTS = ("likely", "uncertain", "unlikely")   # the curator's prior on a value
+# A token is an identifier in the curator's vocabulary, not prose: GEM writes
+# UPPER_SNAKE, other workspaces may not, so the shape is permissive but excludes
+# whitespace (the adjudication key is "dimension/token").
+_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:+-]{0,127}")
+
 # ---- "what still needs a curator's eyes": ONE definition (entry_needs), computed
 # by the server and consumed as data by the whole UI -- the rail badges, the Home
 # worklist, the values-table filter, the value view's "next" button. Fixed order.
 # (code, short label, description, scope)
 NEED_CODES = (
+    ("unbuilt", "not resolved",
+     "in the inventory but not in the crosswalk — rebuild the dimension to "
+     "query UMLS for it", "value"),
     ("review", "review",
      "in review — the harness found candidates but no faithful match", "value"),
     ("unconfirmed", "unconfirmed",
@@ -249,6 +273,13 @@ KEY_FILE = (Path(os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config"))
 
 UTS_SIGNUP_URL = "https://uts.nlm.nih.gov/uts/signup-login"
 UTS_PROFILE_URL = "https://uts.nlm.nih.gov/uts/profile"
+
+# The Studio's usage guide, opened by the ? control in the brand row. Kept as
+# ONE constant because the document's home is provisional -- set
+# $GEM_STUDIO_HELP_URL to point a deployment at its own copy.
+HELP_URL = os.environ.get("GEM_STUDIO_HELP_URL") or (
+    "https://github.com/ForomePlatform/genetic-evidence-model"
+    "/blob/master/docs/STUDIO.md")
 
 
 def find_api_key() -> tuple[str, str]:
@@ -386,7 +417,9 @@ def entry_needs(e: dict, dim_has_values: bool = True) -> list:
     """The need codes (NEED_CODES) of one state entry -- the single place that
     says what still needs a curator's eyes. Empty list = nothing to do.
 
-    value entries: review        status review
+    value entries: unbuilt       in the inventory but absent from the crosswalk
+                                 -- never queried
+                   review        status review
                    unconfirmed   auto-mapped by the harness, never confirmed
                    unresolved    unmapped because the harness query returned
                                  nothing (or it was all filtered out) -- a gap,
@@ -399,6 +432,10 @@ def entry_needs(e: dict, dim_has_values: bool = True) -> list:
     if e.get("kind") == "axis":
         return ["untyped"] if dim_has_values and not e.get("sty_tui") else []
     status, curated = e.get("status"), bool(e.get("curated"))
+    if status == "pending":
+        # in the inventory, never resolved: the harness has not queried it (a
+        # rebuild that failed or has not run). Not a verdict -- unfinished work.
+        return ["unbuilt"]
     # The crosswalk snapshot only changes on Rebuild; the live adjudication
     # (entry["decision"]) wins so the flags follow decisions made in-session.
     dec = e.get("decision")
@@ -446,6 +483,29 @@ def load_state() -> dict:
             if e.get("kind") == "axis":
                 continue
             values_by_dim.setdefault(e["dimension"], []).append(e)
+
+    # The INVENTORY is the source of truth for which values exist; the crosswalk
+    # is a resolved snapshot of it. A value present in the former and missing
+    # from the latter (just added, or a rebuild that failed) is shown as
+    # 'pending' rather than not at all -- otherwise adding a value looks like
+    # nothing happened, which is exactly the trap this workspace used to set.
+    inv_values: dict = {}
+    for dim, block in dims.items():
+        for kind, seq in VALUE_SEQS.items():
+            for v in (block or {}).get(seq) or []:
+                if not isinstance(v, dict) or v.get("token") is None:
+                    continue
+                inv_values.setdefault(dim, {})[str(v["token"])] = (kind, dict(v))
+    for dim, byname in inv_values.items():
+        have = {str(e.get("token")) for e in values_by_dim.get(dim, [])}
+        for tok, (kind, v) in byname.items():
+            if tok in have:
+                continue
+            values_by_dim.setdefault(dim, []).append({
+                "dimension": dim, "token": v["token"], "kind": kind,
+                "query": v.get("query") or "", "status": "pending",
+                "expect": v.get("expect"), "sab": v.get("sab"),
+                "inventory_note": v.get("note"), "candidates": []})
 
     # Tiered ordering: core dimensions first in the model's canonical order,
     # then conditional (grouped by activation via their order values), then
@@ -529,6 +589,12 @@ def load_state() -> dict:
                 "decision_cui": a.get("accept"), "decision_sty": a.get("accept_sty"),
                 "note": a.get("note"), "error": e.get("curator_error"),
                 "search_type": e.get("search_type"),
+                # the inventory definition behind this value, for the editor:
+                # None/absent means the crosswalk carries a row the inventory
+                # no longer defines (hand-edited or deleted elsewhere)
+                "expect": e.get("expect"),
+                "inventory_note": e.get("inventory_note"),
+                "in_inventory": str(e["token"]) in (inv_values.get(e["dimension"]) or {}),
                 **_rationale_view(a),
             }
             v["needs"] = entry_needs(v)
@@ -555,7 +621,7 @@ def load_state() -> dict:
             "need_labels": NEED_LABELS,
             "workspace": str(DATA_DIR), "dimensions": sorted(dims),
             "prefs": {"workspace": ws_prefs},
-            "search_backend": SEARCH_BACKEND,
+            "search_backend": SEARCH_BACKEND, "help_url": HELP_URL,
             "server": {"started": SERVER_STARTED, "code": CODE_STAMP},
             "search_backend_note": SEARCH_BACKEND_NOTE,
             # never the key itself -- only whether one is loaded and from where
@@ -645,6 +711,190 @@ def save_axis(dimension: str, semantic_type=None, query=None, note=None,
         axis["semantic_type"] = semantic_type
     _inv_save(inv)
     return dict(axis)
+
+
+# ---- values ---------------------------------------------------------------
+# A dimension's VALUES are the tokens adjudicated to concepts. They live in the
+# inventory beside the axis (dimensions.<dim>.values, or common_values for the
+# open dimensions whose tokens are conventions rather than schema enumerations),
+# and until now could only be added by hand-editing the YAML -- so a workspace
+# built from scratch through the UI could never acquire one. These are the
+# inventory-side primitives behind /api/value.
+def _find_value(block: dict, token) -> tuple:
+    """(sequence name, index, entry) of one token in a dimension block, or
+    (None, None, None). Both value sequences are searched: a token is unique
+    within its dimension whichever list holds it."""
+    for seq in VALUE_SEQS.values():
+        for i, v in enumerate(block.get(seq) or []):
+            if isinstance(v, dict) and str(v.get("token")) == str(token):
+                return seq, i, v
+    return None, None, None
+
+
+def _new_value_entry(fields: dict):
+    """A fresh inventory value. Emitted flow-style ({token: X, query: Y}) to
+    match how the value lists have always been written."""
+    try:
+        from ruamel.yaml.comments import CommentedMap
+        m = CommentedMap(fields)
+        m.fa.set_flow_style()
+        return m
+    except ImportError:
+        return dict(fields)
+
+
+def save_value(dimension: str, token: str, query=None, expect=None, sab=None,
+               note=None, kind: str = "value", old_token=None) -> dict:
+    """Create or update one value of a dimension in the workspace inventory.
+
+    ``old_token`` renames an existing value in place (keeping its position and
+    surrounding comments) and carries its adjudication over to the new key, so a
+    corrected token does not silently abandon the curator's decision. Returns
+    the resulting inventory entry as a plain dict."""
+    dimension = (dimension or "").strip()
+    token = str(token or "").strip()
+    old_token = str(old_token).strip() if old_token else None
+    if kind not in VALUE_SEQS:
+        raise ValueError(f"unknown value kind {kind!r}")
+    if not dimension:
+        raise ValueError("a dimension name is required")
+    if not token:
+        raise ValueError("a token is required")
+    if not _TOKEN_RE.fullmatch(token):
+        raise ValueError("token must be an identifier: letters, digits, "
+                         "_ . : + - (no spaces)")
+    query = _rs(query, "query")
+    if not query:
+        # The harness reads src["query"] unconditionally; a value without one
+        # would break every rebuild of the dimension.
+        raise ValueError("a query is required -- it is the term sent to UMLS")
+    if expect and expect not in EXPECTS:
+        raise ValueError(f"expect must be one of {', '.join(EXPECTS)}")
+    sabs = _norm_sabs(sab)
+    if len(sabs) > 1:
+        raise ValueError("a value takes at most one source-vocabulary hint")
+
+    inv = _inv_load()
+    dims = inv.get("dimensions") or {}
+    if dimension not in dims:
+        raise ValueError(f"dimension {dimension!r} is not in the inventory")
+    block = dims[dimension]
+    # old_token is what makes this an UPDATE. Without it the call creates, and
+    # an existing token is a collision -- never a silent overwrite of the
+    # query, note and prior of a value somebody else defined.
+    if old_token:
+        _, _, existing = _find_value(block, old_token)
+        if existing is None:
+            raise ValueError(f"{old_token!r} is not a value of {dimension}")
+        if token != old_token and _find_value(block, token)[2] is not None:
+            raise ValueError(f"{dimension} already has a value {token!r}")
+    else:
+        existing = None
+        if _find_value(block, token)[2] is not None:
+            raise ValueError(f"{dimension} already has a value {token!r} — "
+                             "edit that one instead of adding a second")
+
+    fields = {"token": token, "query": query}
+    if expect:
+        fields["expect"] = expect
+    if sabs:
+        fields["sab"] = sabs[0]
+    note = _rs(note, "note")
+    if note:
+        fields["note"] = note
+
+    if existing is None:
+        block.setdefault(VALUE_SEQS[kind], []).append(_new_value_entry(fields))
+        entry = fields
+    else:
+        # Update in place so ruamel keeps the entry's position and comments.
+        for k in ("token", "query", "expect", "sab", "note"):
+            if k in fields:
+                existing[k] = fields[k]
+            else:
+                existing.pop(k, None)
+        entry = dict(existing)
+    _inv_save(inv)
+
+    if old_token and old_token != token:
+        adj = H.load_adjudications(H.ADJUDICATIONS)
+        prev = adj.pop(H._adj_key(dimension, old_token), None)
+        if prev is not None:
+            adj[H._adj_key(dimension, token)] = prev
+            write_adjudications(adj)
+    return entry
+
+
+def delete_value(dimension: str, token: str) -> dict:
+    """Remove one value from a dimension, together with any adjudication of it.
+
+    The decision goes with the token deliberately: leaving it behind would make
+    re-adding the same token resurrect a mapping the curator never re-made, and
+    the Studio does not present decisions nobody took. Returns what was removed."""
+    dimension = (dimension or "").strip()
+    token = str(token or "").strip()
+    inv = _inv_load()
+    block = (inv.get("dimensions") or {}).get(dimension)
+    if block is None:
+        raise ValueError(f"dimension {dimension!r} is not in the inventory")
+    seq, idx, existing = _find_value(block, token)
+    if existing is None:
+        raise ValueError(f"{token!r} is not a value of {dimension}")
+    removed = dict(existing)
+    del block[seq][idx]
+    if not block[seq]:
+        del block[seq]
+    _inv_save(inv)
+
+    adj = H.load_adjudications(H.ADJUDICATIONS)
+    dropped = adj.pop(H._adj_key(dimension, token), None)
+    if dropped is not None:
+        write_adjudications(adj)
+    return {"removed": removed, "dropped_adjudication": dropped is not None}
+
+
+def rebuild_workspace(dim: str | None = None) -> dict:
+    """Re-resolve the workspace against UMLS and rewrite the crosswalk snapshot.
+
+    ``dim`` scopes the rebuild to one dimension, merged into the existing
+    crosswalk in place (every other dimension is left exactly as it was);
+    without it the whole inventory is rebuilt. Returns the written document."""
+    if dim:
+        part = H.build(client, live=True, only_dims={dim})
+        if not part["entries"]:
+            # dim not in the inventory (renamed/removed by hand?): merging an
+            # empty part would only DELETE its existing crosswalk entries --
+            # refuse instead of destroying data.
+            raise ValueError(f"dimension {dim!r} is not in the inventory; "
+                             "nothing to rebuild")
+        doc = (yaml.safe_load(CROSSWALK.read_text())
+               if CROSSWALK.is_file() else None)
+        if doc and doc.get("entries"):
+            merged, inserted = [], False
+            for e in doc["entries"]:
+                if e.get("dimension") == dim:
+                    if not inserted:
+                        merged.extend(part["entries"])
+                        inserted = True
+                    continue
+                merged.append(e)
+            if not inserted:
+                merged.extend(part["entries"])
+            doc["entries"] = merged
+        else:
+            doc = part
+        counts = {s: 0 for s in ("mapped", "review", "unmapped", "pending")}
+        for e in doc["entries"]:
+            counts[e["status"]] += 1
+        counts["curated"] = sum(1 for e in doc["entries"] if e.get("curated"))
+        counts["axis_typed"] = sum(1 for e in doc["entries"] if e.get("sty_tui"))
+        doc["meta"]["counts"] = counts
+        doc["meta"]["total"] = len(doc["entries"])
+    else:
+        doc = H.build(client, live=True)
+    CROSSWALK.write_text(yaml.safe_dump(doc, sort_keys=False,
+                                        allow_unicode=True, width=100))
+    return doc
 
 
 def save_prefs(preferred_sabs) -> list:
@@ -887,8 +1137,16 @@ LOCAL_INDEX = False           # the optional PostgreSQL index is serving search
 # /api paths that need UTS. Without a key they return {"needs_key": true}
 # instead of silently empty results; the local index, when loaded, still
 # serves /api/search and /api/sabs on its own.
+# Reads that go to UMLS, plus EVERY write: a workspace may be browsed without a
+# key (tables, recorded decisions, the axis and value definitions already in the
+# inventory), but nothing may be changed until UMLS is connected -- a decision or
+# a new value that cannot be resolved against the Metathesaurus is not a mapping.
+# /api/state and /api/umls-key stay open in every state, so the browser can
+# render the workspace read-only and walk the curator through entering a key.
 UTS_PATHS = {"/api/search", "/api/rollup", "/api/sabs", "/api/expand",
-             "/api/descend", "/api/concept", "/api/rebuild"}
+             "/api/descend", "/api/concept", "/api/rebuild",
+             "/api/decide", "/api/axis", "/api/prefs",
+             "/api/value", "/api/value/delete"}
 LOCAL_ONLY_OK = {"/api/search", "/api/sabs"}
 
 
@@ -1076,6 +1334,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(500, json.dumps({"error": str(ex)}))
         self._send(404, json.dumps({"error": "not found"}))
 
+    def _resolve_dim(self, dim) -> dict:
+        """Re-resolve one dimension after an inventory edit, so the value the
+        curator just wrote comes back with its candidates instead of waiting for
+        a manual Rebuild. The write has already succeeded when this runs: a
+        failure here is reported as rebuild_error alongside ok, never as a
+        failed write."""
+        dim = (dim or "").strip()
+        try:
+            doc = rebuild_workspace(dim or None)
+            return {"counts": doc["meta"]["counts"]}
+        except Exception as ex:  # noqa: BLE001 -- UMLS hiccup, not a lost edit
+            return {"rebuild_error": f"{type(ex).__name__}: {ex}"}
+
     def do_POST(self):
         ln = int(self.headers.get("Content-Length") or 0)
         try:
@@ -1156,46 +1427,34 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, json.dumps({"ok": True, "preferred_sabs": lst}))
             if u.path == "/api/rebuild":
                 dim = (data.get("dim") or "").strip() or None
-                if dim:
-                    # scoped rebuild: re-resolve one dimension, merge into the
-                    # existing crosswalk in place (other dimensions untouched).
-                    part = H.build(client, live=True, only_dims={dim})
-                    if not part["entries"]:
-                        # dim not in the inventory (renamed/removed by hand?):
-                        # merging an empty part would only DELETE its existing
-                        # crosswalk entries -- refuse instead of destroying data.
-                        return self._send(400, json.dumps({"error":
-                            f"dimension {dim!r} is not in the inventory; "
-                            "nothing to rebuild"}))
-                    doc = (yaml.safe_load(CROSSWALK.read_text())
-                           if CROSSWALK.is_file() else None)
-                    if doc and doc.get("entries"):
-                        merged, inserted = [], False
-                        for e in doc["entries"]:
-                            if e.get("dimension") == dim:
-                                if not inserted:
-                                    merged.extend(part["entries"])
-                                    inserted = True
-                                continue
-                            merged.append(e)
-                        if not inserted:
-                            merged.extend(part["entries"])
-                        doc["entries"] = merged
-                    else:
-                        doc = part
-                    counts = {s: 0 for s in ("mapped", "review", "unmapped", "pending")}
-                    for e in doc["entries"]:
-                        counts[e["status"]] += 1
-                    counts["curated"] = sum(1 for e in doc["entries"] if e.get("curated"))
-                    counts["axis_typed"] = sum(1 for e in doc["entries"] if e.get("sty_tui"))
-                    doc["meta"]["counts"] = counts
-                    doc["meta"]["total"] = len(doc["entries"])
-                else:
-                    doc = H.build(client, live=True)
-                CROSSWALK.write_text(yaml.safe_dump(doc, sort_keys=False,
-                                                    allow_unicode=True, width=100))
+                try:
+                    doc = rebuild_workspace(dim)
+                except ValueError as ve:
+                    return self._send(400, json.dumps({"error": str(ve)}))
                 return self._send(200, json.dumps({"ok": True, "dim": dim,
                                                    "counts": doc["meta"]["counts"]}))
+            if u.path == "/api/value":
+                try:
+                    entry = save_value(data.get("dimension"), data.get("token"),
+                                       query=data.get("query"),
+                                       expect=data.get("expect") or None,
+                                       sab=data.get("sab"),
+                                       note=data.get("note"),
+                                       kind=data.get("kind") or "value",
+                                       old_token=data.get("old_token") or None)
+                except ValueError as ve:
+                    return self._send(400, json.dumps({"error": str(ve)}))
+                out = {"ok": True, "value": entry,
+                       **self._resolve_dim(data.get("dimension"))}
+                return self._send(200, json.dumps(out))
+            if u.path == "/api/value/delete":
+                try:
+                    res = delete_value(data.get("dimension"), data.get("token"))
+                except ValueError as ve:
+                    return self._send(400, json.dumps({"error": str(ve)}))
+                out = {"ok": True, **res,
+                       **self._resolve_dim(data.get("dimension"))}
+                return self._send(200, json.dumps(out))
         except Exception as ex:  # noqa: BLE001
             return self._send(500, json.dumps({"error": str(ex)}))
         self._send(404, json.dumps({"error": "not found"}))
@@ -1236,6 +1495,17 @@ textarea{width:100%;min-height:44px}
 #brand .txt{flex:1;min-width:0}
 #gear{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--faint);cursor:pointer;border:1px solid transparent}
 #gear:hover{color:var(--accent);background:#e9e5d8;border-color:var(--line)}
+#help{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:7px;color:var(--faint);border:1px solid transparent;text-decoration:none}
+#help:hover{color:var(--accent);background:#e9e5d8;border-color:var(--line)}
+/* a control that would change the workspace, while UMLS is not connected */
+button:disabled,button.blocked{opacity:.42;cursor:not-allowed}
+.vt td.acts{text-align:right;white-space:nowrap;width:1%}
+.vt td.acts button{visibility:hidden}
+.vt tr.vrow:hover td.acts button,.vt td.acts button:disabled{visibility:visible}
+.vrow.pendingrow .tk{color:var(--faint)}
+.vedit label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--faint);margin:9px 0 3px}
+.vedit input,.vedit select{width:100%;font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+.vedit .mono{font-family:var(--mono);font-size:12px}
 #nav{flex:1;overflow:auto;padding:4px 0 8px}
 .tierhdr{padding:10px 18px 4px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)}
 .nitem{display:flex;align-items:center;gap:8px;padding:5px 18px;cursor:pointer}
@@ -1420,7 +1690,10 @@ const IC={
  right:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 1.5 7 5 3 8.5" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
  down:'<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 3 5 7 8.5 3" stroke="#8a8474" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
  plus:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
- gear:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M3.5 12.5l1.3-1.3M11.2 4.8l1.3-1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>'};
+ gear:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M3.5 12.5l1.3-1.3M11.2 4.8l1.3-1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+ help:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.3" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 6.1a1.85 1.85 0 1 1 2.2 2.06c-.4.09-.4.5-.4.84" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.4" r=".85" fill="currentColor"/></svg>',
+ pencil:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.2 1.6 10.4 3.8 4.1 10.1 1.5 10.5l.4-2.6 6.3-6.3Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+ trash:'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.8 3.2h8.4M4.6 3.2V2.1h2.8v1.1M2.9 3.2l.5 6.7h5.2l.5-6.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
 /* ---------- vocabulary helpers ---------- */
 const TTY={AB:'abbreviation',ACR:'acronym',BN:'brand name',DN:'display name',
  EP:'print entry term (MeSH)',ET:'entry term',FN:'fully specified name',
@@ -1520,12 +1793,22 @@ function attachSabTypeahead(input,onEnter){if(!input||input.dataset.ta)return;in
     else if(ev.key==='Escape'&&open){close();ev.preventDefault();ev.stopPropagation();}
     else if(ev.key==='Tab'&&open){pick(sel<0?0:sel);ev.preventDefault();}});}
 /* ---------- modal + Semantic Network views ---------- */
+/* ---------- write guard ----------
+   A workspace may be browsed without a UMLS key; it may not be CHANGED without
+   one. Every control that writes carries data-write and is disabled until UMLS
+   is connected — including inside modals, which is why this runs on each render
+   and on each modal. The Connect UMLS controls deliberately carry no data-write. */
+const WRITE_BLOCKED_MSG='Connect UMLS to change the workspace — without a key the Studio is read-only';
+function writesBlocked(){return umlsOff();}
+function applyWriteGuard(){if(!writesBlocked())return;
+  document.querySelectorAll('[data-write]').forEach(el=>{
+    el.disabled=true;el.classList.add('blocked');el.title=WRITE_BLOCKED_MSG;});}
 function showModal(titleHTML,bodyHTML){closeModal();
   const d=document.createElement('div');d.id='modal';
   d.innerHTML=`<div class="mbox"><div class="mhead"><b>${titleHTML}</b><span style="flex:1"></span>`+
     `<button class="mini" onclick="closeModal()">close</button></div><div class="mbody">${bodyHTML}</div></div>`;
   d.addEventListener('click',ev=>{if(ev.target===d)closeModal();});
-  document.body.appendChild(d);}
+  document.body.appendChild(d);applyWriteGuard();}
 function closeModal(){const m=$('#modal');if(m)m.remove();}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeModal();});
 function mostSpecificTui(names){if(!SEMTYPES)return null;const norm=s=>(s||'').toLowerCase();
@@ -1645,7 +1928,9 @@ function railItem(d,kid){const act=activeDim()===d.dim;
 function renderRail(){const g=grouped();const box=$('#rail');
   let h=`<div id="brand" onclick="gotoHome()">${IC.logo}<div class="txt"><div class="nm">GEM Mapping Studio</div>`+
     `<div class="ws">${esc(shortWs())} · ${(STATE.counts||{}).total||0} values</div></div>`+
-    `<div id="gear" title="Settings — preferred vocabularies" onclick="event.stopPropagation();openSettings()">${IC.gear}</div></div><div id="nav">`;
+    `<div id="gear" title="Settings — preferred vocabularies" onclick="event.stopPropagation();openSettings()">${IC.gear}</div>`+
+    `<a id="help" href="${esc((STATE.help_url)||'')}" target="_blank" rel="noopener" title="Usage guide — how the workspace, search ladder and decisions work" onclick="event.stopPropagation()">${IC.help}</a>`+
+    `</div><div id="nav">`;
   h+=`<div class="tierhdr">CORE</div>`;
   h+=g.core.map(d=>railItem(d)).join('')||'<div class="navempty">none yet</div>';
   h+=`<div class="tierhdr">CONDITIONAL</div>`;
@@ -1656,7 +1941,7 @@ function renderRail(){const g=grouped();const box=$('#rail');
     if(open)h+=grp.dims.map(d=>railItem(d,true)).join('');});
   h+=`<div class="tierhdr">CANDIDATE</div>`;
   h+=g.candidate.map(d=>railItem(d)).join('')||'<div class="navempty">None — promoted candidates appear here.</div>';
-  h+=`</div><div id="railfoot"><button onclick="newAxis()">${IC.plus} New dimension</button></div>`;
+  h+=`</div><div id="railfoot"><button data-write onclick="newAxis()">${IC.plus} New dimension</button></div>`;
   box.innerHTML=h;}
 function toggleGroup(act){const g=grouped();const grp=g.cond.find(x=>x.act===act);
   const open=OPEN[act]!==undefined?OPEN[act]:(grp&&grp.dims.some(d=>d.dim===activeDim()));
@@ -1666,14 +1951,15 @@ function shortWs(){const w=STATE.workspace||'';const parts=w.split('/');return p
 function render(){if(!STATE)return;renderRail();
   if(ROUTE.view==='home')renderHome();
   else if(ROUTE.view==='dim')renderDim();
-  else if(ROUTE.view==='value')renderValue();}
+  else if(ROUTE.view==='value')renderValue();
+  applyWriteGuard();}
 function head(crumbHTML,titleHTML,orient){$('#head').innerHTML=
   `<div class="crumb">${crumbHTML}</div><div class="titlerow">${titleHTML}</div>`+
   (orient?`<div class="orient">${orient}</div>`:'')+keyBannerHTML();}
 function umlsOff(){return !!(STATE&&STATE.umls&&!STATE.umls.connected);}
 function keyBannerHTML(){if(!umlsOff())return '';
   const u=STATE.umls||{};
-  return `<div class="keybanner"><b>UMLS is not connected.</b> <span>Concept search, evidence, and rebuilds need a UMLS API key${u.local_index?' (the local index still serves plain search)':''}.</span><span class="spacer"></span><button class="primary" onclick="showKeyDialog()">Connect UMLS…</button></div>`;}
+  return `<div class="keybanner"><b>UMLS is not connected — this workspace is read-only.</b> <span>You can browse dimensions, values and recorded decisions; changing any of them needs a UMLS API key${u.local_index?' (the local index still serves plain search)':''}, because a mapping the Metathesaurus has not confirmed is not a mapping.</span><span class="spacer"></span><button class="primary" onclick="showKeyDialog()">Connect UMLS…</button></div>`;}
 /* ---------- UMLS key walkthrough ----------
    Any /api response carrying needs_key opens this dialog, so a missing key is
    never a silent empty result. The key goes to the local server only. */
@@ -1710,7 +1996,7 @@ async function connectUmls(){const key=(($('#umlskey')||{}).value||'').trim(),m=
 function renderHome(){const c=STATE.counts||{},g=grouped(),dims=dimList();
   head('WORKSPACE',
     `<span class="title-serif">Mapping workspace</span><span class="spacer"></span><span id="msg"></span>`+
-    `<button onclick="rebuild()" title="Re-queries UMLS for every dimension and value in the workspace and rewrites umls_crosswalk.yaml">Rebuild all</button><button class="primary" onclick="newAxis()">New dimension</button>`,
+    `<button data-write onclick="rebuild()" title="Re-queries UMLS for every dimension and value in the workspace and rewrites umls_crosswalk.yaml">Rebuild all</button><button class="primary" data-write onclick="newAxis()">New dimension</button>`,
     `Define each dimension&rsquo;s <b>axis</b> as a UMLS semantic type, adjudicate its <b>values</b> to concepts, and export the crosswalk. Pick a dimension on the left to begin.`);
   const tot=c.total||0,m=c.mapped||0,r=c.review||0,u=c.unmapped||0;
   const pct=x=>tot?Math.round(100*x/tot):0;
@@ -1797,8 +2083,8 @@ function renderDim(){const isnew=!!ROUTE.isnew;
     (AXB.activation?`<span class="mini mono">${esc(AXB.activation)}</span>`:'')+
     (e?needChips(e):'')+
     `<span class="spacer"></span><span id="msg"></span>`+(e?nextBtn(e.key):'')+
-    (AXB.isnew?'':`<button onclick="rebuild('${jsq(AXB.dimension)}')" title="Re-queries UMLS for this dimension's values only; the rest of the crosswalk is untouched">Rebuild this dimension</button>`)+
-    `<button class="primary" onclick="axbSave()">${AXB.isnew?'Create axis':'Save axis'}</button>`,
+    (AXB.isnew?'':`<button data-write onclick="rebuild('${jsq(AXB.dimension)}')" title="Re-queries UMLS for this dimension's values only; the rest of the crosswalk is untouched">Rebuild this dimension</button>`)+
+    `<button class="primary" data-write onclick="axbSave()">${AXB.isnew?'Create axis':'Save axis'}</button>`,
     isnew?'A dimension&rsquo;s axis maps it to a UMLS <b>semantic type</b>; the type&rsquo;s subtree becomes the search filter for every value of the dimension.':'');
   const ro=AXB.isnew?'':'readonly';
   let h=`<div class="card"><h3>Axis</h3><div class="axgrid">`+
@@ -1828,8 +2114,10 @@ function renderDim(){const isnew=!!ROUTE.isnew;
         `<option value="mapped">Mapped</option>`+
         `<option value="unmapped">Unmapped</option><option value="curated">Curated</option><option value="auto">Auto (not curated)</option></select>`+
       `<input id="ftext" oninput="setFilter()" placeholder="filter token…" style="width:180px;font-size:12px">`+
+      `<span class="spacer" style="flex:1"></span>`+
+      `<button class="primary" data-write onclick="valueEditor('${jsq(e.dimension)}',null)" title="Define a new value of this dimension in the workspace inventory and resolve it against UMLS">${IC.plus} Add value</button>`+
       `</div><div id="vtbox">${valuesTable(vals)}</div></div>`;
-    if(!vals.length)h+=`<div class="mini" style="margin:-6px 0 12px 4px">No values in the crosswalk yet — values come from the inventory/schema; <b>Rebuild</b> generates and resolves them.</div>`;}
+    if(!vals.length)h+=`<div class="mini" style="margin:-6px 0 12px 4px">This dimension has no values yet. <b>Add value</b> writes one to the workspace inventory — a token and the term to search UMLS for — and resolves it within the axis type straight away. (<b>Rebuild</b> re-resolves the values the inventory already defines; it does not invent any.)</div>`;}
   $('#content').innerHTML=h;
   if(e)wireNext(e.key);
   if(AXB.isnew){['axdim','axtier','axact'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('input',()=>{
@@ -1847,7 +2135,7 @@ function renderDim(){const isnew=!!ROUTE.isnew;
 function setFilter(){FILTER.dim=ROUTE.dim;FILTER.status=($('#fstatus')||{}).value||'all';FILTER.text=($('#ftext')||{}).value||'';
   const e=dimList().find(x=>x.dim===ROUTE.dim);if(!e)return;
   const vals=STATE.entries.filter(x=>x.dimension===ROUTE.dim&&x.kind!=='axis');
-  $('#vtbox').innerHTML=valuesTable(vals);enrichSlots($('#vtbox'));}
+  $('#vtbox').innerHTML=valuesTable(vals);enrichSlots($('#vtbox'));applyWriteGuard();}
 function passFilter(e){const f=FILTER.status,t=FILTER.text.toLowerCase();
   if(t&&!(String(e.token||'')+' '+e.dimension).toLowerCase().includes(t))return false;
   if(f==='all')return true;if(f==='mapped')return e.status==='mapped';if(f==='unmapped')return e.status==='unmapped';
@@ -1858,13 +2146,19 @@ function valuesTable(vals){const rows=vals.filter(passFilter).map(e=>{
     const map=e.cui?`<span>${esc(e.matched_name||'')}</span> <span class="cui">${esc(e.cui)}</span> `+
       `<span class="sabslot" data-cui="${esc(e.cui)}" data-root="${esc(e.root_source||'')}" data-prefs="${esc((e.sab_prefs||[]).join(','))}">`+
       (e.root_source?`<span class="sab">${esc(e.root_source)}</span>`:'')+`</span>`:'<span class="mut">—</span>';
-    return `<tr class="vrow" onclick="gotoValue('${jsq(e.key)}')">`+
+    const inv=e.in_inventory!==false;
+    const noinv='not defined in the workspace inventory — the crosswalk carries a row the inventory does not';
+    return `<tr class="vrow${e.status==='pending'?' pendingrow':''}" onclick="gotoValue('${jsq(e.key)}')">`+
       `<td style="width:16px"><span class="dot ${esc(e.status)}" style="display:inline-block"></span></td>`+
       `<td class="tk">${esc(e.token)}${e.kind!=='value'?` <span class="condchip">${esc(e.kind)}</span>`:''}</td>`+
       `<td class="mut">${esc(e.query)}</td><td>${map}</td><td>${styCell(e)}</td>`+
       `<td style="text-align:right;white-space:nowrap">${needChips(e)}${(e.needs||[]).length?' ':''}<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+
-      (e.curated?' <span class="badge">curated</span>':'')+`</td></tr>`;}).join('');
-  return rows?`<table class="vt"><tr><th></th><th>TOKEN</th><th>QUERY</th><th>MAPPING</th><th>STY</th><th style="text-align:right">STATUS</th></tr>${rows}</table>`
+      (e.curated?' <span class="badge">curated</span>':'')+`</td>`+
+      `<td class="acts">`+
+        `<button class="mini" data-write${inv?'':' disabled'} title="${inv?'edit this value&rsquo;s inventory definition':esc(noinv)}" onclick="event.stopPropagation();valueEditor('${jsq(e.dimension)}','${jsq(e.token)}')">${IC.pencil}</button> `+
+        `<button class="mini" data-write${inv?'':' disabled'} title="${inv?'remove this value from the dimension':esc(noinv)}" onclick="event.stopPropagation();confirmDeleteValue('${jsq(e.dimension)}','${jsq(e.token)}')">${IC.trash}</button>`+
+      `</td></tr>`;}).join('');
+  return rows?`<table class="vt"><tr><th></th><th>TOKEN</th><th>QUERY</th><th>MAPPING</th><th>STY</th><th style="text-align:right">STATUS</th><th></th></tr>${rows}</table>`
     :'<div class="mini" style="padding:8px 0">no values match the filter</div>';}
 // the mapped concept's most specific semantic type as STN + name (no TUI),
 // clickable: its place in the network relative to the dimension's axis type
@@ -1874,6 +2168,71 @@ function styCell(e){if(!e.cui||!(e.semantic_types||[]).length)return '<span clas
   return `<a href="#" class="stnlink" title="${esc(st.name)} — click to see its place relative to the axis type" `+
     `onclick="event.stopPropagation();showCompare('${st.tui}','${jsq(e.dim_sty_tui||'')}');return false">${esc(st.tree)}</a> `+
     `<span style="font-size:11.5px">${esc(st.name)}</span>`;}
+/* ---------- values: the inventory definitions behind the table ----------
+   A value is a token of the dimension plus the term the harness searches UMLS
+   for. It lives in the workspace inventory next to the axis; saving one
+   re-resolves the dimension so the token comes back with its candidates. */
+function valueEditor(dim,token){
+  const cur=token!=null?(STATE.entries||[]).find(x=>x.dimension===dim&&String(x.token)===String(token)):null;
+  const v={token:cur?String(cur.token):'',query:cur?(cur.query||''):'',
+           expect:(cur&&cur.expect)||'uncertain',sab:(cur&&cur.sab_pref)||'',
+           note:(cur&&cur.inventory_note)||'',kind:(cur&&cur.kind)||'value'};
+  const opts=(sel,list)=>list.map(x=>`<option${x===sel?' selected':''}>${x}</option>`).join('');
+  showModal((cur?'Edit value · ':'New value · ')+`<span class="mono">${esc(dim)}</span>`,
+    `<div class="vedit">`+
+    `<div class="mini">Written to the workspace inventory, then resolved against this dimension&rsquo;s axis type. The harness records whatever it actually finds — never a concept you merely name.</div>`+
+    `<label>token</label><input id="vtoken" class="mono" value="${esc(v.token)}" placeholder="e.g. HUMAN_GENETICS">`+
+    `<label>query — the term sent to UMLS</label><input id="vquery" value="${esc(v.query)}" placeholder="e.g. Human genetics">`+
+    `<label>expect — your honest prior that a faithful concept exists</label><select id="vexpect">${opts(v.expect,['likely','uncertain','unlikely'])}</select>`+
+    `<label>preferred source vocabulary (optional)</label><input id="vsab" class="mono" value="${esc(v.sab)}" placeholder="e.g. MSH — blank searches every source">`+
+    `<label>note (optional)</label><input id="vnote" value="${esc(v.note)}" placeholder="what the token means, or why the query is worded this way">`+
+    (cur?`<div class="mini" style="margin-top:9px">Kind: <span class="mono">${esc(v.kind)}</span>. Renaming the token carries its recorded decision over to the new name.</div>`
+        :`<label>kind</label><select id="vkind"><option value="value">value — a schema-enumerated token</option>`+
+         `<option value="common_value">common_value — a convention on an open dimension</option></select>`)+
+    `<div style="display:flex;align-items:center;gap:10px;margin-top:14px">`+
+    `<button class="primary" data-write id="vsave">${cur?'Save value':'Add value'}</button>`+
+    `<button onclick="closeModal()">Cancel</button><span id="vmsg" class="mini"></span></div></div>`);
+  attachSabTypeahead($('#vsab'));
+  const go=()=>saveValue(dim,token!=null?String(token):null);
+  const b=$('#vsave');if(b)b.addEventListener('click',go);
+  ['vtoken','vquery','vsab','vnote'].forEach(id=>{const el=$('#'+id);
+    if(el)el.addEventListener('keydown',ev=>{if(ev.key==='Enter')go();});});
+  const t=$('#vtoken');if(t){t.focus();t.select();}}
+async function saveValue(dim,oldToken){
+  const m=$('#vmsg'),body={dimension:dim,token:(($('#vtoken')||{}).value||'').trim(),
+    query:($('#vquery')||{}).value||'',expect:($('#vexpect')||{}).value||'',
+    sab:($('#vsab')||{}).value||'',note:($('#vnote')||{}).value||'',
+    kind:($('#vkind')||{}).value||'value'};
+  if(oldToken)body.old_token=oldToken;
+  if(m){m.style.color='var(--faint)';m.textContent='saving, then querying UMLS…';}
+  let j;try{j=await (await fetch('/api/value',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)})).json();}
+  catch(err){if(m){m.style.color='var(--danger)';m.textContent='request failed: '+err;}return;}
+  if(j.error){if(m){m.style.color='var(--danger)';m.textContent=j.error;}return;}
+  closeModal();await loadState();
+  msg(j.rebuild_error?`${body.token} saved — the rebuild failed: ${j.rebuild_error}`
+                     :`${body.token} saved and resolved`);}
+function confirmDeleteValue(dim,token){
+  const cur=(STATE.entries||[]).find(x=>x.dimension===dim&&String(x.token)===String(token))||{};
+  showModal('Delete value · '+`<span class="mono">${esc(token)}</span>`,
+    `<div style="font-size:13px;line-height:1.45">Remove <b class="mono">${esc(token)}</b> from <b class="mono">${esc(dim)}</b> — out of the workspace inventory, and out of the crosswalk on the rebuild that follows.</div>`+
+    (cur.decision?`<div class="mini" style="margin-top:9px;color:var(--warn)">Its recorded decision goes with it. Leaving the decision behind would resurrect a mapping you never re-made if the token were ever added again.</div>`:'')+
+    `<div style="display:flex;align-items:center;gap:10px;margin-top:14px">`+
+    `<button class="warn" data-write id="vdel">Delete value</button>`+
+    `<button onclick="closeModal()">Cancel</button><span id="vmsg" class="mini"></span></div>`);
+  const b=$('#vdel');if(b)b.addEventListener('click',()=>deleteValue(dim,token));}
+async function deleteValue(dim,token){const m=$('#vmsg');
+  if(m){m.style.color='var(--faint)';m.textContent='removing…';}
+  let j;try{j=await (await fetch('/api/value/delete',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({dimension:dim,token})})).json();}
+  catch(err){if(m){m.style.color='var(--danger)';m.textContent='request failed: '+err;}return;}
+  if(j.error){if(m){m.style.color='var(--danger)';m.textContent=j.error;}return;}
+  closeModal();
+  // the deleted entry is still in STATE and may be the page we are on
+  if(ROUTE.view==='value'){ROUTE={view:'dim',dim};SEL=null;AXB=null;}
+  await loadState();
+  msg(`${token} removed`+(j.dropped_adjudication?' (its decision too)':'')
+      +(j.rebuild_error?` — the rebuild failed: ${j.rebuild_error}`:''));}
 /* ---------- axis builder internals ---------- */
 async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('#axprev');if(!box)return;
   if(!q){box.innerHTML='<span class="mini">enter a query first</span>';return;}
@@ -1959,7 +2318,7 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
     `<span class="title-mono">${esc(String(e.token))}</span>`+
     `<span class="mini">value of <span class="mono">${esc(e.dimension)}</span>${e.kind!=='value'?' · '+esc(e.kind):''}</span>`+
     `<span class="chip st-${esc(e.status)}">${esc(e.status)}</span>`+(e.curated?' <span class="badge">curated</span>':'')+needChips(e)+
-    `<span class="spacer"></span><span id="msg"></span>${nextBtn(e.key)}<button onclick="rebuild('${jsq(e.dimension)}')" title="Re-queries UMLS for this dimension's values only">Rebuild this dimension</button>`,
+    `<span class="spacer"></span><span id="msg"></span>${nextBtn(e.key)}<button data-write onclick="rebuild('${jsq(e.dimension)}')" title="Re-queries UMLS for this dimension's values only">Rebuild this dimension</button>`,
     e.dim_sty_tui?`axis semantic type: <b>${esc(e.dim_sty_name||e.dim_sty_tui)}</b> <span class="mono" style="font-size:11px">${esc(e.dim_sty_tree||'')}</span> — value search is constrained to its subtree unless widened below`
       :`the ${esc(e.dimension)} axis is untyped — value search runs unconstrained`);
   const slot=e.cui?` <span class="sabslot" data-cui="${esc(e.cui)}" data-root="${esc(e.root_source||'')}" data-prefs="${esc((e.sab_prefs||[]).join(','))}">`+
@@ -1986,11 +2345,11 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
      ${e.relation?` <span class="chip" title="how the recorded decision relates the concept to the GEM token">relation: <b>${esc(e.relation)}</b></span>`:''}
      ${norat}
      <div class="curbar">
-       ${e.status==='mapped'&&e.cui&&!e.decision?`<button class="ok" onclick="decide('accept','${jsq(e.cui)}',{relation:(($('#arel')||{}).value||'exact')})" title="record the harness mapping as your accepted decision (with the 'accept as' relation)">Confirm mapping ✓</button>`:''}
+       ${e.status==='mapped'&&e.cui&&!e.decision?`<button class="ok" data-write onclick="decide('accept','${jsq(e.cui)}',{relation:(($('#arel')||{}).value||'exact')})" title="record the harness mapping as your accepted decision (with the 'accept as' relation)">Confirm mapping ✓</button>`:''}
        <span class="mini" title="how an accepted concept relates to the GEM token — sent with the next accept">accept as</span>
        <select id="arel" class="mini" title="how the accepted concept relates to the GEM token">${relSel}</select>
-       <button class="warn" id="btn-unmapped">No faithful concept</button>
-       <button onclick="decide('clear')">Clear decision</button>
+       <button class="warn" data-write id="btn-unmapped">No faithful concept</button>
+       <button data-write onclick="decide('clear')">Clear decision</button>
        ${e.note?`<span class="mini">note: ${esc(e.note)}</span>`:''}
      </div>
      <textarea id="note" placeholder="optional note / rationale">${esc(e.note||'')}</textarea>
@@ -2091,7 +2450,7 @@ function openUnmapped(){if(!SEL)return;const e=SEL;
     `<details style="margin-top:6px"><summary class="mini" style="cursor:pointer">criteria</summary><div class="mini" style="margin:4px 0 0 8px">${legend}</div></details>`+
     `<div class="evsec"><div class="evh">Protocol (auto-filled)</div>${protocolLine(buildProtocol())||'<span class="mini">nothing searched yet</span>'}</div>`+
     `<div class="evsec"><div class="evh">Note</div><textarea id="unote" placeholder="optional note / rationale">${esc(($('#note')||{}).value||e.note||'')}</textarea></div>`+
-    `<div style="display:flex;align-items:center;gap:10px;margin-top:10px"><button class="warn" id="urec">Record: no faithful concept</button><span id="umsg" class="mini" style="color:var(--danger)"></span></div>`;
+    `<div style="display:flex;align-items:center;gap:10px;margin-top:10px"><button class="warn" data-write id="urec">Record: no faithful concept</button><span id="umsg" class="mini" style="color:var(--danger)"></span></div>`;
   showModal('No faithful concept — '+esc(String(e.token)),body);
   $('#urec').addEventListener('click',recordUnmapped);}
 async function recordUnmapped(){const rows=[...document.querySelectorAll('#modal tr[data-cui]')];
@@ -2111,7 +2470,7 @@ function candHTML(c,mark,origin){const acc=SEL&&SEL.decision_cui===c.cui;noteSee
   return `<div class="cand ${acc?'acc':''}" data-cui="${esc(c.cui)}"><div class="row"><span class="n">${esc(c.name)} <span class="cui">${esc(c.cui)}</span></span>`+
     `<button class="mini" onclick="loadDef('${c.cui}',this)">evidence</button>`+
     `<button class="mini" onclick="descendFrom(this,'${c.cui}')" title="walk this concept's is_a descendants across its vocabularies, ranked against the search text — for when the direct search misses a more specific match">↓ desc</button>`+
-    `<button class="ok" onclick="decide('accept','${c.cui}',{relation:(($('#arel')||{}).value||'exact')})">${acc?'✓ accepted':'accept'}</button></div>`+
+    `<button class="ok" data-write onclick="decide('accept','${c.cui}',{relation:(($('#arel')||{}).value||'exact')})">${acc?'✓ accepted':'accept'}</button></div>`+
     `<div class="sty">${esc((c.sty||c.semantic_types||[]).join(', '))}${c.src||c.root_source?` · <span title="root source of the concept's preferred name (MTH = the Metathesaurus itself) — full vocabulary membership follows">${esc(c.src||c.root_source)}</span>`:''}${stn}${badge}</div>`+
     `<div class="def"></div></div>`;}
 let _semReq=null;
@@ -2279,7 +2638,7 @@ function openSettings(){const wp=((STATE&&STATE.prefs||{}).workspace||[]).join('
     `<div style="font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">PREFERRED VOCABULARIES</div>`+
     `<div class="mini" style="margin:4px 0 8px">Ordered list. Decides which source is shown and ticked for every mapped concept and candidate, everywhere in the app.</div>`+
     `<div style="display:flex;gap:8px"><input id="prefsabs" value="${esc(wp)}" placeholder="e.g. SNOMEDCT_US, MSH, NCI, HPO" style="flex:1;font-family:var(--mono);font-size:12.5px">`+
-    `<button class="primary" onclick="savePrefs()">Save</button></div>`+
+    `<button class="primary" data-write onclick="savePrefs()">Save</button></div>`+
     `<div class="mini" style="margin-top:8px">Workspace default (inventory <span class="mono">meta.preferred_sabs</span>). A dimension can override it in its axis card; a value's own <span class="mono">sab:</span> hint in the inventory always comes first.</div>`+
     `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SERVER</div>`+
     `<div class="mini" style="margin-top:4px">started ${esc((STATE.server||{}).started||'?')} · running code saved ${esc((STATE.server||{}).code||'?')} — if the code date is older than your latest changes, restart the Studio (Ctrl-C, then <span class="mono">gem-umls-adjudicate</span>)</div>`+
@@ -2354,8 +2713,10 @@ def main(argv=None):
         # needs_key and the browser opens the Connect UMLS walkthrough.
         print("WARNING: no UMLS API key found (checked $UMLS_API_KEY, "
               f"{H.BASE / '.envrc'}, {KEY_FILE}).\n"
-              "  Searches and concept details are disabled until a key is "
-              "entered; the Studio will prompt for one.\n"
+              "  The workspace opens READ-ONLY: you can browse it, but adding "
+              "or changing a dimension,\n"
+              "  a value or a decision needs a key. The Studio will prompt for "
+              "one.\n"
               f"  1. Create a free UTS account: {UTS_SIGNUP_URL}\n"
               "     (NLM approves the UMLS license request, usually within a "
               "few business days)\n"
@@ -2402,7 +2763,8 @@ def main(argv=None):
 
     if not H.INVENTORY.is_file() and not CROSSWALK.is_file():
         print(f"Workspace {DATA_DIR} has no inventory or crosswalk yet -- "
-              f"starting empty; use “New axis” to build one from scratch.")
+              f"starting empty; use “New dimension” to define the first axis, "
+              f"then “Add value” for its values.")
 
     srv = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     url = f"http://127.0.0.1:{args.port}/"

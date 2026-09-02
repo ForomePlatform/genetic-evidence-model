@@ -25,6 +25,7 @@ journal submission.
 ├── src/python/     The `gem-mapping-studio` package: Mapping Studio, crosswalk harness,
 │                   validators, PDF highlight/callout extraction (`forome.gem.*`)
 ├── figures/        Source files for figures used in the paper
+├── docs/           Usage guides (STUDIO.md: the Mapping Studio)
 ├── .github/        CI configuration validating annotations against the schema
 ├── CHANGELOG.md    What changed in each tagged release
 └── KNOWN_LIMITATIONS.md  What the model, schema, corpus, and tooling do not yet do
@@ -229,7 +230,10 @@ defining mapping axes and adjudicating value-level mappings against UMLS:
 pip install gem-mapping-studio      # PyPI; console scripts gem-mapping-studio, gem-validate, gem-coverage, ...
 ```
 
-Usage guide: `data/umls/STUDIO.md`. The package also ships `gem-validate`
+Usage guide: **[`docs/STUDIO.md`](docs/STUDIO.md)** — how to build a new
+mapping from scratch in any domain, and how to work on the GEM mapping in
+this repository (from a checkout with `pip install -e .`, or with the
+released tool pointed at `data/umls`). The package also ships `gem-validate`
 and `gem-coverage`, which reproduce the corpus validation and the coverage
 table reported in the paper from a clean checkout.
 
