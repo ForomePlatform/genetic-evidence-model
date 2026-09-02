@@ -6,31 +6,71 @@
 \section{Standards crosswalk}
 \label{sec:supp-crosswalk}
 
-This section gives the term-level crosswalk from the \GeneticEvidence{}
-(GEM) constructs to external vocabularies, extending the class-level
-FHIR alignment in the main paper down to the value level. Mappings to the
-Sequence Ontology (SO), the Human Phenotype Ontology (HPO), NCBITaxon,
-the Evidence and Conclusion Ontology (ECO), SEPIO, and the GA4GH Variant
-Annotation (VA) model were verified against the source ontologies.
-Throughout, the \emph{relation} of a GEM construct to an external term is
-one of \emph{exact} (same scope), \emph{narrower} (GEM is more specific),
-\emph{broader} (GEM is more general), or \emph{none} (no equivalent, a
-coverage gap). The crosswalk is selective: it lists the dimensions with
-external matches and the principled gaps, not every conditional field.
+This section extends the class-level FHIR alignment in the main paper with
+term-level mappings for GEM classes, properties, dimensions, and selected
+enumerated values. The mappings cover the Sequence Ontology (SO), the Human
+Phenotype Ontology (HPO), NCBITaxon, the Evidence and Conclusion Ontology
+(ECO), SEPIO, and the GA4GH Variant Annotation (VA) model. Each mapping was
+verified against its source vocabulary.
+
+This standards crosswalk is distinct from the UMLS crosswalk in
+\Cref{sec:s-umls-crosswalk}. It aligns GEM constructs with source
+vocabularies, whereas that note records concept-level mappings and curation
+decisions within the UMLS Metathesaurus.
+
+The \emph{relation} column describes the relation between a GEM construct
+and an external term. \emph{Exact} indicates the same scope;
+\emph{close} a near match with a material scope difference;
+\emph{narrower} that GEM is more specific; \emph{broader} that GEM is more
+general; \emph{related} that the external term captures a constituent or
+associated aspect of the GEM construct; and \emph{none} that no equivalent
+has been identified. For structural correspondences that are not
+term-level equivalences, the tables instead use structural labels
+(\emph{structural sibling}, \emph{structural parallel}).
+
+The crosswalk prioritizes semantic fidelity over a fixed preference for one
+vocabulary. When the most faithful concept is available only in a specialized
+vocabulary, the crosswalk retains that exact match rather than substituting a
+broader term from a preferred vocabulary. For example,
+\dimval{ANIMAL\_GENETICS} maps exactly to NCI Thesaurus
+\texttt{C1510895} (\emph{Animal Genetics}), for which MeSH has no
+corresponding descriptor. The \emph{relation} field records the nature of
+the mapping; it does not express a preference among vocabularies.
+
+A second source-level issue is sense merging within a single UMLS concept.
+For \dimval{VARIANT}, UMLS concept \texttt{C0042333}
+(\emph{Genetic Variation}) combines two senses. The MeSH descriptor defines
+a population-level phenomenon (``genotypic differences observed among
+individuals in a population'') and determines the concept's semantic type,
+\emph{Natural Phenomenon or Process}. The NCI Thesaurus instead defines an
+entity, a deviation in the nucleotide sequence of an individual, and places
+the ACMG classification variants (\emph{pathogenic}, \emph{likely
+pathogenic}, and \emph{benign}) directly under that concept. Its synonym
+list also includes \emph{Sequence Variant}, the exact SO term shown in
+\cref{tab:xwalk-dimensions}.
+
+The UMLS mapping is therefore recorded as \emph{close}, rather than
+\emph{exact}, because the concept includes the population-level MeSH sense.
+We nevertheless accept its semantic type even though it lies outside the
+expected axis. The entity-level NCI sense is the relevant genomics sense,
+and UMLS provides no generic variant concept that is typed as an entity:
+the classified child concepts are typed \emph{Nucleotide Sequence}, but
+their generic parent is not.
 
 \begin{table}[H]
   \centering
   \small
-  \caption[Crosswalk: structural classes]{Structural classes, extending the class-level FHIR alignment
-  of the main paper to the value level.}
+  \caption[Crosswalk: structural classes]{Structural correspondences between
+  GEM and FHIR R5. The table extends the class-level alignment in the main
+  paper with term-level detail.}
   \label{tab:xwalk-structural}
   \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}X@{}}
     \toprule
     GEM construct & External term & Vocab. & Relation \\
     \midrule
-    \ScientificEvidence{} (evidence item) & \texttt{Evidence} & FHIR R5 & structural sibling (genetic frame replaces PICO) \\
-    \EvidenceVariable{} (definition and measured value) & \texttt{EvidenceVariable} ${+}$ \texttt{Evidence.statistic} & FHIR R5 & broader (measured value folded into one class) \\
-    Credibility (overall rating slot) & \texttt{Evidence.certainty} & FHIR R5 & exact (structural) \\
+        \ScientificEvidence{} (evidence item) & \texttt{Evidence} & FHIR R5 & structural sibling; GEM replaces the PICO frame with a genetics-specific dimensional frame \\
+        \EvidenceVariable{} (definition and measured value) & \texttt{EvidenceVariable} + \texttt{Evidence.statistic} & FHIR R5 & broader; GEM combines the variable definition and measured value in one class \\
+        Credibility (overall rating slot) & \texttt{Evidence.certainty} & FHIR R5 & structural parallel; both provide an overall rating with separable subcomponents \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -38,94 +78,106 @@ external matches and the principled gaps, not every conditional field.
 \begin{table}[H]
   \centering
   \small
-  \caption[Crosswalk: assertion property and class]{The \texttt{assertion} property and the \EvidenceAssertion{}
-  class. The property carries the object-level, source-anchored claim; the
-  class is a meta-predicate (see text).}
+  \caption[Crosswalk: assertion property and class]{Crosswalk for the
+  \texttt{assertion} property and the \EvidenceAssertion{} class. The
+  property records an object-level, source-anchored claim; the class is a
+  meta-predicate over a decision rule.}
   \label{tab:xwalk-assertion}
   \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}X@{}}
     \toprule
     GEM construct & External term & Vocab. & Relation \\
     \midrule
-    \texttt{assertion} property (source-anchored claim) & \texttt{Statement} & GA4GH VA & narrower (close match; genetics-specific) \\
-    \texttt{assertion} property & \texttt{Assertion} (\texttt{SEPIO:0000001}) & SEPIO & narrower \\
-    \texttt{assertion} property (false friend) & \texttt{Evidence.assertion} (human-readable summary) & FHIR R5 & none (do not map) \\
-    \EvidenceAssertion{} class (meta-predicate over a decision rule) & (no equivalent) & --- & none \\
+    \texttt{assertion} property (source-anchored claim) & \texttt{Statement} & GA4GH VA & narrower; a close, genetics-specific match \\
+        \texttt{assertion} property & \texttt{Assertion} (\texttt{SEPIO:0000001}) & SEPIO & narrower \\
+        \texttt{assertion} property (false friend) & \texttt{Evidence.assertion} (human-readable summary) & FHIR R5 & none; do not map \\
+        \EvidenceAssertion{} class (meta-predicate over a decision rule) & no equivalent & --- & none \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-The property \texttt{assertion} and the class \EvidenceAssertion{} are
-distinct despite their similar names. The property carries the
-object-level, source-anchored claim a paper makes; its structural
-analogues are the VA \texttt{Statement} and the SEPIO assertion, and
-\emph{not} FHIR's \texttt{Evidence.assertion}, which is a human-readable
-summary. The class \EvidenceAssertion{} is a meta-predicate, the model's
-point of contact with the reasoning layer of~\cite{our_preprint}; we
-found no close analogue in FHIR, GA4GH VA, ECO, or SEPIO for this
-decision-rule meta-predicate, so its lack of an external analogue is
-expected rather than a failure. The property is slated to be renamed in a later schema
-revision to remove the collision; the pilot annotations are unchanged.
+The \texttt{assertion} property and the \EvidenceAssertion{} class are
+distinct despite their similar names. The property records the object-level,
+source-anchored claim made by a paper. Its closest structural analogues are
+the GA4GH VA \texttt{Statement} and the SEPIO \texttt{Assertion}, not
+FHIR's \texttt{Evidence.assertion}, which is a human-readable summary.
+
+The \EvidenceAssertion{} class is a meta-predicate over a decision rule and
+is the model's point of contact with the reasoning layer
+of~\cite{our_preprint}. We found no close analogue for this decision-rule
+meta-predicate in FHIR, GA4GH VA, ECO, or SEPIO. Its lack of an external
+analogue is therefore expected rather than a coverage failure. A future
+schema revision will rename the property to remove the naming collision; the
+pilot annotations will remain unchanged.
 
 \begin{table}[H]
   \centering
   \footnotesize
-  \caption[Crosswalk: classification dimensions]{Classification dimensions mapped to external vocabularies.
-  Identifiers verified against the source ontologies. SO~=~Sequence
-  Ontology; VA~=~GA4GH Variant Annotation.}
+  \caption[Crosswalk: dimensions and values]{GEM dimensions and selected
+  values mapped to external vocabularies. Identifiers were verified against
+  their source vocabularies. SO = Sequence Ontology; VA = GA4GH Variant
+  Annotation.}
   \label{tab:xwalk-dimensions}
   \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}X@{}}
     \toprule
     GEM dimension / value & External term + ID & Vocab. & Relation \\
     \midrule
-    Target Type: gene & gene \texttt{SO:0000704} & SO & exact \\
-    Target Type: related gene & gene \texttt{SO:0000704} (relation carried by Gene Relation) & SO & exact \\
-    Target Type: variant & sequence\_variant \texttt{SO:0001060} & SO & exact \\
-    Target Type: transcript & transcript \texttt{SO:0000673} & SO & exact \\
-    Target Type: interval / segment & region \texttt{SO:0000001} & SO & narrower \\
-    Mode of Inheritance (axis) & Mode of inheritance \texttt{HP:0000005} & HPO & exact \\
-    \quad autosomal dominant & \texttt{HP:0000006} & HPO & exact \\
-    \quad autosomal recessive & \texttt{HP:0000007} & HPO & exact \\
-    Organism: human & \textit{Homo sapiens} \texttt{NCBITaxon:9606} & NCBITaxon & exact \\
-    Organism: mouse & \textit{Mus musculus} \texttt{NCBITaxon:10090} & NCBITaxon & exact \\
-    Organism: rat & \textit{Rattus norvegicus} \texttt{NCBITaxon:10116} & NCBITaxon & exact \\
-    Organism: zebrafish & \textit{Danio rerio} \texttt{NCBITaxon:7955} & NCBITaxon & exact \\
-    Credibility (rating / facets) & \texttt{confidence level} (\texttt{SEPIO:0000187}), via \texttt{has\_confidence\_level} (\texttt{SEPIO:0000167}); rated \texttt{Assertion} (\texttt{SEPIO:0000001}) & SEPIO & exact (rating) / narrower (facets) \\
-    Method: in vivo (animal model) & animal model system study evidence \texttt{ECO:0000179} & ECO & exact \\
-    Method: in vitro & in vitro assay evidence \texttt{ECO:0000181} & ECO & exact \\
-    Method: clinical & clinical study evidence \texttt{ECO:0000180} & ECO & exact \\
-    Method: statistical genetics & no clean ECO leaf; broadest parent \texttt{computational evidence} (\texttt{ECO:0007672}); OBI a candidate for study designs (unconfirmed) & ECO / OBI & none (ECO) / broader \\
+        Target Type: gene & gene \texttt{SO:0000704} & SO & exact \\
+        Target Type: related gene & gene \texttt{SO:0000704} (relation recorded in Gene Relation) & SO & exact \\
+        Target Type: variant & sequence\_variant \texttt{SO:0001060} & SO & exact \\
+        Target Type: transcript & transcript \texttt{SO:0000673} & SO & exact \\
+        Target Type: interval / segment & region \texttt{SO:0000001} & SO & narrower \\
+        Mode of Inheritance (axis) & Mode of inheritance \texttt{HP:0000005} & HPO & exact \\
+        \quad autosomal dominant & \texttt{HP:0000006} & HPO & exact \\
+        \quad autosomal recessive & \texttt{HP:0000007} & HPO & exact \\
+        Organism: human & \textit{Homo sapiens} \texttt{NCBITaxon:9606} & NCBITaxon & exact \\
+        Organism: mouse & \textit{Mus musculus} \texttt{NCBITaxon:10090} & NCBITaxon & exact \\
+        Organism: rat & \textit{Rattus norvegicus} \texttt{NCBITaxon:10116} & NCBITaxon & exact \\
+        Organism: zebrafish & \textit{Danio rerio} \texttt{NCBITaxon:7955} & NCBITaxon & exact \\
+        Credibility (rating and facets) & \texttt{confidence level} (\texttt{SEPIO:0000187}), via \texttt{has\_confidence\_level} (\texttt{SEPIO:0000167}), on a rated \texttt{Assertion} (\texttt{SEPIO:0000001}) & SEPIO & exact (rating) / narrower (facets) \\
+        Method: in vivo (animal model) & animal model system study evidence \texttt{ECO:0000179} & ECO & exact \\
+        Method: in vitro & in vitro assay evidence \texttt{ECO:0000181} & ECO & exact \\
+        Method: clinical & clinical study evidence \texttt{ECO:0000180} & ECO & exact \\
+        Method: statistical genetics & no clean ECO leaf; broadest parent is \texttt{computational evidence} (\texttt{ECO:0007672}); OBI is a candidate vocabulary for study designs (unconfirmed) & ECO / OBI & none (ECO) / broader (OBI) \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
+The following table lists dimensions for which the selective review reported
+here identified no single external equivalent. These entries are documented
+coverage gaps in the present crosswalk, not claims that no relevant term
+exists in any vocabulary.
+
 \begin{table}[H]
   \centering
   \small
-  \caption[Crosswalk: coverage gaps]{Coverage gaps: GEM dimensions with no single external
-  equivalent (relation: none in every row).}
+  \caption[Crosswalk: coverage gaps]{Coverage gaps in the present crosswalk.
+  The relation is \emph{none} in every row.}
   \label{tab:xwalk-gaps}
   \begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X@{}}
     \toprule
     GEM dimension & Why no external term \\
     \midrule
-    Knowledge Domain & no single external vocabulary carries this axis \\
-    Gene Relation (conditional) & GEM-specific gene-gene relations (\texttt{X\_regulates\_Y}, \texttt{X\_has\_same\_function\_as\_Y}); RO may cover some (unconfirmed) \\
-    Phenotype Scale (ordinal) & no external ordinal axis; GO biological\_process is a candidate for the molecular and cellular end (future work) \\
-    Variant Ascertainment & no clean external term \\
-    Resolution & implicit in the chosen SO target-type term, not an independent external axis \\
-    \EvidenceAssertion{} (meta-predicate) & reasoning layer sits above what ECO, SEPIO, VA, and FHIR cover \\
+    Knowledge Domain & no single external vocabulary represents this axis \\
+        Gene Relation (conditional) & GEM-specific gene--gene relations, such as \texttt{X\_regulates\_Y} and \texttt{X\_has\_same\_function\_as\_Y}; RO may cover some relations (unconfirmed) \\
+        Phenotype Scale (ordinal) & no external vocabulary provides this ordinal axis; GO biological\_process is a possible future alignment for the molecular and cellular end of the scale \\
+        Variant Ascertainment & no single external term captures this dimension \\
+        Resolution & represented implicitly by the selected SO target-type term, rather than as an independent external axis \\
+        \EvidenceAssertion{} (meta-predicate) & belongs to a reasoning layer beyond the scope of ECO, SEPIO, VA, and FHIR \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Two observations follow. The dimensions describing \emph{what} the
-evidence is about and \emph{in what organism} map exactly onto
-established ontologies, and method maps cleanly for its three
-experimental values; the single method gap is statistical genetics,
-because ECO codes evidence types rather than study designs (GWAS,
-linkage, and the like), for which OBI is the candidate vocabulary. The
-remaining gaps, Knowledge Domain, Phenotype Scale, Variant Ascertainment,
-Resolution, and the Gene Relation enumeration, are GEM-specific
-epistemological axes without a single external term; they are coverage
-gaps in the existing standards rather than mapping failures, and they are
-part of what motivates a dedicated reference data model.
+Taken together, the mappings and gaps show two broad patterns. First, the
+dimensions that describe what the evidence concerns and which organism it
+concerns map directly to established ontologies. The three experimental
+Method values also map cleanly. Statistical genetics is the main Method gap:
+ECO represents evidence types rather than study designs such as genome-wide
+association studies and linkage analyses, and OBI is a candidate vocabulary
+for that level of description.
+
+Second, this crosswalk identifies no single external equivalent for Knowledge
+Domain, Phenotype Scale, Variant Ascertainment, Resolution, or the Gene
+Relation enumeration. These are GEM-specific epistemological axes, rather
+than failed attempts to duplicate existing vocabularies. Their partial or
+absent coverage in the reviewed standards constitutes a coverage gap in the
+present crosswalk and helps motivate a dedicated reference data model.

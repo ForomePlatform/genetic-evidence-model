@@ -18,12 +18,11 @@ Scientific Evidence and Provenance Information Ontology
 (SEPIO)~\cite{sepio}, and the Global Alliance for Genomics and
 Health (GA4GH) Genomic Knowledge Standards~\cite{ga4gh_va}
 advance interoperability in clinical research. However, they do not
-comprehensively address the evidence types and workflows that
-originate in the basic sciences. Existing standards focus mainly on
-clinical trials, high-level assertions, and variant representations,
-and provide limited support for the fine-grained, domain-specific
-characterisation of basic and pre-clinical scientific evidence needed
-for automated reasoning and AI-ready infrastructures.
+comprehensively represent the evidence types and workflows of the
+basic sciences. They focus mainly on clinical trials, high-level
+assertions, and variant representations, with limited support for the
+fine-grained, domain-specific evidence from basic and pre-clinical
+research needed for automated reasoning and AI-ready infrastructure.
 
 Each scientific domain demands a tailored approach for structuring
 and communicating evidence. For example, the genetic evidence
@@ -32,7 +31,7 @@ experimental model systems to large-scale population studies, that
 are not fully supported by current standards.
 To properly use evidence derived from
 scientific literature in clinical workflows, two principal challenges
-require standardisation: \emph{Relevance and Specificity}, that is,
+require standardization: \emph{Relevance and Specificity}, that is,
 how precisely a genetic finding maps to an individual patient,
 disease context, or biological hypothesis; and \emph{Confidence},
 that is, whether a given piece of evidence can be robustly and
@@ -43,38 +42,46 @@ A well-designed schema for genetic evidence helps make literature
 review a \emph{semantic-parsing} problem: mapping natural-language
 claims to a shared, source-anchored representation. Large language
 models are increasingly capable of this kind of parsing, but
-dependable automation still requires careful ontological grounding of
-the target language. The present work offers one such increment,
-building on decades of work by the biomedical-ontology community and
-aiming toward literature review that is materially assisted by
-automated parsing.
+dependable automation still requires a carefully structured target
+language. The present work offers one such increment. Building on decades of work by
+the biomedical-ontology community, it takes a small step toward literature
+review that is materially assisted by automated parsing.
 
 \paragraph{Contributions.} This paper makes the following contributions:
 \begin{itemize}
-    \item A domain-analysis-driven semantic model for genetic
-    evidence, with core classes (\ScientificEvidence,
-    \EvidenceVariable, \EvidenceAssertion) and genetic
-    specialisations, plus a compact dimensional vocabulary
-    formalised using the W3C Shapes Constraint Language
-    (SHACL)~\cite{w3c-shacl}.
-    \item A mapping of the model to six genetic-evidence papers
-        covering human, population, model-organism, and polygenic-score
-        genetics, with extraction tooling.
+    \item A domain-analysis-driven semantic model for genetic evidence, with
+    core classes (\ScientificEvidence, \EvidenceVariable,
+    \EvidenceAssertion), genetic specializations, a compact dimensional
+    vocabulary, and a validation schema in the W3C Shapes Constraint
+    Language (SHACL)~\cite{w3c-shacl}.
+    \item An application of the model to six genetic-evidence papers spanning
+        human, population, model-organism, and polygenic-score genetics,
+        supported by extraction tooling.
     \footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model}}
-    \item A human--AI collaborative annotation workflow, packaged as
-        executable annotation and review skills that apply the model under
-        curator supervision.
-    \item A structural alignment of the core classes to HL7 FHIR Evidence, with a
-        credibility representation that decomposes certainty into SEPIO-anchored
-        facets; the dimensions are designed to align with ECO, SEPIO, IAO, and OBI,
-        with a partial term-level mapping provided in Supplementary Note~SN5.
+    \item A human--AI collaborative annotation workflow, packaged as executable
+        AI skills for annotation and review that apply the model under curator
+        supervision.
+    \item A structural alignment of the core classes with HL7 FHIR Evidence,
+        including a credibility representation that decomposes certainty into
+        SEPIO-anchored facets. The dimensions are designed to align with ECO,
+        SEPIO, IAO, and OBI; Supplementary Note~\ref*{supp:sec:supp-crosswalk} provides a partial
+        term-level mapping.
+    \item A curated term-level UMLS crosswalk of the dimensional vocabulary, in
+        which every value is mapped with a typed relation or recorded as an
+        argued gap. The crosswalk was produced with the open-source,
+        model-agnostic \texttt{GEM Mapping Studio}, a standalone curation tool
+        distributed as a Python package that supports the full workflow, from
+        defining dimension axes in an empty workspace to adjudicating
+        value-level mappings. The workflow follows a reproducible protocol with
+        pre-registered search sweeps, structured rejection rationales, and a
+        public decision log in the repository.
 \end{itemize}
 
 The remainder of the paper reviews related standards
 (\Cref{sec:background}), defines the semantic model
-(\Cref{sec:model}), and illustrates it on two worked examples
-(\Cref{sec:examples}). We then describe the annotation workflow and
-pilot statistics (\Cref{sec:workflow}), discuss findings, candidate
-extensions, limitations, and future work (\Cref{sec:discussion}), list
-the released artefacts (\Cref{sec:availability}), and conclude
+(\Cref{sec:model}), and illustrates it with two worked examples
+(\Cref{sec:examples}). It then describes the annotation workflow and
+pilot statistics (\Cref{sec:workflow}), discusses findings, candidate
+extensions, limitations, and future work (\Cref{sec:discussion}), lists
+the released artifacts (\Cref{sec:availability}), and concludes
 (\Cref{sec:conclusion}).

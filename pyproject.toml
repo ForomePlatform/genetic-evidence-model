@@ -3,22 +3,78 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "genetic-evidence-model"
-version = "0.1.0"
-description = "Extract and model genetic evidence annotations from PDF sources"
+name = "gem-mapping-studio"
+version = "0.2.1"
+description = "Forome Genetic Evidence Model: a reference data model, UMLS/OMOP crosswalk tooling, and SHACL validation for basic-science genetic evidence"
 readme = "README.md"
 license = { file = "LICENSE-code.txt" }
 requires-python = ">=3.10"
-dependencies = [
-    "PyMuPDF>=1.23",
-    "pypdf>=4.0",
-    "pyyaml>=6.0",
+authors = [
+    { name = "Michael Bouzinier", email = "michael.bouzinier@forome.org" },
+]
+keywords = [
+    "genetic evidence", "semantic model", "UMLS", "crosswalk", "SHACL",
+    "biomedical informatics", "variant interpretation", "curation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
+dependencies = [
+    "pyyaml>=6.0",
+    "ruamel.yaml>=0.18",
+    "rdflib>=7.0",
+    "pyshacl>=0.27",
+    "requests>=2.28",
+    "PyMuPDF>=1.23",
+    "pypdf>=4.0",
+]
+
+[project.urls]
+Homepage = "https://w3id.org/genetic-evidence-model/"
+Repository = "https://github.com/ForomePlatform/genetic-evidence-model"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+# Local UMLS index on PostgreSQL (forome.gem.umls.local_umls).
+local = ["psycopg[binary]>=3.1"]
+
 [project.scripts]
-extract-annotations = "extraction.extract_annotations:main"
-extract-annotations-pypdf = "extraction.extract_annotations_pypdf:main"
+gem-validate = "forome.gem.validation.validate_annotations:main"
+gem-coverage = "forome.gem.validation.compute_coverage:main"
+gem-umls-crosswalk = "forome.gem.umls.build_umls_crosswalk:main"
+gem-umls-render = "forome.gem.umls.render_crosswalk_tex:main"
+gem-umls-adjudicate = "forome.gem.umls.adjudicate_ui:main"
+gem-mapping-studio = "forome.gem.umls.adjudicate_ui:main"
+gem-umls-semantic-network = "forome.gem.umls.fetch_semantic_network:main"
+gem-umls-load-local = "forome.gem.umls.local_umls:main"
+gem-umls-sweep = "forome.gem.umls.sweep:main"
+gem-umls-classify-credibility = "forome.gem.umls.classify_credibility_sweep:main"
+
+# src-layout: package roots live under src/python/main; tests under src/python/test.
+# `forome` and `forome.gem` are PEP 420 implicit namespace packages, so Forome
+# can publish sibling `forome-*` distributions sharing the `forome.` namespace.
+[tool.setuptools]
+package-dir = { "" = "src/python/main" }
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["extraction*", "annotations*"]
+where = ["src/python/main"]
+namespaces = true
+
+# Reference data (semantic_types.yaml, the SHACL schema, dimensions.md) lives
+# at the repo root as the source of truth, shared by the paper, CI, and skill
+# bundles; walk-up discovery finds it in-repo. For standalone installs the
+# same files ship as SYNCED COPIES in forome.gem._reference (re-synced by
+# scripts/release-pypi.sh; asserted in the test suite), used as a fallback
+# when no repo is found.
+[tool.setuptools.package-data]
+"forome.gem._reference" = ["*.yaml", "*.ttl", "*.md"]

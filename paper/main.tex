@@ -1,15 +1,26 @@
 % =====================================================================
 %  A Semantic Model of Genetic Evidence
-%  ICBO 2026 submission — skeleton
 %
-%  Target: Full paper, 8–12 pages (CEUR single-column).
-%  CEUR releases an ICBO-2026-specific .cls late; this skeleton uses the
-%  standard ceurart class which is what ICBO will converge on. If they
-%  release a custom class, change only the \documentclass line.
+%  Extended version (A): self-contained, standard article class, for arXiv.
+%  Migrated off the CEUR ceurart class (see manuscript-plan-jamia.md, Step 0).
 % =====================================================================
 
-\documentclass[natbib=true]{ceurart}
+\documentclass[11pt]{article}
 
+\usepackage[margin=1in]{geometry}
+
+% natbib + authblk are loaded here, NOT in the shared preamble: preamble.tex is
+% also \input by supplement.tex, which already loads natbib, so loading it there
+% too would double-load it. natbib must precede hyperref (loaded in the
+% preamble), so it is loaded before \input{preamble}.
+% Cross-document references into the supplement: xr imports a labels-only aux
+% (target/supp-labels.aux, extracted by compile_paper.sh, which builds the
+% supplement first). \ref* (hyperref's non-linking form) renders the number
+% without attempting an intra-document hyperlink.
+\usepackage{xr}
+\externaldocument[supp:]{target/supp-labels}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{authblk}
 
 % ---------- shared preamble (factored out; also \input by supplement.tex) ----------
 \input{preamble}
@@ -19,24 +30,18 @@
 
     \title{A Semantic Model of Genetic Evidence: A Step Toward Bridging the Basic-Science--Clinic Gap}
 
-% Authors — fill in ORCIDs and emails per CEUR footer requirements.
-    \author[1,2,3]{Michael Bouzinier}[
-        orcid=0000-0002-3161-5601,
-        email=michael_bouzinier@harvard.edu
-    ]
-    \author[3,4]{Dmitry Etin}[
-        orcid=0000-0003-1068-2781,
-        email=dmitry.etin@forome.org
-    ]
-    \address[1]{Harvard University, Cambridge, MA, USA}
-    \address[2]{IDEXX Laboratories, Westbrook, ME, USA}
-    \address[3]{Forome Association, Newton, MA, USA}
-    \address[4]{Deggendorf Institute of Technology, Germany}
+% Authors (authblk). ORCIDs retained as comments; add an \orcid package for a
+% camera-ready if desired.
+    \author[1,2,3]{Michael Bouzinier\thanks{Correspondence: \texttt{michael\_bouzinier@harvard.edu}}}
+    \author[3,4]{Dmitry Etin}
+% ORCIDs: Bouzinier 0000-0002-3161-5601; Etin 0000-0003-1068-2781.
+    \affil[1]{Harvard University, Cambridge, MA, USA}
+    \affil[2]{IDEXX Laboratories, Westbrook, ME, USA}
+    \affil[3]{Forome Association, Newton, MA, USA}
+    \affil[4]{Deggendorf Institute of Technology, Germany}
+    \date{}
 
-% CEUR requires a conference footnote on the first page. Fill in exact wording
-% from the ICBO 2026 camera-ready template when available.
-    \conference{ICBO 2026: 17th International Conference on Biological and
-    Biomedical Ontology, July 15--17, 2026, Washington, D.C.}
+    \maketitle
 
     \begin{abstract}
         Scientific and clinical decision-making depends on evidence from
@@ -46,10 +51,10 @@
         evidence codes, or single-variant assertions, and do not capture
         the fine-grained, domain-specific structure of claims in basic and
         pre-clinical research. We introduce a semantic model for scientific
-        evidence with three core classes, specialise it for genetics, align it structurally to FHIR Evidence with a
+        evidence with three core classes, specialize it for genetics, align it structurally to FHIR Evidence with a
         SEPIO-anchored credibility decomposition, and attach a compact
         dimensional vocabulary whose conditional-activation rules are
-        formalised as SHACL shapes for the implemented constraints. Using clinical variant
+        validated by a SHACL schema for the implemented constraints. Using clinical variant
         interpretation as the driving use case, we evaluate the model
         through a human--AI annotation pilot over six genetics papers,
         yielding 28 evidence items and 95 source-anchored assertions, with
@@ -57,23 +62,13 @@
         AI-drafted annotations. Treating the pilot as a feasibility study
         rather than a benchmark, we argue that the model is a useful
         increment toward trustworthy, AI-ready infrastructure for variant
-        interpretation: a reference data model and validation schema offered
-        to the ontology community as a substrate for later axiomatisation,
-        not a finished ontology.
+        interpretation: a reference data model and validation schema for
+        representing genetic evidence.
     \end{abstract}
 
-    \begin{keywords}
-        genetic evidence \sep
-        variant interpretation \sep
-        ontology \sep
-        FHIR \sep
-        ECO \sep
-        SEPIO \sep
-        GA4GH \sep
-        AI-ready data
-    \end{keywords}
-
-    \maketitle
+    \medskip
+    \noindent\textbf{Keywords:} genetic evidence; variant interpretation;
+    ontology; FHIR; ECO; SEPIO; GA4GH; AI-ready data.
 
 % =====================================================================
 % §1 — Introduction (see paper/sections/01_intro.tex)
@@ -120,7 +115,7 @@
 % =====================================================================
 
 % =====================================================================
-% \bibliographystyle is set by ceurart natbib=true; do not add another one here.
+    \bibliographystyle{plainnat}
     \bibliography{references}
 % =====================================================================
 

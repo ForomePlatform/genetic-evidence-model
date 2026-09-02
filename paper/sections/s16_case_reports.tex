@@ -6,39 +6,43 @@
 %  This note gives the item-level detail the main paper omits for space:
 %  a decomposition table, one worked annotation item, and the candidate
 %  extensions each paper surfaces. Review verdicts are in SN4 and the
-%  term-level crosswalk in SN5; the complete YAML annotations are in
-%  Appendix SA2 (SA2.5 Duerr, SA2.6 Inouye). The YAML excerpts below are
-%  abridged for readability; the verbatim files are in those appendices.
+%  term-level crosswalk in SN5; the complete YAML annotations are the
+%  repository files annotations/v0/duerr2006.yaml and
+%  annotations/v1/inouye2018.yaml. The YAML excerpts below are abridged
+%  for readability.
 % =====================================================================
 \section{Case reports: Duerr 2006 and Inouye 2018}
 \label{sec:supp-crep}
 
-The two AI-drafted annotations bracket the model's operating range, and
-the main paper (Section~4) summarises them; this note gives the
-item-level detail omitted there for space. Duerr is the clean case: six
-of its seven \GeneticEvidence{} items map without strain, and the one
-genuine gap is translational. Inouye is the stress test: every item
-stretches the variant-level model, which is why it surfaces six
-candidate extensions. The assertion-by-assertion review verdicts for
-both are in \cref{sec:supp-ai-review}, the term-level standards mapping
-is in \cref{sec:supp-crosswalk}, and the complete annotations are in
-Appendix~SA2 (SA2.5 Duerr, SA2.6 Inouye).
+The two AI-drafted annotations illustrate contrasting parts of the model's
+operating range. The main paper (Section~4) summarizes them; this
+note provides the item-level detail omitted there for space. Duerr is the
+more conventional case: six of its seven \GeneticEvidence{} items fit the
+current schema without strain, and the remaining gap concerns translational
+evidence. Inouye tests the limits of the variant-level model: all four items
+require forced-fit assignments, which motivate six candidate extensions.
+Assertion-by-assertion review verdicts are given in
+\cref{sec:supp-ai-review}; the term-level standards crosswalk is in
+\cref{sec:supp-crosswalk}; and the complete annotations are the
+repository files \fpath{annotations/v0/duerr2006.yaml} and
+\fpath{annotations/v1/inouye2018.yaml}.
 
 \subsection{Case Report CR-DU: Duerr et al.\ 2006 (genome-wide association)}
 \label{sec:supp-ex-duerr}
 
 Duerr and colleagues identified \textit{IL23R} as an inflammatory bowel
-disease gene by a genome-wide association scan in non-Jewish ileal
-Crohn's disease, with replication in a Jewish cohort and family-based
-transmission testing in 883 nuclear families. Our annotation decomposes
-the paper into seven \GeneticEvidence{} items (\cref{tab:cr-duerr}).
+disease gene through a genome-wide association study of non-Jewish patients
+with ileal Crohn's disease, followed by replication in a Jewish cohort and
+family-based transmission testing in 883 nuclear families. Our annotation
+decomposes the paper into seven \GeneticEvidence{} items
+(\cref{tab:cr-duerr}).
 
 \begin{table}[H]
   \centering
   \footnotesize
-  \caption[Duerr 2006: evidence-item decomposition]{Duerr 2006: the
-  seven \GeneticEvidence{} items, with target type, method (leaf-level
-  per the hierarchy), and credibility.}
+  \caption[Duerr 2006: evidence-item decomposition]{Duerr 2006: the seven
+  \GeneticEvidence{} items, with target type, leaf-level Method, and
+  Credibility.}
   \label{tab:cr-duerr}
   \begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{1.35cm} >{\raggedright\arraybackslash}p{2.5cm} l@{}}
     \toprule
@@ -55,13 +59,13 @@ the paper into seven \GeneticEvidence{} items (\cref{tab:cr-duerr}).
   \end{tabularx}
 \end{table}
 
-Six of the seven items fit the schema as it stands. The seventh,
-GE-new-1 (a cited anti-p40 antibody trial added during the
-missing-evidence check), is drug-response evidence with no fitting
-genetic knowledge domain, the translational-scope gap discussed below.
-The discovery item GE-1, shown abridged below, illustrates how the
-dimensions, the credibility comment, and the source-anchored assertions
-are recorded.
+Six of the seven items fit the current schema without strain. The seventh,
+GE-new-1, is a cited anti-p40 antibody trial added during the
+missing-evidence check. It concerns drug-response evidence for which the
+model has no fitting genetic Knowledge Domain, revealing a
+translational-scope gap. The discovery item, GE-1, is shown in abridged form
+below. It illustrates how dimensions, a credibility comment, and
+source-anchored assertions are recorded.
 
 \begin{lstlisting}[language=yaml]
 id: GE-1
@@ -93,57 +97,63 @@ assertions:
                    development of CD"}
 \end{lstlisting}
 
-\paragraph{Candidate extensions.} Curator review surfaced three, all
-provisional under the two-papers promotion rule of the main paper:
+\paragraph{Candidate extensions.} Curator review identified three candidate
+extensions, all provisional under the two-papers promotion rule:
+
 \begin{itemize}
   \item \textbf{CE-DU1, direction of effect:} a first-class dimension
-  distinguishing protective from risk-conferring alleles (here OR~0.26),
-  currently implicit in the sign of the odds ratio; the distinction
-  matters for ACMG/AMP-style downstream use.
-  \item \textbf{CE-DU3, cross-item synthesis:} a construct for a
-  higher-order claim that references several items jointly, here the
-  paper's recommendation that blocking the IL-23 pathway is a rational
-  therapeutic strategy; exercised twice (the recommendation and
-  GE-new-1), so it is also a translational-scope question.
+  distinguishing protective from risk-conferring alleles. In this case, the
+  protective direction is implicit in an odds ratio of 0.26. The distinction
+  may matter for downstream ACMG/AMP-style use.
+  \item \textbf{CE-DU3, cross-item synthesis:} a construct for
+    higher-order claims that jointly reference several evidence items. Here,
+    the relevant claim is the paper's recommendation that blocking the IL-23
+    pathway is a rational therapeutic strategy. The issue arises twice, in
+    that recommendation and in GE-new-1, and therefore also raises a question
+    about the model's translational scope.
   \item \textbf{CE-DU4, conditional-activation scope:} widen the
-  \{\texttt{mode\_of\_\allowbreak inheritance},
-  \texttt{mendelian\_\allowbreak segregation}, \texttt{exact\_variant},
-  \texttt{subdomain}\} activation from
-  \dimval{Human Genetics}~$+$~\dimval{Gene} to also include
-  \dimval{Variant} (as in GE-3's family-based transmission test), with a
-  \dimval{Complex} mode-of-inheritance value and a family-based subdomain
-  value.
+    activation condition for
+    \{\texttt{mode\_of\_\allowbreak inheritance},
+    \texttt{mendelian\_\allowbreak segregation}, \texttt{exact\_variant},
+    \texttt{subdomain}\} beyond
+    \dimval{Human Genetics}~$+$~\dimval{Gene} to also cover
+    \dimval{Human Genetics}~$+$~\dimval{Variant}. GE-3, a family-based
+    transmission test of a specific variant, illustrates this need. The
+    extension would also require a \dimval{Complex} mode-of-inheritance
+    value and a family-based subdomain value.
 \end{itemize}
-A fourth candidate, CE-DU2 (a negated-assertion dimension), was
-\emph{retracted} on review: an assertion is a predicate and already
-expresses absence, so no dimension is needed. The retraction is the
-corpus's clearest example of the conservative promotion rule blocking a
-false positive.
+A fourth candidate, CE-DU2, proposed a separate dimension for negated
+assertions. It was \emph{retracted} on review because an assertion is already
+a predicate and can express either absence or presence. This retraction is
+the corpus's clearest example of the conservative promotion rule preventing
+a premature addition.
 
 \subsection{Case Report CR-IN: Inouye et al.\ 2018 (polygenic risk score)}
 \label{sec:supp-ex-inouye}
 
-Inouye and colleagues built and externally validated a meta-genomic risk
-score (metaGRS) for coronary artery disease from 1{,}745{,}180 variants,
-testing it in 482{,}629 UK Biobank participants. The target is a derived
-whole-genome score and the measurements are epidemiological (hazard
-ratio, C-index), so every item strains a variant-level model. The
-annotation used here is the \texttt{v1} re-annotation produced under the
-current protocol, the one matured on the Duerr review (the original
-five-item \texttt{v0} draft is retained in the repository for
-comparison). It decomposes the paper into four claim-coherent items
-(\cref{tab:cr-inouye}), each representable only through deliberate
-``least-wrong'' placeholder choices that are recorded as forced fits and
-candidate extensions rather than hidden.
+Inouye and colleagues developed and externally validated a meta-genomic risk
+score (metaGRS) for coronary artery disease from 1{,}745{,}180 variants in
+482{,}629 UK Biobank participants. The evidential target is a derived,
+whole-genome score, and the primary measurements are epidemiological, such
+as hazard ratios and C-indices. The paper therefore exposes limitations of
+a model whose target types are variant-level.
+
+The annotation reported here is the \texttt{v1} re-annotation produced
+under the current protocol. It was developed after the Duerr review; the
+original five-item \texttt{v0} draft remains in the repository for
+comparison. The \texttt{v1} annotation decomposes the paper into four
+claim-coherent items (\cref{tab:cr-inouye}). Each can be represented only
+through deliberate placeholder assignments, recorded as forced fits and
+candidate extensions rather than left implicit.
 
 \begin{table}[H]
   \centering
   \footnotesize
   \caption[Inouye 2018: evidence-item decomposition]{Inouye 2018
-  (\texttt{v1}): the four \GeneticEvidence{} items. Every item forces the
-  same placeholder target type and resolution (\dimval{Variant}), flagged
-  against CE-IN1 and CE-IN2; the true target is a whole-genome polygenic
-  score.}
+  (\texttt{v1}): four \GeneticEvidence{} items. Each uses the same
+  placeholder Target Type and Resolution value, \dimval{Variant}, and is
+  flagged against CE-IN1 and CE-IN2. The actual target is a whole-genome
+  polygenic score.}
   \label{tab:cr-inouye}
   \begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X p{1.5cm} l@{}}
     \toprule
@@ -156,20 +166,21 @@ candidate extensions rather than hidden.
     \bottomrule
   \end{tabularx}
 
-  {\footnotesize $^{\dagger}$Placeholder; the true target is a polygenic
-  \dimval{Score} (CE-IN1) at whole-genome-aggregate resolution (CE-IN2).
-  Method is recorded at the intermediate \dimval{Association Study} /
-  \dimval{Meta-Analysis} level (no leaf fits polygenic-score association;
-  flag F-METH), and variant ascertainment is marked not-applicable (the
-  CE-IN1 SHACL point).}
+  {\footnotesize $^{\dagger}$Placeholder assignment. The actual target is a
+  polygenic \dimval{Score} (CE-IN1) at whole-genome-aggregate resolution
+  (CE-IN2). Method is recorded at the intermediate
+  \dimval{Association Study}/\dimval{Meta-Analysis} level because no leaf
+  represents polygenic-score association (flag F-METH). Variant Ascertainment
+  is marked not applicable, which supports the CE-IN1 SHACL argument.}
 \end{table}
 
-The independence item GE-2, shown abridged below, makes the strain
-concrete: \texttt{target\_type} and \texttt{target\_resolution} are
-forced to \dimval{Variant} (flagged against CE-IN1 and CE-IN2), variant
-ascertainment is marked not-applicable (the CE-IN1 SHACL point), and the
-epidemiological measures are carried as candidate-extension targets
-(CE-IN4).
+The independence item, GE-2, makes these limitations concrete and is shown
+in abridged form below. \texttt{target\_type} and
+\texttt{target\_resolution} are assigned the placeholder value
+\dimval{Variant} and flagged against CE-IN1 and CE-IN2. Variant
+Ascertainment is marked not applicable because it does not apply cleanly to
+a score target. The epidemiological measures are recorded in
+\texttt{special\_considerations} and motivate CE-IN4.
 
 \begin{lstlisting}[language=yaml]
 id: GE-2
@@ -194,32 +205,40 @@ assertions:
       phrase: "C-index of 0.696 (95% CI: 0.688 to 0.703)"}
 \end{lstlisting}
 
-\paragraph{Candidate extensions.} The annotation surfaces six, the most
-of any paper in the corpus:
+\paragraph{Candidate extensions.} The Inouye annotation identified six
+candidate extensions, the most of any paper in the corpus:
+
 \begin{itemize}
   \item \textbf{CE-IN1, \dimval{Score} target type:} a metaGRS is
-  neither gene nor variant but a derived composite predictor; add a
-  \dimval{Score} value (possibly subtyped polygenic vs composite). Forced
-  into the \dimval{Variant} target, the four items mark variant
-  ascertainment not-applicable, which the schema accepts as an explicit
-  escape; a first-class \dimval{Score} target would remove the forced fit
-  rather than rely on that escape.
+  neither a gene nor a variant, but a derived composite predictor. A
+  \dimval{Score} value, possibly characterized as polygenic, composite, or
+  both, would represent the target directly. Under the current
+  \dimval{Variant} placeholder, all four items mark Variant Ascertainment
+  as not applicable. The schema accepts this as an explicit escape, but a
+  first-class \dimval{Score} target would remove the forced fit.
+
   \item \textbf{CE-IN2, \dimval{Whole Genome Aggregate} resolution:} the
-  score spans the whole genome non-contiguously, which the
-  contiguous/pointwise resolution values do not capture.
-  \item \textbf{CE-IN3, target-composition dimension:} orthogonal to
-  resolution, a \dimval{Single}/\allowbreak\dimval{Aggregate}/\allowbreak\dimval{Composite}
-  axis; a complementary framing of the same gap as CE-IN2.
-  \item \textbf{CE-IN4, epidemiological measurement targets:} extend
-  \texttt{measurement\_target} (today molecular-assay-oriented) with
-  \dimval{Hazard Ratio}, \dimval{Odds Ratio}, \dimval{C-Index},
-  \dimval{AUROC}, and the like, activated for population-genetics
-  evidence.
-  \item \textbf{CE-IN5, structured cohort descriptor:} replace free-text
-  cohort properties with named fields (size, ancestry composition,
-  follow-up, ascertainment); reusable across Duerr, Davis, and future
-  cohort studies.
-  \item \textbf{CE-IN6, natural vs derived-artefact target:} a flag (or
-  \dimval{Natural}/\dimval{Derived} dimension) marking that the metaGRS
-  is a human construction rather than a natural kind.
+  score aggregates variants across the genome non-contiguously, which the
+  current contiguous or pointwise Resolution values do not capture.
+
+  \item \textbf{CE-IN3, target-composition dimension:} an axis orthogonal
+  to Resolution that distinguishes \dimval{Single},
+  \dimval{Aggregate}, and \dimval{Composite} targets. This provides a
+  complementary framing of the same underlying gap as CE-IN2.
+
+  \item \textbf{CE-IN4, epidemiological measurement targets:} an
+  extension of \texttt{measurement\_target}, which is currently oriented
+  toward molecular assays, with values such as \dimval{Hazard Ratio},
+  \dimval{Odds Ratio}, \dimval{C-Index}, and \dimval{AUROC}. These values
+  would be activated for population-genetics evidence.
+
+  \item \textbf{CE-IN5, structured cohort descriptor:} a replacement for
+  free-text cohort properties with named fields for size, ancestry
+  composition, follow-up, and ascertainment. Such a structure could be
+  reused across Duerr, Davis, and future cohort studies.
+
+  \item \textbf{CE-IN6, natural versus derived-artifact target:} a flag,
+  or a \dimval{Natural}/\dimval{Derived} dimension, indicating that the
+  metaGRS is a human-designed construct rather than a natural kind.
 \end{itemize}
+

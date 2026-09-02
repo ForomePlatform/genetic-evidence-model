@@ -145,8 +145,8 @@ LICENSE_FILES=(
 # canonical SHACL validation (convert YAML -> RDF, then pyshacl) instead of
 # re-deriving the mapping itself. Requires `pip install pyshacl rdflib pyyaml`.
 SCRIPT_FILES=(
-  "extraction/yaml_to_rdf.py"
-  "scripts/validate_annotations.py"
+  "src/python/main/forome/gem/extraction/yaml_to_rdf.py"
+  "src/python/main/forome/gem/validation/validate_annotations.py"
 )
 
 # Skill-specific files

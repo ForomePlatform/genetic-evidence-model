@@ -32,21 +32,40 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 def _find_base() -> Path:
-    """Directory that holds schema/genetic_evidence.shacl.ttl (repo or bundle)."""
-    for cand in (SCRIPT_DIR, SCRIPT_DIR.parent, SCRIPT_DIR.parent.parent):
+    """Directory that holds schema/genetic_evidence.shacl.ttl (repo root or bundle).
+
+    Walks all ancestors so it works from the deep package location
+    (src/python/main/forome/gem/validation/) in the repo AND from the flat
+    skill bundle where schema/ sits one or two levels up.
+    """
+    for cand in (SCRIPT_DIR, *SCRIPT_DIR.parents):
         if (cand / "schema" / "genetic_evidence.shacl.ttl").is_file():
             return cand
-    return SCRIPT_DIR.parent.parent  # repo default
+    return SCRIPT_DIR.parent.parent  # fallback
 
 
 BASE = _find_base()
-SHACL = str(BASE / "schema" / "genetic_evidence.shacl.ttl")
+_shacl = BASE / "schema" / "genetic_evidence.shacl.ttl"
+if not _shacl.is_file():
+    # Standalone install (no repo checkout, no flat bundle): fall back to the
+    # synced copy packaged in forome.gem._reference. Guarded import so the
+    # flat skill bundle (where forome.gem is not importable) is unaffected.
+    try:
+        from forome.gem._reference import REFERENCE_DIR as _ref_dir
+        if (_ref_dir / "genetic_evidence.shacl.ttl").is_file():
+            _shacl = _ref_dir / "genetic_evidence.shacl.ttl"
+    except ImportError:
+        pass
+SHACL = str(_shacl)
 
 
 def _load_converter():
-    """Import yaml_to_rdf.py from the repo (extraction/) or a bundle (alongside)."""
-    for cand in (BASE / "extraction" / "yaml_to_rdf.py",
-                 SCRIPT_DIR / "yaml_to_rdf.py",
+    """Import yaml_to_rdf.py, standalone (no forome.gem import) so it also works
+    inside the flat skill bundle. Tries the package sibling, the flat bundle
+    location, then legacy repo layouts."""
+    for cand in (SCRIPT_DIR.parent / "extraction" / "yaml_to_rdf.py",  # package
+                 SCRIPT_DIR / "yaml_to_rdf.py",                         # flat bundle
+                 BASE / "extraction" / "yaml_to_rdf.py",                # legacy repo
                  BASE / "yaml_to_rdf.py"):
         if cand.is_file():
             spec = importlib.util.spec_from_file_location("yaml_to_rdf", cand)
@@ -65,7 +84,9 @@ def _corpus():
                   if "reviews" not in p.parts)
 
 
-def main(argv):
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
     files = [Path(a) for a in argv] if argv else _corpus()
     if not files:
         print("No annotation files found.")
@@ -99,4 +120,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    raise SystemExit(main())

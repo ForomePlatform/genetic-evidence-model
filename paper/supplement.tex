@@ -28,7 +28,7 @@ A Semantic Model of Genetic Evidence}
 
 \begin{document}
     \maketitle
-    \setcounter{tocdepth}{2}   % list parts, sections, and subsections (every appendix paper)
+    \setcounter{tocdepth}{2}   % list parts, sections, and subsections
     \tableofcontents
 
     \clearpage
@@ -44,18 +44,14 @@ A Semantic Model of Genetic Evidence}
     \input{sections/s15_crosswalk}
     \input{sections/s16_case_reports}
     \input{sections/s17_coverage}
+    \input{sections/s18_umls_crosswalk}     % generated: gem-umls-render
+    \input{sections/s19_credibility_umls}
 
-    % Hard break so the standalone tables stay under their own part and do
-    % not float forward into the Appendices.
+    % Hard break so the standalone tables stay under their own part heading.
     \clearpage
     \part*{Supplementary Tables}
     \addcontentsline{toc}{part}{Supplementary Tables}
     \input{sections/s2_tables}
-
-    \clearpage
-    \part*{Appendices}
-    \addcontentsline{toc}{part}{Appendices}
-    \input{sections/s3_appendices}
 
     \bibliographystyle{plainnat}
     \bibliography{references}

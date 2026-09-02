@@ -1,0 +1,1008 @@
+# Curator adjudications for the UMLS crosswalk review/unmapped entries.
+# Applied by build_umls_crosswalk.py AFTER querying. 'accept' is used only if the
+# CUI was among the query's candidates OR the harness can fetch it live from UMLS;
+# the harness never fabricates a concept the curator merely named. 'unmapped: true'
+# records a considered 'no faithful UMLS concept' (honest finding). Edited via
+# mapping/adjudicate_ui.py.
+adjudications:
+  "credibility/(axis)": {accept_sty: T080, note: "Qualitative Concept: the scope the pre-registered sweep searched; all four tiers argued unmapped (see S1 credibility note)."}
+  "credibility/HIGH":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0205250
+      fails: A
+      name: High
+      sab: MTH
+      why: 'SNOMED 75540009 |High (qualifier value)| IS-A Increased: magnitude of a measurand, not epistemic
+        degree (concept is live in UMLS 2026AA)'
+    - cui: C1522410
+      fails: A
+      name: Highest
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4330261
+      fails: D
+      name: High Confidence
+      sab: NCI
+      why: questionnaire response option (assessment answer), not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/LOW":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0205251
+      fails: A
+      name: low
+      sab: MTH
+      why: 'SNOMED qualifier value IS-A Decreased: magnitude of a measurand'
+    - cui: C0547040
+      fails: A
+      name: Minimal
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4330590
+      fails: D
+      name: Low Confidence
+      sab: NCI
+      why: questionnaire response option, not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/MEDIUM":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0439536
+      fails: A
+      name: Medium
+      sab: MTH
+      why: quantitative qualifier (amount/size), not epistemic degree
+    - cui: C5201148
+      fails: A
+      name: Moderate
+      sab: MTH
+      why: qualifier value, measurand degree
+    - cui: C4036199
+      fails: D
+      name: Moderate Confidence
+      sab: NCI
+      why: questionnaire response option, not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "credibility/VERY_HIGH":
+    unmapped: true
+    note: 'GEM-internal defeasibility tier (the curator''s belief-revision policy, see S1 note). The pre-registered
+      sweep found no UMLS concept denoting a degree of epistemic warrant usable as a point of this scale:
+      qualifier values are measurand degrees (A); NCI Level of Evidence is a study-design hierarchy (A/C);
+      the NCI Confidence answer set and LOINC/PROMIS confidence items are questionnaire responses (D); SNOMED
+      definite/probable/possible are diagnostic-certainty modality (C).'
+    relation: none
+    rejected:
+    - cui: C0442804
+      fails: A
+      name: Very high
+      sab: MTH
+      why: 'SNOMED 260360000 qualifier value IS-A High IS-A Increased: magnitude of a measurand'
+    - cui: C5787630
+      fails: A
+      name: Extremely high
+      sab: SNOMEDCT_US
+      why: qualifier value, measurand degree
+    - cui: C4331500
+      fails: D
+      name: Very High Confidence
+      sab: NCI
+      why: NCI Clinical or Research Assessment Answer (questionnaire response option), not an evidence grade
+    - cui: C2986612
+      fails: A
+      name: Level of Evidence I
+      sab: NCI
+      why: 'NCI/PDQ level of evidence: a study-design hierarchy, not a degree of warrant; would collapse GEM
+        method into credibility (also C)'
+    - cui: C0393009
+      fails: A
+      name: Level of Evidence
+      sab: MTH
+      why: the dimension (study-design hierarchy), not a level; also B
+    - cui: C0439544
+      fails: C
+      name: Definite
+      sab: MTH
+      why: 'SNOMED diagnostic-certainty modality (definite/probable/possible): likelihood a proposition holds,
+        three points, no intensified top; bound to diagnosis assertions (also D)'
+    - cui: C0332148
+      fails: C
+      name: Probable diagnosis
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C0332149
+      fails: C
+      name: Possible
+      sab: MTH
+      why: diagnostic-certainty modality, see Definite
+    - cui: C4760312
+      fails: D
+      name: Level of evidence (molecular pathology, LOINC)
+      sab: MTH
+      why: AMP/ASCO/CAP clinical-actionability tier for a variant report, not curator warrant (also B)
+    - cui: C5556778
+      fails: D
+      name: Metabolite Identification Confidence Level
+      sab: NCI
+      why: 'Schymanski identification-confidence ladder: confidence in a structure identification, domain-bound'
+    - cui: C0456878
+      fails: D
+      name: Degree of certainty of TNM classification
+      sab: SNOMEDCT_US
+      why: 'TNM C-factor: certainty of one patient''s staging, a diagnostic-assertion qualifier'
+    protocol:
+      queries:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+      scopes:
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      - LNC
+      - MEDLINEPLUS
+      - HPO
+      umls: '2026AA local index (protocol credibility v2: 174 queries, 497 candidates, all classified) + UTS
+        current 2026-08-30 (505 candidates); see data/umls/sweeps/'
+  "gene_relation/(axis)": {accept_sty: T045, note: "Genetic Function: gene-gene regulatory relations; relational tokens anchored per the operator pattern."}
+  "gene_relation/X_has_same_function_as_Y":
+    unmapped: true
+    note: Composite relational predicate (two gene products sharing function); the sole candidate 'Immunologic
+      equivalence' (Organism Function) is ...
+    relation: none
+    rejected: []
+    protocol:
+      queries:
+      - Functional equivalence
+      scopes:
+      - axis
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      umls: 2026AA local index + UTS current, 2026-08-30
+  "gene_relation/X_inhibits_Y":
+    accept: C2611924
+    note: 'Relational token — the composite inhibits(X, Y); the GO process ''negative regulation of gene expression''
+      (T045) is the nearest anchor, recorded related per the operator-as-anchor pattern (RELATED_GENE, INTERVAL).
+      Caveat: inhibition need not run via expression regulation (e.g. inhibition of product activity); the
+      process concept covers the canonical network reading.'
+    relation: related
+  "gene_relation/X_regulates_Y":
+    accept: C0017263
+    note: X_regulates_Y = one gene product regulating another's expression; C0017263 'Gene Expression Regulation'
+      (Genetic Function) faithfully den...
+    relation: exact
+  "knockout_type/(axis)": {accept_sty: T063, note: "Molecular Biology Research Technique: knockout technology concepts."}
+  "knockout_type/CONDITIONAL":
+    accept: C0814041
+    note: Token CONDITIONAL = conditional (e.g. Cre/lox) knockout; 'conditional gene knockout technology'
+      (Molecular Biology Research Technique) de...
+    relation: exact
+  "knockout_type/UNCONDITIONAL":
+    accept: C0599772
+    note: 'Asymmetric pre-coordination: CONDITIONAL has its own concept (C0814041 ''conditional gene knockout
+      technology'') while the unmarked default has none — no ''constitutive''/''conventional knockout'' anywhere
+      in UMLS. Anchored on the generic C0599772 ''Gene Knockout Techniques'' (MSH); the token is the unmarked
+      subtype of that technique, GEM more specific => narrower. Rejected: C1522225 ''Knock-out'' (NCI, bare
+      qualifier).'
+    relation: narrower
+  "knowledge_domain/(axis)": {accept_sty: T090, note: "Occupation or Discipline. Lifted from T091 (A2.6.1 -> A2.6) 2026-08-30: Biomedical Occupation or Discipline was too narrow (e.g. Animal Genetics)."}
+  "knowledge_domain/ANIMAL_GENETICS":
+    accept: C1510895
+    note: NCI is specialized vocabulary, but we did find a match in a more general one. Still NCI is a relevant
+      vocabulary.
+    relation: exact
+  "knowledge_domain/COMPARATIVE_GENOMICS":
+    accept: C4704937
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/EPIGENETICS":
+    accept: C1655731
+    note: EPIGENETICS is a knowledge-domain (discipline) value; 'study of epigenetics' (Biomedical Occupation
+      or Discipline) faithfully denotes the...
+    relation: exact
+  "knowledge_domain/GENE_FUNCTION":
+    accept: C0872316
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/HUMAN_GENETICS":
+    accept: C0020124
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/MODEL_ORGANISM":
+    accept: C0599779
+    note: curator-accepted via UI
+    relation: exact
+  "knowledge_domain/POPULATION_GENETICS":
+    accept: C0017404
+    note: curator-accepted via UI
+    relation: exact
+  "measurement_target/(axis)": {accept_sty: T044, note: "Molecular Function: aspects of gene-product function (expression T045 sibling accepted per value)."}
+  "measurement_target/ACTIVITY":
+    accept: C1148560
+    note: 'GO molecular_function (T044) is the class of ALL molecular-level activities of gene products, including
+      binding — which the scale carries as its own token (C0033618). GEM''s binding-excluded ACTIVITY is therefore
+      more specific: narrower. Within-scale anchors stay distinct (criterion C).'
+    relation: narrower
+  "measurement_target/BINDING":
+    accept: C0033618
+    note: 'Protein Binding (T044): binding of the gene product to its partners. Recorded exact on the product-binding
+      reading; if the token is later read to cover nucleic-acid binding by the product as well, downgrade
+      to close.'
+    relation: exact
+  "measurement_target/CATALYSIS":
+    accept: C0243102
+    note: CATALYSIS measures catalytic/enzymatic activity of the gene product; C0243102 'enzyme activity'
+      (Molecular Function) faithfully denotes c...
+    relation: exact
+  "measurement_target/EXISTENCE":
+    unmapped: true
+    note: EXISTENCE is a measured property (whether the gene product is present); candidates 'Proteins'/'Genome
+      Encoded Entity' are substance/entit...
+    relation: none
+    rejected:
+    - cui: C2755856
+      fails: A
+      name: regulation of gene product expression
+      sab: GO
+      why: denotes the substance/entity (protein, gene product), not the measured property of existence/presence
+    - cui: C5887109
+      fails: A
+      name: miRNA-mediated gene silencing, production of miRNAs
+      sab: GO
+      why: denotes the substance/entity (protein, gene product), not the measured property of existence/presence
+    - cui: C5887519
+      fails: A
+      name: gene silencing by RNA, production of guide RNA
+      sab: GO
+      why: denotes the substance/entity (protein, gene product), not the measured property of existence/presence
+    protocol:
+      queries:
+      - Gene product
+      scopes:
+      - axis
+      - all
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      umls: 2026AA local index + UTS current, 2026-08-30
+  "measurement_target/EXPRESSION":
+    accept: C0017262
+    note: Gene Expression (T045); measured quantity is expression of the target's product. Clean denotation.
+    relation: exact
+  "measurement_target/LOCALIZATION":
+    accept: C0597704
+    note: '''protein localization activity''; STY Cell Function is outside the axis subtree — accepted deliberately.'
+    relation: close
+  "measurement_target/STABILITY":
+    accept: C2350440
+    note: MeSH 'Protein Stability'; GEM token also covers transcript stability, hence close.
+    relation: close
+  "method/(axis)": {accept_sty: T062, note: "Research Activity: methodology/study-activity concepts; hosts the mapped method values (case-control, linkage, GWAS-adjacent)."}
+  "method/ASSOCIATION_STUDY":
+    accept: C2717878
+    note: ASSOCIATION_STUDY = statistical test of association between genetic variation and phenotype; 'Genetic
+      Association Studies' (Molecular Bio...
+    relation: exact
+  "method/BIOINFORMATICS_INFERENCE":
+    accept: C0376528
+    note: 'GEM token is inference over existing biological data (Computational Biology x Inference C0679201,
+      today typically ML C0376284); no pre-coordinated concept; nearest single anchor is the field. STY outside
+      the method axis; accepted deliberately. Relation corrected broader->narrower in the 2026-08-31 consistency
+      audit: the token is inference work WITHIN the field, GEM more specific — same direction as STATISTICAL_GENETICS.'
+    relation: narrower
+  "method/CANDIDATE_GENE_STUDY":
+    accept: C2717881
+    note: CANDIDATE_GENE_STUDY = hypothesis-driven association study at candidate genes; 'Candidate Gene Identification'
+      (Molecular Biology Researc...
+    relation: exact
+  "method/CLINICAL_EVIDENCE":
+    accept: C0008972
+    note: CLINICAL_EVIDENCE is the clinical-observation evidence-generation method; 'Clinical Research' (Research
+      Activity) faithfully denotes evid...
+    relation: exact
+  "method/EXPERIMENT":
+    accept: C0678323
+    note: curator-accepted via UI
+    relation: exact
+  "method/FAMILY_BASED":
+    unmapped: true
+    note: FAMILY_BASED denotes statistical inference from family/pedigree data; the 'genetic pedigree analysis'
+      candidates are clinical lab-test ca...
+    relation: none
+    rejected: []
+    protocol:
+      queries:
+      - Pedigree analysis
+      scopes:
+      - axis
+      match:
+      - exact
+      - normalizedString
+      - words
+      sabs:
+      - MSH
+      umls: UTS current, queried 2026-08-30
+  "method/FINE_MAPPING":
+    accept: C1517888
+    note: 'NCI Linkage Disequilibrium Mapping; close (not exact): modern fine-mapping also includes Bayesian/conditional
+      approaches beyond pure LD.'
+    relation: close
+  "method/GWAS":
+    accept: C2350277
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_SILICO":
+    accept: C0009609
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_VITRO":
+    accept: C0681828
+    note: curator-accepted via UI
+    relation: exact
+  "method/IN_VIVO":
+    accept: C0681829
+    note: curator-accepted via UI
+    relation: exact
+  "method/LINKAGE_ANALYSIS":
+    accept: C0796345
+    note: curator-accepted via UI. STY outside the axis subtree; accepted deliberately (live fetch bypasses
+      the search filter).
+    relation: exact
+  "method/META_ANALYSIS":
+    accept: C0920317
+    note: Meta-Analysis (statistical procedure) is the analytic-method sense, faithful for the method token.
+    relation: exact
+  "method/SEGREGATION_ANALYSIS":
+    unmapped: true
+    note: No candidates returned; the segregation-analysis statistical method has no faithful UMLS concept
+      (only the segregation phenomenon exists,...
+    relation: none
+    rejected:
+    - cui: C0314646
+      fails: A
+      name: Genetic independent segregation
+      sab: SNOMEDCT_US
+      why: the Mendelian phenomenon (Genetic Function), not the analytic method
+    - cui: C0796344
+      fails: B
+      name: Genetic Analysis
+      sab: MTH
+      why: far too broad to stand for one pedigree-based method
+    - cui: C0796345
+      fails: D
+      name: genetic linkage analysis
+      sab: MTH
+      why: the sibling method, already anchoring LINKAGE_ANALYSIS
+    protocol:
+      queries:
+      - segregation analysis
+      - genetic segregation
+      - segregation analysis genetic
+      scopes:
+      - all
+      match:
+      - exact
+      - words
+      - partial
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      umls: 2026AA local index + UTS current, queried 2026-08-30
+  "method/STATISTICAL_GENETICS":
+    accept: C2717898
+    note: GEM token is the intersection Statistics (C0038215) x Genetics (C0017398); no pre-coordinated UMLS
+      concept exists; Biostatistics is the nearest single broader anchor.
+    relation: narrower
+  "method/TRANSMISSION_DISEQUILIBRIUM_TEST":
+    unmapped: true
+    note: The exact-name query returned no candidates; TDT/FBAT are specific family-based transmission tests
+      with no faithful UMLS concept.
+    relation: none
+    rejected:
+    - cui: C2717878
+      fails: B
+      name: Genetic Association Studies
+      sab: MSH
+      why: the token is one specific family-based test; this broader concept already anchors ASSOCIATION_STUDY
+        — mapping both collapses two tokens
+    - cui: C0023746
+      fails: A
+      name: Linkage Disequilibrium
+      sab: MSH
+      why: the population-genetic phenomenon the test exploits, not the test
+    protocol:
+      queries:
+      - transmission disequilibrium test
+      - transmission disequilibrium
+      scopes:
+      - all
+      match:
+      - exact
+      - words
+      - partial
+      sabs:
+      - MSH
+      - NCI
+      - SNOMEDCT_US
+      umls: 2026AA local index + UTS current, queried 2026-08-30
+  "mode_of_inheritance/(axis)": {accept_sty: T045, note: "Genetic Function: UMLS types inheritance modes (autosomal dominant etc.) under it."}
+  "mode_of_inheritance/autosomal_dominant":
+    accept: C0443147
+    note: curator-accepted via UI
+    relation: exact
+  "mode_of_inheritance/autosomal_recessive":
+    accept: C0441748
+    note: curator-accepted via UI
+    relation: exact
+  "mode_of_inheritance/mitochondrial":
+    accept: C0887941
+    note: curator-accepted via UI
+    relation: exact
+  "mode_of_inheritance/x_linked_dominant":
+    accept: C1847879
+    note: HPO 'X-linked dominant inheritance'.
+    relation: exact
+  "mode_of_inheritance/x_linked_recessive":
+    accept: C1845977
+    note: HPO 'X-linked recessive inheritance'.
+    relation: exact
+  "organism/(axis)": {accept_sty: T001, note: "Organism: NCBITaxon-style species values."}
+  "penetrance/(axis)": {accept_sty: T045, note: "Genetic Function, matching the inheritance-genetics neighborhood of its values."}
+  "penetrance/complete":
+    accept: C5826795
+    note: Token 'complete' = complete penetrance; HPO C5826795 'Typified by complete penetrance' (Genetic
+      Function) denotes exactly that.
+    relation: exact
+  "penetrance/incomplete":
+    accept: C1836598
+    note: HPO 'Typified by incomplete penetrance' — the sibling of the mapped 'complete'.
+    relation: exact
+  "penetrance/unknown":
+    accept: C0439673
+    note: curator-accepted via UI
+    relation: close
+  "phenotype_scale/(axis)": {accept_sty: T071, note: "Entity (letter root A) - breadth deliberate: every scale anchor (Substance, Cell, Tissue, Organism, Sign or Symptom A2.2.2) falls under it."}
+  "phenotype_scale/CELLULAR":
+    accept: C0007634
+    note: Anchors the cellular scale level to the entity kind at that scale (Cells); related, not an equivalent
+      of the phenotype-scale point.
+    relation: related
+  "phenotype_scale/CLINICAL":
+    accept: C0037088
+    note: 'Token = ''Human clinical phenotype''. Anchors the clinical scale level to the observable kind at
+      that scale: SNOMED ''Clinical finding'' (root of the finding/disorder hierarchy) / NCI ''Finding'' (broad:
+      clinical, laboratory or molecular evidence of disease); the MeSH atom ''Signs and Symptoms'' is the
+      narrowest of the nested senses. Pattern break vs siblings noted: the bearer at this scale is the organism
+      again, so observable-kind anchors instead. Rejected: C3889687 Clinical Observation (T058 healthcare
+      *act*, procedural neighborhood — method territory, fails A), C0031437 Phenotype (the dimension itself,
+      fails B), C0030705 Patients (bearer reading erases the ORGANISMAL/CLINICAL distinction), C5890437 Observation
+      (finding) (thin LOINC-only atom).'
+    relation: related
+  "phenotype_scale/HISTOLOGICAL":
+    accept: C0040300
+    note: Anchors the histological scale level to the entity kind at that scale (Tissue, T024; MSH D014024
+      / NCI C12801 / SNOMED 85756007 / FMA 9637 all concur); related, not an equivalence — the token is a
+      level of phenotypic organization, the concept the entity class, consistent with MOLECULAR/CELLULAR/ORGANISMAL.
+      Replaces review-flagged C0684084 (Skin tissue).
+    relation: related
+  "phenotype_scale/MOLECULAR":
+    accept: C0567416
+    note: Anchors the molecular scale level to the entity kind at that scale (Molecule); related, not an equivalent
+      of the phenotype-scale point.
+    relation: related
+  "phenotype_scale/ORGANISMAL":
+    accept: C0029235
+    note: Anchors the organismal scale level to the entity kind at that scale (Organism); related, not an
+      equivalent of the phenotype-scale point.
+    relation: related
+  "resolution/(axis)": {accept_sty: T082, note: "Spatial Concept - the intension: resolution is spatial granularity of localization (UMLS itself types Gene Locus and Coordinate as T082). That only two anchors are in-axis is a UMLS gap (no spatial concept represents a coarse genomic window or segment), not a mistyping of the axis. Principled exception: VARIANT is two-dimensional - a position x a discrete nucleotide change - so its anchor (Genetic Variation) lies outside any purely spatial type by nature. T028 considered and declined (curator ruling 2026-09-01)."}
+  "resolution/FUNCTIONAL_ELEMENT":
+    accept: C1517495
+    note: 'Token = ''Regulatory or functional element'' (inclusive). C1517495 ''Gene Feature'' (NCI C13445;
+      syn Gene Structure, Sequence Feature; STY T028, in-axis) is the inclusive parent: NCI children include
+      both Coding Region and Regulatory Element — the two narrower readings — plus Exon, Intron, UTR, TATA
+      Box, CpG Island, Poly-A Addition Site. Close, not exact: the concept is gene-anchored (''elements that
+      comprise a gene or transcription unit''), so gene-free intergenic elements sit awkwardly, while membership
+      is structural (introns, switch regions) — narrower in anchoring, broader in membership. Rejected narrower
+      readings: C0314642 Regulatory Element, Coding Region (children); C2333586 ''DNA molecule region'' (FMA
+      parthood incl. Linker DNA, fails D).'
+    relation: close
+  "resolution/GENE":
+    accept: C1708726
+    note: curator-accepted via UI
+    relation: exact
+  "resolution/POSITION":
+    accept: C1707511
+    note: Token = 'Single-base position', a genomic granularity/coordinate descriptor; all candidates are
+      GO 'positive regulation of nucleotide ......
+    relation: exact
+  "resolution/VARIANT":
+    accept: C0042333
+    note: 'Finest resolution level: resolved to the specific variant. Same anchor and argument as target_type/VARIANT
+      (NCI entity sense, ACMG classification children, ''Sequence Variant'' synonym; MeSH population sense
+      => close, not exact; STY T070 out-of-axis, deliberate) — see that record. Cross-dimension reuse; within
+      the resolution scale all anchors remain distinct (criterion C).'
+    relation: close
+  "resolution/WINDOW":
+    accept: C0678933
+    note: 'Token = ''coarse genomic window''. C0678933 ''Genetic Loci'' (T028, in-axis) — locus is the idiom
+      of coarse resolution (linkage peak, GWAS locus; cf. QTL C0597336 as corroborating loci-language). Same
+      anchor as target_type/SEGMENT (cross-dimension reuse, precedented by Coordinate and Linkage Study);
+      close because coarseness/extent are not explicit. Coordinate C1707511 barred by criterion C: it is resolution/POSITION''s
+      exact anchor within the same scale. Rejected: C1521913 Chromosome band (one banding scheme, fails B),
+      C1953345 chromosomal region (GO/FMA cell-component material sense, T026, fails D), ''genomic window''
+      absent.'
+    relation: close
+  "subdomain/(axis)": {accept_sty: T063, note: "Molecular Biology Research Technique: study designs/techniques (GWAS, WGS, linkage)."}
+  "subdomain/Candidate Gene Study":
+    accept: C2717881
+    note: Value denotes the candidate-gene study design; 'Candidate Gene Identification' (Molecular Biology
+      Research Technique) is the standard MeS...
+    relation: exact
+  "subdomain/GWAS":
+    accept: C2350277
+    note: curator-accepted via UI
+    relation: exact
+  "subdomain/Linkage Study":
+    accept: C0796345
+    note: Same concept the method dimension maps for LINKAGE_ANALYSIS; consistency.
+    relation: exact
+  "subdomain/WGS-WES Study":
+    accept: C3640076
+    note: Token covers whole-genome AND whole-exome sequencing studies; C3640076 'Whole Genome Sequencing'
+      (MSH) denotes only the WGS half, and UMLS pre-coordinates Whole Exome Sequencing separately — no concept
+      covers the WGS+WES study family. GEM more general => broader. Curator decision (relation corrected from
+      the harness's exact-name match).
+    relation: broader
+  "target_type/(axis)": {accept_sty: T028, note: "Gene or Genome: the entity kind of evidence targets. Out-of-axis accepts (RELATED_GENE operator, VARIANT sense-merge, INTERVAL coordinate) are deliberate, argued per value."}
+  "target_type/GENE":
+    accept: C0017337
+    note: Token GENE = 'a single gene'; C0017337 'Genes' (Gene or Genome) faithfully denotes exactly this
+      concept.
+    relation: exact
+  "target_type/INTERVAL":
+    accept: C1707511
+    note: 'Token INTERVAL = ''a coordinate interval (bp or cM)'' (schema) — the coordinate system is the semantic
+      core, so the composite is (Coordinate, Coordinate) x genomic axis and C1707511 ''Coordinate'' (NCI C44465,
+      ''a number or other designation that identifies a position relative to an axis or grid'') anchors it
+      as related, parallel to RELATED_GENE. Caveats: the concept is any-grid (children include GPS coordinates
+      as well as End Coordinate / From-To Position Dimension fields) and denotes the point designation, not
+      the span. Nothing closer exists: ''Interval'' is Temporal Concept C1272706 or HL7 datatype C1552654;
+      no genomic interval/region concept; C1517520 ''Genomic Segment'' is a BAC/YAC library-clone false friend
+      (isa UML Entity). STY T082 Spatial Concept outside the T028 axis; accepted deliberately. Division of
+      labor: SEGMENT = material stretch (Genetic Loci), INTERVAL = coordinate-specified span. SO region (SO:0000001)
+      stays the external anchor (s15).'
+    relation: related
+  "target_type/RELATED_GENE":
+    accept: C0332281
+    note: The token is the composite C0332281 'Associated with' x C0017337 'Genes' — the relation is the semantic
+      core, so the operator concept anchors it. UMLS pre-coordinates specific relatedness kinds (Genes, Modifier
+      C3178895; Homologous Gene C1334043; Linked gene C0314613; gene interaction C0596610) but no generic
+      related-gene. STY (Qualitative Concept) outside the target_type axis; accepted deliberately.
+    relation: related
+  "target_type/SEGMENT":
+    accept: C0678933
+    note: 'Token SEGMENT = a contiguous genomic segment under study. C0678933 ''Genetic Loci'' (T028, in-axis)
+      denotes identified positions/regions on the genome; a segment under study functions as a locus, but
+      the concept carries neither contiguity nor arbitrary extent — hence close, not exact. SO region (SO:0000001)
+      stays the external anchor (s15). Rejected: C0449719 ''Part'' (generic partitive, fails B/D). Near-miss
+      recorded: C2333586 ''DNA molecule region'' (FMA:84119, sole source, no definition; children incl. Exon,
+      Intron, Linker DNA) — material parthood of a DNA molecule, not a segment defined on the genome; fails
+      D; STY T167 Substance out-of-axis.'
+    relation: close
+  "target_type/TRANSCRIPT":
+    accept: C1519595
+    note: 'Token TRANSCRIPT = a transcript isoform as evidence target; C1519595 ''RNA Transcript'' is the
+      class of the target kind — the same pattern as GENE (Genes, exact) and VARIANT (Genetic Variation, close).
+      Close, not exact: the isoform nuance (a specific alternative transcript of a gene) is not explicit in
+      the class concept. NCI ''Transcript Variant'' rejected (dysfunction-flavored STY, variant-of-transcript
+      sense). SO transcript (SO:0000673) stays the exact external anchor (s15). Relation corrected broader->close
+      in the 2026-08-31 consistency audit — the original direction claim was wrong under the documented convention
+      (narrower = GEM more specific, broader = GEM more general).'
+    relation: close
+  "target_type/VARIANT":
+    accept: C0042333
+    note: NCI defines the entity sense ('deviation(s) in the nucleotide sequence of the genetic material of
+      an individual') and hangs the ACMG classification ladder under it (Pathogenic Variant C3816499, Variant
+      Benign C5239128, Likely Pathogenic Variant C4264624, each is_a Genetic Variation [NCI]); UMLS files
+      'Sequence Variant'/'Sequence Variation' — SO's exact term — as synonyms of this CUI. The MeSH atom carries
+      the population-phenomenon sense ('genotypic differences observed among individuals in a population'),
+      which wins the STY (T070 Natural Phenomenon or Process, outside the T028 axis; the NCI children are
+      typed T086 Nucleotide Sequence). Sense merge => close, not exact; out-of-axis STY accepted deliberately.
+      No entity-typed generic variant exists (T086 holds the classified children only; 'variant' alone is
+      a SNOMED qualifier C0205419).
+    relation: close
+  "variant_ascertainment/(axis)": {accept_sty: T062, note: "Research Activity: the dimension's intension is the ascertainment route (study-design vocabulary); artifact-anchored values (Published Database, synthetic construct) are metonymic route-markers, deliberately out-of-axis. See DECISIONS.md 2026-08-31."}
+  "variant_ascertainment/FROM_DATABASE":
+    accept: C0993637
+    note: FROM_DATABASE is a provenance/ascertainment route; 'Databases'/'Published Database' denote the database
+      artifact, not the route by which ...
+    relation: exact
+  "variant_ascertainment/OBSERVED_IN_CASES":
+    accept: C0007328
+    note: Ascertainment route; C0007328 Case-Control Studies is the related methodology concept, not an equivalent.
+    relation: related
+  "variant_ascertainment/OBSERVED_IN_CONTROLS":
+    accept: C0007328
+    note: Ascertainment route; C0007328 Case-Control Studies is the related methodology concept, not an equivalent.
+    relation: related
+  "variant_ascertainment/SYNTHETIC":
+    accept: C0598279
+    note: curator-accepted via UI
+    relation: exact

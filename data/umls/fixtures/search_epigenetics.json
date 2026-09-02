@@ -1,0 +1,16 @@
+{
+  "pageSize": 25,
+  "pageNumber": 1,
+  "result": {
+    "classType": "searchResults",
+    "results": [
+      {
+        "ui": "C9000003",
+        "rootSource": "MSH",
+        "uri": "https://uts-ws.nlm.nih.gov/rest/content/TEST/CUI/C9000003",
+        "name": "Epigenetics",
+        "semanticTypes": ["Biomedical Occupation or Discipline"]
+      }
+    ]
+  }
+}

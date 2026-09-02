@@ -2,7 +2,7 @@
 %  §6 — Discussion
 %
 %  Revised 2026-04-21: subsections collapsed from four to two.
-%  §6.1 ICBO Alignment + §6.2 Model Extensions → §6.1 Discussion.
+%  §6.1 (positioning) + §6.2 Model Extensions → §6.1 Discussion.
 %  §6.3 Limitations + §6.4 Future Work → §6.2 Limitations and
 %  Future Work. Labels preserved for all cross-section references
 %  (sec:disc-future is referenced from §2).
@@ -11,58 +11,48 @@
 \section{Discussion}
 \label{sec:discussion}
 
-Two features of the proposal bear brief recapitulation. First, the
-always-required vocabulary is small, and its conditional-activation
-mechanism keeps the extended vocabulary compact without sacrificing
-expressive power. Second, every assertion in every annotation is
-anchored to a specific source span in its underlying publication,
-making each annotation independently auditable.
+Two features of the proposal merit brief emphasis. First, the
+always-required vocabulary is small, and conditional activation keeps
+the extended vocabulary compact without sacrificing expressive power.
+Second, every assertion is anchored to a specific source span in its
+source publication, making each annotation independently auditable.
 
-\subsection{ICBO Alignment and Model Extensions}
-\label{sec:disc-icbo}
+\subsection{Positioning and Model Extensions}
+\label{sec:disc-positioning}
 \label{sec:disc-extensions}
 
-The contribution aligns with ICBO's focus on trustworthy,
-interpretable, and AI-ready semantic infrastructure. The released
-schema formalises the implemented conformance requirements as SHACL
-shapes, makes the implemented activation conditions machine-checkable,
-and anchors each assertion to its source text rather than only to a
-style guide. The flag vocabularies of
-\cref{sec:workflow-flags} make provenance explicit: a reader can
+The released schema formalizes the implemented conformance
+requirements as SHACL shapes, makes the implemented activation
+conditions machine-checkable, and anchors each assertion to its
+source text rather than only to a style guide. The flag vocabularies
+of \cref{sec:workflow-flags} make provenance explicit: a reader can
 tell whether a value was drawn from the author's summary, proposed
 by a reviewer, added as an AI assumption, or left deliberately
-unpopulated. A broader framing is that the schema is designed to
-make literature review tractable as a \emph{semantic-parsing}
-problem, the mapping of natural-language claims to a shared,
-source-anchored representation. This is not a task a language model
-can do in isolation: the target of each parse is an ontology, and
-the quality of the parse depends on the quality of the ontological
-grounding. We see the present contribution as one increment along
-a longer path, building on decades of biomedical-ontology work
-(ECO, SEPIO, HPO, IAO, OBI, VRS, and others), not as a replacement
-for any of it. We therefore offer the model, its SHACL schema, and
-the annotated corpus to the biomedical-ontology community as a concrete
-starting point, and invite collaboration on the axiomatisation and OWL
-rendering that would carry this reference data model toward a fully
-formal ontology. A complementary downstream layer, in which an
-epistemological type system and machine-checkable meta-predicates
-constrain the decision logic that consumes such evidence, is addressed
-in~\cite{our_preprint}.
+unpopulated. More broadly, the schema is intended to make literature review tractable as
+a \emph{semantic-parsing} problem: the mapping of natural-language claims
+to a shared, source-anchored representation. This is not a task a language model can perform in isolation. The target of
+each parse is a structured, source-anchored representation, so the quality
+of the parse depends on the quality of that target language. We see the present
+contribution as one increment along a longer path, building on
+decades of biomedical-ontology work (ECO, SEPIO, HPO, IAO, OBI, VRS,
+and others), not as a replacement for any of it. A complementary
+downstream layer, in which an epistemological type system and
+machine-checkable meta-predicates constrain the decision logic that
+consumes such evidence, is addressed in~\cite{our_preprint}.
 
-The pilot surfaced two candidate dimensions that were exercised by
-multiple papers and promoted to first-class status
-(Phenotype Scale and Variant Ascertainment), plus fifteen further
-candidate extensions recorded but not yet promoted under the
-two-papers rule (\cref{sec:workflow-promotion}). The pattern of
-candidates is summarised in \cref{tab:candidates}; per-candidate
+The pilot identified two candidate dimensions that were exercised by
+multiple papers and promoted to first-class status, Phenotype Scale and
+Variant Ascertainment. It also identified fifteen further candidate
+extensions that remain unpromoted under the two-papers rule
+(\cref{sec:workflow-promotion}). The pattern of
+candidates is summarized in \cref{tab:candidates}; per-candidate
 rationale, affected dimensions, and proposed enumeration values
 are documented in a companion \texttt{schema/EXTENSIONS.md} in the
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/EXTENSIONS.md}}
-The Gupta annotation, which surfaced no candidate extensions, is
-worth naming as a positive finding: the paper reports a family
-with an X-linked splice-site mutation and careful pedigree
-segregation, the canonical evidence shape the model was designed
-for, and the schema accommodates it without strain.
+The Gupta annotation, which identified no candidate extensions, is also a
+positive finding. It reports a family with an X-linked splice-site mutation
+and careful pedigree segregation, a canonical evidence shape for which the
+model was designed. The schema accommodates this evidence without strain.
 
 \begin{table}[tbp]
 \centering
@@ -77,7 +67,7 @@ D~=~Davis, N~=~Nelson, DU~=~Duerr, IN~=~Inouye. Gupta surfaced none.}
 Group & Papers & Count and examples \\
 \midrule
 Finer structural resolution  & J, N   & 4 (subdomain, interaction, gene-relation, cross-level variant) \\
-Polygenic-score machinery    & IN     & 6 (score target, whole-genome aggregate, target composition, epidemiological measurement, cohort sub-block, derived-artefact flag) \\
+Polygenic-score machinery    & IN     & 6 (score target, whole-genome aggregate, target composition, epidemiological measurement, cohort sub-block, derived-artifact flag) \\
 Effect-size and curation     & DU, D  & 3 (direction of effect, knowledge-domain priority, curator critique) \\
 Cross-item and activation scope & DU & 2 (cross-item/translational synthesis, conditional-activation scope) \\
 \bottomrule
@@ -90,30 +80,82 @@ Cross-item and activation scope & DU & 2 (cross-item/translational synthesis, co
 
 The pilot has significant limitations. Six papers and a single
 annotator do not support claims about inter-annotator agreement or
-generalisability; we treat the work as a feasibility study, not a
-benchmark. The model has not been released as a fully
-OWL-formalised ontology: the present SHACL distribution covers
-class declarations, dimension enumerations, and activation rules,
-but not the axiomatisation that classification and subsumption
-inference would require. The evaluation is not a clinical
+generalizability; we treat the work as a feasibility study, not a
+benchmark. The evaluation is not a clinical
 deployment: although the model is motivated by variant
 interpretation in clinical-genomics programs, the pilot stops short
 of applying the model to a live workflow.
 
-Three near-term directions address these limitations. First, annotate a
+Three near-term directions follow from these limitations. First, annotate a
 second corpus selected to exercise the strongest candidate extensions.
 Second, generate OWL, SHACL, JSON Schema, and LinkML renderings from a
-single source of truth, opening the schema to the OBO and Bridge2AI
-ecosystems and aligning the dimension vocabularies term by term with
-those ontologies (for example, the molecular and cellular phenotype
-scales with Gene Ontology biological processes). Third, carry out a
-clinical-deployment study that turns the feasibility claim into a utility
-claim.
+single source of truth. This would open the schema to the OBO and Bridge2AI
+ecosystems and support term-level alignment of the dimension vocabularies
+with relevant ontologies, for example by aligning the molecular and cellular
+phenotype scales with Gene Ontology biological processes. Third, conduct a
+clinical-deployment study to test whether the feasibility claim translates
+into utility.
 
-\section{Availability of Code, Data, and Artefacts}
+A further limitation revealed by the UMLS crosswalk is representational
+rather than empirical. Several GEM tokens are intersective compounds:
+\dimval{statistical\_genetics} denotes statistics~$\times$~genetics
+(\texttt{C0038215}~$\times$~\texttt{C0017398}), and
+\dimval{bioinformatics\_inference} denotes inference~$\times$~bioinformatics.
+Relational tokens have the same structure. For example,
+\dimval{related\_gene} combines a relation operator with \emph{Genes}
+(\texttt{C0017337}). Because the current crosswalk maps each GEM token to
+one UMLS concept, it must sometimes use the nearest available anchor rather
+than a concept that expresses the full compound meaning. For
+\dimval{statistical\_genetics}, that anchor is \emph{Biostatistics},
+recorded with the relation \emph{narrower}.
+
+Concept-level post-coordination would address this limitation by mapping a
+token to a small set of concepts whose intersection represents its intended
+meaning. The UMLS Metathesaurus does not provide such a mechanism at the
+aggregate level. As an aggregator, it records the concepts asserted by its
+source vocabularies and the links among them, but it does not define a
+compositional grammar of its own. Composition remains a feature of individual
+source vocabularies, with the compositional grammar of SNOMED~CT being the
+best-known example. It cannot be transferred directly across the aggregate:
+the same intended intersection may be pre-coordinated in one source, absent
+from another, and decomposed differently in a third~\cite{umls2004}.
+
+The problem is particularly clear for \dimval{related\_gene}. UMLS often
+contains pre-coordinated specific instances while lacking a generic concept:
+gene-relatedness appears in terms such as \emph{modifier},
+\emph{homologous genes}, and \emph{linked genes}, whereas the generic sense
+of ``related in some way'' is represented only by the bare operator
+\emph{Associated with} (\texttt{C0332281}). Thus
+\dimval{related\_gene} can be represented as
+\texttt{C0332281}~$\times$~\texttt{C0017337}, but not by a single concept.
+Extending the crosswalk with an explicit composite relation, represented as
+a structured set of concepts, is future work. At present, the intended composition
+is preserved in the mapping's curator note; where the relation is the
+semantic core, the operator concept itself is recorded as the anchor with
+relation \emph{related}.
+
+The crosswalk review also highlighted a representational limitation of the
+Resolution axis. Its current enumeration presupposes genomic coordinates, but
+genetic evidence may be localized in several coordinate systems. A variant
+may be described at the genomic level (HGVS~\texttt{g.}), the transcript
+level (\texttt{c.}), or the protein level (\texttt{p.}).
+
+For example, an assertion of the form ``variant $V$ has effect $E$ in
+transcript $T$'' is resolved in transcript coordinates. Such assertions are
+often tissue-restricted and are characteristic of bioinformatics inference.
+The domain mapping underlying the \dimval{PROTEIN\_SUBDOMAIN} candidate is
+instead resolved in protein coordinates. In addition, \dimval{VARIANT}
+itself has two components: a position and a discrete nucleotide change.
+
+We therefore record \dimval{VARIANT\_IN\_TRANSCRIPT} as a curator-surfaced
+candidate value for Resolution. It is separate from the fifteen
+pilot-surfaced extensions listed in \cref{tab:candidates} and awaits
+independent use in a corpus paper under the promotion rule.
+
+\section{Availability of Code, Data, and Artifacts}
 \label{sec:availability}
 
-All artefacts referenced in this paper are open-source and
+All artifacts referenced in this paper are open-source and
 available in the project repository at
 \url{https://github.com/ForomePlatform/genetic-evidence-model}.
 This includes the SHACL schema, the human-readable dimension
@@ -122,11 +164,50 @@ six pilot publications, case reports, the companion
 \texttt{schema/EXTENSIONS.md}, the SHACL walkthrough
 (\texttt{schema/examples.md}), the annotation and review protocol
 suite (\texttt{protocols/}) and the two executable annotation and
-review skills (\texttt{skills/}) described in Supplementary Note~SN3,
+review skills (\texttt{skills/}) described in Supplementary Note~\ref*{supp:sec:supp-skills},
 and the extraction tooling used to
 convert PDF highlights and callouts into annotation scaffolds. The
 namespace \url{https://w3id.org/genetic-evidence-model/} resolves
-to the same repository.
+to the same repository. This paper describes release \texttt{v0.2.1},
+archived on Zenodo; the GEM Mapping Studio is distributed on PyPI as
+\texttt{gem-mapping-studio}.
+% TODO(release): insert the Zenodo version DOI for v0.2.1 once minted.
+
+\subsection*{Reproducibility and conformance}
+
+All counts reported in this paper were generated from the accompanying
+tagged release. From a clean checkout, corpus validation and regeneration of
+the coverage table require two commands: \texttt{gem-validate} and
+\texttt{gem-coverage}. Continuous integration runs both checks on every
+change.
+
+The paper distinguishes SHACL-enforced activation conditions, marked in
+\cref{tab:dimensions-cond}, from documented rules that are not yet
+executable. The enforced activation shapes are unit-tested in both
+directions: a conforming instance passes, whereas an instance that satisfies
+an activation condition but lacks the required dimension is reported as a
+violation.
+
+\begin{table}[tbp]
+\centering
+\caption{Artifact-to-claim traceability. Paths are relative to the
+repository root of the tagged release.}
+\label{tab:conformance}
+\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Claim & Where to verify \\
+\midrule
+Canonical schema & \texttt{schema/genetic\_evidence.shacl.ttl} (three enforced activation shapes: Variant Ascertainment, Mode of Inheritance, and Organism) \\
+YAML-to-RDF transform & \texttt{src/python/main/forome/gem/extraction/yaml\_to\_rdf.py} (normalizes \texttt{key\_phrase} and \texttt{phrase}) \\
+Corpus validation & \texttt{gem-validate} over \texttt{annotations/}; CI workflow \texttt{.github/workflows/validate.yml} \\
+Coverage counts & \texttt{gem-coverage} regenerates \texttt{annotations/coverage.md} \\
+Activation-shape tests & \texttt{src/python/test/forome/gem/validation/} \\
+UMLS crosswalk & \texttt{data/umls/} (harness \texttt{gem-umls-crosswalk}; decision log \texttt{data/umls/DECISIONS.md}; SN8 regenerated by \texttt{gem-umls-render}) \\
+Archived release & Zenodo deposit of the tagged release; metadata in \texttt{.zenodo.json} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section*{Acknowledgements}
 

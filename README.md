@@ -4,9 +4,9 @@ A conceptual framework for representing scientific and genetic evidence from
 the biomedical literature in a form suitable for variant interpretation,
 automated reasoning, and AI-ready clinical infrastructure.
 
-This repository accompanies a paper submitted to the 17th International
-Conference on Biological and Biomedical Ontology (ICBO 2026, Washington
-D.C., July 15–17 2026). The paper is currently under revision.
+This repository accompanies a manuscript in preparation: an extended
+version to be deposited on arXiv and a condensed version intended for
+journal submission.
 
 ## What this repository contains
 
@@ -47,7 +47,7 @@ each is retained for comparison.
 
 For manually annotated papers, PDF highlights and sticky-note callouts are the
 authoritative ground truth. The YAML is a structured transformation of those
-artefacts, with every assertion carrying a `source_span` pointing back to the
+artifacts, with every assertion carrying a `source_span` pointing back to the
 specific page and quoted passage. Disagreements between the annotator and the
 AI reviewer are not silently resolved: they are captured as `reviewer_query`,
 `reviewer_suggestion`, or `reviewer_disagreement` fields so they remain
@@ -56,7 +56,7 @@ auditable.
 For AI-drafted annotations, the same `source_span` anchoring is used, and
 curator review is the evaluation signal.
 
-Per-paper case reports are in `case-reports/`. Each report summarises the
+Per-paper case reports are in `case-reports/`. Each report summarizes the
 paper's role in the corpus, the decomposition into `GeneticEvidence` items,
 the candidate extensions surfaced, the reviewer flags, and notes for
 downstream consumers.
@@ -66,13 +66,13 @@ downstream consumers.
 The `protocols/` directory documents how annotations are produced, separately
 from what they describe (the schema) and what they contain (the corpus). The
 intent is that an annotation under this schema is reproducible and citable
-under a versioned protocol, not an artefact of a particular annotator's
+under a versioned protocol, not an artifact of a particular annotator's
 unwritten conventions.
 
 - `protocols/PROTOCOL.md`: the canonical, mode-agnostic rules. Covers
   decomposition principles (the lumper default), dimension assignment,
   source-anchoring requirements, flag taxonomy, candidate-extension
-  promotion, normalisation handling. Current version: 1.0.
+  promotion, normalization handling. Current version: 1.0.
 - `protocols/PROTOCOL_AUTONOMOUS.md`: the operational workflow for autonomous
   AI annotation (single pass, no curator in the loop). Specifies input
   quality gating, self-consistency checks, mandatory confidence-summary
@@ -82,7 +82,7 @@ unwritten conventions.
   review protocol and its interactive, curator-in-the-loop variant, used
   to adjudicate the AI-drafted annotations. Current version: 1.0.
 - `protocols/LABELING_EXAMPLES.md`: worked cases for the recurring
-  judgement calls referenced by the protocols above.
+  judgment calls referenced by the protocols above.
 
 A staged interactive *annotation* protocol (curator review of the
 decomposition before dimension filling) is planned but not yet
@@ -154,7 +154,7 @@ Once installed, ask in natural language, for example:
 The annotation skill confirms the input paper, output path, and schema location,
 then produces a single YAML file matching the existing annotations. The review
 skill walks the annotation item by item with the curator and emits its three
-artefacts (review log, review report, and the updated annotation).
+artifacts (review log, review report, and the updated annotation).
 
 ## Extraction pipeline
 
@@ -212,13 +212,15 @@ and `python3 scripts/compute_coverage.py` (requires `pyshacl rdflib pyyaml`).
 
 ## Citing this work
 
-See `CITATION.cff`. Once the paper is accepted, a DOI will be registered via
-Zenodo and the CITATION file updated.
+See `CITATION.cff`. A DOI is minted via the Zenodo–GitHub integration at
+each tagged release (record metadata in `.zenodo.json`); the concept DOI
+will be added to `CITATION.cff` after the first release.
 
 ## License
 
-See `LICENSE.txt` (content) and `LICENSE-code.txt` (scripts and schema). Both are
-permissive and compatible with CEUR-WS publication terms.
+Content (annotations, documentation, the paper sources) is licensed
+CC-BY-4.0 (`LICENSE.txt`). Code — `src/`, `scripts/`, and the extraction
+tooling — is licensed Apache-2.0 (`LICENSE-code.txt`).
 
 ## Contact
 

@@ -1,0 +1,16 @@
+{
+  "pageSize": 25,
+  "pageNumber": 1,
+  "result": {
+    "classType": "searchResults",
+    "results": [
+      {
+        "ui": "C9000002",
+        "rootSource": "MSH",
+        "uri": "https://uts-ws.nlm.nih.gov/rest/content/TEST/CUI/C9000002",
+        "name": "In vivo",
+        "semanticTypes": ["Functional Concept"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+# Pre-registered UMLS mapping sweep protocol -- dimension `credibility`.
+#
+# This file is written BEFORE any search is run. It states, reproducibly, what
+# was searched (terms, phrases, semantic types), how (UTS search types, scope),
+# and against what (source vocabularies of interest), so that an "unmapped"
+# verdict for a GEM token is an earned finding of a stated protocol rather than
+# an assertion. Run it with:
+#
+#     gem-umls-sweep data/umls/sweeps/credibility.yaml --tex build/credibility_sweep.tex
+#
+# The runner never touches adjudications.yaml; it writes
+# data/umls/sweeps/credibility.results.yaml, in which each surfaced candidate
+# carries `fails: null` / `why: null` for the curator to fill in with one of the
+# criterion codes below (or leave null for a candidate that is ACCEPTED as a
+# mapping -- record the acceptance itself in adjudications.yaml via the Studio).
+
+name: credibility
+dimension: credibility
+tokens: [VERY_HIGH, HIGH, MEDIUM, LOW]
+date_registered: "2026-08-30"
+
+# Rejection criteria (shared across all sweeps; a candidate that is not accepted
+# must be tagged with exactly one code, plus a one-line `why`).
+criteria:
+  A: "denotation -- the concept denotes a different thing or relation than the GEM token (e.g. a measurand degree vs an epistemic degree)"
+  B: "granularity -- only a broader/narrower concept exists and the gap is not acceptable as a proxy"
+  C: "set membership -- cannot serve as a point of the token's scale/enumeration (not disjoint from / ordered with its siblings)"
+  D: "domain sense -- right words, wrong domain or context (e.g. an IPSS-R risk category named 'High')"
+criteria_note: >
+  A, B and D are judged per candidate. C is judged on the candidate SET once
+  per scale: the four credibility tokens form one ordered enumeration, so a
+  concept is a valid point of that scale only if the set of accepted concepts
+  is pairwise disjoint and carries (or can be given) the same order.
+
+# The dimension's axis semantic type(s). Used only by queries whose scope is
+# `axis`: the search is then constrained to these TUIs (and their subtree).
+axis_tuis: [T080]   # Qualitative Concept
+
+# Search passes, executed in the order written. Each query is (term x match x
+# scope). `match` values are UTS search types, except `partial`, which is a
+# words search with partialSearch=true (any subset of the words may match).
+passes:
+  string:
+    description: >
+      Bare scale words and their epistemic collocations. Surfaces every UMLS
+      concept whose name is (or normalises to) the token's plain-language
+      label, so that the reason each is NOT a credibility tier is on record.
+    terms:
+      - very high
+      - extremely high
+      - highest
+      - maximal
+      - high
+      - moderate
+      - medium
+      - low
+      - very low
+      - minimal
+      - markedly increased
+      - strong
+      - weak
+      - definite
+      - probable
+      - possible
+      - very high confidence
+      - high confidence
+      - moderate confidence
+      - low confidence
+      - high certainty
+      - low certainty
+    match: [exact, normalizedString]
+    scopes: [all]
+
+  vocabulary:
+    description: >
+      Names of the evidence-grading vocabularies themselves. If UMLS carries
+      an enumerated certainty/quality-of-evidence scale (GRADE levels, Oxford
+      levels, NCI Level of Evidence), its members are the natural anchors for
+      the GEM tiers and must be surfaced here so the curator classifies them.
+    phrases:
+      - level of evidence
+      - quality of evidence
+      - certainty of evidence
+      - strength of evidence
+      - strength of recommendation
+      - confidence level
+      - level of confidence
+      - GRADE
+      - grade of evidence
+      - evidence grade
+      - evidence strength
+      - evidence level
+      - evidence quality
+      - quality of evidence high
+      - quality of evidence moderate
+      - quality of evidence low
+      - certainty rating
+      - degree of certainty
+      - epistemic certainty
+      - credibility
+    match: [words]
+    scopes: [all]
+
+  sty:
+    description: >
+      Search the string-pass terms WITHIN each candidate semantic type (the
+      UTS semanticTypes filter, or the local index), so a scale hiding under a
+      host type that the unconstrained passes ranked out of the top 200 is
+      still surfaced. mode: enumerate (local index only, capped by `limit`)
+      would instead list whole types; T033 Finding is far too large for that.
+    mode: terms
+    terms_from: string
+    match: [normalizedString]
+    tuis: [T080, T078, T081, T170, T033]   # Qualitative Concept, Idea or Concept, Quantitative Concept, Intellectual Product, Finding
+
+# Vocabularies whose atoms are worth reporting for each candidate (`--enrich`).
+# Not a filter: every source is searched; these are the ones a reader of the
+# supplement would expect a certainty scale to come from.
+sabs_of_interest: [MSH, NCI, SNOMEDCT_US, LNC, MEDLINEPLUS, HPO]
+
+notes: >
+  What would confirm or refute the standing verdict (VERY_HIGH/HIGH/MEDIUM/LOW
+  have no faithful UMLS concept): if UMLS enumerates epistemic certainty levels
+  -- a "high/moderate/low/very low certainty of evidence" scale (GRADE) or a
+  "confidence level" enumeration with ordered members -- those members become
+  the anchors and the verdict is refuted for every token they cover. NCI's
+  "Level of Evidence I-IV" family is known to exist and is a study-design
+  hierarchy (RCT > cohort > case series ...), not an epistemic degree; the
+  protocol must surface it, and the curator must classify it explicitly
+  (expected: A, denotation) rather than leave it unmentioned. Bare qualifiers
+  ("High", "Low", "Moderate") are expected to fail C: they are not points of
+  one scale and are not disjoint from each other's siblings across contexts.
+  Disease-specific risk categories (IPSS-R "High") are expected to fail D.
+
+# Amendments (recorded before any candidate was adjudicated):
+#   v1 (2026-08-30, executed; results archived locally, not redistributed -- regenerable
+#     with match [words, normalizedWords]): string
+#     terms with match [words, normalizedWords], vocabulary phrases with [words,
+#     partial], within-type pass with [words] -> 194 queries, 6,403 candidates:
+#     bare qualifiers ("high", "low", "possible") match every concept containing
+#     the word, so the pass discriminated nothing.
+#   v2 (2026-08-30): qualifier terms use whole-string matching
+#     [exact, normalizedString]; vocabulary phrases use [words] only (no partial);
+#     the within-type pass uses [normalizedString]. Criteria A-D unchanged.

@@ -1,0 +1,949 @@
+count: 181
+source: UMLS Semantic Network (UTS API)
+types:
+- tui: T051
+  name: Event
+  tree_number: B
+  abbreviation: evnt
+  definition: A broad type for grouping activities, processes and states.
+- tui: T071
+  name: Entity
+  tree_number: A
+  abbreviation: enty
+  definition: A broad type for grouping physical and conceptual entities.
+- tui: T166
+  name: associated_with
+  tree_number: R
+  abbreviation: AW
+  definition: has a significant or salient relationship to.
+- tui: T186
+  name: isa
+  tree_number: H
+  abbreviation: IS
+  definition: The basic hierarchical link in the Network. If one item "isa" another item then the first item is more specific in meaning than the second item.
+- tui: T072
+  name: Physical Object
+  tree_number: A1
+  abbreviation: phob
+  definition: An object perceptible to the sense of vision or touch.
+- tui: T001
+  name: Organism
+  tree_number: A1.1
+  abbreviation: orgm
+  definition: Generally, a living individual, including all plants and animals.
+- tui: T194
+  name: Archaeon
+  tree_number: A1.1.1
+  abbreviation: arch
+  definition: 'A member of one of the three domains of life, formerly called Archaebacteria under the taxon Bacteria, but now considered separate and distinct. Archaea are characterized by: 1) the presence
+    of characteristic tRNAs and ribosomal RNAs; 2) the absence of peptidoglycan cell walls; 3) the presence of ether-linked lipids built from branched-chain subunits; and 4) their occurrence in unusual
+    habitats. While archaea resemble bacteria in morphology and genomic organization, they resemble eukarya in their method of genomic replication.'
+- tui: T007
+  name: Bacterium
+  tree_number: A1.1.2
+  abbreviation: bact
+  definition: A small, typically one-celled, prokaryotic micro-organism.
+- tui: T204
+  name: Eukaryote
+  tree_number: A1.1.3
+  abbreviation: euka
+  definition: One of the three domains of life (the others being Bacteria and Archaea), also called Eukarya. These are organisms whose cells are enclosed in membranes and possess a nucleus. They comprise
+    almost all multicellular and many unicellular organisms, and are traditionally divided into groups (sometimes called kingdoms) including Animals, Plants, Fungi, various Algae, and other taxa that were
+    previously part of the old kingdom Protista.
+- tui: T008
+  name: Animal
+  tree_number: A1.1.3.1
+  abbreviation: anim
+  definition: An organism with eukaryotic cells, and lacking stiff cell walls, plastids and photosynthetic pigments.
+- tui: T010
+  name: Vertebrate
+  tree_number: A1.1.3.1.1
+  abbreviation: vtbt
+  definition: An animal which has a spinal column.
+- tui: T011
+  name: Amphibian
+  tree_number: A1.1.3.1.1.1
+  abbreviation: amph
+  definition: A cold-blooded, smooth-skinned vertebrate which characteristically hatches as an aquatic larva, breathing by gills. When mature, the amphibian breathes with lungs.
+- tui: T012
+  name: Bird
+  tree_number: A1.1.3.1.1.2
+  abbreviation: bird
+  definition: A vertebrate having a constant body temperature and characterized by the presence of feathers.
+- tui: T013
+  name: Fish
+  tree_number: A1.1.3.1.1.3
+  abbreviation: fish
+  definition: A cold-blooded aquatic vertebrate characterized by fins and breathing by gills. Included here are fishes having either a bony skeleton, such as a perch, or a cartilaginous skeleton, such as
+    a shark, or those lacking a jaw, such as a lamprey or hagfish.
+- tui: T015
+  name: Mammal
+  tree_number: A1.1.3.1.1.4
+  abbreviation: mamm
+  definition: A vertebrate having a constant body temperature and characterized by the presence of hair, mammary glands and sweat glands.
+- tui: T016
+  name: Human
+  tree_number: A1.1.3.1.1.4.1
+  abbreviation: humn
+  definition: Modern man, the only remaining species of the Homo genus.
+- tui: T014
+  name: Reptile
+  tree_number: A1.1.3.1.1.5
+  abbreviation: rept
+  definition: A cold-blooded vertebrate having an external covering of scales or horny plates. Reptiles breathe by means of lungs and are generally egg-laying.
+- tui: T004
+  name: Fungus
+  tree_number: A1.1.3.2
+  abbreviation: fngs
+  definition: A eukaryotic organism characterized by the absence of chlorophyll and the presence of a rigid cell wall. Included here are both slime molds and true fungi such as yeasts, molds, mildews, and
+    mushrooms.
+- tui: T002
+  name: Plant
+  tree_number: A1.1.3.3
+  abbreviation: plnt
+  definition: An organism having cellulose cell walls, growing by synthesis of inorganic substances, generally distinguished by the presence of chlorophyll, and lacking the power of locomotion. Plant parts
+    are included here as well.
+- tui: T005
+  name: Virus
+  tree_number: A1.1.4
+  abbreviation: virs
+  definition: An organism consisting of a core of a single nucleic acid enclosed in a protective coat of protein. A virus may replicate only inside a host living cell. A virus exhibits some but not all
+    of the usual characteristics of living things.
+- tui: T017
+  name: Anatomical Structure
+  tree_number: A1.2
+  abbreviation: anst
+  definition: A normal or pathological part of the anatomy or structural organization of an organism.
+- tui: T018
+  name: Embryonic Structure
+  tree_number: A1.2.1
+  abbreviation: emst
+  definition: An anatomical structure that exists only before the organism is fully formed; in mammals, for example, a structure that exists only prior to the birth of the organism. This structure may be
+    normal or abnormal.
+- tui: T190
+  name: Anatomical Abnormality
+  tree_number: A1.2.2
+  abbreviation: anab
+  definition: An abnormal structure, or one that is abnormal in size or location.
+- tui: T019
+  name: Congenital Abnormality
+  tree_number: A1.2.2.1
+  abbreviation: cgab
+  definition: An abnormal structure, or one that is abnormal in size or location, present at birth or evolving over time as a result of a defect in embryogenesis.
+- tui: T020
+  name: Acquired Abnormality
+  tree_number: A1.2.2.2
+  abbreviation: acab
+  definition: An abnormal structure, or one that is abnormal in size or location, found in or deriving from a previously normal structure. Acquired abnormalities are distinguished from diseases even though
+    they may result in pathological functioning (e.g., "hernias incarcerate").
+- tui: T021
+  name: Fully Formed Anatomical Structure
+  tree_number: A1.2.3
+  abbreviation: ffas
+  definition: An anatomical structure in a fully formed organism; in mammals, for example, a structure in the body after the birth of the organism.
+- tui: T023
+  name: Body Part, Organ, or Organ Component
+  tree_number: A1.2.3.1
+  abbreviation: bpoc
+  definition: A collection of cells and tissues which are localized to a specific area or combine and carry out one or more specialized functions of an organism. This ranges from gross structures to small
+    components of complex organs. These structures are relatively localized in comparison to tissues.
+- tui: T024
+  name: Tissue
+  tree_number: A1.2.3.2
+  abbreviation: tisu
+  definition: An aggregation of similarly specialized cells and the associated intercellular substance. Tissues are relatively non-localized in comparison to body parts, organs or organ components.
+- tui: T025
+  name: Cell
+  tree_number: A1.2.3.3
+  abbreviation: cell
+  definition: The fundamental structural and functional unit of living organisms.
+- tui: T026
+  name: Cell Component
+  tree_number: A1.2.3.4
+  abbreviation: celc
+  definition: A part of a cell or the intercellular matrix, generally visible by light microscopy.
+- tui: T028
+  name: Gene or Genome
+  tree_number: A1.2.3.5
+  abbreviation: gngm
+  definition: A specific sequence, or in the case of the genome the complete sequence, of nucleotides along a molecule of DNA or RNA (in the case of some viruses) which represent the functional units of
+    heredity.
+- tui: T073
+  name: Manufactured Object
+  tree_number: A1.3
+  abbreviation: mnob
+  definition: A physical object made by human beings.
+- tui: T074
+  name: Medical Device
+  tree_number: A1.3.1
+  abbreviation: medd
+  definition: A manufactured object used primarily in the diagnosis, treatment, or prevention of physiologic or anatomic disorders.
+- tui: T203
+  name: Drug Delivery Device
+  tree_number: A1.3.1.1
+  abbreviation: drdd
+  definition: A medical device that contains a clinical drug or drugs.
+- tui: T075
+  name: Research Device
+  tree_number: A1.3.2
+  abbreviation: resd
+  definition: A manufactured object used primarily in carrying out scientific research or experimentation.
+- tui: T200
+  name: Clinical Drug
+  tree_number: A1.3.3
+  abbreviation: clnd
+  definition: A pharmaceutical preparation as produced by the manufacturer. The name usually includes the substance, its strength, and the form, but may include the substance and only one of the other two
+    items.
+- tui: T167
+  name: Substance
+  tree_number: A1.4
+  abbreviation: sbst
+  definition: A material with definite or fairly definite chemical composition.
+- tui: T103
+  name: Chemical
+  tree_number: A1.4.1
+  abbreviation: chem
+  definition: Compounds or substances of definite molecular composition. Chemicals are viewed from two distinct perspectives in the network, functionally and structurally. Almost every chemical concept
+    is assigned at least two types, generally one from the structure hierarchy and at least one from the function hierarchy.
+- tui: T120
+  name: Chemical Viewed Functionally
+  tree_number: A1.4.1.1
+  abbreviation: chvf
+  definition: A chemical viewed from the perspective of its functional characteristics or pharmacological activities.
+- tui: T121
+  name: Pharmacologic Substance
+  tree_number: A1.4.1.1.1
+  abbreviation: phsu
+  definition: A substance used in the treatment or prevention of pathologic disorders. This includes substances that occur naturally in the body and are administered therapeutically.
+- tui: T195
+  name: Antibiotic
+  tree_number: A1.4.1.1.1.1
+  abbreviation: antb
+  definition: A pharmacologically active compound produced by growing microorganisms which kill or inhibit growth of other microorganisms.
+- tui: T122
+  name: Biomedical or Dental Material
+  tree_number: A1.4.1.1.2
+  abbreviation: bodm
+  definition: A substance used in biomedicine or dentistry predominantly for its physical, as opposed to chemical, properties. Included here are biocompatible materials, tissue adhesives, bone cements,
+    resins, toothpastes, etc.
+- tui: T123
+  name: Biologically Active Substance
+  tree_number: A1.4.1.1.3
+  abbreviation: bacs
+  definition: A generally endogenous substance produced or required by an organism, of primary interest because of its role in the biologic functioning of the organism that produces it.
+- tui: T125
+  name: Hormone
+  tree_number: A1.4.1.1.3.2
+  abbreviation: horm
+  definition: In animals, a chemical usually secreted by an endocrine gland whose products are released into the circulating fluid. Hormones act as chemical messengers and regulate various physiologic processes
+    such as growth, reproduction, metabolism, etc. They usually fall into two broad classes, steroid hormones and peptide hormones.
+- tui: T126
+  name: Enzyme
+  tree_number: A1.4.1.1.3.3
+  abbreviation: enzy
+  definition: 'A complex chemical, usually a protein, that is produced by living cells and which catalyzes specific biochemical reactions. There are six main types of enzymes: oxidoreductases, transferases,
+    hydrolases, lyases, isomerases, and ligases.'
+- tui: T127
+  name: Vitamin
+  tree_number: A1.4.1.1.3.4
+  abbreviation: vita
+  definition: A substance, usually an organic chemical complex, present in natural products or made synthetically, which is essential in the diet of man or other higher animals. Included here are vitamin
+    precursors, provitamins, and vitamin supplements.
+- tui: T129
+  name: Immunologic Factor
+  tree_number: A1.4.1.1.3.5
+  abbreviation: imft
+  definition: A biologically active substance whose activities affect or play a role in the functioning of the immune system.
+- tui: T192
+  name: Receptor
+  tree_number: A1.4.1.1.3.6
+  abbreviation: rcpt
+  definition: A specific structure or site on the cell surface or within its cytoplasm that recognizes and binds with other specific molecules. These include the proteins on the surface of an immunocompetent
+    cell that binds with antigens, or proteins found on the surface molecules that bind with hormones or neurotransmitters and react with other molecules that respond in a specific way.
+- tui: T130
+  name: Indicator, Reagent, or Diagnostic Aid
+  tree_number: A1.4.1.1.4
+  abbreviation: irda
+  definition: A substance primarily of interest for its use in laboratory or diagnostic tests and procedures to detect, measure, examine, or analyze other chemicals, processes, or conditions.
+- tui: T131
+  name: Hazardous or Poisonous Substance
+  tree_number: A1.4.1.1.5
+  abbreviation: hops
+  definition: A substance of concern because of its potentially hazardous or toxic effects. This would include most drugs of abuse, as well as agents that require special handling because of their toxicity.
+- tui: T104
+  name: Chemical Viewed Structurally
+  tree_number: A1.4.1.2
+  abbreviation: chvs
+  definition: A chemical or chemicals viewed from the perspective of their structural characteristics. Included here are concepts which can mean either a salt, an ion, or a compound (e.g., "Bromates" and
+    "Bromides").
+- tui: T109
+  name: Organic Chemical
+  tree_number: A1.4.1.2.1
+  abbreviation: orch
+  definition: The general class of carbon-containing compounds, usually based on carbon chains or rings, and also containing hydrogen (hydrocarbons), with or without nitrogen, oxygen, or other elements
+    in which the bonding between elements is generally covalent.
+- tui: T114
+  name: Nucleic Acid, Nucleoside, or Nucleotide
+  tree_number: A1.4.1.2.1.5
+  abbreviation: nnon
+  definition: A complex compound of high molecular weight occurring in living cells. These are basically of two types, ribonucleic (RNA) and deoxyribonucleic (DNA) acids. Nucleic acids are made of nucleotides
+    (nitrogen-containing base, a 5-carbon sugar, and one or more phosphate group) linked together by a phosphodiester bond between the 5' and 3' carbon atoms. Nucleosides are compounds composed of a purine
+    or pyrimidine base (usually adenine, cytosine, guanine, thymine, uracil) linked to either a ribose or a deoxyribose sugar.
+- tui: T116
+  name: Amino Acid, Peptide, or Protein
+  tree_number: A1.4.1.2.1.7
+  abbreviation: aapp
+  definition: Amino acids and chains of amino acids connected by peptide linkages.
+- tui: T197
+  name: Inorganic Chemical
+  tree_number: A1.4.1.2.2
+  abbreviation: inch
+  definition: Chemical elements and their compounds, excluding the hydrocarbons and their derivatives (except carbides, carbonates, cyanides, cyanates and carbon disulfide). Generally inorganic compounds
+    contain ionic bonds. Included here are inorganic acids and salts, alloys, alkalies, and minerals.
+- tui: T196
+  name: Element, Ion, or Isotope
+  tree_number: A1.4.1.2.3
+  abbreviation: elii
+  definition: One of the 109 presently known fundamental substances that comprise all matter at and above the atomic level. This includes elemental metals, rare gases, and most abundant naturally occurring
+    radioactive elements, as well as the ionic counterparts of elements (NA+, Cl-), and the less abundant isotopic forms. This does not include organic ions such as iodoacetate to which the type 'Organic
+    Chemical' is assigned.
+- tui: T031
+  name: Body Substance
+  tree_number: A1.4.2
+  abbreviation: bdsu
+  definition: Extracellular material, or mixtures of cells and extracellular material, produced, excreted, or accreted by the body. Included here are substances such as saliva, dental enamel, sweat, and
+    gastric acid.
+- tui: T168
+  name: Food
+  tree_number: A1.4.3
+  abbreviation: food
+  definition: Any substance generally containing nutrients, such as carbohydrates, proteins, and fats, that can be ingested by a living organism and metabolized into energy and body tissue. Some foods are
+    naturally occurring, others are either partially or entirely made by humans.
+- tui: T077
+  name: Conceptual Entity
+  tree_number: A2
+  abbreviation: cnce
+  definition: A broad type for grouping abstract entities or concepts.
+- tui: T078
+  name: Idea or Concept
+  tree_number: A2.1
+  abbreviation: idcn
+  definition: An abstract concept, such as a social, religious or philosophical concept.
+- tui: T079
+  name: Temporal Concept
+  tree_number: A2.1.1
+  abbreviation: tmco
+  definition: A concept which pertains to time or duration.
+- tui: T080
+  name: Qualitative Concept
+  tree_number: A2.1.2
+  abbreviation: qlco
+  definition: A concept which is an assessment of some quality, rather than a direct measurement.
+- tui: T081
+  name: Quantitative Concept
+  tree_number: A2.1.3
+  abbreviation: qnco
+  definition: A concept which involves the dimensions, quantity or capacity of something using some unit of measure, or which involves the quantitative comparison of entities.
+- tui: T169
+  name: Functional Concept
+  tree_number: A2.1.4
+  abbreviation: ftcn
+  definition: A concept which is of interest because it pertains to the carrying out of a process or activity.
+- tui: T022
+  name: Body System
+  tree_number: A2.1.4.1
+  abbreviation: bdsy
+  definition: A complex of anatomical structures that performs a common function.
+- tui: T082
+  name: Spatial Concept
+  tree_number: A2.1.5
+  abbreviation: spco
+  definition: A location, region, or space, generally having definite boundaries.
+- tui: T030
+  name: Body Space or Junction
+  tree_number: A2.1.5.1
+  abbreviation: bsoj
+  definition: An area enclosed or surrounded by body parts or organs or the place where two anatomical structures meet or connect.
+- tui: T029
+  name: Body Location or Region
+  tree_number: A2.1.5.2
+  abbreviation: blor
+  definition: An area, subdivision, or region of the body demarcated for the purpose of topographical description.
+- tui: T085
+  name: Molecular Sequence
+  tree_number: A2.1.5.3
+  abbreviation: mosq
+  definition: A broad type for grouping the collected sequences of amino acids, carbohydrates, and nucleotide sequences. Descriptions of these sequences are generally reported in the published literature
+    and/or are deposited in and maintained by databanks such as GenBank, European Molecular Biology Laboratory (EMBL), National Biomedical Research Foundation (NBRF), or other sequence repositories.
+- tui: T086
+  name: Nucleotide Sequence
+  tree_number: A2.1.5.3.1
+  abbreviation: nusq
+  definition: The sequence of purines and pyrimidines in nucleic acids and polynucleotides. Included here are nucleotide-rich regions, conserved sequence, and DNA transforming region.
+- tui: T087
+  name: Amino Acid Sequence
+  tree_number: A2.1.5.3.2
+  abbreviation: amas
+  definition: The sequence of amino acids as arrayed in chains, sheets, etc., within the protein molecule. It is of fundamental importance in determining protein structure.
+- tui: T088
+  name: Carbohydrate Sequence
+  tree_number: A2.1.5.3.3
+  abbreviation: crbs
+  definition: The sequence of carbohydrates within polysaccharides, glycoproteins, and glycolipids.
+- tui: T083
+  name: Geographic Area
+  tree_number: A2.1.5.4
+  abbreviation: geoa
+  definition: A geographic location, generally having definite boundaries.
+- tui: T033
+  name: Finding
+  tree_number: A2.2
+  abbreviation: fndg
+  definition: That which is discovered by direct observation or measurement of an organism attribute or condition, including the clinical history of the patient. The history of the presence of a disease
+    is a 'Finding' and is distinguished from the disease itself.
+- tui: T034
+  name: Laboratory or Test Result
+  tree_number: A2.2.1
+  abbreviation: lbtr
+  definition: The outcome of a specific test to measure an attribute or to determine the presence, absence, or degree of a condition.
+- tui: T184
+  name: Sign or Symptom
+  tree_number: A2.2.2
+  abbreviation: sosy
+  definition: An observable manifestation of a disease or condition based on clinical judgment, or a manifestation of a disease or condition which is experienced by the patient and reported as a subjective
+    observation.
+- tui: T032
+  name: Organism Attribute
+  tree_number: A2.3
+  abbreviation: orga
+  definition: A property of the organism or its major parts.
+- tui: T201
+  name: Clinical Attribute
+  tree_number: A2.3.1
+  abbreviation: clna
+  definition: An observable or measurable property or state of an organism of clinical interest.
+- tui: T170
+  name: Intellectual Product
+  tree_number: A2.4
+  abbreviation: inpr
+  definition: A conceptual entity resulting from human endeavor. Concepts assigned to this type generally refer to information created by humans for some purpose.
+- tui: T185
+  name: Classification
+  tree_number: A2.4.1
+  abbreviation: clas
+  definition: A term or system of terms denoting an arrangement by class or category.
+- tui: T089
+  name: Regulation or Law
+  tree_number: A2.4.2
+  abbreviation: rnlw
+  definition: An intellectual product resulting from legislative or regulatory activity.
+- tui: T171
+  name: Language
+  tree_number: A2.5
+  abbreviation: lang
+  definition: The system of communication used by a particular nation or people.
+- tui: T090
+  name: Occupation or Discipline
+  tree_number: A2.6
+  abbreviation: ocdi
+  definition: A vocation, academic discipline, or field of study, or a subpart of an occupation or discipline.
+- tui: T091
+  name: Biomedical Occupation or Discipline
+  tree_number: A2.6.1
+  abbreviation: bmod
+  definition: A vocation, academic discipline, or field of study related to biomedicine.
+- tui: T092
+  name: Organization
+  tree_number: A2.7
+  abbreviation: orgt
+  definition: The result of uniting for a common purpose or function. The continued existence of an organization is not dependent on any of its members, its location, or particular facility. Components
+    or subparts of organizations are also included here. Although the names of organizations are sometimes used to refer to the buildings in which they reside, they are not inherently physical in nature.
+- tui: T093
+  name: Health Care Related Organization
+  tree_number: A2.7.1
+  abbreviation: hcro
+  definition: An established organization which carries out specific functions related to health care delivery or research in the life sciences.
+- tui: T094
+  name: Professional Society
+  tree_number: A2.7.2
+  abbreviation: pros
+  definition: An organization uniting those who have a common vocation or who are involved with a common field of study.
+- tui: T095
+  name: Self-help or Relief Organization
+  tree_number: A2.7.3
+  abbreviation: shro
+  definition: An organization whose purpose and function is to provide assistance to the needy or to offer support to those sharing similar problems.
+- tui: T102
+  name: Group Attribute
+  tree_number: A2.8
+  abbreviation: grpa
+  definition: A conceptual entity which refers to the frequency or distribution of certain characteristics or phenomena in certain groups.
+- tui: T096
+  name: Group
+  tree_number: A2.9
+  abbreviation: grup
+  definition: A conceptual entity referring to the classification of individuals according to certain shared characteristics.
+- tui: T097
+  name: Professional or Occupational Group
+  tree_number: A2.9.1
+  abbreviation: prog
+  definition: An individual or individuals classified according to their vocation.
+- tui: T098
+  name: Population Group
+  tree_number: A2.9.2
+  abbreviation: popg
+  definition: An indivdual or individuals classified according to their sex, racial origin, religion, common place of living, financial or social status, or some other cultural or behavioral attribute.
+- tui: T099
+  name: Family Group
+  tree_number: A2.9.3
+  abbreviation: famg
+  definition: An individual or individuals classified according to their family relationships or relative position in the family unit.
+- tui: T100
+  name: Age Group
+  tree_number: A2.9.4
+  abbreviation: aggp
+  definition: An individual or individuals classified according to their age.
+- tui: T101
+  name: Patient or Disabled Group
+  tree_number: A2.9.5
+  abbreviation: podg
+  definition: An individual or individuals classified according to a disability, disease, condition or treatment.
+- tui: T052
+  name: Activity
+  tree_number: B1
+  abbreviation: acty
+  definition: An operation or series of operations that an organism or machine carries out or participates in.
+- tui: T053
+  name: Behavior
+  tree_number: B1.1
+  abbreviation: bhvr
+  definition: Any of the psycho-social activities of humans or animals that can be observed directly by others or can be made systematically observable by the use of special strategies.
+- tui: T054
+  name: Social Behavior
+  tree_number: B1.1.1
+  abbreviation: socb
+  definition: Behavior that is a direct result or function of the interaction of humans or animals with their fellows. This includes behavior that may be considered anti-social.
+- tui: T055
+  name: Individual Behavior
+  tree_number: B1.1.2
+  abbreviation: inbe
+  definition: Behavior exhibited by a human or an animal that is not a direct result of interaction with other members of the species, but which may have an effect on others.
+- tui: T056
+  name: Daily or Recreational Activity
+  tree_number: B1.2
+  abbreviation: dora
+  definition: An activity carried out for recreation or exercise, or as part of daily life.
+- tui: T057
+  name: Occupational Activity
+  tree_number: B1.3
+  abbreviation: ocac
+  definition: An activity carried out as part of an occupation or job.
+- tui: T058
+  name: Health Care Activity
+  tree_number: B1.3.1
+  abbreviation: hlca
+  definition: An activity of or relating to the practice of medicine or involving the care of patients.
+- tui: T059
+  name: Laboratory Procedure
+  tree_number: B1.3.1.1
+  abbreviation: lbpr
+  definition: A procedure, method, or technique used to determine the composition, quantity, or concentration of a specimen, and which is carried out in a clinical laboratory. Included here are procedures
+    which measure the times and rates of reactions.
+- tui: T060
+  name: Diagnostic Procedure
+  tree_number: B1.3.1.2
+  abbreviation: diap
+  definition: A procedure, method, or technique used to determine the nature or identity of a disease or disorder. This excludes procedures which are primarily carried out on specimens in a laboratory.
+- tui: T061
+  name: Therapeutic or Preventive Procedure
+  tree_number: B1.3.1.3
+  abbreviation: topp
+  definition: A procedure, method, or technique designed to prevent a disease or a disorder, or to improve physical function, or used in the process of treating a disease or injury.
+- tui: T062
+  name: Research Activity
+  tree_number: B1.3.2
+  abbreviation: resa
+  definition: An activity carried out as part of research or experimentation.
+- tui: T063
+  name: Molecular Biology Research Technique
+  tree_number: B1.3.2.1
+  abbreviation: mbrt
+  definition: Any of the techniques used in the study of or the directed modification of the gene complement of a living organism.
+- tui: T064
+  name: Governmental or Regulatory Activity
+  tree_number: B1.3.3
+  abbreviation: gora
+  definition: An activity carried out by officially constituted governments, or an activity related to the creation or enforcement of the rules or regulations governing some field of endeavor.
+- tui: T065
+  name: Educational Activity
+  tree_number: B1.3.4
+  abbreviation: edac
+  definition: An activity related to the organization and provision of education.
+- tui: T066
+  name: Machine Activity
+  tree_number: B1.4
+  abbreviation: mcha
+  definition: An activity carried out primarily or exclusively by machines.
+- tui: T067
+  name: Phenomenon or Process
+  tree_number: B2
+  abbreviation: phpr
+  definition: A process or state which occurs naturally or as a result of an activity.
+- tui: T068
+  name: Human-caused Phenomenon or Process
+  tree_number: B2.1
+  abbreviation: hcpp
+  definition: A phenomenon or process that is a result of the activities of human beings.
+- tui: T069
+  name: Environmental Effect of Humans
+  tree_number: B2.1.1
+  abbreviation: eehu
+  definition: A change in the natural environment that is a result of the activities of human beings.
+- tui: T070
+  name: Natural Phenomenon or Process
+  tree_number: B2.2
+  abbreviation: npop
+  definition: A phenomenon or process that occurs irrespective of the activities of human beings.
+- tui: T038
+  name: Biologic Function
+  tree_number: B2.2.1
+  abbreviation: biof
+  definition: A state, activity or process of the body or one of its systems or parts.
+- tui: T039
+  name: Physiologic Function
+  tree_number: B2.2.1.1
+  abbreviation: phsf
+  definition: A normal process, activity, or state of the body.
+- tui: T040
+  name: Organism Function
+  tree_number: B2.2.1.1.1
+  abbreviation: orgf
+  definition: A physiologic function of the organism as a whole, of multiple organ systems, or of multiple organs or tissues.
+- tui: T041
+  name: Mental Process
+  tree_number: B2.2.1.1.1.1
+  abbreviation: menp
+  definition: A physiologic function involving the mind or cognitive processing.
+- tui: T042
+  name: Organ or Tissue Function
+  tree_number: B2.2.1.1.2
+  abbreviation: ortf
+  definition: A physiologic function of a particular organ, organ system, or tissue.
+- tui: T043
+  name: Cell Function
+  tree_number: B2.2.1.1.3
+  abbreviation: celf
+  definition: A physiologic function inherent to cells or cell components.
+- tui: T044
+  name: Molecular Function
+  tree_number: B2.2.1.1.4
+  abbreviation: moft
+  definition: A physiologic function occurring at the molecular level.
+- tui: T045
+  name: Genetic Function
+  tree_number: B2.2.1.1.4.1
+  abbreviation: genf
+  definition: Functions of or related to the maintenance, translation or expression of the genetic material.
+- tui: T046
+  name: Pathologic Function
+  tree_number: B2.2.1.2
+  abbreviation: patf
+  definition: A disordered process, activity, or state of the organism as a whole, of a body system or systems, or of multiple organs or tissues. Included here are normal responses to a negative stimulus
+    as well as patholologic conditions or states that are less specific than a disease. Pathologic functions frequently have systemic effects.
+- tui: T047
+  name: Disease or Syndrome
+  tree_number: B2.2.1.2.1
+  abbreviation: dsyn
+  definition: A condition which alters or interferes with a normal process, state, or activity of an organism. It is usually characterized by the abnormal functioning of one or more of the host's systems,
+    parts, or organs. Included here is a complex of symptoms descriptive of a disorder.
+- tui: T048
+  name: Mental or Behavioral Dysfunction
+  tree_number: B2.2.1.2.1.1
+  abbreviation: mobd
+  definition: A clinically significant dysfunction whose major manifestation is behavioral or psychological. These dysfunctions may have identified or presumed biological etiologies or manifestations.
+- tui: T191
+  name: Neoplastic Process
+  tree_number: B2.2.1.2.1.2
+  abbreviation: neop
+  definition: A new and abnormal growth of tissue in which the growth is uncontrolled and progressive. The growths may be malignant or benign.
+- tui: T049
+  name: Cell or Molecular Dysfunction
+  tree_number: B2.2.1.2.2
+  abbreviation: comd
+  definition: A pathologic function inherent to cells, parts of cells, or molecules.
+- tui: T050
+  name: Experimental Model of Disease
+  tree_number: B2.2.1.2.3
+  abbreviation: emod
+  definition: A representation in a non-human organism of a human disease for the purpose of research into its mechanism or treatment.
+- tui: T037
+  name: Injury or Poisoning
+  tree_number: B2.3
+  abbreviation: inpo
+  definition: A traumatic wound, injury, or poisoning caused by an external agent or force.
+- tui: T132
+  name: physically_related_to
+  tree_number: R1
+  abbreviation: PR
+  definition: Related by virtue of some physical attribute or characteristic.
+- tui: T133
+  name: part_of
+  tree_number: R1.1
+  abbreviation: PT
+  definition: Composes, with one or more other physical units, some larger whole. This includes component of, division of, portion of, fragment of, section of, and layer of.
+- tui: T172
+  name: consists_of
+  tree_number: R1.2
+  abbreviation: CS
+  definition: Is structurally made up of in whole or in part of some material or matter. This includes composed of, made of, and formed of.
+- tui: T134
+  name: contains
+  tree_number: R1.3
+  abbreviation: CT
+  definition: Holds or is the receptacle for fluids or other substances. This includes is filled with, holds, and is occupied by.
+- tui: T174
+  name: connected_to
+  tree_number: R1.4
+  abbreviation: CN
+  definition: Directly attached to another physical unit as tendons are connected to muscles. This includes attached to and anchored to.
+- tui: T175
+  name: interconnects
+  tree_number: R1.5
+  abbreviation: IC
+  definition: Serves to link or join together two or more other physical units. This includes joins, links, conjoins, articulates, separates, and bridges.
+- tui: T198
+  name: branch_of
+  tree_number: R1.6
+  abbreviation: BR
+  definition: Arises from the division of. For example, the arborization of arteries.
+- tui: T199
+  name: tributary_of
+  tree_number: R1.7
+  abbreviation: TB
+  definition: Merges with. For example, the confluence of veins.
+- tui: T202
+  name: ingredient_of
+  tree_number: R1.8
+  abbreviation: IG
+  definition: Is a component of, as in a constituent of a preparation.
+- tui: T189
+  name: spatially_related_to
+  tree_number: R2
+  abbreviation: SP
+  definition: Related by place or region.
+- tui: T135
+  name: location_of
+  tree_number: R2.1
+  abbreviation: LO
+  definition: The position, site, or region of an entity or the site of a process.
+- tui: T173
+  name: adjacent_to
+  tree_number: R2.2
+  abbreviation: AD
+  definition: Close to, near or abutting another physical unit with no other structure of the same kind intervening. This includes adjoins, abuts, is contiguous to, is juxtaposed, and is close to.
+- tui: T176
+  name: surrounds
+  tree_number: R2.3
+  abbreviation: SR
+  definition: Establishes the boundaries for, or defines the limits of another physical structure. This includes limits, bounds, confines, encloses, and circumscribes.
+- tui: T177
+  name: traverses
+  tree_number: R2.4
+  abbreviation: TV
+  definition: Crosses or extends across another physical structure or area. This includes crosses over and crosses through.
+- tui: T139
+  name: functionally_related_to
+  tree_number: R3
+  abbreviation: FR
+  definition: Related by the carrying out of some function or activity.
+- tui: T151
+  name: affects
+  tree_number: R3.1
+  abbreviation: AF
+  definition: Produces a direct effect on. Implied here is the altering or influencing of an existing condition, state, situation, or entity. This includes has a role in, alters, influences, predisposes,
+    catalyzes, stimulates, regulates, depresses, impedes, enhances, contributes to, leads to, and modifies.
+- tui: T153
+  name: manages
+  tree_number: R3.1.1
+  abbreviation: MN
+  definition: Administers, or contributes to the care of an individual or group of individuals.
+- tui: T154
+  name: treats
+  tree_number: R3.1.2
+  abbreviation: TS
+  definition: Applies a remedy with the object of effecting a cure or managing a condition.
+- tui: T146
+  name: disrupts
+  tree_number: R3.1.3
+  abbreviation: DS
+  definition: Alters or influences an already existing condition, state, or situation. Produces a negative effect on.
+- tui: T149
+  name: complicates
+  tree_number: R3.1.4
+  abbreviation: CM
+  definition: Causes to become more severe or complex or results in adverse effects.
+- tui: T142
+  name: interacts_with
+  tree_number: R3.1.5
+  abbreviation: IW
+  definition: Acts, functions, or operates together with.
+- tui: T148
+  name: prevents
+  tree_number: R3.1.6
+  abbreviation: PV
+  definition: Stops, hinders or eliminates an action or condition.
+- tui: T187
+  name: brings_about
+  tree_number: R3.2
+  abbreviation: BA
+  definition: Acts on or influences an entity.
+- tui: T144
+  name: produces
+  tree_number: R3.2.1
+  abbreviation: PS
+  definition: Brings forth, generates or creates. This includes yields, secretes, emits, biosynthesizes, generates, releases, discharges, and creates.
+- tui: T147
+  name: causes
+  tree_number: R3.2.2
+  abbreviation: CA
+  definition: Brings about a condition or an effect. Implied here is that an agent, such as for example, a pharmacologic substance or an organism, has brought about the effect. This includes induces, effects,
+    evokes, and etiology.
+- tui: T188
+  name: performs
+  tree_number: R3.3
+  abbreviation: PE
+  definition: Executes, accomplishes, or achieves an activity.
+- tui: T141
+  name: carries_out
+  tree_number: R3.3.1
+  abbreviation: CO
+  definition: Executes a function or performs a procedure or activity. This includes transacts, operates on, handles, and executes.
+- tui: T145
+  name: exhibits
+  tree_number: R3.3.2
+  abbreviation: EX
+  definition: Shows or demonstrates.
+- tui: T143
+  name: practices
+  tree_number: R3.3.3
+  abbreviation: PA
+  definition: Performs habitually or customarily.
+- tui: T152
+  name: occurs_in
+  tree_number: R3.4
+  abbreviation: OC
+  definition: Takes place in or happens under given conditions, circumstances, or time periods, or in a given location or population. This includes appears in, transpires, comes about, is present in, and
+    exists in.
+- tui: T140
+  name: process_of
+  tree_number: R3.4.1
+  abbreviation: PO
+  definition: Action, function, or state of.
+- tui: T155
+  name: uses
+  tree_number: R3.5
+  abbreviation: US
+  definition: Employs in the carrying out of some activity. This includes applies, utilizes, employs, and avails.
+- tui: T150
+  name: manifestation_of
+  tree_number: R3.6
+  abbreviation: MF
+  definition: That part of a phenomenon which is directly observable or concretely or visibly expressed, or which gives evidence to the underlying process. This includes expression of, display of, and exhibition
+    of.
+- tui: T156
+  name: indicates
+  tree_number: R3.7
+  abbreviation: IN
+  definition: Gives evidence for the presence at some time of an entity or process.
+- tui: T157
+  name: result_of
+  tree_number: R3.8
+  abbreviation: RO
+  definition: The condition, product, or state occurring as a consequence, effect, or conclusion of an activity or process. This includes product of, effect of, sequel of, outcome of, culmination of, and
+    completion of.
+- tui: T136
+  name: temporally_related_to
+  tree_number: R4
+  abbreviation: TR
+  definition: Related in time by preceding, co-occuring with, or following.
+- tui: T137
+  name: co-occurs_with
+  tree_number: R4.1
+  abbreviation: CW
+  definition: Occurs at the same time as, together with, or jointly. This includes is co-incident with, is concurrent with, is contemporaneous with, accompanies, coexists with, and is concomitant with.
+- tui: T138
+  name: precedes
+  tree_number: R4.2
+  abbreviation: PC
+  definition: Occurs earlier in time. This includes antedates, comes before, is in advance of, predates, and is prior to.
+- tui: T158
+  name: conceptually_related_to
+  tree_number: R5
+  abbreviation: CR
+  definition: Related by some abstract concept, thought, or idea.
+- tui: T161
+  name: evaluation_of
+  tree_number: R5.1
+  abbreviation: EV
+  definition: Judgment of the value or degree of some attribute or process.
+- tui: T180
+  name: degree_of
+  tree_number: R5.2
+  abbreviation: DE
+  definition: The relative intensity of a process or the relative intensity or amount of a quality or attribute.
+- tui: T193
+  name: analyzes
+  tree_number: R5.3
+  abbreviation: AN
+  definition: Studies or examines using established quantitative or qualitative methods.
+- tui: T164
+  name: assesses_effect_of
+  tree_number: R5.3.1
+  abbreviation: AE
+  definition: Analyzes the influence or consequences of the function or action of.
+- tui: T182
+  name: measurement_of
+  tree_number: R5.4
+  abbreviation: ME
+  definition: The dimension, quantity, or capacity determined by measuring.
+- tui: T162
+  name: measures
+  tree_number: R5.5
+  abbreviation: MS
+  definition: Ascertains or marks the dimensions, quantity, degree, or capacity of.
+- tui: T163
+  name: diagnoses
+  tree_number: R5.6
+  abbreviation: DI
+  definition: Distinguishes or identifies the nature or characteristics of.
+- tui: T159
+  name: property_of
+  tree_number: R5.7
+  abbreviation: PP
+  definition: Characteristic of, or quality of.
+- tui: T178
+  name: derivative_of
+  tree_number: R5.8
+  abbreviation: DO
+  definition: In chemistry, a substance structurally related to another or that can be made from the other substance. This is used only for structural relationships. This does not include functional relationships
+    such as metabolite of, by product of, nor analog of.
+- tui: T179
+  name: developmental_form_of
+  tree_number: R5.9
+  abbreviation: DF
+  definition: An earlier stage in the individual maturation of.
+- tui: T183
+  name: method_of
+  tree_number: R5.10
+  abbreviation: MT
+  definition: The manner and sequence of events in performing an act or procedure.
+- tui: T160
+  name: conceptual_part_of
+  tree_number: R5.11
+  abbreviation: CP
+  definition: Conceptually a portion, division, or component of some larger whole.
+- tui: T165
+  name: issue_in
+  tree_number: R5.12
+  abbreviation: II
+  definition: Is an issue in or a point of discussion, study, debate, or dispute.

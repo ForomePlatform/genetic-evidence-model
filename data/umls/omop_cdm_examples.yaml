@@ -1,0 +1,81 @@
+# OMOP CDM positioning examples for GEM dimensions
+# =====================================================================
+# A few WORKED, ILLUSTRATIVE examples of where GEM dimensions sit relative
+# to the OHDSI OMOP Common Data Model (CDM) and its standardized
+# vocabularies. This is deliberately NOT a full crosswalk: it positions
+# GEM against the common-data-model paradigm and shows what the CDM does
+# and does not yet capture for basic-science genetic evidence.
+#
+# These rows are hand-authored by the curator, not produced by an
+# automated harness, and are presented as illustrative. Each row names the
+# OMOP CDM domain/table a dimension's content would map toward and the
+# standard vocabulary OMOP uses there. The "gap" field records what the
+# CDM does not natively represent.
+#
+# Rendered into the supplement crosswalk section by
+# mapping/render_crosswalk_tex.py alongside the (harness-generated) UMLS table.
+# =====================================================================
+
+meta:
+  model: OMOP CDM
+  status: illustrative
+  note: >-
+    OMOP CDM is built around observational, patient-level clinical data, including conditions, drugs, measurements, and observations. GEM describes basic-science genetic evidence about gene--phenotype relationships, much of which has no native patient-level representation in the CDM.
+
+examples:
+  - gem_dimension: phenotype_scale (CLINICAL)
+    omop_domain: Condition
+    omop_table: condition_occurrence
+    standard_vocabulary: SNOMED CT
+    alignment: >-
+      A clinical-scale phenotype aligns with an OMOP Condition concept
+      (SNOMED CT), the CDM's native representation of a clinical finding.
+    gap: >-
+      Molecular, cellular, histological and organismal phenotype scales have
+      no Condition-domain representation; OMOP has no phenotype-scale axis.
+
+  - gem_dimension: measurement_target (EXPRESSION, ACTIVITY, ...)
+    omop_domain: Measurement
+    omop_table: measurement
+    standard_vocabulary: LOINC
+    alignment: >-
+      A quantitative molecular readout is conceptually a Measurement; LOINC
+      covers some assay readouts (e.g. enzyme activity panels).
+    gap: >-
+      Basic-science functional readouts (binding, localization, stability of
+      a specific gene product in an experimental system) are rarely
+      represented as standard LOINC Measurement concepts.
+
+  - gem_dimension: target_type (GENE) / resolution (GENE)
+    omop_domain: Observation / (Genomic CDM extension)
+    omop_table: observation (or OMOP Genomic CDM)
+    standard_vocabulary: HGNC (via the OMOP Genomic vocabulary effort)
+    alignment: >-
+      A gene identity aligns with HGNC; the OHDSI Genomic CDM extension is
+      the locus where gene- and variant-level data are being standardized.
+    gap: >-
+      The base OMOP CDM has no first-class gene or variant entity; this lives
+      only in the evolving Genomic CDM extension, which is not yet a stable
+      standard.
+
+  - gem_dimension: organism
+    omop_domain: (none)
+    omop_table: (none)
+    standard_vocabulary: (none in CDM; NCBITaxon outside it)
+    alignment: >-
+      No alignment. OMOP CDM is patient-centric (Homo sapiens implied) and
+      has no concept of a model organism.
+    gap: >-
+      Model-organism evidence is entirely out of scope for the CDM; GEM's
+      organism dimension maps to NCBITaxon ([[supp-crosswalk]]), not OMOP.
+
+  - gem_dimension: method (GWAS, ASSOCIATION_STUDY, ...)
+    omop_domain: (metadata / study-level, not CDM clinical domains)
+    omop_table: (none; study design is not a CDM patient-data domain)
+    standard_vocabulary: (none; partial coverage in MeSH/OBI outside OMOP)
+    alignment: >-
+      No direct alignment. Study design / evidence-generation method is not a
+      patient-level CDM domain.
+    gap: >-
+      The CDM records observations, not how upstream genetic evidence was
+      generated; GEM's method hierarchy has no OMOP counterpart.
