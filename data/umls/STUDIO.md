@@ -15,10 +15,28 @@ Console script: `gem-mapping-studio` (alias `gem-umls-adjudicate`).
 ## Quick start
 
 ```bash
-pip install -e '.[local,dev]'          # psycopg only needed for the local index
-export UMLS_API_KEY=...                # your UTS key (never commit it)
+pip install gem-mapping-studio         # from PyPI; or, in a checkout: pip install -e '.[local,dev]'
 gem-mapping-studio                     # opens the browser on port 8765
 ```
+
+The Studio searches UMLS through the NLM UTS API, so it needs your own
+(free) UMLS API key. Without one it starts anyway, but the first search or
+concept lookup opens a **Connect UMLS** dialog that walks you through it:
+
+1. Create a UTS account and request the UMLS license at
+   <https://uts.nlm.nih.gov/uts/signup-login>. NLM reviews the request,
+   usually within a few business days; the key does not work before approval.
+2. Sign in and copy the API key from your profile,
+   <https://uts.nlm.nih.gov/uts/profile>.
+3. Paste it into the dialog. The Studio makes one test request before
+   accepting it, and (if you leave *Remember on this machine* ticked) stores
+   it in `~/.config/forome-gem/umls_api_key`, readable by you only.
+
+The key never leaves your machine: the browser sends it to the local Studio
+server, which proxies UMLS. Alternatives to the dialog: `export
+UMLS_API_KEY=...` before starting (never commit it), or a repository
+`.envrc` under direnv. Lookup order is the environment, then `.envrc`, then
+the key file; ⚙ Settings shows which one is in use.
 
 Options: `--data-dir DIR` (workspace; defaults to the repo's `data/umls`
 or `$GEM_DATA_DIR`; may be empty — the Studio can build a workspace from

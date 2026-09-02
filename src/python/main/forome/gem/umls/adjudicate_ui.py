@@ -33,12 +33,15 @@ confirm it is a real concept -- the harness never records a CUI it cannot
 resolve.
 
 It runs locally (not a hosted artifact) because it must reach the licensed UTS
-API with your key and write files. The key is read from UMLS_API_KEY or .envrc
-and never sent to the browser; the browser calls local /api/* endpoints that
-proxy UMLS.
+API with your key and write files. The key is read from UMLS_API_KEY, the repo
+.envrc, or the per-user key file (~/.config/forome-gem/umls_api_key, written by
+the Connect UMLS dialog) and never sent to the browser; the browser calls local
+/api/* endpoints that proxy UMLS. Without a key every UMLS-backed request
+answers with needs_key and the browser walks the curator through obtaining
+one (UTS sign-up, license approval, profile page) instead of failing silently.
 
 Usage:
-    export UMLS_API_KEY=...            # or have it in .envrc; optional -- axis
+    export UMLS_API_KEY=...            # or .envrc / key file; optional -- axis
                                        # construction works offline
     gem-umls-adjudicate [--data-dir DIR] [--port N] [--no-browser]
         DIR is a mapping workspace (inventory / crosswalk / adjudications); it
@@ -238,17 +241,75 @@ def validate_rationale(verdict: str, data: dict) -> dict:
     return out
 
 
-def api_key() -> str:
+# Per-user key file written by the Studio's "Connect UMLS" dialog (mode 0600),
+# so a pip-installed Studio on a machine without a repo checkout keeps its key
+# between runs. Env and the repo .envrc take precedence.
+KEY_FILE = (Path(os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config"))
+            / "forome-gem" / "umls_api_key")
+
+UTS_SIGNUP_URL = "https://uts.nlm.nih.gov/uts/signup-login"
+UTS_PROFILE_URL = "https://uts.nlm.nih.gov/uts/profile"
+
+
+def find_api_key() -> tuple[str, str]:
+    """(key, source) -- source is 'env', '.envrc', 'key file', or '' when none."""
     k = os.environ.get("UMLS_API_KEY", "")
     if k:
-        return k
+        return k, "env"
     envrc = H.BASE / ".envrc"
     if envrc.is_file():
         for line in envrc.read_text().splitlines():
             m = re.match(r"\s*export\s+UMLS_API_KEY=(.+)", line)
             if m:
-                return m.group(1).strip().strip("\"'")
+                return m.group(1).strip().strip("\"'"), ".envrc"
+    try:
+        if KEY_FILE.is_file():
+            k = KEY_FILE.read_text().strip()
+            if k:
+                return k, "key file"
+    except OSError:
+        pass
+    return "", ""
+
+
+def api_key() -> str:
+    return find_api_key()[0]
+
+
+def remember_api_key(key: str) -> Path:
+    """Store the key for this user only (dir 0700, file 0600)."""
+    KEY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        KEY_FILE.parent.chmod(0o700)
+    except OSError:
+        pass
+    KEY_FILE.write_text(key.strip() + "\n")
+    KEY_FILE.chmod(0o600)
+    return KEY_FILE
+
+
+def probe_api_key(key: str) -> str:
+    """Try the key against UTS with one uncached request. Returns '' when it
+    works, else a message for the curator (never containing the key)."""
+    try:
+        UTSClient(key, cache_dir=None).get_concept("C0017337")  # Genes
+    except Exception as ex:  # noqa: BLE001
+        code = getattr(getattr(ex, "response", None), "status_code", None)
+        if code in (401, 403):
+            return (f"UTS rejected this key (HTTP {code}). Copy it again from "
+                    f"your UTS profile ({UTS_PROFILE_URL}); a newly created "
+                    "account is usable only after NLM approves the license.")
+        return f"could not reach UTS: {type(ex).__name__}: {ex}"
     return ""
+
+
+def no_key_help() -> str:
+    """The API's answer to a UMLS request made without a key. Short on
+    purpose: the browser opens the Connect UMLS walkthrough on needs_key, and
+    the console prints the full steps at startup."""
+    return ("UMLS is not connected: this needs a UMLS API key. Use Connect "
+            f"UMLS in the Studio (free UTS account: {UTS_SIGNUP_URL}) or "
+            "export UMLS_API_KEY before starting.")
 
 
 def load_meanings() -> dict:
@@ -496,7 +557,11 @@ def load_state() -> dict:
             "prefs": {"workspace": ws_prefs},
             "search_backend": SEARCH_BACKEND,
             "server": {"started": SERVER_STARTED, "code": CODE_STAMP},
-            "search_backend_note": SEARCH_BACKEND_NOTE}
+            "search_backend_note": SEARCH_BACKEND_NOTE,
+            # never the key itself -- only whether one is loaded and from where
+            "umls": {"connected": UTS_ONLINE, "key_source": KEY_SOURCE,
+                     "local_index": LOCAL_INDEX, "key_file": str(KEY_FILE),
+                     "signup_url": UTS_SIGNUP_URL, "profile_url": UTS_PROFILE_URL}}
 
 
 def write_adjudications(adj: dict) -> None:
@@ -816,6 +881,35 @@ def expand_search(cli, query: str, stys: str | None = None,
 
 client = None  # set in main()
 SEARCH_BACKEND = "UTS"
+UTS_ONLINE = False            # a working UTS key is loaded
+KEY_SOURCE = ""               # where the key came from: env / .envrc / key file / dialog
+LOCAL_INDEX = False           # the optional PostgreSQL index is serving search
+# /api paths that need UTS. Without a key they return {"needs_key": true}
+# instead of silently empty results; the local index, when loaded, still
+# serves /api/search and /api/sabs on its own.
+UTS_PATHS = {"/api/search", "/api/rollup", "/api/sabs", "/api/expand",
+             "/api/descend", "/api/concept", "/api/rebuild"}
+LOCAL_ONLY_OK = {"/api/search", "/api/sabs"}
+
+
+def uts_required(path: str) -> bool:
+    if UTS_ONLINE or path not in UTS_PATHS:
+        return False
+    return not (LOCAL_INDEX and path in LOCAL_ONLY_OK)
+
+
+def connect_uts(key: str, source: str) -> None:
+    """Swap the live UTS client in (keeping a local-index hybrid if present)."""
+    global client, UTS_ONLINE, KEY_SOURCE, SEARCH_BACKEND, SEARCH_BACKEND_NOTE
+    live = UTSClient(key, cache_dir=H.CACHE_DIR)
+    if isinstance(client, HybridClient):
+        client._uts = live
+    else:
+        client = live
+        SEARCH_BACKEND = "UTS"
+    if SEARCH_BACKEND_NOTE.startswith("no UMLS_API_KEY"):
+        SEARCH_BACKEND_NOTE = ""
+    UTS_ONLINE, KEY_SOURCE = True, source
 SEARCH_BACKEND_NOTE = ""      # why the local-index probe failed, when it did
 import datetime as _dt
 SERVER_STARTED = _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -875,6 +969,9 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if u.path == "/":
                 return self._send(200, HTML, "text/html; charset=utf-8")
+            if uts_required(u.path):
+                return self._send(200, json.dumps(
+                    {"error": no_key_help(), "needs_key": True}))
             if u.path == "/api/state":
                 return self._send(200, json.dumps(load_state()))
             if u.path == "/api/search":
@@ -887,11 +984,7 @@ class Handler(BaseHTTPRequestHandler):
                 partial = stype == "partial"
                 res = client.search(term, search_type="words" if partial else stype,
                                     sabs=sab, semantic_types=stys, partial=partial)
-                out = {"results": res}
-                if not res and SEARCH_BACKEND.startswith("OFFLINE"):
-                    out["note"] = ("offline: no UMLS key and no local index — "
-                                   "every search is empty (see ⚙ Settings)")
-                return self._send(200, json.dumps(out))
+                return self._send(200, json.dumps({"results": res}))
             if u.path == "/api/rollup":
                 cui = (q.get("cui") or [""])[0]
                 sab = (q.get("use_sab") or [""])[0] or None
@@ -988,6 +1081,29 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = json.loads(self.rfile.read(ln) or b"{}")
             u = urlparse(self.path)
+            if u.path == "/api/umls-key":
+                # The key travels browser -> this local server only; it is
+                # never echoed back, logged, or written anywhere but KEY_FILE.
+                key = str(data.get("key") or "").strip()
+                if not key:
+                    return self._send(400, json.dumps({"error": "empty key"}))
+                why = probe_api_key(key)
+                if why:
+                    return self._send(200, json.dumps({"error": why}))
+                connect_uts(key, "dialog")
+                out = {"ok": True, "key_source": KEY_SOURCE}
+                if data.get("remember"):
+                    try:
+                        out["key_file"] = str(remember_api_key(key))
+                        globals()["KEY_SOURCE"] = "key file"
+                        out["key_source"] = "key file"
+                    except OSError as ex:
+                        out["remember_error"] = f"{type(ex).__name__}: {ex}"
+                print(f"UMLS connected (key from {out['key_source']}).")
+                return self._send(200, json.dumps(out))
+            if uts_required(u.path):
+                return self._send(200, json.dumps(
+                    {"error": no_key_help(), "needs_key": True}))
             if u.path == "/api/decide":
                 adj = H.load_adjudications(H.ADJUDICATIONS)
                 key, verdict = data["key"], data.get("verdict")
@@ -1150,6 +1266,8 @@ textarea{width:100%;min-height:44px}
 .titlerow .spacer{flex:1}
 #msg{font-size:12px;color:var(--mut)}
 .orient{margin-top:6px;font-size:13px;color:var(--mut);max-width:780px}
+.keybanner{margin:12px 0 0;padding:9px 12px;border:1px solid var(--warn);border-radius:8px;background:rgba(190,120,20,.07);font-size:13px;display:flex;gap:10px;align-items:center}
+.keybanner .spacer{flex:1}
 .orient b{color:var(--ink)}
 #content{flex:1;overflow:auto;padding:16px 32px 28px}
 /* ---- shared bits ---- */
@@ -1551,7 +1669,43 @@ function render(){if(!STATE)return;renderRail();
   else if(ROUTE.view==='value')renderValue();}
 function head(crumbHTML,titleHTML,orient){$('#head').innerHTML=
   `<div class="crumb">${crumbHTML}</div><div class="titlerow">${titleHTML}</div>`+
-  (orient?`<div class="orient">${orient}</div>`:'');}
+  (orient?`<div class="orient">${orient}</div>`:'')+keyBannerHTML();}
+function umlsOff(){return !!(STATE&&STATE.umls&&!STATE.umls.connected);}
+function keyBannerHTML(){if(!umlsOff())return '';
+  const u=STATE.umls||{};
+  return `<div class="keybanner"><b>UMLS is not connected.</b> <span>Concept search, evidence, and rebuilds need a UMLS API key${u.local_index?' (the local index still serves plain search)':''}.</span><span class="spacer"></span><button class="primary" onclick="showKeyDialog()">Connect UMLS…</button></div>`;}
+/* ---------- UMLS key walkthrough ----------
+   Any /api response carrying needs_key opens this dialog, so a missing key is
+   never a silent empty result. The key goes to the local server only. */
+function installKeyGuard(){const orig=window.fetch;let open=false;
+  window.fetch=async function(url,opts){const r=await orig.apply(this,arguments);
+    try{if(typeof url==='string'&&url.startsWith('/api/')&&!url.startsWith('/api/umls-key')){
+      const j=await r.clone().json();
+      if(j&&j.needs_key&&!open){open=true;showKeyDialog(j.error);setTimeout(()=>{open=false;},500);}}}catch(e){}
+    return r;};}
+function showKeyDialog(reason){const u=(STATE&&STATE.umls)||{};
+  showModal('Connect UMLS',
+    (reason?`<div class="mini" style="color:var(--warn);margin-bottom:8px">${esc(reason)}</div>`:'')+
+    `<div style="font-size:13px;line-height:1.45">The Studio searches the UMLS Metathesaurus through the NLM UTS API, which needs your own (free) API key. The key stays on this machine: the browser sends it to the local Studio server only, and the server never echoes it back.</div>`+
+    `<ol style="font-size:13px;line-height:1.5;margin:10px 0 6px 18px;padding:0">`+
+    `<li>Create a UTS account and request the UMLS license: <a href="${esc(u.signup_url||'https://uts.nlm.nih.gov/uts/signup-login')}" target="_blank" rel="noopener">uts.nlm.nih.gov/uts/signup-login</a>. NLM reviews the request, usually within a few business days; the key does not work before approval.</li>`+
+    `<li>Once approved, sign in and open your profile: <a href="${esc(u.profile_url||'https://uts.nlm.nih.gov/uts/profile')}" target="_blank" rel="noopener">uts.nlm.nih.gov/uts/profile</a>. Copy the <b>API key</b> shown there (generate one if the field is empty).</li>`+
+    `<li>Paste it below and press <b>Test &amp; connect</b>. The Studio makes one test request before accepting it.</li></ol>`+
+    `<div style="display:flex;gap:8px;margin-top:8px"><input id="umlskey" type="password" placeholder="UMLS API key" autocomplete="off" spellcheck="false" style="flex:1;font-family:var(--mono);font-size:12.5px">`+
+    `<button class="primary" onclick="connectUmls()">Test &amp; connect</button></div>`+
+    `<label class="mini" style="display:block;margin-top:8px"><input type="checkbox" id="umlsremember" checked> Remember on this machine (<span class="mono">${esc(u.key_file||'~/.config/forome-gem/umls_api_key')}</span>, readable by you only)</label>`+
+    `<div id="umlskeymsg" class="mini" style="margin-top:8px"></div>`+
+    `<div class="mini" style="margin-top:12px;color:var(--faint)">Alternatives: <span class="mono">export UMLS_API_KEY=…</span> before starting the Studio, or a repository <span class="mono">.envrc</span> under direnv. To forget a remembered key, delete the file above.</div>`);
+  const i=$('#umlskey');if(i){i.focus();i.addEventListener('keydown',ev=>{if(ev.key==='Enter')connectUmls();});}}
+async function connectUmls(){const key=(($('#umlskey')||{}).value||'').trim(),m=$('#umlskeymsg');
+  if(!key){if(m)m.textContent='paste the key first';return;}
+  if(m)m.textContent='testing the key against UTS…';
+  let j;try{j=await (await fetch('/api/umls-key',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key,remember:!!(($('#umlsremember')||{}).checked)})})).json();}
+  catch(e){if(m)m.textContent='request failed: '+e;return;}
+  if(j.error){if(m){m.style.color='var(--danger)';m.textContent=j.error;}return;}
+  closeModal();await loadState();
+  msg('UMLS connected'+(j.key_file?' — key remembered in '+j.key_file:'')+(j.remember_error?' (could not remember it: '+j.remember_error+')':''));}
 /* ---------- HOME ---------- */
 function renderHome(){const c=STATE.counts||{},g=grouped(),dims=dimList();
   head('WORKSPACE',
@@ -1727,7 +1881,7 @@ async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('
   const j=await (await fetch('/api/search?string='+encodeURIComponent(q))).json();
   if(j.error){box.innerHTML='<span style="color:var(--danger)">'+esc(j.error)+'</span>';return;}
   const res=(j.results||[]).slice(0,60);
-  if(!res.length){box.innerHTML='<span class="mini">no results — offline (no key), or no match. You can still pick a type below.</span>';return;}
+  if(!res.length){box.innerHTML='<span class="mini">no match. You can still pick a type below.</span>';return;}
   const norm=s=>(s||'').toLowerCase(),byT={};
   res.forEach(c=>(c.semantic_types||[]).forEach(nm=>{
     const t=(SEMTYPES||[]).find(x=>norm(x.name)===norm(nm));if(!t)return;
@@ -1844,7 +1998,7 @@ function renderValue(){SEL=STATE.entries.find(x=>x.key===ROUTE.key)||SEL;
    </div>
    <div class="card"><h3>Query candidates · ${e.candidates.length}</h3>${e.candidates.map(c=>candHTML(c,null,'query')).join('')||'<span class="mini">none returned by the harness query</span>'}</div>
    <div class="card"><h3>Search the Metathesaurus <span style="margin-left:6px">${filt}</span>`+
-     `<span class="hint">preferred: ${(e.sab_prefs||[]).length?esc(e.sab_prefs.join(' › ')):'none — set in ⚙ Settings'} · search: ${esc(STATE.search_backend||'UTS')}${(STATE.search_backend||'UTS')==='UTS'?' (local index not active — see ⚙)':''}</span></h3>
+     `<span class="hint">preferred: ${(e.sab_prefs||[]).length?esc(e.sab_prefs.join(' › ')):'none — set in ⚙ Settings'} · search: ${esc(STATE.search_backend||'UTS')}${umlsOff()?' — <a href="#" onclick="showKeyDialog();return false">connect UMLS</a>':(STATE.search_backend||'UTS')==='UTS'?' (local index not active — see ⚙)':''}</span></h3>
      <div class="searchbar"><input id="sq" placeholder="concept term…" value="${esc(e.token?String(e.token).replace(/_/g,' ').toLowerCase():e.query)}">
        <select id="sscope" title="widen the search beyond the axis subtree"${e.dim_sty_tui?'':' disabled'}>
          <option value="axis"${e.dim_sty_tui?'':' disabled'}>within axis subtree</option>
@@ -2129,6 +2283,9 @@ function openSettings(){const wp=((STATE&&STATE.prefs||{}).workspace||[]).join('
     `<div class="mini" style="margin-top:8px">Workspace default (inventory <span class="mono">meta.preferred_sabs</span>). A dimension can override it in its axis card; a value's own <span class="mono">sab:</span> hint in the inventory always comes first.</div>`+
     `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SERVER</div>`+
     `<div class="mini" style="margin-top:4px">started ${esc((STATE.server||{}).started||'?')} · running code saved ${esc((STATE.server||{}).code||'?')} — if the code date is older than your latest changes, restart the Studio (Ctrl-C, then <span class="mono">gem-umls-adjudicate</span>)</div>`+
+    `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">UMLS API KEY</div>`+
+    (umlsOff()?`<div style="font-size:12.5px;margin-top:4px;color:var(--warn)">not connected — searches, evidence, and rebuilds are disabled</div><button class="primary" style="margin-top:6px" onclick="showKeyDialog()">Connect UMLS…</button>`
+      :`<div style="font-size:12.5px;margin-top:4px">connected · key from ${esc((STATE.umls||{}).key_source||'?')}</div><button class="mini" style="margin-top:6px" onclick="showKeyDialog()">use a different key</button>`)+
     `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SEARCH BACKEND</div>`+
     `<div style="font-size:12.5px;margin-top:4px">${esc(STATE.search_backend||'UTS')}${(STATE.search_backend||'UTS')==='UTS'?' — the optional local index (faster search, typo-tolerant matching, axis browse) is not loaded':''}</div>`+
     (STATE.search_backend_note?`<div class="mini" style="margin-top:3px;color:var(--warn)">probe: ${esc(STATE.search_backend_note)}</div>`:'')+
@@ -2149,7 +2306,7 @@ async function rebuild(dim){msg(dim?('rebuilding '+dim+' (querying UMLS)…'):'r
   if(j.error){msg('error: '+j.error);return;}
   await loadState();const c=STATE.counts||{};
   msg((dim?dim+' rebuilt':'all rebuilt')+' — '+(c.mapped||0)+' mapped · '+(c.review||0)+' review · '+(c.unmapped||0)+' unmapped of '+(c.total||0)+' values · '+(c.needs||0)+' need review');}
-loadState();loadSemTypes();
+installKeyGuard();loadState();loadSemTypes();
 </script></body></html>'''
 
 
@@ -2185,20 +2342,32 @@ def main(argv=None):
             os.execv(sys.executable,
                      [sys.executable, "-m", "forome.gem.umls.adjudicate_ui", *argv])
 
-    global SEARCH_BACKEND
-    key = api_key()
+    global SEARCH_BACKEND, UTS_ONLINE, KEY_SOURCE, LOCAL_INDEX
+    key, KEY_SOURCE = find_api_key()
     if key:
         client = UTSClient(key, cache_dir=H.CACHE_DIR)
+        UTS_ONLINE = True
+        print(f"UMLS: key loaded from {KEY_SOURCE}.")
     else:
         # Axis construction needs only the Semantic Network (reference data), so
-        # run without a key -- value search/concept info are simply inert.
-        print("WARNING: no UMLS_API_KEY found; running offline (axis construction "
-              "works; live value search/concept info are disabled).")
+        # start without a key; every UMLS-backed request then answers with
+        # needs_key and the browser opens the Connect UMLS walkthrough.
+        print("WARNING: no UMLS API key found (checked $UMLS_API_KEY, "
+              f"{H.BASE / '.envrc'}, {KEY_FILE}).\n"
+              "  Searches and concept details are disabled until a key is "
+              "entered; the Studio will prompt for one.\n"
+              f"  1. Create a free UTS account: {UTS_SIGNUP_URL}\n"
+              "     (NLM approves the UMLS license request, usually within a "
+              "few business days)\n"
+              f"  2. Copy the API key from your UTS profile: {UTS_PROFILE_URL}\n"
+              "  3. Paste it into the Studio's Connect UMLS dialog (it can be "
+              "remembered on this machine),\n"
+              "     or export UMLS_API_KEY=<key> and restart.")
         client = NullClient()
         SEARCH_BACKEND = "OFFLINE — no UMLS key"
         globals()["SEARCH_BACKEND_NOTE"] = ("no UMLS_API_KEY in the environment: "
-            "start the Studio from the repository directory (direnv exports the "
-            "key there) or export UMLS_API_KEY yourself")
+            "use Connect UMLS in the Studio, or export UMLS_API_KEY (the repo "
+            ".envrc exports it under direnv)")
     # The local PostgreSQL index is an OPTIONAL accelerator each user builds
     # from their own licensed UMLS copy (gem-umls-load-local; see
     # data/umls/README.md) -- it is never distributed with the tool. Released
@@ -2212,6 +2381,7 @@ def main(argv=None):
             _rel = _pg.release()
             if _rel:
                 client = HybridClient(_pg, client)
+                LOCAL_INDEX = True
                 SEARCH_BACKEND = f"local {_rel.get('version')}"
                 print(f"Search backend: local UMLS index {_rel.get('version')}; "
                       "concept details via UTS.")

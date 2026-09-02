@@ -25,6 +25,11 @@
             "relation": "isSupplementTo",
             "identifier": "https://w3id.org/genetic-evidence-model/",
             "scheme": "url"
+        },
+        {
+            "relation": "isIdenticalTo",
+            "identifier": "https://pypi.org/project/gem-mapping-studio/",
+            "scheme": "url"
         }
     ]
 }
