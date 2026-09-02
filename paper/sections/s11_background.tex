@@ -118,21 +118,21 @@ whether each pattern can be represented by each standard and by GEM. Eight
 patterns are exercised by the six-paper corpus in the main paper
 (\Cref{tab:corpus}). The final two, therapeutic-response evidence and
 cross-publication synthesis, lie outside the current model's scope by
-design. The corpus surfaced the first directly, through the cited anti-p40
-antibody trial in Duerr (GE-new-1), and the second only in its within-paper
-form, as a higher-order claim over several items of a single paper; both
-are logged under candidate extension CE-DU3.
+design. The corpus exposed therapeutic response directly through the cited
+anti-p40 antibody trial in Duerr (GE-new-1). It also exposed an analogous
+within-paper synthesis problem, a higher-order claim over several items from
+one paper. Both issues are recorded under candidate extension CE-DU3.
 
 The matrix is a coverage inventory, not a ranking. The standards were
 developed for different purposes, and a pattern marked as not represented is
 a limitation only if that pattern lies within the standard's intended scope.
 
-The five standards columns cover the standards in the comparison that
-carry evidence content, with ECO and SEPIO shown separately and the
-ClinGen and ACMG/AMP frameworks combined. IAO, OBI, and PROV-O are omitted because they are
-orthogonal to all ten patterns. They provide upper-level classes, assay
-hierarchies, and provenance relations that any of the represented models
-could reuse, but do not themselves represent the patterns.
+The five standards columns represent the resources in this comparison that
+carry evidence content, with ECO and SEPIO shown separately and the ClinGen
+and ACMG/AMP frameworks combined. IAO, OBI, and PROV-O are omitted because
+they are orthogonal to all ten patterns. They provide upper-level classes,
+assay hierarchies, and provenance relations that the represented models may
+reuse, but do not themselves represent these patterns.
 
 Cell values are interpreted relative to each standard's role. For an
 information model, including FHIR Evidence, GA4GH VA, and SEPIO,
@@ -146,39 +146,45 @@ For ECO, \cfull{} indicates that a term for the pattern exists, \chalf{}
 that only a generic term applies, and \cnone{} that no suitable term was
 identified.
 
-For the ClinGen gene--disease validity framework~\cite{strande2017} and
-the ACMG/AMP variant-interpretation guidelines~\cite{acmg2015},
-\cfull{} indicates that the pattern is a scored evidence category.
-\chalf{} indicates partial or indirect treatment, including a required
-input that is not itself scored (row 7) or treatment by a ClinGen product
-other than the validity framework (the PRS-RS reporting standard in row 8,
-actionability curation in row 9), and \cnone{} indicates that neither
-framework provides a corresponding scored category. For GEM, \cfull{}
-indicates that the pattern is represented natively and was annotated in
-the corpus without a forced fit. \cforce{} indicates that the pattern was
-annotated only through a forced fit recorded as a candidate extension,
-identified by a CE code in \fpath{schema/EXTENSIONS.md}. \cnone{}
-indicates that the pattern is not represented. In any column, \cna{}
-indicates that the pattern is outside the standard's subject matter
-altogether, so that its absence is not a gap. Every identifier cited in
-the row notes was verified against the relevant source vocabulary or
-specification at the time of writing.
+The ClinGen gene--disease validity framework~\cite{strande2017} and the
+ACMG/AMP variant-interpretation guidelines~\cite{acmg2015} share one
+column because they score complementary levels of evidence, gene--disease
+validity and variant pathogenicity, and the column is read as their union.
+\cfull{} indicates that the pattern is a scored evidence category in the
+framework that operates at the pattern's level; the row note names that
+framework, and the absence of a criterion in the other framework is not
+counted as a gap when the pattern lies outside its level, as a gene-level
+claim does for ACMG/AMP (rows 2 and 6). \chalf{} indicates partial or
+indirect treatment, including a required input that is not itself scored,
+or treatment by a ClinGen product other than the validity framework.
+\cnone{} indicates that neither framework provides a corresponding scored
+category. For GEM, \cfull{} indicates that
+the pattern is represented natively and was annotated in the corpus without
+a forced fit. \cforce{} indicates that the pattern was annotated only
+through a forced fit recorded as a candidate extension, identified by a CE
+code in \fpath{schema/EXTENSIONS.md}. \cnone{} indicates that the pattern
+is not represented. In any column, \cna{} indicates that the pattern is
+outside the standard's subject matter, so its absence is not a coverage gap.
+Every identifier cited in the row notes was verified against the relevant
+source vocabulary or specification at the time of writing.
 
 \begin{table}[H]
   \centering
   \footnotesize
   \caption[Requirements and coverage matrix]{Ten evidence patterns across
-  five standards and GEM. \cfull{} represented natively (for ECO, a term
-  exists; for ClinGen/ACMG, a scored category); \chalf{} represented only
-  through the standard's extension mechanism, or only in part; \cnone{}
-  not represented; \cna{} outside the standard's subject matter. For GEM,
-  \cforce{} denotes a forced fit recorded as a candidate extension. The
-  \emph{remaining gap} column is relative to GEM and names the candidate
-  extension where one exists. Row notes follow the table.
-  FHIR = HL7 FHIR Evidence R5; VA = GA4GH Variant Annotation 1.0 with
-  VRS 2.0 and Cat-VRS 1.0; ClinGen/ACMG = the ClinGen gene--disease
-  validity framework, with other ClinGen products where noted, and the
-  ACMG/AMP variant-interpretation guidelines.}
+  five standards and GEM. \cfull{} = represented natively; for ECO, a
+  suitable term exists; for ClinGen/ACMG, read as the union of the two
+  frameworks, a scored category in the one at the pattern's level.
+  \chalf{} = represented only through the standard's extension mechanism,
+  only by reference to another resource, or only in part. \cforce{} = forced
+  fit recorded as a candidate extension (GEM only). \cnone{} = not
+  represented. \cna{} = outside the standard's subject matter. The
+  \emph{remaining gap} column is relative to GEM and names a candidate
+  extension where one exists. Row notes follow the table. FHIR = HL7 FHIR
+  Evidence R5; VA = GA4GH Variant Annotation 1.0 with VRS 2.0 and Cat-VRS
+  1.0; ClinGen/ACMG = the ClinGen gene--disease validity framework, with
+  other ClinGen products where noted, and the ACMG/AMP
+  variant-interpretation guidelines.}
   \label{tab:coverage-matrix}
   \setlength{\tabcolsep}{4pt}
   \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth} c c c c c c >{\raggedright\arraybackslash}X@{}}
@@ -189,7 +195,7 @@ specification at the time of writing.
     \midrule
     1. Mendelian pedigree: variant co-segregates with disease in a family
       & \chalf & \cfull & \chalf & \chalf & \cfull & \cfull
-      & segregation strength (meioses, LOD) unstructured; activation scope for Variant targets (CE-DU4) \\
+      & segregation strength (meioses, LOD) is unstructured; activation scope for Variant targets (CE-DU4) \\
     2. Case--control burden: gene-level aggregate of rare variants
       & \chalf & \chalf & \chalf & \chalf & \cfull & \cfull
       & cohort composition (CE-IN5) \\
@@ -257,7 +263,10 @@ released annotations.
     result, Cohort Allele Frequency, is variant-level, so a custom profile
     is required. ECO offers only the generic ECO:0005613. ClinGen scores
     case--control evidence, including aggregate variant
-    analysis~\cite{strande2017}. GEM represents the pattern natively in
+    analysis~\cite{strande2017}. ACMG/AMP classifies single variants and
+    has no gene-level burden criterion; its case--control criterion, PS4,
+    concerns the prevalence of one variant. The cell therefore reflects
+    ClinGen alone. GEM represents the pattern natively in
     Davis GE-1, with Population Genetics and Human Genetics, Statistical
     Genetics, and a Gene target. Case and control counts are recorded only as
     free text (Davis GE-1, \texttt{special\_considerations}), not as
@@ -324,8 +333,12 @@ released annotations.
     type. ClinGen scores protein interaction as experimental evidence in
     its Function category, alongside the biochemical function evidence of
     row 4~\cite{strande2017}, although the relation serves a gene--disease
-    claim rather than standing as a claim of its own; ACMG/AMP has no
-    corresponding criterion. GEM has a Gene Relation dimension, of whose
+    claim rather than standing as a claim of its own. ACMG/AMP has no
+    corresponding criterion: a gene--gene relation is a gene-level claim
+    outside its variant-level scope, and a variant's effect on an
+    interaction would enter only as generic functional evidence under PS3
+    or BS3. The cell therefore reflects ClinGen alone. GEM has a Gene
+    Relation dimension, of whose
     three current values the corpus exercised one: X inhibits Y in Jossin
     GE-5. The physical-binding relation in GE-4 matched no value and was
     left unpopulated (CE-J3, which also proposes a trafficking-regulation
@@ -366,9 +379,8 @@ released annotations.
     computational term ECO:0007672 and association term ECO:0005613.
     ClinGen's relevant contribution is the PRS-RS reporting
     checklist~\cite{wand2021}, not a curation rubric. In GEM, all four
-    Inouye items are forced fits: the target is recorded as Variant, the
-    Resolution value is a placeholder, and Variant Ascertainment is set to
-    the documented sentinel. These conditions motivated CE-IN1 through
+    Inouye items are forced fits: the target type and Resolution are recorded with \dimval{Variant} as
+    placeholders, and Variant Ascertainment is set to the documented sentinel. These conditions motivated CE-IN1 through
     CE-IN6, which await a second polygenic-score paper under the
     two-papers rule.
 
@@ -380,9 +392,9 @@ released annotations.
     than the gene--disease validity framework. GEM has no intervention
     construct. The cited anti-p40 antibody trial in Duerr, GE-new-1, was
     recorded with Knowledge Domain left unresolved by curator decision rather
-    than forced into a genetic domain. It is the second instance of CE-DU3 within the
-    same paper, alongside the authors' therapeutic-strategy recommendation;
-    two instances in one paper do not satisfy the two-papers rule, so CE-DU3
+    than forced into a genetic domain. Together with the authors' therapeutic-strategy recommendation, it forms
+    the second CE-DU3 instance within the same paper.
+    Two instances in one paper do not satisfy the two-papers rule, so CE-DU3
     remains a candidate whose proposal leaves open whether to add a
     higher-order claim construct or to declare translational claims out of
     scope.
@@ -411,14 +423,14 @@ released annotations.
 Read by column, the matrix clarifies GEM's contribution. Rows 1 through 5
 cover common patterns in basic-science genetic publications. Under the
 operational definitions used in this coverage inventory, GEM is the only
-model in this comparison that represents all five patterns within one
-common, genetics-specific dimensional profile. Other standards either require
-an extension mechanism because they were designed for a different primary
-purpose, or provide an evidence-type vocabulary that names the evidence
-without structuring the claim. Rows 6 through 8 identify patterns that the
-pilot exposed as forced fits and therefore as documented areas for extension.
-Rows 9 and 10 are outside GEM's intended scope, and the matrix indicates
-which standards can represent them.
+resource in this comparison that represents all five patterns natively
+within one common, genetics-specific dimensional profile. Other resources
+either require an extension mechanism because they were designed for a
+different primary purpose, or provide an evidence-type vocabulary that names
+the evidence without structuring the claim. Rows 6 through 8 identify
+patterns that the pilot exposed as forced fits and therefore as documented
+areas for extension. Rows 9 and 10 are outside GEM's intended scope, and the
+matrix indicates which standards can represent them.
 
 \paragraph{The coverage gap.}
 None of these standards was designed to treat the heterogeneous evidence

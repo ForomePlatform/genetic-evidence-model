@@ -175,15 +175,16 @@ candidate extensions rather than left implicit.
 \end{table}
 
 The independence item, GE-2, makes these limitations concrete and is shown
-in abridged form below. Protocol v0 (Duerr) used the field name
-\texttt{resolution}; protocol v1 (Inouye) renamed it
-\texttt{target\_resolution}. The corpus retains both spellings, and the
-YAML-to-RDF transformation normalizes both to \texttt{gem:resolution}, so
-\texttt{gem-validate} treats them identically. \texttt{target\_type} and
-\texttt{target\_resolution} are assigned the placeholder value
-\dimval{Variant} and flagged against CE-IN1 and CE-IN2. Variant
-Ascertainment is marked not applicable because it does not apply cleanly to
-a score target. The epidemiological measures are recorded in
+in abridged form below. Protocol~v0, used for Duerr, named the field
+\texttt{resolution}; protocol~v1, used for Inouye, renamed it
+\texttt{target\_resolution}. The corpus retains both forms, which the
+YAML-to-RDF transformation normalizes to \texttt{gem:resolution};
+\texttt{gem-validate} therefore treats them identically.
+
+\texttt{target\_type} and \texttt{target\_resolution} are assigned the
+placeholder value \dimval{Variant} and flagged against CE-IN1 and CE-IN2.
+Variant Ascertainment is marked not applicable because it does not apply
+cleanly to a score target. The epidemiological measures are recorded in
 \texttt{special\_considerations} and motivate CE-IN4.
 
 \begin{lstlisting}[language=yaml]
