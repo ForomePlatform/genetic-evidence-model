@@ -3,36 +3,34 @@
 %  Fragment \input by supplement.tex under the Supplementary Notes part.
 %  No preamble here.
 % =====================================================================
+
 \section{Executable skills}
 \label{sec:supp-skills}
 
-Because the term may be unfamiliar to readers outside agent-based AI
-tooling, we describe briefly what we mean by an executable
-\emph{skill}. A skill is a packaged, version-controlled bundle of
-natural-language instructions together with any supporting resources,
-such as reference files, templates, or worked examples, that an AI
-assistant loads on demand to perform a defined task in a repeatable
-way~\cite{anthropic_skills}. It is the executable counterpart of a
-written protocol: where a protocol tells a human reader what a task
-requires, a skill states the same requirements in a form an assistant
-can apply directly. Concretely, a skill is a folder containing a
-top-level instruction file (by convention \texttt{SKILL.md}) that
-describes when the skill applies and how to carry the task out, plus
-the resources the instructions refer to. The assistant reviews the
-skills available to it, loads only the one relevant to the task at
-hand, and follows its instructions, so behavior is governed by the
-versioned bundle rather than improvised for each session. The general
-mechanism is not specific to one model or vendor, and a cross-vendor
-specification for it is emerging;\footnote{\url{https://agentskills.io}}
-the two skills accompanying this work are implemented as Claude Agent
-Skills.
+Because the term may be unfamiliar outside agent-based AI tooling, we briefly
+define an executable \emph{skill}. A skill is a version-controlled package of
+natural-language instructions and supporting resources, such as reference
+files, templates, and worked examples. An AI assistant loads the package on
+demand to perform a defined task in a repeatable way~\cite{anthropic_skills}.
 
-The annotation skill packages the annotation protocol, and the review
-skill packages the review protocol (\cref{sec:supp-protocol-suite}), so
-that the rules a human curator follows can be applied by an AI
-assistant under curator supervision. Both are published with the
-protocols in the project
+A skill is the executable counterpart of a written protocol. A protocol tells
+a human reader what a task requires; a skill expresses those requirements in a
+form that an AI assistant can apply directly. In practice, a skill is a
+folder containing a top-level instruction file, conventionally
+\texttt{SKILL.md}, and the resources referenced by that file. The assistant
+reviews the skills available to it, loads the one relevant to the task, and
+follows its instructions. Its behavior is therefore governed by the
+versioned package rather than improvised anew for each session.
+
+The general mechanism is not specific to a particular model or vendor, and a
+cross-vendor specification is emerging.\footnote{\url{https://agentskills.io}}
+The two skills accompanying this work are implemented as Claude Agent Skills.
+
+The annotation skill packages the annotation protocol, and the review skill
+packages the review protocol (\cref{sec:supp-protocol-suite}). They allow an
+AI assistant to apply the same rules that guide a human curator, under curator
+supervision. Both skills are published with the protocols in the project
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/skills}}
-Their purpose here is reproducibility and reuse, not autonomy: the
-curator remains the authority for every recorded annotation, as the
-provenance note in \cref{sec:supp-protocol-suite} records.
+Their purpose in this work is reproducibility and reuse, not autonomy. The
+curator remains the authority for every recorded annotation, as described in
+\cref{sec:supp-protocol-suite}.
