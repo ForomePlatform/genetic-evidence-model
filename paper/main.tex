@@ -13,6 +13,12 @@
 % also \input by supplement.tex, which already loads natbib, so loading it there
 % too would double-load it. natbib must precede hyperref (loaded in the
 % preamble), so it is loaded before \input{preamble}.
+% Cross-document references into the supplement: xr imports a labels-only aux
+% (target/supp-labels.aux, extracted by compile_paper.sh, which builds the
+% supplement first). \ref* (hyperref's non-linking form) renders the number
+% without attempting an intra-document hyperlink.
+\usepackage{xr}
+\externaldocument[supp:]{target/supp-labels}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{authblk}
 

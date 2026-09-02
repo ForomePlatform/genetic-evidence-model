@@ -9,151 +9,155 @@
 \section{A Semantic Model of Genetic Evidence}
 \label{sec:model}
 
-The model comprises three parts: a small set of \emph{core classes}
+The model contains three parts: a small set of \emph{core classes}
 (\cref{sec:model-classes}) that define what a unit of evidence is and
 how evidence items compose; a \emph{dimensional vocabulary}
 (\cref{sec:model-dimensions}) that describes each evidence item along
-roughly twenty axes; and a \emph{conditional activation} mechanism
+roughly twenty axes; and a \emph{conditional-activation} mechanism
 (\cref{sec:model-conditional}) that keeps the vocabulary compact by
 requiring dimensions only when they are semantically appropriate.
 
 \subsection{Core Classes}
 \label{sec:model-classes}
 
-Three abstract classes anchor the model:
+Three abstract classes form the core of the model:
 
 \begin{description}
-  \item[\ScientificEvidence] A unit of evidence, typically linked to a
-        publication or dataset, described by a set of dimensions (see
-        \cref{tab:dimensions-core,tab:dimensions-cond}) and carrying an
-        \texttt{assertion} property: the object-level, source-anchored
-        claims a paper makes about it (that a variant is associated with
-        a phenotype, and so on), which are what the pilot of
-        \cref{sec:workflow} records. A single paper may
-        give rise to multiple \ScientificEvidence{} items when it reports
-        distinct evidential claims, for example a case--control association
-        and an \emph{in vivo} functional assay for the same variant.
-  \item[\EvidenceVariable] A named quantity extracted from one or more
-      \ScientificEvidence{} items, for example the gnomAD allele
-      frequency of a variant, the LOD score in a family, or the odds
-      ratio reported by a GWAS. Evidence variables are the terms from
-      which predicates over Evidence are constructed. They are also
-      annotated by dimensions, because the same quantity (for example, an
-      odds ratio) may carry different epistemic weight depending on how it
-      was obtained.
-  \item[\EvidenceAssertion] A meta-predicate, a predicate about a
-      predicate, that ascertains that \EvidenceVariable{}s are used
-      appropriately in a predicate constructed over Evidence, that is,
-      in a decision rule. It is the model's point of contact with the
-      reasoning layer of~\cite{our_preprint},
-      where such meta-predicates assert which evidence a rule may use.
-      This paper constructs no decision rules and therefore instantiates
-      no \EvidenceAssertion{}: the class is part of the model and of a
-      reasoning layer whose interpretability and AI-readiness are the
-      primary focus of~\cite{our_preprint} rather than of the present
-      pilot.
+    \item[\ScientificEvidence] A unit of evidence, typically linked to a
+          publication or dataset and described by a set of dimensions (see
+          \cref{tab:dimensions-core,tab:dimensions-cond}). It carries an
+          \texttt{assertion} property containing the object-level,
+          source-anchored claims made by the source, for example that a
+          variant is associated with a phenotype. These are the claims
+          recorded in the pilot (\cref{sec:workflow}). A single paper may
+          give rise to multiple \ScientificEvidence{} items when it reports
+          distinct evidential claims, such as a case--control association and
+          an \emph{in vivo} functional assay of the same variant.
+    \item[\EvidenceVariable] A named quantity extracted from one or more
+        \ScientificEvidence{} items, such as the gnomAD allele frequency of
+        a variant, the LOD score in a family, or the odds ratio reported by
+        a GWAS. Evidence variables are the terms from which predicates over
+        Evidence are constructed. They are also described by dimensions,
+        because the same quantity, such as an odds ratio, may carry different
+        epistemic weight depending on how it was obtained.
+    \item[\EvidenceAssertion] A meta-predicate, that is, a predicate about a
+        predicate. It determines whether \EvidenceVariable{}s are used
+        appropriately in a predicate over Evidence, namely in a decision
+        rule. This class is the model's point of contact with the reasoning
+        layer described in~\cite{our_preprint}, where such meta-predicates
+        assert which evidence a rule may use. This paper constructs no
+        decision rules and therefore instantiates no \EvidenceAssertion{}.
+        The class remains part of the model, but the interpretability and
+        AI-readiness of the reasoning layer are the primary focus
+        of~\cite{our_preprint}, not of the present pilot.
 \end{description}
 
 The \texttt{assertion} property and the \EvidenceAssertion{} class share
-a name but denote different things: the property holds the object-level
-claims the pilot records, whereas the class is the meta-predicate above
-any decision rule that would consume them. We keep the property name for
-continuity with the released annotations and will rename it (for example
-to \texttt{selector}) in a future schema revision.
+a name but denote different things. The property records the object-level
+claims captured in the pilot, whereas the class is a meta-predicate over
+any decision rule that would use those claims. The property name is
+retained for compatibility with the released annotations and will be
+renamed, for example to \texttt{selector}, in a future schema revision.
 
-Specialising these three classes to the genetic domain yields
+Specialising these classes for the genetic domain yields
 \GeneticEvidence, \GeneticEvidenceVariable, and
-\GeneticEvidenceAssertion. The specialisations inherit the
-provenance requirement and add the dimensional annotations
-discussed next.
+\GeneticEvidenceAssertion. These specialisations inherit the provenance
+requirement and add the dimensional annotations described next.
 
 \subsection{Dimensions}
 \label{sec:model-dimensions}
 
 Each \GeneticEvidence{} instance is described using a dimensional
-vocabulary that is summarised in \cref{tab:dimensions-core}
-(always-required dimensions) and \cref{tab:dimensions-cond}
-(representative conditional dimensions).\footnote{The full
-enumeration of conditional dimensions, including those omitted
-from \cref{tab:dimensions-cond} for space, is maintained in the
-project repository at
+vocabulary summarised in \cref{tab:dimensions-core}, which lists the
+always-required dimensions, and \cref{tab:dimensions-cond}, which gives
+representative conditional dimensions.\footnote{The full enumeration of
+conditional dimensions, including those omitted from
+\cref{tab:dimensions-cond} for space, is maintained in the project
+repository at
 \url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/dimensions.md}.}
-A small subset of dimensions is
-\emph{always required}: Knowledge Domain, Method, Target Type,
-Resolution, Credibility, and Phenotype Scale. No well-formed
-genetic-evidence item is fully specified without them. Together these dimensions tell a
-downstream reader \emph{what kind} of evidence this is, \emph{how} it
-was obtained, \emph{what} it is about, and \emph{how} credible it is
-in context.
 
-The dimensions differ in internal structure, and we model each by its
-own nature rather than forcing one hierarchy on all of them. Knowledge
-Domain values are sibling methodological framings, not a subsumption
-hierarchy: a single item may carry several at once (a functional study
-read in a clinical-genetics context), which the multi-valued
-cardinality captures directly. Phenotype Scale is an ordinal
-granularity (molecular through clinical), not a class hierarchy, and
-modelling it as subsumption would misrepresent it.
-Method is a genuinely hierarchical dimension; its \texttt{is\_a} relations
-are encoded as such in the SHACL distribution.
-The choice of structure is thus
-part of each dimension's definition.
+Six dimensions are \emph{always required}: Knowledge Domain, Method,
+Target Type, Resolution, Credibility, and Phenotype Scale. No
+well-formed genetic-evidence item is fully specified without them.
+Together, they tell a downstream reader what kind of evidence the item
+is, how it was obtained, what it concerns, and how credible it is in
+context.
 
-Phenotype Scale and Variant Ascertainment were added during the
-annotation work (\cref{sec:workflow}). Phenotype Scale distinguishes evidence about
-molecular phenotypes (for example, binding or activity) from cellular,
-histological, organismal, or clinical phenotypes, and is independent
-of the scale of the genetic target. Variant Ascertainment,
-recording how the variant entered the
-study, is meaningful only for variant-level targets and is added as a
-\emph{conditional} dimension, required when Target Type is
-\dimval{Variant}. Both are revisited in \cref{sec:discussion}.
+The dimensions differ in internal structure, and each is modeled
+according to its own semantics rather than forced into a single
+hierarchy. Knowledge Domain values are sibling framings rather than a
+subsumption hierarchy. A single item may carry several values at once,
+as when a functional study is interpreted in a clinical-genetics
+context; the multi-valued cardinality captures this directly.
+
+Phenotype Scale is an ordinal scale, from molecular to clinical, rather
+than a class hierarchy. Modeling it through subsumption would therefore
+misrepresent the dimension. Method, by contrast, is genuinely
+hierarchical, and its \texttt{is\_a} relations are encoded in the SHACL
+distribution. The chosen structure is therefore part of the definition
+of each dimension.
+
+Phenotype Scale and Variant Ascertainment were added during the annotation
+work (\cref{sec:workflow}). Phenotype Scale distinguishes molecular
+phenotypes, such as binding or activity, from cellular, histological,
+organismal, and clinical phenotypes. It is independent of the scale of the
+genetic target.
+
+Variant Ascertainment records how a variant entered a study. It is meaningful
+only for variant-level targets and is therefore a \emph{conditional}
+dimension, required when Target Type is \dimval{Variant}. Both dimensions
+are revisited in \cref{sec:discussion}.
+
+Credibility records the methodological soundness of an asserted finding, and
+nothing else. It is a structured decomposition rather than an open key-value
+field: one overall ordinal rating together with separately rated facets for
+statistical power or sample size, independent replication, multiple-testing
+control, ancestry or population-stratification control, and ascertainment.
+The facets remain separate rather than being collapsed into a single score
+because clinical and research users may weigh them differently.
+
+This separation is inspired by GRADE's general practice of assessing the
+factors that affect certainty separately~\cite{grade2008}. GEM does not
+adopt the GRADE framework or its rating rules, which were developed for
+bodies of clinical evidence, particularly randomized and observational
+studies. The GEM facets instead support credibility judgments about
+individual evidence items from basic and pre-clinical research.
+
+The overall rating is anchored on SEPIO confidence, defined as the degree of
+belief that an asserted proposition is true~\cite{sepio}, and is implemented
+as a genetics-specific value set bound to that attribute, as prescribed by
+SEPIO profiles (Supplementary Table~\ref*{supp:tab:credibility-facets}).
+
+Two constructs are excluded from credibility by design. First, the
+direction or hedging of a finding belongs to the assertion itself and is
+represented by the width of the value range it constrains. An honestly
+reported null result from a rigorous study may therefore have high
+credibility. Second, the extent to which evidence bears on a particular
+question is applicability. It is captured by Relevance and Specificity and
+computed for each question. Combining methodological soundness, assertion
+content, and applicability in one field would conflate distinct constructs.
 
 The remaining dimensions are \emph{conditional}: they are required, or
-even meaningful, only when other dimensions take particular values. It
-does not make sense to record mode of inheritance for a polygenic
-score, or knockout type for a human case--control study. Instead of
-marking such dimensions as ``optional'' and relying on convention, the
-model attaches explicit activation conditions to each, formalised as
-described in \cref{sec:model-conditional}. These conditions state the
-situations in which a dimension must be present; outside those
-situations it may be omitted. This makes the requirement status
-transparent to both human curators and automated validators.
-Credibility records how far the asserted finding can be trusted as a
-matter of methodological soundness, and nothing else. Rather than an
-open key-value field it is a structured decomposition: one overall
-ordinal rating together with separately rated facets (statistical power
-or sample size, independent replication, multiple-testing control,
-ancestry or population-stratification control, and ascertainment). The
-facets are kept separate, not collapsed to a single score, because
-clinical and research consumers reweight them; we take this
-decomposition principle from the Grading of Recommendations
-Assessment, Development and Evaluation (GRADE) framework~\cite{grade2008},
-which is anchored in clinical-trial and observational studies and does
-not transfer easily to evidence from the basic sciences. The overall
-rating is anchored on SEPIO confidence, the degree
-of belief that the asserted proposition is true~\cite{sepio}, realised
-as a genetics-specific value set bound to that attribute as SEPIO
-profiles prescribe (Supplementary Table~ST14). Two things stay out of
-credibility by design: the direction or hedging of a finding is content
-of the assertion, carried in the width of the value range it
-constrains, so an honestly reported null from a rigorous study is
-high-credibility; and how well the evidence bears on a given question
-is applicability, captured by Relevance and Specificity and computed
-per question. Representing the three as one field would conflate them.
+even meaningful, only when other dimensions take particular values. For
+example, mode of inheritance is not meaningful for a polygenic score, and
+knockout type is not meaningful for a human case--control study. Rather
+than marking such dimensions as ``optional'' and relying on convention, the
+model assigns explicit activation conditions to each, as described in
+\cref{sec:model-conditional}. These conditions specify when a dimension
+must be present; otherwise, it may be omitted. This makes the requirement
+status transparent to both human curators and automated validators.
 
 \begin{table}[tbp]
 \centering
 \caption{Always-required dimensions of the \GeneticEvidence{} model.
-These apply to every evidence item regardless of context. The final
-row (Phenotype Scale) was added to the always-required set during the
-annotation work in \cref{sec:workflow}. KD abbreviates Knowledge
-Domain.}
+These apply to every evidence item regardless of context. Phenotype Scale
+was added to this set during the annotation work
+(\cref{sec:workflow}). KD abbreviates Knowledge Domain.}
 \label{tab:dimensions-core}
 \small
 \begin{tabularx}{\linewidth}{@{}llllX@{}}
 \toprule
-Dimension              & Value type        & Card.    & Obj.       & Example values \\
+Dimension              & Value type        & Cardinality & Objectivity & Example values \\
 \midrule
 Knowledge Domain       & categorical       & multiple & obj.       & \dimval{Human Genetics}, \dimval{Population Genetics}, \dimval{Model Organism}, \dimval{Gene Function} \\
 Method                 & categorical       & multiple & obj.       & \dimval{Statistical Genetics}, \dimval{In Vivo}, \dimval{In Vitro}, \dimval{Clinical Evidence} \\
@@ -168,15 +172,14 @@ Phenotype Scale        & categorical       & single   & obj.       & \dimval{Mol
 \begin{table}[tbp]
 \centering
 \caption{Conditional dimensions of the \GeneticEvidence{} model.
-Each is required only when its activation condition holds. KD
-abbreviates Knowledge Domain; MT abbreviates Method; TT abbreviates
-Target Type; $\supseteq$ denotes set membership for multi-valued
-dimensions.}
+Each is required only when its activation condition holds. KD, MT, and TT
+abbreviate Knowledge Domain, Method, and Target Type, respectively;
+$\supseteq$ denotes set membership for multi-valued dimensions.}
 \label{tab:dimensions-cond}
 \small
 \begin{tabularx}{\linewidth}{@{}lllX@{}}
 \toprule
-Dimension              & Value type   & Card.    & Activation condition \\
+Dimension              & Value type   & Cardinality & Activation condition \\
 \midrule
 Mode of Inheritance    & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
 Mendelian Segregation  & boolean      & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
@@ -193,39 +196,38 @@ Knockout Type          & categorical  & single   & KD $\supseteq$ \dimval{Model 
 \subsection{Conditional Activation}
 \label{sec:model-conditional}
 
-The conditional activation mechanism is the least conventional part of
-the model and is what keeps the vocabulary compact without sacrificing
-expressive power. Instead of a fixed schema in which every
-\GeneticEvidence{} item has every dimension (with many dimensions
-marked as optional and left empty for most items), the model states
-that certain dimensions are required \emph{exactly when} specified
-conditions over other dimensions hold. This mirrors how domain experts
-reason: a human curator reading a paper about an X-linked recessive
-pedigree knows to ask about mode of inheritance because the evidence
-makes that question meaningful, not because a global schema demands it.
+Conditional activation is the least conventional part of the model, but it
+keeps the vocabulary compact without sacrificing expressive power. Rather
+than using a fixed schema in which every \GeneticEvidence{} item has every
+dimension, with many dimensions marked as optional and left empty, the model
+requires particular dimensions only when specified conditions over other
+dimensions hold. This mirrors expert reasoning. A curator reading a paper
+about an X-linked recessive pedigree asks about mode of inheritance because
+the evidence makes that question meaningful, not because a global schema
+requires it.
 
-We encode the activation conditions as SHACL shapes using SPARQL-based
-constraints, which are the idiomatic SHACL mechanism for expressing
-requirements that cannot be captured by simple cardinality annotations
-on a single property. Two representative shapes illustrate the
-pattern; we show only the \texttt{sh:sparql} body of each and elide
-the outer NodeShape wrapper for space. The full shapes, together
-with the base \texttt{GeneticEvidenceShape} and the simpler
-\texttt{variant\_ascertainment} conditional rule, are distributed
-with annotated walkthrough in the project repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
+The activation conditions are encoded as SHACL shapes with SPARQL-based
+constraints. This is the standard SHACL mechanism for expressing
+requirements that cannot be captured by simple cardinality constraints on a
+single property. Two representative shapes illustrate the pattern. For
+brevity, we show only the \texttt{sh:sparql} body of each and omit the
+outer NodeShape wrapper. The full shapes, together with the base
+\texttt{GeneticEvidenceShape} and the simpler
+\texttt{variant\_ascertainment} rule, are available in the project
+repository with an annotated walkthrough.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
 
-Checking activation conditions this way is a closed-world question,
-whether an annotation contains every dimension its evidence requires,
-which SHACL answers directly; OWL's open-world semantics cannot express
-such completeness, which is one reason the constraints are encoded in
-SHACL rather than as ontology axioms.
+Checking activation conditions is a closed-world question: whether an
+annotation contains every dimension required by the evidence item. SHACL can
+answer this question directly. OWL's open-world semantics cannot express
+this form of completeness, which is one reason the constraints are encoded
+in SHACL rather than as ontology axioms.
 
-The first example encodes a conjunction over two axes of
-classification: \emph{mode of inheritance} is required when the
-Knowledge Domain contains \dimval{Human Genetics} \textbf{and} the
-Target Type is \dimval{Gene} (\cref{lst:shacl-moi}).
+The first example encodes a conjunction across two classification axes.
+\emph{Mode of Inheritance} is required when Knowledge Domain contains
+\dimval{Human Genetics} \textbf{and} Target Type is \dimval{Gene}
+(\cref{lst:shacl-moi}).
 
-\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{mode of inheritance}: the outer NodeShape wrapper is elided. The two triple patterns in \texttt{WHERE} form the conjunction; \texttt{FILTER NOT EXISTS} identifies instances that satisfy the condition but lack the required dimension.}, label={lst:shacl-moi}]
+\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{Mode of Inheritance}. The outer NodeShape wrapper is omitted. The two triple patterns in \texttt{WHERE} form the conjunction; \texttt{FILTER NOT EXISTS} identifies instances that satisfy the condition but lack the required dimension.}, label={lst:shacl-moi}]
 sh:sparql [ sh:select """
   SELECT $this WHERE {
     $this gem:knowledgeDomain gem:HUMAN_GENETICS .
@@ -234,16 +236,15 @@ sh:sparql [ sh:select """
   }""" ] .
 \end{lstlisting}
 
-The second example encodes a cross-axis disjunction:
-\emph{organism} is required when the Method contains
-\dimval{In Vivo} \textbf{or} the Knowledge Domain contains
-\dimval{Model Organism} (\cref{lst:shacl-org}). The two disjuncts
-refer to different axes, one a Method value and the other a
-Knowledge Domain value, illustrating that activation conditions can
-span the dimensional vocabulary rather than being confined to a
-single axis.
+The second example encodes a disjunction across two classification axes.
+\emph{Organism} is required when Method contains \dimval{In Vivo}
+\textbf{or} Knowledge Domain contains \dimval{Model Organism}
+(\cref{lst:shacl-org}). The two disjuncts refer to different dimensions:
+one is a Method value and the other is a Knowledge Domain value. This
+illustrates that activation conditions can span the dimensional vocabulary
+rather than being confined to a single axis.
 
-\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{organism}: the disjunction is expressed by a SPARQL \texttt{UNION} whose two branches refer to different dimensions.}, label={lst:shacl-org}]
+\begin{lstlisting}[language=yaml, caption={Compact form of the conditional-activation shape for \emph{Organism}. The disjunction is expressed by a SPARQL \texttt{UNION} whose two branches refer to different dimensions.}, label={lst:shacl-org}]
 sh:sparql [ sh:select """
   SELECT $this WHERE {
     { $this gem:method          gem:IN_VIVO . }
@@ -254,13 +255,12 @@ sh:sparql [ sh:select """
 \end{lstlisting}
 
 In each case, the \texttt{SELECT} returns every \GeneticEvidence{}
-instance that satisfies the activation condition but lacks the
-required dimension; the validator reports those instances as
-constraint violations with a localised diagnostic. The small
-additional cost of writing each conditional rule explicitly is
-repaid in downstream clarity: a reader of an annotation file can
-see \emph{why} a particular dimension is required or absent, and a
-validator can check conformance automatically.
+instance that satisfies the activation condition but lacks the required
+dimension. The validator reports these instances as constraint violations
+with a localized diagnostic. Writing each conditional rule explicitly adds
+some complexity, but it improves downstream clarity: a reader of an
+annotation file can see why a particular dimension is required or absent,
+and a validator can check conformance automatically.
 
-\Cref{sec:workflow} returns to conditional activation in the
-context of the annotation workflow.
+\Cref{sec:workflow} returns to conditional activation in the context of
+the annotation workflow.

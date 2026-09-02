@@ -6,6 +6,9 @@ tool is genomics-specific**: it operates on a workspace of *dimensions*
 (each bound to a UMLS Semantic Type as its search axis) and *values*
 (tokens adjudicated to UMLS concepts), whatever the domain. GEM's own
 mapping (`data/umls/`) is one such workspace.
+The `gem-` prefix marks the tool's origin in the GEM project, not its
+scope; if you prefer the letters to mean something here, read them as
+*Generic Evidence Mapping* Studio.
 
 Console script: `gem-mapping-studio` (alias `gem-umls-adjudicate`).
 

@@ -1,0 +1,387 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix gem:  <https://w3id.org/genetic-evidence-model/> .
+
+# =====================================================================
+#  SHACL shapes for the Genetic Evidence Model
+#
+#  Schema version: 1.1
+#  (1.1 adds enforceable shapes for resolution, credibility, and a
+#  mandatory source_span, enum value sets for the categorical
+#  conditional dimensions, and the not_applicable_or_omitted sentinel;
+#  1.0 shaped only knowledge_domain, method, target_type, phenotype_scale.)
+#
+#  This file encodes (a) the top-level class hierarchy, (b) the
+#  dimension enumerations, (c) the always-required and conditional
+#  dimension shapes, and (d) the mandatory source_span on every
+#  assertion. Every released annotation validates against it
+#  (scripts/validate_annotations.py, run in CI). Remaining open shapes
+#  (an organism vocabulary; reviewer-flag fields) are noted in
+#  schema/examples.md.
+#
+#  Namespace note: `gem:` is a placeholder. Register a persistent
+#  w3id redirect before the paper goes to camera-ready.
+# =====================================================================
+
+# ---------- top-level classes ----------
+
+gem:ScientificEvidence   a rdfs:Class .
+gem:EvidenceVariable     a rdfs:Class .
+gem:EvidenceAssertion    a rdfs:Class .
+
+gem:GeneticEvidence          rdfs:subClassOf gem:ScientificEvidence .
+gem:GeneticEvidenceVariable  rdfs:subClassOf gem:EvidenceVariable  .
+gem:GeneticEvidenceAssertion rdfs:subClassOf gem:EvidenceAssertion .
+
+# ---------- enumeration of knowledge domain values ----------
+
+gem:KnowledgeDomain       a rdfs:Class .
+gem:HUMAN_GENETICS        a gem:KnowledgeDomain .
+gem:ANIMAL_GENETICS       a gem:KnowledgeDomain .
+gem:POPULATION_GENETICS   a gem:KnowledgeDomain .
+gem:COMPARATIVE_GENOMICS  a gem:KnowledgeDomain .
+gem:EPIGENETICS           a gem:KnowledgeDomain .
+gem:GENE_FUNCTION         a gem:KnowledgeDomain .
+gem:MODEL_ORGANISM        a gem:KnowledgeDomain .
+
+# ---------- enumeration of method values (hierarchical) ----------
+#
+# The method dimension is hierarchical; see schema/dimensions.md for the
+# human-readable terms table and `is_a` relations. Each term is declared as
+# an instance of gem:Method so that it satisfies the `sh:class gem:Method`
+# constraint when used as a method value. The OBO-style `is_a` hierarchy is
+# encoded with rdfs:subClassOf (subject is_a object), which lifts directly to
+# OWL when the schema is rendered as an ontology (future work). Terms are thus
+# punned: an instance of gem:Method (for enumeration membership) and a class
+# (for the subsumption hierarchy).
+
+gem:Method a rdfs:Class .
+
+# top-level families (no parent)
+gem:STATISTICAL_GENETICS     a gem:Method .
+gem:EXPERIMENT               a gem:Method .
+gem:BIOINFORMATICS_INFERENCE a gem:Method .
+gem:CLINICAL_EVIDENCE        a gem:Method .
+
+# STATISTICAL_GENETICS subtree
+gem:ASSOCIATION_STUDY                a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+gem:GWAS                             a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:CANDIDATE_GENE_STUDY             a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:FINE_MAPPING                     a gem:Method ; rdfs:subClassOf gem:ASSOCIATION_STUDY .
+gem:FAMILY_BASED                     a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+gem:LINKAGE_ANALYSIS                 a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:TRANSMISSION_DISEQUILIBRIUM_TEST a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:SEGREGATION_ANALYSIS             a gem:Method ; rdfs:subClassOf gem:FAMILY_BASED .
+gem:META_ANALYSIS                    a gem:Method ; rdfs:subClassOf gem:STATISTICAL_GENETICS .
+
+# EXPERIMENT subtree
+gem:IN_VIVO   a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+gem:IN_VITRO  a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+gem:IN_SILICO a gem:Method ; rdfs:subClassOf gem:EXPERIMENT .
+
+# Legacy synonyms, retained so existing annotations validate. Migration to
+# the renamed values is deferred (see notes/ROADMAP.md §1.b and the
+# "Backward compatibility" note in dimensions.md).
+gem:IN_VIVO_EXPERIMENT        a gem:Method ; owl:sameAs gem:IN_VIVO .
+gem:IN_VITRO_EXPERIMENT       a gem:Method ; owl:sameAs gem:IN_VITRO .
+gem:BIOINFORMATICS_PREDICTION a gem:Method ; owl:sameAs gem:BIOINFORMATICS_INFERENCE .
+
+# Removed in this revision (never exercised by any annotation). Their content
+# is recovered in knowledge_domain (POPULATION_GENETICS / EPIGENETICS):
+#   gem:POPULATION_DATA   a gem:Method .
+#   gem:EPIGENETICS_DATA  a gem:Method .
+
+# ---------- enumeration of target-type values ----------
+
+gem:TargetType        a rdfs:Class .
+gem:GENE              a gem:TargetType .
+gem:RELATED_GENE      a gem:TargetType .
+gem:VARIANT           a gem:TargetType .
+gem:SEGMENT           a gem:TargetType .
+gem:INTERVAL          a gem:TargetType .
+gem:TRANSCRIPT        a gem:TargetType .
+# Candidate extensions (not yet promoted; require second paper confirmation):
+# gem:INTERACTION    a gem:TargetType .  (source: Jossin 2017)
+# gem:COMPLEX        a gem:TargetType .  (source: Jossin 2017)
+
+# ---------- enumeration of phenotype_scale values (PROMOTED) ----------
+
+gem:PhenotypeScale    a rdfs:Class .
+gem:MOLECULAR         a gem:PhenotypeScale .
+gem:CELLULAR          a gem:PhenotypeScale .
+gem:HISTOLOGICAL      a gem:PhenotypeScale .
+gem:ORGANISMAL        a gem:PhenotypeScale .
+gem:CLINICAL          a gem:PhenotypeScale .
+
+# ---------- enumeration of variant_ascertainment values (PROMOTED) ----------
+
+gem:VariantAscertainment   a rdfs:Class .
+gem:OBSERVED_IN_CASES      a gem:VariantAscertainment .
+gem:OBSERVED_IN_CONTROLS   a gem:VariantAscertainment .
+gem:FROM_DATABASE          a gem:VariantAscertainment .
+gem:SYNTHETIC              a gem:VariantAscertainment .
+
+# ---------- base shape: every GeneticEvidence requires these ----------
+
+gem:GeneticEvidenceShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+
+  # knowledge_domain: required, at least one value, must be from the
+  # enumeration.
+  sh:property [
+    sh:path gem:knowledgeDomain ;
+    sh:minCount 1 ;
+    sh:class gem:KnowledgeDomain ;
+    sh:message "GeneticEvidence must declare at least one knowledge_domain from the enumeration."
+  ] ;
+
+  # method: required, at least one value, must be from the enumeration.
+  sh:property [
+    sh:path gem:method ;
+    sh:minCount 1 ;
+    sh:class gem:Method ;
+    sh:message "GeneticEvidence must declare at least one method from the enumeration."
+  ] ;
+
+  # target_type: required, exactly one value.
+  sh:property [
+    sh:path gem:targetType ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:TargetType ;
+    sh:message "GeneticEvidence must declare exactly one target_type."
+  ] ;
+
+  # phenotype_scale: required, exactly one value (PROMOTED dimension).
+  sh:property [
+    sh:path gem:phenotypeScale ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:PhenotypeScale ;
+    sh:message "GeneticEvidence must declare exactly one phenotype_scale."
+  ] ;
+
+  # resolution: required, exactly one value.
+  sh:property [
+    sh:path gem:resolution ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:Resolution ;
+    sh:message "GeneticEvidence must declare exactly one resolution."
+  ] ;
+
+  # credibility: required overall rating (one tier from the enumeration).
+  sh:property [
+    sh:path gem:credibility ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class gem:Credibility ;
+    sh:message "GeneticEvidence must declare exactly one credibility rating."
+  ] .
+
+# ---------- optional shape: variant_ascertainment ----------
+# Multi-valued; required only when target_type is VARIANT (enforced by
+# the conditional shape below). Outside that context it may be absent.
+
+gem:VariantAscertainmentShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:variantAscertainment ;
+    sh:class gem:VariantAscertainment ;
+    sh:message "variant_ascertainment values must come from the enumeration."
+  ] .
+
+# ---------- conditional-activation rule: variant_ascertainment ----------
+#
+# variant_ascertainment is required (at least one value) when
+# target_type = VARIANT. PROMOTED dimension per Davis 2011 annotation.
+
+gem:VariantAscertainmentConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When target_type is VARIANT, variant_ascertainment is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        $this gem:targetType gem:VARIANT .
+        FILTER NOT EXISTS { $this gem:variantAscertainment ?v }
+      }
+    """
+  ] .
+
+# ---------- conditional-activation rule: mode_of_inheritance ----------
+#
+# Mode of inheritance is required exactly when knowledge_domain contains
+# HUMAN_GENETICS AND target_type is GENE.
+
+gem:ModeOfInheritanceConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When knowledge_domain contains HUMAN_GENETICS and target_type is GENE, mode_of_inheritance is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        $this gem:knowledgeDomain gem:HUMAN_GENETICS .
+        $this gem:targetType      gem:GENE .
+        FILTER NOT EXISTS { $this gem:modeOfInheritance ?moi }
+      }
+    """
+  ] .
+
+# ---------- conditional-activation rule: organism ----------
+#
+# Organism is required when method contains IN_VIVO (or its legacy synonym
+# IN_VIVO_EXPERIMENT) OR knowledge_domain contains MODEL_ORGANISM.
+# Demonstrates the disjunctive (OR-joined) activation shape and cross-axis
+# activation (Method OR Knowledge Domain). Both the renamed and legacy method
+# values are matched explicitly, since owl:sameAs is not materialised without
+# a reasoner.
+
+gem:OrganismConditionalShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:sparql [
+    sh:message "When method contains IN_VIVO (or legacy IN_VIVO_EXPERIMENT) or knowledge_domain contains MODEL_ORGANISM, organism is required." ;
+    sh:prefixes gem: ;
+    sh:select """
+      PREFIX gem: <https://w3id.org/genetic-evidence-model/>
+      SELECT $this
+      WHERE {
+        { $this gem:method gem:IN_VIVO . }
+        UNION
+        { $this gem:method gem:IN_VIVO_EXPERIMENT . }
+        UNION
+        { $this gem:knowledgeDomain gem:MODEL_ORGANISM . }
+        FILTER NOT EXISTS { $this gem:organism ?org }
+      }
+    """
+  ] .
+
+# ---------- enumeration of resolution values ----------
+
+gem:Resolution         a rdfs:Class .
+gem:WINDOW             a gem:Resolution .
+gem:FUNCTIONAL_ELEMENT a gem:Resolution .
+gem:POSITION           a gem:Resolution .
+# gem:GENE and gem:VARIANT are reused from the TargetType block above and are
+# also valid Resolution values (gene-level and variant-level resolution).
+gem:GENE               a gem:Resolution .
+gem:VARIANT            a gem:Resolution .
+
+# ---------- enumeration of credibility ratings (overall tier) ----------
+
+gem:Credibility a rdfs:Class .
+gem:VERY_HIGH   a gem:Credibility .
+gem:HIGH        a gem:Credibility .
+gem:MEDIUM      a gem:Credibility .
+gem:LOW         a gem:Credibility .
+
+# ---------- enumeration of conditional-dimension values ----------
+
+gem:MeasurementTarget a rdfs:Class .
+gem:EXISTENCE    a gem:MeasurementTarget .
+gem:EXPRESSION   a gem:MeasurementTarget .
+gem:STABILITY    a gem:MeasurementTarget .
+gem:BINDING      a gem:MeasurementTarget .
+gem:LOCALIZATION a gem:MeasurementTarget .
+gem:ACTIVITY     a gem:MeasurementTarget .
+gem:CATALYSIS    a gem:MeasurementTarget .
+
+gem:GeneRelation a rdfs:Class .
+gem:X_has_same_function_as_Y a gem:GeneRelation .
+gem:X_regulates_Y            a gem:GeneRelation .
+gem:X_inhibits_Y             a gem:GeneRelation .
+
+gem:KnockoutType  a rdfs:Class .
+gem:CONDITIONAL   a gem:KnockoutType .
+gem:UNCONDITIONAL a gem:KnockoutType .
+
+gem:Penetrance a rdfs:Class .
+gem:complete   a gem:Penetrance .
+gem:incomplete a gem:Penetrance .
+gem:unknown    a gem:Penetrance .
+
+# ---------- the "addressed but not populated" sentinel ----------
+# A curator may explicitly mark a dimension not_applicable_or_omitted after
+# considering it. This sentinel is a member of every dimension class, so a
+# dimension carrying it satisfies presence and class constraints: the
+# dimension was addressed, just not populated with a substantive value.
+
+gem:NOT_APPLICABLE_OR_OMITTED
+  a gem:KnowledgeDomain, gem:Method, gem:TargetType, gem:Resolution,
+    gem:Credibility, gem:PhenotypeScale, gem:VariantAscertainment,
+    gem:MeasurementTarget, gem:GeneRelation, gem:KnockoutType,
+    gem:Penetrance .
+
+# ---------- enum-validity shapes for conditional dimensions ----------
+# These constrain values to the enumeration when the dimension is present;
+# they do not force population (the conditional-activation shapes above and
+# the coverage analysis handle which dimensions are expected where).
+
+gem:MeasurementTargetShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:measurementTarget ;
+    sh:class gem:MeasurementTarget ;
+    sh:message "measurement_target values must come from the enumeration."
+  ] .
+
+gem:GeneRelationShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:geneRelation ;
+    sh:class gem:GeneRelation ;
+    sh:message "gene_relation must come from the enumeration."
+  ] .
+
+gem:KnockoutTypeShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidence ;
+  sh:property [
+    sh:path gem:knockoutType ;
+    sh:class gem:KnockoutType ;
+    sh:message "knockout_type must come from the enumeration."
+  ] .
+
+# ---------- source anchoring: every assertion needs a source span ----------
+# This is the machine-checkable form of the paper's source-anchoring
+# requirement: an annotation with any assertion lacking a source_span (page +
+# phrase) is rejected at validation time.
+
+gem:AssertionShape
+  a sh:NodeShape ;
+  sh:targetClass gem:GeneticEvidenceAssertion ;
+  sh:property [
+    sh:path gem:sourceSpan ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Every assertion must carry exactly one source_span."
+  ] .
+
+gem:SourceSpanShape
+  a sh:NodeShape ;
+  sh:targetClass gem:SourceSpan ;
+  sh:property [
+    sh:path gem:page ;
+    sh:minCount 1 ;
+    sh:datatype xsd:integer ;
+    sh:message "A source_span must record a page number."
+  ] ;
+  sh:property [
+    sh:path gem:phrase ;
+    sh:minCount 1 ;
+    sh:message "A source_span must record a key phrase locating the passage."
+  ] .

@@ -66,3 +66,4 @@ internal/
 # UMLS-derived sweep results (concept names incl. SNOMED strings): not
 # redistributed; regenerate with gem-umls-sweep + gem-umls-classify-credibility.
 data/umls/sweeps/*.results.*
+dist/

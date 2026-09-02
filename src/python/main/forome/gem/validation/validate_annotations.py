@@ -45,7 +45,18 @@ def _find_base() -> Path:
 
 
 BASE = _find_base()
-SHACL = str(BASE / "schema" / "genetic_evidence.shacl.ttl")
+_shacl = BASE / "schema" / "genetic_evidence.shacl.ttl"
+if not _shacl.is_file():
+    # Standalone install (no repo checkout, no flat bundle): fall back to the
+    # synced copy packaged in forome.gem._reference. Guarded import so the
+    # flat skill bundle (where forome.gem is not importable) is unaffected.
+    try:
+        from forome.gem._reference import REFERENCE_DIR as _ref_dir
+        if (_ref_dir / "genetic_evidence.shacl.ttl").is_file():
+            _shacl = _ref_dir / "genetic_evidence.shacl.ttl"
+    except ImportError:
+        pass
+SHACL = str(_shacl)
 
 
 def _load_converter():

@@ -3,12 +3,32 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "forome-gem"
+name = "gem-mapping-studio"
 version = "0.1.0"
 description = "Forome Genetic Evidence Model: a reference data model, UMLS/OMOP crosswalk tooling, and SHACL validation for basic-science genetic evidence"
 readme = "README.md"
 license = { file = "LICENSE-code.txt" }
 requires-python = ">=3.10"
+authors = [
+    { name = "Michael Bouzinier", email = "michael.bouzinier@forome.org" },
+]
+keywords = [
+    "genetic evidence", "semantic model", "UMLS", "crosswalk", "SHACL",
+    "biomedical informatics", "variant interpretation", "curation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
 dependencies = [
     "pyyaml>=6.0",
     "ruamel.yaml>=0.18",
@@ -18,6 +38,10 @@ dependencies = [
     "PyMuPDF>=1.23",
     "pypdf>=4.0",
 ]
+
+[project.urls]
+Homepage = "https://w3id.org/genetic-evidence-model/"
+Repository = "https://github.com/ForomePlatform/genetic-evidence-model"
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
@@ -46,8 +70,11 @@ package-dir = { "" = "src/python/main" }
 where = ["src/python/main"]
 namespaces = true
 
-# NOTE (deferred): the SHACL schema lives at repo-root schema/ (shared by the
-# paper, CI, and skill bundles) and is located by walk-up discovery, which works
-# in-repo and inside the flat skill bundle. Shipping it as package_data for a
-# standalone `pip install` (no repo checkout) is a follow-up that needs a
-# decision on whether schema/ moves under the package.
+# Reference data (semantic_types.yaml, the SHACL schema, dimensions.md) lives
+# at the repo root as the source of truth, shared by the paper, CI, and skill
+# bundles; walk-up discovery finds it in-repo. For standalone installs the
+# same files ship as SYNCED COPIES in forome.gem._reference (re-synced by
+# scripts/release-pypi.sh; asserted in the test suite), used as a fallback
+# when no repo is found.
+[tool.setuptools.package-data]
+"forome.gem._reference" = ["*.yaml", "*.ttl", "*.md"]

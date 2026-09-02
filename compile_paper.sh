@@ -70,9 +70,11 @@ done
 [[ $missing -eq 0 ]] || err "$missing supplement input file(s) missing."
 
 # Documents to build, as "source-basename:output-jobname" (order preserved).
+# Order matters: the supplement builds FIRST so its .aux exists for the
+# main paper's xr cross-document references (Supplementary Table/Note numbers).
 DOCS=(
-  "main:Semantic-GEM"
   "supplement:Semantic-GEM-SupplementaryMaterial"
+  "main:Semantic-GEM"
 )
 
 mkdir -p "$TARGET"
@@ -87,41 +89,30 @@ for entry in "${DOCS[@]}"; do
   if latexmk "$ENGINE_FLAG" -bibtex -f -interaction=nonstopmode \
              -jobname="$job" -output-directory="$TARGET" "$src.tex"; then
     echo "==> OK:     $TARGET/$job.pdf"
+    if [ "$src" = "supplement" ]; then
+      # Labels-only aux for the main paper's xr cross-references: the raw aux
+      # carries \citation/\@writefile lines that xr cannot digest in the
+      # preamble, so extract just the \newlabel lines.
+      grep '^\\newlabel' "$TARGET/$job.aux" > "$TARGET/supp-labels.aux"
+      echo "==> wrote $TARGET/supp-labels.aux ($(grep -c . "$TARGET/supp-labels.aux") labels)"
+    fi
   else
     echo "==> FAILED: $src.tex (see $TARGET/$job.log)" >&2
     status=1
   fi
 done
 
-# ----- cross-document reference guard -------------------------------
-# Main-text references to supplement numbering (Table~STn, Note~SNn) are
-# hard-coded, so a supplement renumbering silently mispoints them. Verify
-# every STn/SNn used in the main sections against the freshly built
-# supplement .lot/.toc, using paper/xrefs.tsv (number <TAB> required
-# caption substring) as the declaration of intent.
-XREFS="$PAPER_DIR/xrefs.tsv"
-SUPP_LOT="$TARGET/Semantic-GEM-SupplementaryMaterial.lot"
-SUPP_TOC="$TARGET/Semantic-GEM-SupplementaryMaterial.toc"
-if [ "$status" -eq 0 ] && [ -f "$XREFS" ] && [ -f "$SUPP_LOT" ] && [ -f "$SUPP_TOC" ]; then
-  xref_bad=0
-  for ref in $(perl -ne 'print "$1\n" while /\b(S[TN][0-9]+)(?:\.[0-9]+)?\b/g' \
-               "$PAPER_DIR"/sections/0*.tex | sort -u); do
-    want=$(awk -F'\t' -v r="$ref" '$1==r{print $2}' "$XREFS")
-    if [ -z "$want" ]; then
-      echo "XREF: $ref is used in the main text but has no line in paper/xrefs.tsv" >&2
-      xref_bad=1; continue
-    fi
-    case "$ref" in SN*) src="$SUPP_TOC" ;; *) src="$SUPP_LOT" ;; esac
-    if ! grep "numberline {$ref}" "$src" | grep -q "$want"; then
-      echo "XREF: main text expects $ref = '$want' but the built supplement disagrees" >&2
-      echo "      (renumbering? update paper/sections/0*.tex and paper/xrefs.tsv)" >&2
-      xref_bad=1
+# ----- undefined-reference check -------------------------------------
+# Cross-document numbers are now real \ref*{supp:...} references resolved by
+# xr, so a broken one shows up as an undefined-reference warning; fail on it.
+if [ "$status" -eq 0 ]; then
+  for job in Semantic-GEM Semantic-GEM-SupplementaryMaterial; do
+    if grep -q "LaTeX Warning: Reference .* undefined" "$TARGET/$job.log"; then
+      grep "LaTeX Warning: Reference .* undefined" "$TARGET/$job.log" >&2
+      err "undefined references in $job (stale supplement label? rebuild both)"
     fi
   done
-  if [ "$xref_bad" -ne 0 ]; then
-    err "stale supplement cross-references in the main text"
-  fi
-  echo "==> xref guard: main-text ST/SN references match the built supplement"
+  echo "==> reference check: no undefined references in either document"
 fi
 
 if [ "$status" -eq 0 ]; then

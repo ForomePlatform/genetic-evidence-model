@@ -4,9 +4,9 @@ A conceptual framework for representing scientific and genetic evidence from
 the biomedical literature in a form suitable for variant interpretation,
 automated reasoning, and AI-ready clinical infrastructure.
 
-This repository accompanies a paper submitted to the 17th International
-Conference on Biological and Biomedical Ontology (ICBO 2026, Washington
-D.C., July 15–17 2026). The paper is currently under revision.
+This repository accompanies a manuscript in preparation: an extended
+version to be deposited on arXiv and a condensed version intended for
+journal submission.
 
 ## What this repository contains
 
@@ -212,13 +212,15 @@ and `python3 scripts/compute_coverage.py` (requires `pyshacl rdflib pyyaml`).
 
 ## Citing this work
 
-See `CITATION.cff`. Once the paper is accepted, a DOI will be registered via
-Zenodo and the CITATION file updated.
+See `CITATION.cff`. A DOI is minted via the Zenodo–GitHub integration at
+each tagged release (record metadata in `.zenodo.json`); the concept DOI
+will be added to `CITATION.cff` after the first release.
 
 ## License
 
-See `LICENSE.txt` (content) and `LICENSE-code.txt` (scripts and schema). Both are
-permissive and compatible with CEUR-WS publication terms.
+Content (annotations, documentation, the paper sources) is licensed
+CC-BY-4.0 (`LICENSE.txt`). Code — `src/`, `scripts/`, and the extraction
+tooling — is licensed Apache-2.0 (`LICENSE-code.txt`).
 
 ## Contact
 
