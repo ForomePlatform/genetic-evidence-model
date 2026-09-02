@@ -206,7 +206,7 @@ repository root of the tagged release.}
 Claim & Where to verify \\
 \midrule
 Canonical schema & \texttt{schema/genetic\_evidence.shacl.ttl} (three enforced activation shapes: Variant Ascertainment, Mode of Inheritance, and Organism) \\
-YAML-to-RDF transform & \texttt{src/python/main/forome/gem/extraction/yaml\_to\_rdf.py} (normalizes \texttt{key\_phrase} and \texttt{phrase}) \\
+YAML-to-RDF transform & \texttt{src/python/main/forome/gem/extraction/yaml\_to\_rdf.py} (normalizes the v0/v1 field renames \texttt{key\_phrase}/\texttt{phrase} and \texttt{resolution}/\texttt{target\_resolution}) \\
 Corpus validation & \texttt{gem-validate} over \texttt{annotations/}; CI workflow \texttt{.github/workflows/validate.yml} \\
 Coverage counts & \texttt{gem-coverage} regenerates \texttt{annotations/coverage.md} \\
 Activation-shape tests & \texttt{src/python/test/forome/gem/validation/} \\
