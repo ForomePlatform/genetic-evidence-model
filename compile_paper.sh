@@ -3,13 +3,9 @@
 # compile_paper.sh
 #
 # Single build script for the ICBO 2026 paper AND its supplement.
-# (Combines the former compile_paper.sh + build_supplementary.sh: the
-# supplement now embeds the SHACL schema and the six annotation YAMLs
-# directly as Appendix A / Appendix B via \lstinputlisting in
-# paper/sections/s3_appendices.tex, so there is no separate pandoc
-# bundle to build. Editing any annotation YAML or the schema and
-# re-running this script regenerates the supplement with the new
-# content and the full table of contents.)
+# The supplement is Supplementary Notes plus standalone tables; the SHACL
+# schema and the annotation YAMLs are not embedded (they are cited by
+# repository path at the tagged release).
 #
 # Builds with latexmk; all intermediate and output files go to
 # paper/target/:
@@ -47,27 +43,6 @@ esac
 command -v latexmk >/dev/null 2>&1 || err "missing dependency: latexmk"
 command -v "$ENGINE" >/dev/null 2>&1 || err "missing dependency: $ENGINE"
 
-# ----- preflight: input files the supplement embeds -----------------
-# The supplement \lstinputlistings these; a missing one fails the build
-# late and noisily, so check up front.
-APPENDIX_INPUTS=(
-  "schema/genetic_evidence.shacl.ttl"
-  "annotations/jossin2017.yaml"
-  "annotations/davis2011.yaml"
-  "annotations/nelson1992.yaml"
-  "annotations/gupta2015.yaml"
-  "annotations/v0/duerr2006.yaml"
-  "annotations/v0/inouye2018.yaml"
-  "paper/sections/s3_appendices.tex"
-)
-missing=0
-for f in "${APPENDIX_INPUTS[@]}"; do
-  if [[ ! -f "$REPO_ROOT/$f" ]]; then
-    echo "  MISSING: $f" >&2
-    missing=$((missing + 1))
-  fi
-done
-[[ $missing -eq 0 ]] || err "$missing supplement input file(s) missing."
 
 # Documents to build, as "source-basename:output-jobname" (order preserved).
 # Order matters: the supplement builds FIRST so its .aux exists for the

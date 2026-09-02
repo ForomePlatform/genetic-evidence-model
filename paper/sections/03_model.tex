@@ -45,11 +45,10 @@ Three abstract classes form the core of the model:
         appropriately in a predicate over Evidence, namely in a decision
         rule. This class is the model's point of contact with the reasoning
         layer described in~\cite{our_preprint}, where such meta-predicates
-        assert which evidence a rule may use. This paper constructs no
-        decision rules and therefore instantiates no \EvidenceAssertion{}.
-        The class remains part of the model, but the interpretability and
-        AI-readiness of the reasoning layer are the primary focus
-        of~\cite{our_preprint}, not of the present pilot.
+        assert which evidence a rule may use. This paper constructs no decision rules and therefore instantiates no
+        \EvidenceAssertion{} in its meta-predicate role. The class remains part of
+        the model, but the interpretability and AI-readiness of the reasoning layer
+        are the primary focus of~\cite{our_preprint}, not of the present pilot.
 \end{description}
 
 The \texttt{assertion} property and the \EvidenceAssertion{} class share
@@ -59,7 +58,7 @@ any decision rule that would use those claims. The property name is
 retained for compatibility with the released annotations and will be
 renamed, for example to \texttt{selector}, in a future schema revision.
 
-Specialising these classes for the genetic domain yields
+Specializing these classes for the genetic domain yields
 \GeneticEvidence, \GeneticEvidenceVariable, and
 \GeneticEvidenceAssertion. These specializations inherit the provenance
 requirement and add the dimensional annotations described next.
@@ -175,20 +174,24 @@ Phenotype Scale        & categorical       & single   & obj.       & \dimval{Mol
 \caption{Conditional dimensions of the \GeneticEvidence{} model.
 Each is required only when its activation condition holds. KD, MT, and TT
 abbreviate Knowledge Domain, Method, and Target Type, respectively;
-$\supseteq$ denotes set membership for multi-valued dimensions.}
+$\supseteq$ denotes set membership for multi-valued dimensions.
+Dimensions marked $^{\ddagger}$ have their activation condition enforced by
+an executable SHACL shape; for the others the condition is documented in
+the schema and checked at curation time, with executable shapes scoped as
+future work.}
 \label{tab:dimensions-cond}
 \small
 \begin{tabularx}{\linewidth}{@{}lllX@{}}
 \toprule
 Dimension              & Value type   & Cardinality & Activation condition \\
 \midrule
-Mode of Inheritance    & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
+Mode of Inheritance$^{\ddagger}$ & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
 Mendelian Segregation  & boolean      & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Gene} \\
 Penetrance             & categorical  & single   & KD $\supseteq$ \dimval{Human Genetics} AND TT = \dimval{Variant} \\
-Variant Ascertainment  & categorical  & multiple & TT = \dimval{Variant} \\
+Variant Ascertainment$^{\ddagger}$ & categorical  & multiple & TT = \dimval{Variant} \\
 Measurement Target     & categorical  & multiple & KD $\supseteq$ \dimval{Gene Function} \\
 Gene Relation          & categorical  & single   & KD $\supseteq$ \dimval{Gene Function} \\
-Organism               & categorical  & multiple & MT $\supseteq$ \dimval{In Vivo} OR KD $\supseteq$ \dimval{Model Organism} \\
+Organism$^{\ddagger}$ & categorical  & multiple & MT $\supseteq$ \dimval{In Vivo} OR KD $\supseteq$ \dimval{Model Organism} \\
 Knockout Type          & categorical  & single   & KD $\supseteq$ \dimval{Model Organism} \\
 \bottomrule
 \end{tabularx}
@@ -207,15 +210,19 @@ about an X-linked recessive pedigree asks about mode of inheritance because
 the evidence makes that question meaningful, not because a global schema
 requires it.
 
-The activation conditions are encoded as SHACL shapes with SPARQL-based
-constraints. This is the standard SHACL mechanism for expressing
-requirements that cannot be captured by simple cardinality constraints on a
-single property. Two representative shapes illustrate the pattern. For
-brevity, we show only the \texttt{sh:sparql} body of each and omit the
-outer NodeShape wrapper. The full shapes, together with the base
-\texttt{GeneticEvidenceShape} and the simpler
-\texttt{variant\_ascertainment} rule, are available in the project
-repository with an annotated walkthrough.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
+Three activation conditions are currently encoded as SHACL shapes with
+SPARQL-based constraints: Variant Ascertainment, Mode of Inheritance, and
+Organism (marked in \cref{tab:dimensions-cond}). SPARQL-based constraints
+are the standard SHACL mechanism for expressing requirements that cannot be
+captured by simple cardinality constraints on a single property. Two
+representative shapes illustrate the pattern. For brevity, we show only the
+\texttt{sh:sparql} body of each and omit the outer NodeShape wrapper. The
+full shapes, together with the base \texttt{GeneticEvidenceShape} and the
+simpler \texttt{variant\_ascertainment} rule, are available in the project
+repository with an annotated walkthrough. The remaining conditional
+dimensions are documented in the schema and
+assessed during curation;
+executable shapes for them are future work.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/examples.md}}
 
 Checking activation conditions is a closed-world question: whether an
 annotation contains every dimension required by the evidence item. SHACL can

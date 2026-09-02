@@ -64,17 +64,23 @@ specialize to \GeneticEvidence{}, \GeneticEvidenceVariable{}, and
 \GeneticEvidenceAssertion{}, respectively. \Cref{tab:fhir-alignment} gives
 the class-level correspondence. The field-level alignment, including the
 certainty subcomponents discussed in \cref{sec:model-dimensions}, is given in
-Supplementary Table~\ref*{supp:tab:fhir-fields}.
+Supplementary Table~\ref*{supp:tab:fhir-fields}.%
 \footnote{We distinguish two notions that the literature often conflates.
 The \texttt{assertion} property of a \ScientificEvidence{} item records the
 object-level claim made by a paper. It is what the pilot records, and its
 closest analogues are the GA4GH VA \texttt{Statement} and the SEPIO
 \texttt{Assertion}, not the FHIR \texttt{Evidence.assertion} element, which
-is a human-readable summary. \EvidenceAssertion{} is instead a
-meta-predicate over decision rules that would use such
-claims~\cite{our_preprint}. It has no direct analogue in FHIR, VA, or SEPIO and
-is not instantiated in this paper. The property and the class share a name;
-a future schema revision will resolve this collision.}
+is a human-readable summary.
+
+The \EvidenceAssertion{} class is retained for the reasoning layer developed
+in~\cite{our_preprint}, where it is a meta-predicate over decision rules that
+use such claims. That reasoning layer is not instantiated in this paper and
+has no direct analogue in FHIR, VA, or SEPIO. In the released RDF
+serialization, \texttt{GeneticEvidenceAssertion} currently types
+object-level assertions so that assertion-level SHACL validation applies to
+them. This temporary serialization choice does not assign the
+meta-predicate role to the pilot assertions. The property and the class
+share a name; a future schema revision will separate them.}
 
 \begin{table}[tbp]
     \centering

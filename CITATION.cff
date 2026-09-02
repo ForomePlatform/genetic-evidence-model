@@ -6,7 +6,8 @@ message: >
   preparation; this file will be updated with the preferred citation when
   it is available.
 title: "Forome Genetic Evidence Model (GEM)"
-version: 0.1.0
+version: 0.2.1
+date-released: 2026-09-02
 abstract: >
   A semantic model for scientific and genetic evidence from the biomedical
   literature, designed to support variant interpretation and AI-ready
