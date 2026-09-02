@@ -9,7 +9,7 @@ dimensions, literals for free-text ones) and its assertions, each with a
 
 Design notes
 ------------
-* Field-name aliases are normalised: ``resolution``/``target_resolution`` and
+* Field-name aliases are normalized: ``resolution``/``target_resolution`` and
   source-span ``key_phrase``/``phrase`` (the v0 -> v1 protocol rename).
 * Legacy method synonyms are mapped to canonical values
   (``IN_VIVO_EXPERIMENT`` -> ``IN_VIVO`` etc.) so the shapes need only the

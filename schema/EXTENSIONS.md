@@ -157,7 +157,7 @@ comparison).
 #### CE-IN6: `derived_artifact` flag
 
 - **Triggering evidence:** the metaGRS is a human construction, not
-  a natural kind. Evidence about its behaviour (HR, C-index, risk
+  a natural kind. Evidence about its behavior (HR, C-index, risk
   stratification) is analogous to evidence about clinical tools,
   imaging biomarkers, or ML classifiers. The current schema assumes
   all targets are natural kinds.
@@ -169,7 +169,7 @@ comparison).
 ### Group 3: Effect-size direction and curation
 
 The smallest and most heterogeneous group. Each candidate responds
-to a specific curator judgement that the current schema does not
+to a specific curator judgment that the current schema does not
 have a named place for.
 
 #### CE-DU1: `direction_of_effect` dimension

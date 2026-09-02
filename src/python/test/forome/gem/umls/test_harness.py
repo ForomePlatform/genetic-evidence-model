@@ -67,7 +67,7 @@ class TestResolveStatus(unittest.TestCase):
         self.assertEqual(r["status"], "mapped")
 
     def test_mapped_via_normalized_name_equal(self):
-        # exact empty; normalized returns a name that normalises equal to query
+        # exact empty; normalized returns a name that normalizes equal to query
         c = StubClient({"normalizedString": [_cand("In Vivo")]})
         r = H.resolve(c, "in vivo", None, live=True)
         self.assertEqual(r["status"], "mapped")
@@ -86,12 +86,12 @@ class TestResolveStatus(unittest.TestCase):
 
 class TestClientParsing(unittest.TestCase):
     def test_semantic_types_string_and_dict_forms(self):
-        # _normalise must handle semanticTypes as strings (search endpoint) and
+        # _normalize must handle semanticTypes as strings (search endpoint) and
         # as dicts (content endpoint), extracting names either way.
-        s = U._normalise({"ui": "C1", "name": "X", "rootSource": "MSH",
+        s = U._normalize({"ui": "C1", "name": "X", "rootSource": "MSH",
                           "semanticTypes": ["Gene or Genome"]})
         self.assertEqual(s["semantic_types"], ["Gene or Genome"])
-        d = U._normalise({"ui": "C2", "name": "Y", "rootSource": "MSH",
+        d = U._normalize({"ui": "C2", "name": "Y", "rootSource": "MSH",
                           "semanticTypes": [{"name": "Finding",
                                              "uri": "http://x/T033"}]})
         self.assertEqual(d["semantic_types"], ["Finding"])

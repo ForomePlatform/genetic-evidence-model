@@ -264,7 +264,7 @@ def build_search_sql(term: str, search_type: str = "words",
     elif mode == "words":
         where.append("to_tsvector('english', m.str) @@ plainto_tsquery('english', %s)")
         params.append(term)
-        # exact-name bonus + length-normalised rank (flag 1: /(1+log(len))) --
+        # exact-name bonus + length-normalized rank (flag 1: /(1+log(len))) --
         # otherwise long clinical strings repeating the term outrank the
         # concept actually named by it.
         score = ("(CASE WHEN lower(m.str) = lower(%s) THEN 1000.0 ELSE 0.0 END)"

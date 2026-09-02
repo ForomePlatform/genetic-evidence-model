@@ -231,7 +231,7 @@ def render_omop(omop: dict) -> list[str]:
         r"\label{sec:s-omop-positioning}",
         "",
         r"The following worked examples position GEM dimensions relative to "
-        r"the OHDSI OMOP Common Data Model (CDM) and its standardised "
+        r"the OHDSI OMOP Common Data Model (CDM) and its standardized "
         r"vocabularies. This is an illustrative, hand-authored positioning "
         r"exercise, not a full crosswalk. " + tex(omop["meta"]["note"]),
         "",

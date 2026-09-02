@@ -22,7 +22,7 @@ which it does not modify.
 The harness never invents concept identifiers.
 
 - Nothing is reported as **mapped** unless a UMLS query actually returned a
-  faithful concept (exact, or normalised name-equal).
+  faithful concept (exact, or normalized name-equal).
 - A query that returns candidates but no faithful match is **review** — the
   candidates are recorded for a curator to adjudicate, never silently mapped.
 - A query that returns nothing is **unmapped** — reported as "no faithful UMLS
@@ -35,7 +35,7 @@ The harness never invents concept identifiers.
 | File | Role |
 |---|---|
 | `dimensions_inventory.yaml` | **Input.** Curated list of every GEM dimension + value, each with the natural-language `query` term and an `expect` prior. Checked against the SHACL enums. |
-| `build_umls_crosswalk.py` | **Harness.** Resolves each entry against UMLS (tiered exact → normalised → words), applies curator adjudications, and writes `umls_crosswalk.yaml` + a coverage summary. |
+| `build_umls_crosswalk.py` | **Harness.** Resolves each entry against UMLS (tiered exact → normalized → words), applies curator adjudications, and writes `umls_crosswalk.yaml` + a coverage summary. |
 | `uts_client.py` | UTS REST API client (`apiKey` auth; search + concept/definition lookups), plus a fixture client (offline tests) and a null client (no-key runs). |
 | `adjudicate_ui.py` | **Curation UI.** A local, Metathesaurus-integrated web app for reviewing/curating the mappings (see below). |
 | `adjudications.yaml` | **Input.** Curator decisions (accept a CUI / mark unmapped), applied by the harness. Edited via the UI. |
@@ -51,7 +51,7 @@ The harness never invents concept identifiers.
 pip install -e .                  # dependencies are declared in pyproject.toml
 ```
 
-A **UMLS licence** is required to resolve concepts. It is free but requires
+A **UMLS license** is required to resolve concepts. It is free but requires
 registration and approval:
 
 1. Request a UMLS Metathesaurus License: <https://uts.nlm.nih.gov/uts/signup-login>
@@ -164,7 +164,7 @@ stay on UTS.
 ### 1. Download the release
 
 From <https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html>
-(a UMLS licence is required) take either
+(a UMLS license is required) take either
 
 - the **UMLS Metathesaurus Full Release** (RRF; ~30 GB unpacked), or
 - a **MetamorphoSys subset** you built yourself (RRF format, e.g. English only,
@@ -175,7 +175,7 @@ Only two files are used: `MRCONSO.RRF` (atoms/strings) and `MRSTY.RRF`
 
 ### 2. Keep it outside the repository
 
-The UMLS licence forbids redistribution: keep the files **outside** the
+The UMLS license forbids redistribution: keep the files **outside** the
 checkout, e.g.
 
 ```
@@ -228,7 +228,7 @@ from forome.gem.umls.local_umls import PgUMLSClient
 c = PgUMLSClient()                                  # reads GEM_UMLS_DSN
 c.search("gene locus", search_type="exact")
 c.search("locus", partial=True, semantic_types="T082")   # fuzzy, within a TUI
-c.strings_like("genom wide assoc")                  # trigram neighbours
+c.strings_like("genom wide assoc")                  # trigram neighbors
 c.concepts_by_tui("T028,T087", limit=50)
 c.release()
 ```

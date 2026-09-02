@@ -47,7 +47,7 @@ each is retained for comparison.
 
 For manually annotated papers, PDF highlights and sticky-note callouts are the
 authoritative ground truth. The YAML is a structured transformation of those
-artefacts, with every assertion carrying a `source_span` pointing back to the
+artifacts, with every assertion carrying a `source_span` pointing back to the
 specific page and quoted passage. Disagreements between the annotator and the
 AI reviewer are not silently resolved: they are captured as `reviewer_query`,
 `reviewer_suggestion`, or `reviewer_disagreement` fields so they remain
@@ -56,7 +56,7 @@ auditable.
 For AI-drafted annotations, the same `source_span` anchoring is used, and
 curator review is the evaluation signal.
 
-Per-paper case reports are in `case-reports/`. Each report summarises the
+Per-paper case reports are in `case-reports/`. Each report summarizes the
 paper's role in the corpus, the decomposition into `GeneticEvidence` items,
 the candidate extensions surfaced, the reviewer flags, and notes for
 downstream consumers.
@@ -66,13 +66,13 @@ downstream consumers.
 The `protocols/` directory documents how annotations are produced, separately
 from what they describe (the schema) and what they contain (the corpus). The
 intent is that an annotation under this schema is reproducible and citable
-under a versioned protocol, not an artefact of a particular annotator's
+under a versioned protocol, not an artifact of a particular annotator's
 unwritten conventions.
 
 - `protocols/PROTOCOL.md`: the canonical, mode-agnostic rules. Covers
   decomposition principles (the lumper default), dimension assignment,
   source-anchoring requirements, flag taxonomy, candidate-extension
-  promotion, normalisation handling. Current version: 1.0.
+  promotion, normalization handling. Current version: 1.0.
 - `protocols/PROTOCOL_AUTONOMOUS.md`: the operational workflow for autonomous
   AI annotation (single pass, no curator in the loop). Specifies input
   quality gating, self-consistency checks, mandatory confidence-summary
@@ -82,7 +82,7 @@ unwritten conventions.
   review protocol and its interactive, curator-in-the-loop variant, used
   to adjudicate the AI-drafted annotations. Current version: 1.0.
 - `protocols/LABELING_EXAMPLES.md`: worked cases for the recurring
-  judgement calls referenced by the protocols above.
+  judgment calls referenced by the protocols above.
 
 A staged interactive *annotation* protocol (curator review of the
 decomposition before dimension filling) is planned but not yet
@@ -154,7 +154,7 @@ Once installed, ask in natural language, for example:
 The annotation skill confirms the input paper, output path, and schema location,
 then produces a single YAML file matching the existing annotations. The review
 skill walks the annotation item by item with the curator and emits its three
-artefacts (review log, review report, and the updated annotation).
+artifacts (review log, review report, and the updated annotation).
 
 ## Extraction pipeline
 

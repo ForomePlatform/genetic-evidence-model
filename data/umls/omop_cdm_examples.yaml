@@ -1,7 +1,7 @@
 # OMOP CDM positioning examples for GEM dimensions
 # =====================================================================
 # A few WORKED, ILLUSTRATIVE examples of where GEM dimensions sit relative
-# to the OHDSI OMOP Common Data Model (CDM) and its standardised
+# to the OHDSI OMOP Common Data Model (CDM) and its standardized
 # vocabularies. This is deliberately NOT a full crosswalk: it positions
 # GEM against the common-data-model paradigm and shows what the CDM does
 # and does not yet capture for basic-science genetic evidence.
@@ -52,7 +52,7 @@ examples:
     standard_vocabulary: HGNC (via the OMOP Genomic vocabulary effort)
     alignment: >-
       A gene identity aligns with HGNC; the OHDSI Genomic CDM extension is
-      the locus where gene- and variant-level data are being standardised.
+      the locus where gene- and variant-level data are being standardized.
     gap: >-
       The base OMOP CDM has no first-class gene or variant entity; this lives
       only in the evolving Genomic CDM extension, which is not yet a stable

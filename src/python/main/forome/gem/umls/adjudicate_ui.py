@@ -662,7 +662,7 @@ def concept_evidence(cui: str, axis_tui: str | None = None,
     isa_up = _agg(lambda r: r["rela"] == "isa", lambda r: {"dir": "up"})[:25]
     isa_down = _agg(lambda r: r["rela"] == "inverse_isa", lambda r: {"dir": "down"})[:25]
 
-    # other meaningful relations, grouped by their (labelled) rela -- the
+    # other meaningful relations, grouped by their (labeled) rela -- the
     # semantically rich edges a curator wants (gene_mapped_to_disease,
     # has_allelic_variant, part_of, mapped_to, ...). Skip is_a (shown above) and
     # lexical/synonym bookkeeping (permuted/translation/alias/expanded forms).
@@ -742,7 +742,7 @@ def expand_search(cli, query: str, stys: str | None = None,
     """Ontology-aware query expansion: for each content word of ``query``,
     find the concepts literally named by that word, take their is_a
     NEIGHBOURS (children and a few ancestors) from the source hierarchies,
-    substitute the neighbour's name for the word, and re-search every
+    substitute the neighbor's name for the word, and re-search every
     variant. "model organism" -> organism's children (animal, plant, ...) ->
     "model animal" -> Animal Model. Results carry their provenance
     (word -> substituted term, and the variant searched)."""
@@ -1734,7 +1734,7 @@ async function axbRun(){const q=(($('#axq')||{}).value||'').trim();const box=$('
     const g=byT[t.tui]||(byT[t.tui]={tui:t.tui,name:t.name,tree:t.tree,n:0,ex:[]});
     g.n++;if(g.ex.length<5)g.ex.push(c.name);}));
   const types=Object.values(byT).sort((a,b)=>b.n-a.n);
-  if(!types.length){box.innerHTML='<span class="mini">'+res.length+' concepts matched but none carried a recognised semantic type. Pick a type below.</span>';return;}
+  if(!types.length){box.innerHTML='<span class="mini">'+res.length+' concepts matched but none carried a recognized semantic type. Pick a type below.</span>';return;}
   const rows=types.map(t=>`<div class="styrow ${t.tui===AXB.tui?'acc':''}"><span class="stytree">${esc(t.tree)}</span> ${esc(t.name)} <span class="mut">&times;${t.n}</span>`+
     `<button class="ok mini" onclick="axbSet('${t.tui}')">${t.tui===AXB.tui?'✓ axis type':'use as axis type'}</button>`+
     `<button class="mini" onclick="stnToggle(this,'${t.tui}')">tree</button>`+
@@ -2132,7 +2132,7 @@ function openSettings(){const wp=((STATE&&STATE.prefs||{}).workspace||[]).join('
     `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">SEARCH BACKEND</div>`+
     `<div style="font-size:12.5px;margin-top:4px">${esc(STATE.search_backend||'UTS')}${(STATE.search_backend||'UTS')==='UTS'?' — the optional local index (faster search, typo-tolerant matching, axis browse) is not loaded':''}</div>`+
     (STATE.search_backend_note?`<div class="mini" style="margin-top:3px;color:var(--warn)">probe: ${esc(STATE.search_backend_note)}</div>`:'')+
-    ((STATE.search_backend||'UTS')==='UTS'?`<div class="mini" style="margin-top:4px">To enable it: download a UMLS release with your licence, create the database (<span class="mono">createdb umls; psql -d umls -c 'CREATE EXTENSION pg_trgm'</span>), load it (<span class="mono">gem-umls-load-local --rrf-dir ~/umls/2026AA/META --release 2026AA</span>) and restart the Studio. Full recipe: <span class="mono">data/umls/README.md</span>.</div>`:'')+
+    ((STATE.search_backend||'UTS')==='UTS'?`<div class="mini" style="margin-top:4px">To enable it: download a UMLS release with your license, create the database (<span class="mono">createdb umls; psql -d umls -c 'CREATE EXTENSION pg_trgm'</span>), load it (<span class="mono">gem-umls-load-local --rrf-dir ~/umls/2026AA/META --release 2026AA</span>) and restart the Studio. Full recipe: <span class="mono">data/umls/README.md</span>.</div>`:'')+
     `<div style="margin-top:14px;font-size:10.5px;font-weight:600;letter-spacing:.09em;color:var(--faint)">WORKSPACE</div>`+
     `<div class="mono" style="font-size:11.5px;word-break:break-all;margin-top:4px">${esc(STATE.workspace||'')}</div>`);
   const i=$('#prefsabs');if(i){attachSabTypeahead(i,savePrefs);i.focus();}}
@@ -2202,7 +2202,7 @@ def main(argv=None):
     # The local PostgreSQL index is an OPTIONAL accelerator each user builds
     # from their own licensed UMLS copy (gem-umls-load-local; see
     # data/umls/README.md) -- it is never distributed with the tool. Released
-    # behaviour needs only a UTS key: --search-backend auto silently falls
+    # behavior needs only a UTS key: --search-backend auto silently falls
     # back to UTS when no index is reachable; 'browse axis' then explains
     # what it needs instead of appearing broken.
     if args.search_backend != "uts":

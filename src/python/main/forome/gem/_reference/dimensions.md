@@ -62,7 +62,7 @@ transitivity) a `STATISTICAL_GENETICS`.
 | `IN_VIVO`                          | Experiment in a living organism |
 | `IN_VITRO`                         | Experiment in isolated cells, tissues, or biochemical systems outside a living organism |
 | `IN_SILICO`                        | Computational simulation of a biological process (molecular dynamics, docking, simulation models) |
-| `BIOINFORMATICS_INFERENCE`         | Computational analysis of existing biological data to characterise or predict features |
+| `BIOINFORMATICS_INFERENCE`         | Computational analysis of existing biological data to characterize or predict features |
 | `CLINICAL_EVIDENCE`                | Observation of variants or phenotypes in clinical contexts |
 
 The four top-level families, `STATISTICAL_GENETICS`, `EXPERIMENT`,
@@ -104,10 +104,10 @@ as a third sibling.
 **`IN_SILICO` is distinct from `BIOINFORMATICS_INFERENCE`.** The two are easy
 to conflate but capture different epistemic operations. `IN_SILICO` is
 computational *simulation*: a model is constructed, parameterised, executed,
-and analysed, producing new data points by execution (molecular dynamics,
+and analyzed, producing new data points by execution (molecular dynamics,
 docking, forward population-genetics simulation). `BIOINFORMATICS_INFERENCE` is
 computational *analysis* of existing data (sequences, structures, database
-records) to characterise or predict features of those data, with no process
+records) to characterize or predict features of those data, with no process
 simulated (conservation analysis, splice-site prediction, variant-impact
 prediction). A study running molecular dynamics to predict the effect of a
 substitution is `IN_SILICO`; a study running SIFT or PolyPhen on a list of
@@ -206,7 +206,7 @@ the overall ordinal rating; the facets remain open.
 would take for the curator to stop believing the evidence item — not by study
 design or by the authors' expressed certainty (see `stated certainty`, a
 candidate facet). Credibility is the curator's trust; interest or relevance is
-a separate judgment and must not colour it.
+a separate judgment and must not color it.
 
 | Level | Definition |
 | --- | --- |

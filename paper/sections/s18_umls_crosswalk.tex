@@ -146,7 +146,7 @@ GEM value & CUI / TUI & Relation & UMLS concept or semantic type \\
 \subsection{OMOP CDM positioning (illustrative)}
 \label{sec:s-omop-positioning}
 
-The following worked examples position GEM dimensions relative to the OHDSI OMOP Common Data Model (CDM) and its standardised vocabularies. This is an illustrative, hand-authored positioning exercise, not a full crosswalk. OMOP CDM is built around observational, patient-level clinical data, including conditions, drugs, measurements, and observations. GEM describes basic-science genetic evidence about gene--phenotype relationships, much of which has no native patient-level representation in the CDM.
+The following worked examples position GEM dimensions relative to the OHDSI OMOP Common Data Model (CDM) and its standardized vocabularies. This is an illustrative, hand-authored positioning exercise, not a full crosswalk. OMOP CDM is built around observational, patient-level clinical data, including conditions, drugs, measurements, and observations. GEM describes basic-science genetic evidence about gene--phenotype relationships, much of which has no native patient-level representation in the CDM.
 
 {\footnotesize
 \begin{longtable}{@{}p{2.9cm} p{2.6cm} p{2.1cm} p{6.0cm}@{}}
@@ -163,7 +163,7 @@ phenotype\_scale (CLINICAL) & Condition\newline condition\_occurrence & SNOMED C
 \addlinespace
 measurement\_target (EXPRESSION, ACTIVITY, ...) & Measurement\newline measurement & LOINC & A quantitative molecular readout is conceptually a Measurement; LOINC covers some assay readouts (e.g. enzyme activity panels). \emph{Gap:} Basic-science functional readouts (binding, localization, stability of a specific gene product in an experimental system) are rarely represented as standard LOINC Measurement concepts. \\
 \addlinespace
-target\_type (GENE) / resolution (GENE) & Observation / (Genomic CDM extension)\newline observation (or OMOP Genomic CDM) & HGNC (via the OMOP Genomic vocabulary effort) & A gene identity aligns with HGNC; the OHDSI Genomic CDM extension is the locus where gene- and variant-level data are being standardised. \emph{Gap:} The base OMOP CDM has no first-class gene or variant entity; this lives only in the evolving Genomic CDM extension, which is not yet a stable standard. \\
+target\_type (GENE) / resolution (GENE) & Observation / (Genomic CDM extension)\newline observation (or OMOP Genomic CDM) & HGNC (via the OMOP Genomic vocabulary effort) & A gene identity aligns with HGNC; the OHDSI Genomic CDM extension is the locus where gene- and variant-level data are being standardized. \emph{Gap:} The base OMOP CDM has no first-class gene or variant entity; this lives only in the evolving Genomic CDM extension, which is not yet a stable standard. \\
 \addlinespace
 organism & (none)\newline (none) & (none in CDM; NCBITaxon outside it) & No alignment. OMOP CDM is patient-centric (Homo sapiens implied) and has no concept of a model organism. \emph{Gap:} Model-organism evidence is entirely out of scope for the CDM; GEM's organism dimension maps to NCBITaxon (\Cref{sec:supp-crosswalk}), not OMOP. \\
 \addlinespace

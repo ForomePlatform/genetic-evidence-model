@@ -17,12 +17,12 @@ track and the AI-drafted track.
 
 A mode-agnostic annotation protocol (\texttt{PROTOCOL.md}) states the
 requirements for a valid annotation (classes, dimensions, source
-anchoring, and flag semantics). Two mode-specific specialisations adapt
+anchoring, and flag semantics). Two mode-specific specializations adapt
 it for autonomous drafting (\texttt{PROTOCOL\_AUTONOMOUS.md}) and for
 interactive, curator-in-the-loop work. A separate review protocol
 (\texttt{REVIEW\_PROTOCOL.md}, with an interactive variant) governs
 assertion-by-assertion review of drafted annotations. A document of
-labelling examples records worked cases for the recurring judgement
+labeling examples records worked cases for the recurring judgment
 calls. These written protocols are also packaged as executable skills
 (defined in \cref{sec:supp-skills}), one for annotation and one for
 review, so that the same rules can be applied by a human curator or by
@@ -32,7 +32,7 @@ an AI assistant working under curator supervision.
 
 In the \emph{manual track}, four of the six publications (Jossin 2017,
 Davis 2011, Nelson 1992, Gupta 2015) were annotated by Vladimir
-Seplyarskiy, a researcher in human and population genetics specialising
+Seplyarskiy, a researcher in human and population genetics specializing
 in human germline mutation and mutational processes (Assistant
 Professor at UT~Southwestern; formerly Harvard Medical School and
 Brigham and Women's Hospital). This expertise covers the
@@ -48,14 +48,14 @@ For each paper, the curator:
         annotations into a structured JSON record (page, offset,
         highlighted text, free-text callout);
   \item constructed a summary table with one row per paper capturing
-        high-level judgements (knowledge domain, method, credibility,
+        high-level judgments (knowledge domain, method, credibility,
         resolution, mode of inheritance, and so on); and
   \item mapped the highlights and summary row into the schema,
         producing a YAML file conforming to the
         \texttt{GeneticEvidence} model.
 \end{enumerate}
 
-Whenever this mapping required a normalisation step, for example
+Whenever this mapping required a normalization step, for example
 turning the free-text ``localisation and protein expression'' into the
 enumeration values \texttt{LOCALIZATION} and \texttt{EXISTENCE}, the
 change was recorded inline as a \texttt{normalization\_note} with
@@ -92,13 +92,13 @@ Concretely, the assistant is provided with:
 
 It then produces draft YAML annotations in the same format as the
 manual ones. When the assistant is uncertain about a mapping or has to
-make a judgement call that a human curator might reasonably contest, it
+make a judgment call that a human curator might reasonably contest, it
 records this inline using two flag types:
 
 \begin{itemize}
   \item \texttt{ai\_uncertainty} for cases where the mapping is judged
         unreliable and a human decision is preferred; and
-  \item \texttt{ai\_assumption} for judgements made without explicit
+  \item \texttt{ai\_assumption} for judgments made without explicit
         support in the text that should be revisited at review time
         rather than silently absorbed.
 \end{itemize}
@@ -119,8 +119,8 @@ reviewer checked:
 
 Corrections were applied directly to the YAML, with every change and
 ruling logged under \fpath{annotations/reviews/}. Table~ST1
-summarises the resulting verdicts per \texttt{GeneticEvidence} item,
-and Supplementary Note~SN4 analyses them qualitatively. In all cases,
+summarizes the resulting verdicts per \texttt{GeneticEvidence} item,
+and Supplementary Note~SN4 analyzes them qualitatively. In all cases,
 the \emph{curator}, not the model, is the authority for the recorded
 annotations.
 
@@ -156,8 +156,8 @@ Two provenance points are important for interpreting the corpus.
 
 First, the pilot corpus described in the main paper was initially
 annotated under an earlier procedure (``protocol~v0''). The suite
-described here is the subsequent, generalised formalisation. The pilot
-annotations remain valid under the current protocol, but some artefacts,
+described here is the subsequent, generalized formalization. The pilot
+annotations remain valid under the current protocol, but some artifacts,
 such as slightly different span-selection conventions in the earliest
 AI-drafted annotations, are recorded as forward-looking notes rather
 than retro-fit edits.

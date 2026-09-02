@@ -10,9 +10,9 @@
 #   scripts/release-pypi.sh --upload     # ...then upload to PyPI (asks to confirm)
 #
 # Auth: create an API token at https://pypi.org/manage/account/token/ and
-# either put it in ~/.pypirc, or export it for one run:
-#   export TWINE_USERNAME=__token__
-#   export TWINE_PASSWORD=pypi-...        # never commit or echo this
+# either put it in ~/.pypirc, or export it for one run: set TWINE_USERNAME
+# to __token__ and TWINE_PASSWORD to the token value (never commit or echo
+# the token; secret scanners also flag literal assignments in docs).
 # (TestPyPI needs its own token from https://test.pypi.org)
 # =====================================================================
 set -euo pipefail

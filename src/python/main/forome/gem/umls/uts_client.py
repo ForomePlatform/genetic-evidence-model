@@ -8,7 +8,7 @@ interface so the harness and its tests can swap them:
                        Authenticates with an API key passed as the ``apiKey``
                        query parameter (the current UTS scheme; the older
                        ticket-granting-ticket flow is deprecated). Requires a
-                       free UMLS licence; see mapping/README.md.
+                       free UMLS license; see mapping/README.md.
 * ``FixtureClient``  - reads canned JSON responses from a directory, for
                        offline unit tests. No network.
 * ``NullClient``     - returns no results for everything, so the harness can
@@ -85,7 +85,7 @@ class UTSClient:
                partial: bool = False) -> list[dict]:
         """Return a list of candidate concept dicts for ``term``.
 
-        Each candidate is normalised to:
+        Each candidate is normalized to:
             {cui, name, root_source, semantic_types: [str, ...]}
         Rows with no CUI, a CUI of ``NONE``, no name, or a source-metadata
         ``rootSource == 'SRC'`` are filtered out. ``page_size`` is 200 (the
@@ -119,7 +119,7 @@ class UTSClient:
                 continue
             if not r.get("name"):  # no usable name -> cannot verify a match
                 continue
-            out.append(_normalise(r))
+            out.append(_normalize(r))
         return out
 
     def sources(self) -> list[dict]:
@@ -297,7 +297,7 @@ class UTSClient:
                 "definition": (r.get("definition") or "").strip()}
 
 
-def _normalise(r: dict) -> dict:
+def _normalize(r: dict) -> dict:
     sts = r.get("semanticTypes") or []
     names = []
     for s in sts:
@@ -343,7 +343,7 @@ class FixtureClient:
             if cand.is_file():
                 data = json.loads(cand.read_text())
                 results = (data.get("result") or {}).get("results") or []
-                return [_normalise(r) for r in results
+                return [_normalize(r) for r in results
                         if r.get("ui") and r.get("ui") != "NONE"
                         and r.get("rootSource") != "SRC" and r.get("name")]
         return []

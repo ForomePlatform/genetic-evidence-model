@@ -4,7 +4,7 @@ UMLS concept via the UTS REST API.
 
 This is the harness. It reads the curated inventory
 (``mapping/dimensions_inventory.yaml``), queries UMLS for each entry through a
-tiered search (exact -> normalised -> words), assigns an honest status
+tiered search (exact -> normalized -> words), assigns an honest status
 (``mapped`` / ``review`` / ``unmapped`` / ``pending``), and writes a
 machine-readable crosswalk to ``mapping/umls_crosswalk.yaml`` plus a coverage
 summary. The LaTeX table is rendered separately by
@@ -14,14 +14,14 @@ Honesty by construction:
 * Nothing is mapped without a UMLS query actually returning a concept.
 * Without an API key the harness runs but every entry is ``pending`` (queried
   nothing); it does not invent CUIs.
-* A query that finds candidates but no faithful exact/normalised match is
+* A query that finds candidates but no faithful exact/normalized match is
   ``review`` (candidates recorded for a curator), never silently ``mapped``.
 
 Usage:
     # 1. verify the inventory still covers the SHACL enumerations
     python3 mapping/build_umls_crosswalk.py --check-inventory
 
-    # 2. real run (needs a UMLS licence; key in UMLS_API_KEY or --api-key)
+    # 2. real run (needs a UMLS license; key in UMLS_API_KEY or --api-key)
     UMLS_API_KEY=... python3 mapping/build_umls_crosswalk.py
 
     # 3. offline run with no key -> all entries 'pending' (scaffold mode)
@@ -133,7 +133,7 @@ def resolve(client, query: str, sab: str | None, live: bool,
 
     top = cands[0]
     # Honesty by construction: 'mapped' requires the returned concept name to
-    # actually match the query (normalised), regardless of which search tier
+    # actually match the query (normalized), regardless of which search tier
     # produced it. The search_type label alone is NOT a guarantee that the
     # top hit is faithful, so an 'exact'-tier hit with a mismatched name is
     # demoted to 'review', not silently mapped.
