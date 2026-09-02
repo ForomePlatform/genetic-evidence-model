@@ -13,55 +13,69 @@
 \section{Illustrative Examples from the Literature}
 \label{sec:examples}
 
-To demonstrate the model's coverage and to see where it strains, we
-applied it to six published genetic-evidence papers that span the major
-epistemic shapes encountered in literature-based variant interpretation
-(Supplementary Table~\ref*{supp:tab:corpus}). The set covers classical Mendelian human
-genetics (Gupta), population-scale association (Duerr) and case--control
-resequencing (Davis), model-organism and \emph{in vitro} functional
-genetics (Jossin, Nelson, and the functional arms of Davis), and a
-genome-wide polygenic score (Inouye). Four of the six were annotated
-manually from curator PDF highlights and callouts and are treated as
-ground truth; the remaining two were drafted by an AI assistant and
-curator-reviewed. All six annotations and per-paper case reports are
-available in the project repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/case-reports}}
+To demonstrate the model's coverage and identify where it reaches its
+current limits, we applied it to six published genetic-evidence papers that
+span the major epistemic shapes encountered in literature-based variant
+interpretation (Supplementary Table~\ref*{supp:tab:corpus}). The set covers
+classical Mendelian human genetics (Gupta), population-scale association
+(Duerr), case--control resequencing (Davis), model-organism and \emph{in
+vitro} functional genetics (Jossin, Nelson, and the functional components of
+Davis), and a genome-wide polygenic score (Inouye). Four of the six papers
+were annotated manually from curator PDF highlights and callouts and are
+treated as ground truth. The remaining two were drafted by an AI assistant
+and reviewed by a curator. All annotations and per-paper case reports are
+available in the project
+repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/tree/master/case-reports}}
 
-Duerr et al.\ 2006 (\cref{sec:ex-duerr}) serves as our reference
-example of a classical variant-level association study. Inouye et
-al.\ 2018 (\cref{sec:ex-inouye}) is a polygenic risk score study
-whose annotation deliberately strains the model and surfaces a
-cluster of candidate extensions (\cref{sec:discussion}).
+Duerr et al.\ 2006 (\cref{sec:ex-duerr}) is the reference example of a
+classical variant-level association study. Inouye et al.\ 2018
+(\cref{sec:ex-inouye}) is a polygenic risk score study that exposes
+limitations of the current variant-level model and motivates a cluster of
+candidate extensions (\cref{sec:discussion}).
 
 \subsection{A Genome-Wide Association Study Example}
 \label{sec:ex-duerr}
 
-Duerr et al. 2006 identified IL23R as an inflammatory bowel disease gene through a genome-wide association study in
-non-Jewish cases with ileal Crohn's disease, followed by independent replication and family-based transmission
-testing. Under our decomposition, the paper yields seven \GeneticEvidence{} items (Supplementary Table~\ref*{supp:tab:corpus} and Case
-Report CR-DU): variant-level discovery and replication, a family-based transmission analysis, conditional
-fine-mapping, negative results at related pathway genes, and cited functional and mouse-model
-support. Six of the seven items fit the current schema without strain. The seventh, a cited anti-p40 antibody trial,
-is drug-response evidence that exercises no existing genetic knowledge domain and therefore surfaces a
-translational-scope gap. Review of this annotation also motivated three candidate extensions that remain
-provisional under the two-papers rule: an explicit direction-of-effect dimension for protective vs risk-conferring
-alleles, a construct for cross-item therapeutic synthesis, and an extension of the conditional-activation scope from
-gene- to variant-level Mendelian context. Further detail is in Supplementary Note~\ref*{supp:sec:supp-ex-duerr}.
+Duerr et al.\ 2006 identified \textit{IL23R} as an inflammatory bowel
+disease gene through a genome-wide association study of non-Jewish patients
+with ileal Crohn's disease, followed by replication in a Jewish cohort and
+family-based transmission testing. Under our decomposition, the paper yields
+seven \GeneticEvidence{} items (Supplementary
+Table~\ref*{supp:tab:corpus} and Case Report CR-DU): variant-level discovery
+and replication, a family-based transmission analysis, conditional
+fine-mapping, negative results at related pathway genes, and cited
+functional and mouse-model support.
 
+Six of the seven items fit the current schema without strain. The seventh, a
+cited anti-p40 antibody trial, concerns drug-response evidence for which the
+model has no fitting genetic Knowledge Domain, revealing a
+translational-scope gap. Review of this annotation also identified three
+candidate extensions that remain provisional under the two-papers rule: an
+explicit direction-of-effect dimension for protective and risk-conferring
+alleles, a construct for cross-item therapeutic synthesis, and an extension
+of conditional activation from gene-level to variant-level Mendelian context.
+Further detail is given in Supplementary
+Note~\ref*{supp:sec:supp-ex-duerr}.
 
-\subsection{A Polygenic Risk Score Stress Test}
+\subsection{A Polygenic Risk Score Example}
 \label{sec:ex-inouye}
 
-Inouye et al. 2018 constructed a meta-genomic risk score (metaGRS) for coronary artery disease,
-combining three component scores and testing performance in UK Biobank
-participants. Unlike Duerr's variant-level association, the target here is a derived score spanning the whole genome,
-and the main measurements are epidemiological. Our
-annotation decomposes the paper into four \GeneticEvidence{} items: the score's predictive and stratifying power, its
-independence from conventional risk factors, its persistence among medicated individuals, and the headline finding
-that combining three component scores outperforms each
-(Case Report CR-IN). All four are representable in the current model but only through deliberate ``least-wrong''
-choices (for example, forcing the score into the variant target type and leaving variant ascertainment
-not-applicable). These forced fits are recorded as six candidate
-extensions, including a score target type, a whole-genome resolution, a target-composition axis
-distinguishing single from aggregate targets, an epidemiological measurement-target vocabulary, a structured cohort
-descriptor, and a flag for derived-artifact targets. Where and how the model strains is thus recorded openly rather
-than papered over. Further detail is in Supplementary Note~\ref*{supp:sec:supp-ex-inouye}.
+Inouye et al.\ 2018 developed and externally validated a meta-genomic risk
+score (metaGRS) for coronary artery disease by combining three component
+scores and evaluating performance in UK Biobank participants. Unlike Duerr's
+variant-level association study, the evidential target is a derived,
+whole-genome score and the primary measurements are epidemiological.
+
+Our annotation decomposes the paper into four \GeneticEvidence{} items:
+predictive and stratifying performance; independence from conventional risk
+factors; persistence of stratification among medicated individuals; and the
+headline finding that combining three component scores outperforms each
+component (Case Report CR-IN). All four require deliberate placeholder
+assignments in the current model. In particular, the score is assigned the
+placeholder Target Type \dimval{Variant}, and Variant Ascertainment is marked
+not applicable. These forced fits are recorded as six candidate extensions:
+a score target type, whole-genome-aggregate resolution, a target-composition
+axis, epidemiological measurement targets, a structured cohort descriptor,
+and a flag for derived-artifact targets. The model's limitations are thus
+recorded explicitly rather than left implicit. Further detail is given in
+Supplementary Note~\ref*{supp:sec:supp-ex-inouye}.
