@@ -21,6 +21,15 @@ A Semantic Model of Genetic Evidence}
 \renewcommand{\thetable}{ST\arabic{table}}      % supplementary tables: ST1, ST2, ...
 \renewcommand{\thesection}{SN\arabic{section}}  % supplementary notes: SN1 .. SN5
 
+% Coverage-matrix cell symbols (SN1). Defined here rather than in the shared
+% preamble because only the supplement uses them.
+\usepackage[nointegrals]{wasysym}             % \CIRCLE / \LEFTcircle / \Circle for the coverage matrix (SN1); nointegrals avoids the amsmath clash
+\newcommand{\cfull}{\CIRCLE}      % represented natively (coverage matrix, SN1)
+\newcommand{\chalf}{\LEFTcircle}  % only via extension/profile, or one aspect only
+\newcommand{\cforce}{\LEFTcircle} % GEM: forced fit recorded as a candidate extension
+\newcommand{\cnone}{\Circle}      % not represented
+\newcommand{\cna}{--}             % outside the standard's subject matter
+
 % Widen the ToC/LoT number boxes so the SN/ST prefixes do not overlap the titles.
 \setlength{\cftsecnumwidth}{2.8em}
 \setlength{\cftsubsecnumwidth}{3.6em}

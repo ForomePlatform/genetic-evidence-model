@@ -68,8 +68,8 @@ always-required dimension or a conditional dimension whose activation
 condition held but whose value was absent, had to be resolved before an
 annotation was admitted to the corpus.
 
-The four manual annotations are treated as \emph{ground truth} for this
-work. They are not a gold standard in the statistical sense, because the
+The four manual annotations are treated as the curator-authored
+\emph{reference annotations} for this work. They are not a gold standard in the statistical sense, because the
 corpus has only one annotator. They are, however, the authoritative reference
 against which the AI-drafted track is evaluated.
 
@@ -155,17 +155,22 @@ subsequent, generalized formalization. The pilot annotations remain valid
 under the current protocol. Some artifacts, such as slightly different
 span-selection conventions in the earliest AI-drafted annotations, are
 recorded as forward-looking notes rather than retrofitted edits.
-One such artifact is a field-name change. Protocol~v0 used
-\texttt{key\_phrase} for the source-span phrase, whereas v1 uses
-\texttt{phrase}. The corpus retains both spellings. Before RDF validation,
-the YAML-to-RDF transformation
+Two such artifacts are field-name changes. Protocol~v0 used
+\texttt{key\_phrase} for the source-span phrase and \texttt{resolution} for
+the target resolution, whereas v1 uses \texttt{phrase} and
+\texttt{target\_resolution}. The corpus retains both spellings. Before RDF
+validation, the YAML-to-RDF transformation
 (\fpath{src/python/main/forome/gem/extraction/yaml_to_rdf.py}) normalizes
-both to the RDF property \texttt{gem:phrase}.
+them to the RDF properties \texttt{gem:phrase} and \texttt{gem:resolution},
+so \texttt{gem-validate} treats the two spellings identically; the legacy
+names are retained solely for backward compatibility.
 
 Second, the AI-drafted annotations were produced with Claude Opus~4.7 for
-Duerr and Claude Opus~4.8 for Inouye, and both were reviewed with Claude
-Opus~4.8 under the executable skills. These implementation details are
-reported for reproducibility and are not central to the scientific
-contribution. In all cases, every AI-produced annotation and review verdict
-was adjudicated by the human curator, who remains the authority for the
-recorded annotations.
+Duerr and Claude Opus~4.8 for Inouye, and the assertion-by-assertion review
+was conducted by the human curator interacting with Claude Opus~4.8 under
+the executable review skill. These implementation details are reported for
+reproducibility and are not central to the scientific contribution.
+AI-generated drafts and AI-assisted review suggestions were subject to
+final adjudication by the human curator; the reviewed annotations are
+human-approved records, and no AI system was treated as the authority for
+any scientific or curation decision.

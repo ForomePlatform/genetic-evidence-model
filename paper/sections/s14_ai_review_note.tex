@@ -10,13 +10,35 @@
 This note reports the review outcomes for the two AI-drafted annotations:
 Duerr et al.\ 2006, a conventional genome-wide association example, and
 Inouye et al.\ 2018, a polygenic-score case that exposes several model
-limitations. Each draft was reviewed assertion by assertion in interactive
-mode against \texttt{REVIEW\_PROTOCOL} v1.0. The authoritative logs,
-including every flag and ruling, are available in the repository under
-\fpath{annotations/reviews/}. \Cref{tab:ai-review} summarizes the verdicts
-for the drafted items.
+limitations.
+% Review 2026-09-02: (1) 'interacting with the AI assistant under the review
+% skill' restored: SN2 and SN3 describe the assistant as executing the skill
+% under curator supervision, so 'the curator, who used the review skill'
+% inverted the actor/tool relation; 'against' keeps the protocol phrase
+% attached to 'reviewed', and the tie keeps 'v1.0' on the same line.
+% (2) The human-authority sentence is restored verbatim from Section 5 and
+% SN2, which the CHANGELOG records as one shared formulation. (3)
+% 'authoritative logs' -> 'complete review logs' to avoid the
+% authority/authoritative echo across the paragraph break.
+Each draft was reviewed assertion by assertion against
+\texttt{REVIEW\_PROTOCOL}~v1.0 by the human curator, who interacted with
+an AI assistant operating under the review skill.
+% Review 2026-09-03: the semicolon join is restored in the human-authority
+% sentence: Section 5, SN2, and SN4 carry it as one verbatim shared
+% formulation, recorded as such in the CHANGELOG and in the 2026-09-02 note
+% above; the period split made SN4 silently diverge from the other two
+% copies. The reordered first sentence of the paragraph is kept.
+AI-generated drafts and
+AI-assisted review suggestions were subject to final adjudication by the
+human curator; the reviewed annotations are human-approved records, and no
+AI system was treated as the authority for any scientific or curation
+decision.
 
-\begin{table}[h]
+The complete review logs, including every flag and ruling, are available in
+the repository under \fpath{annotations/reviews/}.
+\Cref{tab:ai-review} summarizes the verdicts for the drafted items.
+
+\begin{table}[H]  % [H] like every other supplement table
   \centering
   \small
   \begin{tabular}{lcccccc}

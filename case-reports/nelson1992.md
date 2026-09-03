@@ -48,8 +48,8 @@ of beta-2 integrin biogenesis.
 | GE-2 | R586W (c.C1756T) | Missense in a conserved region of the cytoplasmic tail.                                |
 | GE-3 | N351S (c.A1052G) | Missense in the I-domain.                                                              |
 
-All three items share method (`EXPERIMENTAL_IN_VITRO` plus
-`CLINICAL_EVIDENCE`), `target_type = VARIANT`, and `phenotype_scale
+All three items share method (`IN_VITRO_EXPERIMENT`, the legacy
+synonym for `IN_VITRO`), `target_type = VARIANT`, and `phenotype_scale
 = MOLECULAR`. The schema accommodates them cleanly without
 extension. The paper's age (1992) does not stress the model: the
 fundamental epistemic shape of variant-level functional evidence

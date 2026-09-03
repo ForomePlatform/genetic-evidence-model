@@ -16,9 +16,16 @@ part of what a basic-science genetic publication reports, but none captures the
 whole: a single conditional-knockout study may report molecular, cellular, and
 clinical phenotypes at once, and a polygenic-score study may aggregate millions
 of variants into one score. A per-family review, with the specific coverage
-gaps that motivate our model, is given in Supplementary Note~\ref*{supp:sec:supp-background}. Of these
-families, FHIR Evidence is the closest structural relative of our model, and we
-position the model relative to it here.
+gaps that motivate our model,
+is given in Supplementary Note~\ref*{supp:sec:supp-background}.
+Supplementary Table~\ref*{supp:tab:coverage-matrix} presents the same
+analysis as a matrix comparing ten evidence patterns across the standards
+% Review 2026-09-03: 'our model (GEM)' ties the acronym to its referent at
+% what is its first prose use in the main paper; GEM is expanded nowhere
+% else, and later bare uses (Table 1, Section 3) inherit this antecedent.
+and our model (GEM). For each pattern, the matrix indicates whether a resource
+represents it natively, only in part or by extension, or not at all. It
+also marks patterns that lie outside a resource's subject matter.
 
 \subsection{Relation to FHIR Evidence}
 \label{sec:background-fhir}
@@ -27,9 +34,10 @@ FHIR is an HL7 information model rather than an OBO Foundry ontology. A
 genetic-evidence model could, in principle, be built directly on the OBO
 side, but doing so first would be premature. ECO and SEPIO provide,
 respectively, an evidence-type vocabulary and a model of assertion
-provenance and qualifiers. Neither provides the variable-and-certainty
-content model for an evidence unit that FHIR Evidence provides and that
-basic-science evidence needs to support translation from bench to bedside.
+provenance and qualifiers.
+Neither provides the variable-and-certainty content model for an evidence
+unit that FHIR Evidence offers and that basic-science evidence needs to
+support translation from bench to bedside.
 
 Aligning a genetics-only model directly to OBO before such a general content
 model exists would yield a narrow resource. It would neither compose cleanly

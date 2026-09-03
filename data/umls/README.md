@@ -11,7 +11,7 @@ the alternatives rejected, and the argument for each verdict --- lives in
 [`DECISIONS.md`](DECISIONS.md).
 
 The curation app itself is documented in the usage guide
-[`STUDIO.md`](STUDIO.md).
+[`docs/STUDIO.md`](../../docs/STUDIO.md).
 
 It is **separate from** `paper/sections/s15_crosswalk.tex`, the existing
 structural crosswalk (SO / HPO / NCBITaxon / ECO / SEPIO / GA4GH-VA / FHIR),
@@ -57,7 +57,9 @@ registration and approval:
 1. Request a UMLS Metathesaurus License: <https://uts.nlm.nih.gov/uts/signup-login>
 2. Once approved, copy your API key from your UTS profile.
 3. Provide it to the harness via the `UMLS_API_KEY` environment variable
-   (e.g. in `.envrc`) — do not hard-code it. The key is sent to NLM's UTS
+   (e.g. in `.envrc`) — do not hard-code it. The Studio also accepts it
+   through its Connect UMLS dialog, which can remember it in
+   `~/.config/forome-gem/umls_api_key` (mode 0600); see `docs/STUDIO.md`. The key is sent to NLM's UTS
    service (`uts-ws.nlm.nih.gov`) on each query; raw responses are cached
    under `mapping/cache/` (git-ignored) so reruns are offline and auditable.
 

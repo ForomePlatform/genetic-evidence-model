@@ -34,7 +34,7 @@ the schema exposes, rather than hides, its points of strain.
     \node[box, fill=black!5] (src) {Source publication (PDF)};
     \node[box, fill=blue!6, below left=12mm and 22mm of src] (m1) {Curator highlights \& callouts};
     \node[box, fill=blue!6, below=6mm of m1] (m2) {Structured JSON record};
-    \node[box, fill=blue!6, below=6mm of m2] (m3) {YAML annotation\\(curator ground truth)};
+    \node[box, fill=blue!6, below=6mm of m2] (m3) {YAML annotation\\(curator reference set)};
     \node[box, fill=orange!8, below right=12mm and 22mm of src] (a1) {AI draft\\(annotation skill)};
     \node[box, fill=orange!8, below=6mm of a1] (a2) {Curator review\\(review skill)};
     \node[box, fill=orange!8, below=6mm of a2] (a3) {Reviewed YAML annotation};
@@ -49,7 +49,7 @@ the schema exposes, rather than hides, its points of strain.
     \draw[arr] (a3) -- (val);
   \end{tikzpicture}
   \caption{The two annotation tracks. Curator-authored annotations
-  (left) form the ground truth. AI-drafted annotations (right) are
+  (left) form the feasibility corpus's reference set. AI-drafted annotations (right) are
   produced under an annotation skill from the source PDF, the schema, and
   the manual annotations as exemplars, then reviewed by a curator under a
   review skill. Both tracks are validated against the same SHACL shapes.
@@ -85,7 +85,7 @@ Note~\ref*{supp:sec:supp-protocol-suite}.
 For two publications, Duerr and Inouye, an AI assistant drafted the
 annotations directly from the PDFs under an executable annotation
 skill~\cite{anthropic_skills}. The assistant received the schema
-(\texttt{dimensions.md}), the ground-truth annotations for the four
+(\texttt{dimensions.md}), the curator-authored reference annotations for the four
 manual papers as exemplars, and the source PDFs. It produced YAML
 annotations in the same format as the manual annotations.
 
@@ -95,9 +95,13 @@ either \texttt{ai\_uncertainty} or \texttt{ai\_assumption}. One of the
 authors then reviewed the AI-drafted annotations assertion by assertion.
 The reviewer has expertise in genomic data curation and the evidence
 model, rather than in genetics domain science. The review assessed source
-fidelity and schema conformance, not the underlying science.
-The four manual annotations are treated as domain-expert ground truth for
-their own papers and as exemplars for AI drafting. The executable skills
+fidelity and schema conformance, not the underlying science. AI-generated
+drafts and AI-assisted review suggestions were subject to final adjudication
+by the human curator; the reviewed annotations are human-approved records,
+and no AI system was treated as the authority for any scientific or
+curation decision.
+The four manual annotations are treated as the curator-authored reference
+annotations for their own papers and as exemplars for AI drafting. The executable skills
 and review protocol are described in Supplementary
 Notes~\ref*{supp:sec:supp-protocol-suite}
 and~\ref*{supp:sec:supp-skills}.
@@ -141,7 +145,7 @@ corrected. For example, the Nelson summary assigned
 dimension's semantics.
 
 \paragraph{AI-drafted track.}
-Because there is no prior ground truth with which to disagree, the
+Because there is no prior reference annotation with which to disagree, the
 AI-drafted track uses two flags. An \texttt{ai\_uncertainty} records a
 mapping that the assistant judged unreliable and referred for a human
 decision, such as a borderline assignment of Mode of Inheritance. An

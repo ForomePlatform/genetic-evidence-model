@@ -1,5 +1,8 @@
 # A Semantic Model of Genetic Evidence
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22260686.svg)](https://doi.org/10.5281/zenodo.22260686)
+[![PyPI](https://img.shields.io/pypi/v/gem-mapping-studio.svg)](https://pypi.org/project/gem-mapping-studio/)
+
 A conceptual framework for representing scientific and genetic evidence from
 the biomedical literature in a form suitable for variant interpretation,
 automated reasoning, and AI-ready clinical infrastructure.
@@ -18,9 +21,14 @@ journal submission.
 ├── case-reports/   Per-paper case reports (one for each of the six annotations)
 ├── protocols/      Annotation protocol documents (canonical rules + per-mode workflows)
 ├── skills/         Two Claude skills (annotation, review) that operationalise the protocols
-├── extraction/     Scripts that extract highlights and callouts from annotated PDFs
+├── data/umls/      UMLS crosswalk of the dimensional vocabulary + decision log (DECISIONS.md)
+├── src/python/     The `gem-mapping-studio` package: Mapping Studio, crosswalk harness,
+│                   validators, PDF highlight/callout extraction (`forome.gem.*`)
 ├── figures/        Source files for figures used in the paper
-└── .github/        CI configuration validating annotations against the schema
+├── docs/           Usage guides (STUDIO.md: the Mapping Studio)
+├── .github/        CI configuration validating annotations against the schema
+├── CHANGELOG.md    What changed in each tagged release
+└── KNOWN_LIMITATIONS.md  What the model, schema, corpus, and tooling do not yet do
 ```
 
 ## The annotation corpus
@@ -158,13 +166,13 @@ artifacts (review log, review report, and the updated annotation).
 
 ## Extraction pipeline
 
-The scripts in `extraction/` read a PDF with highlights and callouts and emit
-a structured JSON record of every annotation, including the text covered by
-each highlight (extracted via coordinate lookup) and the free-text notes
-attached to callouts.
+The `forome.gem.extraction` modules read a PDF with highlights and callouts
+and emit a structured JSON record of every annotation, including the text
+covered by each highlight (extracted via coordinate lookup) and the free-text
+notes attached to callouts.
 
 ```bash
-python3 extraction/extract_annotations.py paper.pdf out.json
+python3 -m forome.gem.extraction.extract_annotations paper.pdf out.json
 ```
 
 Two extractors are provided. `extract_annotations.py` uses PyMuPDF and is the
@@ -210,11 +218,32 @@ and blocks merges on failure:
 Run the same checks locally with `python3 scripts/validate_annotations.py`
 and `python3 scripts/compute_coverage.py` (requires `pyshacl rdflib pyyaml`).
 
+## UMLS crosswalk and the GEM Mapping Studio
+
+`data/umls/` holds the term-level crosswalk of the dimensional vocabulary to
+UMLS (`umls_crosswalk.yaml`), the curator adjudications behind it, and the
+public decision log `DECISIONS.md`. The crosswalk was produced with the
+**GEM Mapping Studio**, a standalone, model-agnostic curation tool for
+defining mapping axes and adjudicating value-level mappings against UMLS:
+
+```bash
+pip install gem-mapping-studio      # PyPI; console scripts gem-mapping-studio, gem-validate, gem-coverage, ...
+```
+
+Usage guide: **[`docs/STUDIO.md`](docs/STUDIO.md)** — how to build a new
+mapping from scratch in any domain, and how to work on the GEM mapping in
+this repository (from a checkout with `pip install -e .`, or with the
+released tool pointed at `data/umls`). The package also ships `gem-validate`
+and `gem-coverage`, which reproduce the corpus validation and the coverage
+table reported in the paper from a clean checkout.
+
 ## Citing this work
 
-See `CITATION.cff`. A DOI is minted via the Zenodo–GitHub integration at
-each tagged release (record metadata in `.zenodo.json`); the concept DOI
-will be added to `CITATION.cff` after the first release.
+See `CITATION.cff`. Concept DOI (all versions):
+[10.5281/zenodo.22260686](https://doi.org/10.5281/zenodo.22260686);
+the release described in the manuscript is v0.2.5.
+A new version DOI is minted via the Zenodo–GitHub integration at each
+tagged release (record metadata in `.zenodo.json`).
 
 ## License
 

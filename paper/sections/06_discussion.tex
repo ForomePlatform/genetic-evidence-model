@@ -49,6 +49,13 @@ candidates is summarized in \cref{tab:candidates}; per-candidate
 rationale, affected dimensions, and proposed enumeration values
 are documented in a companion \texttt{schema/EXTENSIONS.md} in the
 repository.\footnote{\url{https://github.com/ForomePlatform/genetic-evidence-model/blob/master/schema/EXTENSIONS.md}}
+Supplementary Table~\ref*{supp:tab:coverage-matrix} places these candidates
+in a broader context. Of the ten evidence patterns considered, five common
+patterns in basic-science genetic publications are represented natively by
+the model. Three patterns were exposed by the pilot as forced fits and define
+documented areas for extension. Two further patterns, therapeutic-response
+evidence and cross-publication synthesis, are outside the model's intended
+scope and are left to standards designed to represent them.
 The Gupta annotation, which identified no candidate extensions, is also a
 positive finding. It reports a family with an X-linked splice-site mutation
 and careful pedigree segregation, a canonical evidence shape for which the
@@ -168,10 +175,12 @@ review skills (\texttt{skills/}) described in Supplementary Note~\ref*{supp:sec:
 and the extraction tooling used to
 convert PDF highlights and callouts into annotation scaffolds. The
 namespace \url{https://w3id.org/genetic-evidence-model/} resolves
-to the same repository. This paper describes release \texttt{v0.2.2},
-archived on Zenodo; the GEM Mapping Studio is distributed on PyPI as
+to the same repository. This paper describes release \texttt{v0.2.5},
+archived on Zenodo under the concept DOI
+\url{https://doi.org/10.5281/zenodo.22260686}, which resolves to the
+latest archived release;
+the GEM Mapping Studio is distributed on PyPI as
 \texttt{gem-mapping-studio}.
-% TODO(release): insert the Zenodo version DOI for v0.2.2 once minted (concept DOI 10.5281/zenodo.22260686).
 
 \subsection*{Reproducibility and conformance}
 
@@ -199,7 +208,7 @@ repository root of the tagged release.}
 Claim & Where to verify \\
 \midrule
 Canonical schema & \texttt{schema/genetic\_evidence.shacl.ttl} (three enforced activation shapes: Variant Ascertainment, Mode of Inheritance, and Organism) \\
-YAML-to-RDF transform & \texttt{src/python/main/forome/gem/extraction/yaml\_to\_rdf.py} (normalizes \texttt{key\_phrase} and \texttt{phrase}) \\
+YAML-to-RDF transform & \texttt{src/python/main/forome/gem/extraction/yaml\_to\_rdf.py} (normalizes the v0/v1 field renames \texttt{key\_phrase}/\texttt{phrase} and \texttt{resolution}/\texttt{target\_resolution}) \\
 Corpus validation & \texttt{gem-validate} over \texttt{annotations/}; CI workflow \texttt{.github/workflows/validate.yml} \\
 Coverage counts & \texttt{gem-coverage} regenerates \texttt{annotations/coverage.md} \\
 Activation-shape tests & \texttt{src/python/test/forome/gem/validation/} \\
