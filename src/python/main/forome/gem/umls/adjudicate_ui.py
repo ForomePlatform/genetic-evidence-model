@@ -2193,11 +2193,26 @@ function valueEditor(dim,token){
     `<button class="primary" data-write id="vsave">${cur?'Save value':'Add value'}</button>`+
     `<button onclick="closeModal()">Cancel</button><span id="vmsg" class="mini"></span></div></div>`);
   attachSabTypeahead($('#vsab'));
+  // A new value opens with an empty query and the server refuses to save one
+  // (the harness sends the query to UMLS). Derive it from the token as the
+  // token is typed, following the inventory's own convention
+  // (HUMAN_GENETICS -> "Human genetics", X_inhibits_Y -> "X inhibits Y"),
+  // until the curator edits the query by hand; clearing the query hands it
+  // back to the derivation.
+  if(!cur){const tt=$('#vtoken'),tq=$('#vquery');
+    if(tt&&tq){let handEdited=false;
+      tq.addEventListener('input',()=>{handEdited=tq.value.trim()!=='';if(!handEdited)tq.value=queryFromToken(tt.value);});
+      tt.addEventListener('input',()=>{if(!handEdited)tq.value=queryFromToken(tt.value);});}}
   const go=()=>saveValue(dim,token!=null?String(token):null);
   const b=$('#vsave');if(b)b.addEventListener('click',go);
   ['vtoken','vquery','vsab','vnote'].forEach(id=>{const el=$('#'+id);
     if(el)el.addEventListener('keydown',ev=>{if(ev.key==='Enter')go();});});
   const t=$('#vtoken');if(t){t.focus();t.select();}}
+function queryFromToken(t){
+  const raw=String(t||'').replace(/[_\s]+/g,' ').trim();
+  if(!raw)return '';
+  const s=raw===raw.toUpperCase()?raw.toLowerCase():raw;
+  return s[0].toUpperCase()+s.slice(1);}
 async function saveValue(dim,oldToken){
   const m=$('#vmsg'),body={dimension:dim,token:(($('#vtoken')||{}).value||'').trim(),
     query:($('#vquery')||{}).value||'',expect:($('#vexpect')||{}).value||'',

@@ -16,15 +16,15 @@
 
 The two AI-drafted annotations illustrate contrasting parts of the model's
 operating range. The main paper (Section~4) summarizes them; this
-note provides the item-level detail omitted there for space. Duerr is the
-more conventional case: six of its seven \GeneticEvidence{} items fit the
-current schema without strain, and the remaining gap concerns translational
-evidence. Inouye tests the limits of the variant-level model: all four items
+note provides the item-level detail omitted there for space.
+Duerr is the more conventional case: six of its seven \GeneticEvidence{}
+items fit the current schema without strain, and the remaining item raises
+an open question about translational scope. Inouye tests the limits of the variant-level model: all four items
 require forced-fit assignments, which motivate six candidate extensions.
 Assertion-by-assertion review verdicts are given in
 \cref{sec:supp-ai-review}; the term-level standards crosswalk is in
-\cref{sec:supp-crosswalk}; and the complete annotations are the
-repository files \fpath{annotations/v0/duerr2006.yaml} and
+\cref{sec:supp-crosswalk}; and the complete annotations are available as
+the repository files \fpath{annotations/v0/duerr2006.yaml} and
 \fpath{annotations/v1/inouye2018.yaml}.
 
 \subsection{Case Report CR-DU: Duerr et al.\ 2006 (genome-wide association)}
@@ -139,7 +139,7 @@ as hazard ratios and C-indices. The paper therefore exposes limitations of
 a model whose target types are variant-level.
 
 The annotation reported here is the \texttt{v1} re-annotation produced
-under the current protocol. It was developed after the Duerr review; the
+under the current protocol, which was refined during the Duerr review. The
 original five-item \texttt{v0} draft remains in the repository for
 comparison. The \texttt{v1} annotation decomposes the paper into four
 claim-coherent items (\cref{tab:cr-inouye}). Each can be represented only
@@ -171,21 +171,30 @@ candidate extensions rather than left implicit.
   (CE-IN2). Method is recorded at the intermediate
   \dimval{Association Study}/\dimval{Meta-Analysis} level because no leaf
   represents polygenic-score association (flag F-METH). Variant Ascertainment
-  is marked not applicable, which supports the CE-IN1 SHACL argument.}
+  is marked not applicable because a score has no
+  single ascertainment mode; this supports the CE-IN1 SHACL argument.}
 \end{table}
 
-The independence item, GE-2, makes these limitations concrete and is shown
-in abridged form below. Protocol~v0, used for Duerr, named the field
-\texttt{resolution}; protocol~v1, used for Inouye, renamed it
-\texttt{target\_resolution}. The corpus retains both forms, which the
-YAML-to-RDF transformation normalizes to \texttt{gem:resolution};
-\texttt{gem-validate} therefore treats them identically.
-
+% Review 2026-09-02: paragraphs reordered so the GE-2 description follows
+% its topic sentence and the field-rename aside sits next to the listing it
+% explains; 'Both its' keeps the lowercase \texttt token off the paragraph
+% start (a colon join produced a 55pt overfull line); 'The' dropped before 'Epidemiological' to clear a 2.4pt
+% overfull box; the key_phrase/phrase rename, visible in the two listings,
+% is now named alongside resolution/target_resolution.
+The independence item, GE-2, makes these limitations concrete. Both its
 \texttt{target\_type} and \texttt{target\_resolution} are assigned the
 placeholder value \dimval{Variant} and flagged against CE-IN1 and CE-IN2.
 Variant Ascertainment is marked not applicable because it does not apply
-cleanly to a score target. The epidemiological measures are recorded in
+cleanly to a score target. Epidemiological measures are recorded in
 \texttt{special\_considerations} and motivate CE-IN4.
+
+The item is shown in abridged form below. Protocol~v0, used for Duerr,
+named the fields \texttt{resolution} and \texttt{key\_phrase}; protocol~v1,
+used for Inouye, renamed them \texttt{target\_resolution} and
+\texttt{phrase} (\cref{sec:supp-protocol-suite}). The corpus retains both
+forms, which the YAML-to-RDF transformation normalizes to
+\texttt{gem:resolution} and \texttt{gem:phrase}; \texttt{gem-validate}
+therefore treats them identically.
 
 \begin{lstlisting}[language=yaml]
 id: GE-2

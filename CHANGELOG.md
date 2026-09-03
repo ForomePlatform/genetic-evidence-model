@@ -21,6 +21,10 @@ Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
   comment-preserving round-trip and re-resolving that dimension on the spot.
   Renaming a token re-keys its adjudication; deleting a value drops its
   adjudication, so a re-added token cannot resurrect a mapping nobody re-made.
+  The **New value** dialog pre-fills the UMLS query from the token as it is
+  typed (`HUMAN_GENETICS` becomes *Human genetics*) until the query is
+  edited by hand; previously the field opened empty and a save without one
+  was refused.
 - Mapping Studio: a **?** control in the brand row opening the usage guide
   (`docs/STUDIO.md`); `$GEM_STUDIO_HELP_URL` repoints it.
 - Mapping Studio: a value defined in the inventory but absent from the
@@ -31,7 +35,7 @@ Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
   evidence patterns against HL7 FHIR Evidence R5, GA4GH VA 1.0 / VRS, SEPIO,
   ECO, ClinGen / ACMG-AMP, and GEM, with per-row notes and identifiers
   verified against the source vocabularies (`paper/sections/s11_background.tex`;
-  pointers from main-text §2 and §6; references `strande2017`, `wand2021`).
+  pointers from main-text §2 and §6; references `strande2017`, `wand2021`, `schmidt2024`).
 - `KNOWN_LIMITATIONS.md`: what the model, schema, and tooling do not yet do.
 - This changelog.
 
