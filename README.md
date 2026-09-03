@@ -241,8 +241,7 @@ table reported in the paper from a clean checkout.
 
 See `CITATION.cff`. Concept DOI (all versions):
 [10.5281/zenodo.22260686](https://doi.org/10.5281/zenodo.22260686);
-the release described in the manuscript is v0.2.2,
-[10.5281/zenodo.22260773](https://doi.org/10.5281/zenodo.22260773).
+the release described in the manuscript is v0.2.5.
 A new version DOI is minted via the Zenodo–GitHub integration at each
 tagged release (record metadata in `.zenodo.json`).
 

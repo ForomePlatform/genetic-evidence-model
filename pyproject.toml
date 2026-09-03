@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gem-mapping-studio"
-version = "0.2.4"
+version = "0.2.5"
 description = "Forome Genetic Evidence Model: a reference data model, UMLS/OMOP crosswalk tooling, and SHACL validation for basic-science genetic evidence"
 readme = "README.md"
 license = "Apache-2.0"

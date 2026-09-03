@@ -6,8 +6,8 @@ message: >
   preparation; this file will be updated with the preferred citation when
   it is available.
 title: "Forome Genetic Evidence Model (GEM)"
-version: 0.2.2
-date-released: 2026-09-02
+version: 0.2.5
+date-released: 2026-09-03
 doi: 10.5281/zenodo.22260686
 identifiers:
   - type: doi
@@ -15,7 +15,7 @@ identifiers:
     description: Concept DOI (resolves to the latest release)
   - type: doi
     value: 10.5281/zenodo.22260773
-    description: Version DOI for v0.2.2, the release described in the manuscript
+    description: Version DOI for v0.2.2
 abstract: >
   A semantic model for scientific and genetic evidence from the biomedical
   literature, designed to support variant interpretation and AI-ready

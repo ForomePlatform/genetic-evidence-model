@@ -8,7 +8,10 @@ version of the `gem-mapping-studio` Python package; the two earlier tags
 Each tagged release from 0.2.1 on is archived on Zenodo (concept DOI
 [10.5281/zenodo.22260686](https://doi.org/10.5281/zenodo.22260686)).
 
-## [Unreleased]
+## [0.2.5] - 2026-09-03
+
+*(Tags `v0.2.3` and `v0.2.4` were `gem-mapping-studio` package-version bumps
+without a repository release; their changes are recorded here.)*
 
 ### Added
 - Mapping Studio: **value curation**. A dimension's values could only ever be
