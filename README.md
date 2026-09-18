@@ -25,7 +25,8 @@ journal submission.
 ├── src/python/     The `gem-mapping-studio` package: Mapping Studio, crosswalk harness,
 │                   validators, PDF highlight/callout extraction (`forome.gem.*`)
 ├── figures/        Source files for figures used in the paper
-├── docs/           Usage guides (STUDIO.md: the Mapping Studio)
+├── docs/           Usage guides (ANNOTATION_GUIDE.md, REVIEW_GUIDE.md: running
+│                   the skills; STUDIO.md: the UMLS Mapping Studio)
 ├── .github/        CI configuration validating annotations against the schema
 ├── CHANGELOG.md    What changed in each tagged release
 └── KNOWN_LIMITATIONS.md  What the model, schema, corpus, and tooling do not yet do
@@ -163,6 +164,11 @@ The annotation skill confirms the input paper, output path, and schema location,
 then produces a single YAML file matching the existing annotations. The review
 skill walks the annotation item by item with the curator and emits its three
 artifacts (review log, review report, and the updated annotation).
+
+Step-by-step guides for both skills, written for a reader new to Claude and
+covering Claude Code, the Claude app, and agentic (Cowork) use:
+**[`docs/ANNOTATION_GUIDE.md`](docs/ANNOTATION_GUIDE.md)** and
+**[`docs/REVIEW_GUIDE.md`](docs/REVIEW_GUIDE.md)**, in that order.
 
 ## Extraction pipeline
 
