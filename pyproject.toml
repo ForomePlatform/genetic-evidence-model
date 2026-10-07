@@ -44,13 +44,16 @@ Homepage = "https://w3id.org/genetic-evidence-model/"
 Repository = "https://github.com/ForomePlatform/genetic-evidence-model"
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "openpyxl>=3.1"]  # openpyxl: the worksheet-converter tests
 # Local UMLS index on PostgreSQL (forome.gem.umls.local_umls).
 local = ["psycopg[binary]>=3.1"]
+# Annotation-worksheet conversion (forome.gem.extraction.worksheet_to_yaml); pyyaml is already core.
+xl = ["openpyxl>=3.1"]
 
 [project.scripts]
 gem-validate = "forome.gem.validation.validate_annotations:main"
 gem-coverage = "forome.gem.validation.compute_coverage:main"
+gem-worksheet-to-yaml = "forome.gem.extraction.worksheet_to_yaml:main"
 gem-umls-crosswalk = "forome.gem.umls.build_umls_crosswalk:main"
 gem-umls-render = "forome.gem.umls.render_crosswalk_tex:main"
 gem-umls-adjudicate = "forome.gem.umls.adjudicate_ui:main"
