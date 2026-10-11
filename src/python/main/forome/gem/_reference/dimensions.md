@@ -1,4 +1,4 @@
-# Dimensions of the Genetic Evidence Model — Reference
+# Dimensions of the Genetic Evidence Model: Reference
 
 This document is the human-readable enumeration reference for every dimension
 in the model. The machine-checkable version lives in
@@ -29,6 +29,54 @@ Cardinality: multiple. Objectivity: objective.
 | `EPIGENETICS`         | Methylation, chromatin, non-sequence inheritance |
 | `GENE_FUNCTION`       | Molecular function of gene products |
 | `MODEL_ORGANISM`      | Experimental work in a non-human organism used as a model |
+
+#### Notes on the enumeration
+
+**Knowledge-domain values are inclusive rather than exclusive.** They name
+scientific domains in which an evidence item is situated. An item may
+therefore receive more than one value when its evidence lies at the
+intersection of domains. The values are sibling framings, not alternative
+positions in a hierarchy. `HUMAN_GENETICS`, `ANIMAL_GENETICS`,
+`POPULATION_GENETICS`, and `COMPARATIVE_GENOMICS` name traditions of
+genetic inference; `EPIGENETICS` and `GENE_FUNCTION` name areas of
+biological inquiry; and `MODEL_ORGANISM` names a research domain centered
+on experimental organisms. For example, an experiment in a model organism
+that investigates the function of a gene implicated through familial
+inheritance may be annotated `MODEL_ORGANISM`, `GENE_FUNCTION`, and
+`HUMAN_GENETICS`. Davis 2011 GE-1 is an example of such a combination.
+
+**`HUMAN_GENETICS` names an inference tradition, not a species.** Human
+subjects alone do not make an item `HUMAN_GENETICS`. The inference must be
+family- or inheritance-based. A case-control association study or
+GWAS in human cohorts is instead `POPULATION_GENETICS`. The
+distinction is drawn per evidence item, not per paper (curatorial
+precedent: in the Duerr 2006 review, the family-based
+transmission item GE-3 is reassigned to `HUMAN_GENETICS`, dropping
+`POPULATION_GENETICS`, "human genetics, not popgen").
+
+**`EPIGENETICS` denotes a phenomenon and combines with other values where
+warranted.** It may co-occur with an inference-tradition value when the
+study design supports one, or with none. Observing methylation in human
+material does not by itself justify `{HUMAN_GENETICS, EPIGENETICS}`:
+each value must independently satisfy its own gloss.
+
+- A methylation association tested across human cohorts, for example an
+  EWAS, is `{EPIGENETICS, POPULATION_GENETICS}`.
+- A methylation mark shown to be transmitted through human families is
+  `{EPIGENETICS, HUMAN_GENETICS}`: it concerns a non-sequence inherited
+  mark and rests on inheritance-based inference.
+- The criterion for adding `POPULATION_GENETICS` is not sample size alone.
+  The analysis must test associations among variable observations across
+  sampled individuals and support inference about a population. A
+  sufficiently large donor panel used for an iPSC QTL study, for example,
+  is `POPULATION_GENETICS`.
+- Conversely, an apparent case-control structure does not by itself make
+  an item `POPULATION_GENETICS`. If clinical-history groups function as
+  fixed experimental conditions (for example, in a differential-methylation
+  comparison among a small number of patient-derived cell lines), the item is
+  `EPIGENETICS` without an inference-tradition value, unless another value
+  is independently supported. It may still receive other applicable
+  domain values, such as `GENE_FUNCTION`.
 
 ### Method
 
@@ -175,6 +223,35 @@ Cardinality: single. Objectivity: objective.
 | `INTERVAL`     | A coordinate interval (bp or cM) |
 | `TRANSCRIPT`   | A transcript isoform |
 
+#### Epigenetic entities as targets
+
+Methylation marks (CpG sites, differentially methylated regions) have no
+target type of their own, and a methylation mark is **never** a `VARIANT`:
+`VARIANT` means a sequence change, and using it for a CpG probe would also
+wrongly trigger the `variant_ascertainment` activation. Until a dedicated
+treatment is adopted (candidate CE-M2 in `KNOWN_LIMITATIONS.md`), the rule
+is:
+
+- When the evidential claim attributes the finding to a gene (methylation
+  at a CpG site or region in the gene's promoter or body, with or without
+  an expression consequence for that gene), the target is that `GENE`.
+  `target_resolution` then records the genomic precision of the mark:
+  `POSITION` for a single CpG site, `FUNCTIONAL_ELEMENT` for a promoter,
+  CpG-island, or other element-level region. This mirrors the established
+  linkage pattern in the opposite direction (target `GENE`, resolution
+  `WINDOW`): resolution records the localisation of the evidence signal,
+  not the extent of the target.
+- When the claim concerns a differentially methylated region not attributed
+  to a specific gene, the target is a `SEGMENT` (coordinates in `target`),
+  with `target_resolution` of `FUNCTIONAL_ELEMENT` or `WINDOW` as the paper
+  supports.
+
+Attribution follows the paper's own attribution; an annotator's or
+reviewer's disagreement with it is recorded as a note, not by re-routing
+the target. The mark's identity (a probe identifier or coordinates) has no
+structured slot and is recorded in a `normalization_note` on the item,
+pending CE-M2.
+
 ### Resolution
 
 Cardinality: single. Objectivity: objective.
@@ -194,7 +271,7 @@ Cardinality: one overall rating, plus optional facets. Objectivity: subjective.
 The overall credibility is an ordinal rating from the enumeration
 `{VERY_HIGH, HIGH, MEDIUM, LOW}` (anchored on SEPIO confidence), optionally
 accompanied by a free-text `credibility_comment` and by separately rated
-facets — statistical power / sample size, independent replication,
+facets: statistical power / sample size, independent replication,
 multiple-testing control, ancestry or population-stratification control,
 and ascertainment. The facet keys are not a closed set and grow with the
 corpus; facets observed so far include `cohort_size`, `replication_cohort`,
@@ -202,8 +279,8 @@ corpus; facets observed so far include `cohort_size`, `replication_cohort`,
 `n_variants_tested`, `multiple_testing_correction`. The SHACL shape enforces
 the overall ordinal rating; the facets remain open.
 
-**Level definitions.** The levels are defined by *defeasibility* — what it
-would take for the curator to stop believing the evidence item — not by study
+**Level definitions.** The levels are defined by *defeasibility* (what it
+would take for the curator to stop believing the evidence item), not by study
 design or by the authors' expressed certainty (see `stated certainty`, a
 candidate facet). Credibility is the curator's trust; interest or relevance is
 a separate judgment and must not color it.
@@ -357,22 +434,22 @@ tripartite complex also motivates a `COMPLEX` target value.
 
 ### Candidate: additional Gene relation values
 
-Source: Jossin 2017 — `X_physically_binds_Y` and
-`X_regulates_trafficking_of_Y`. The existing enumeration covers functional
+Source: Jossin 2017 (`X_physically_binds_Y` and
+`X_regulates_trafficking_of_Y`). The existing enumeration covers functional
 equivalence, regulation, and inhibition; it does not cover physical binding
 or trafficking regulation.
 
 ### Candidate: `knowledge_domain_priority`
 
 Source: Davis 2011 annotator used "Model Organism (primary) Human Genetics
-Functional (somewhat)" — an explicitly ordered compound value. Would either
+Functional (somewhat)", an explicitly ordered compound value. Would either
 attach an ordinal priority to each knowledge_domain value or introduce a
 scalar `primary_knowledge_domain` field (analogous to `primary_method`).
 
 ### Candidate: `curator_critique` sub-block on Assertion
 
 Source: Davis 2011 annotator's callout "Looks unrealistic, they have twice
-as many cases..." — a methodological critique attached to a specific
+as many cases...", a methodological critique attached to a specific
 assertion in the paper. Would attach raised_by / concern / status fields
 to `GeneticEvidenceAssertion`.
 

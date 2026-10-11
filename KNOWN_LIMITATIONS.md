@@ -75,6 +75,26 @@ none enters the schema until a second independent paper exercises it
 - **Cohort composition (CE-IN5).** Case and control counts and ancestry are
   recorded only as free text (`special_considerations`), not as structured
   fields. Status: candidate.
+- **Epigenetics and the activation rules (CE-M1).** None of the eight
+  conditional-activation rules reference `EPIGENETICS`. In particular, Mode
+  of Inheritance and Mendelian Segregation fire on Knowledge Domain ⊇ Human
+  Genetics and Target Type = Gene regardless of whether the inherited
+  entity is a sequence or a non-sequence mark. Under the domain notes in
+  `schema/dimensions.md`, a methylation paper without an inheritance-based
+  inference does not carry `HUMAN_GENETICS` and never meets the condition;
+  the genuinely mixed case (transgenerational transmission of a mark in
+  human families, `{EPIGENETICS, HUMAN_GENETICS}` with a `GENE` target)
+  would be forced to populate sequence-inheritance dimensions. Surfaced
+  while exercising `EPIGENETICS` for the first time (Marques 2025). Status:
+  candidate.
+- **Epigenetic entity as target (CE-M2).** A methylation mark (CpG site,
+  differentially methylated region) has no target type and is forced onto
+  `GENE` or `SEGMENT` under the decision rule in `schema/dimensions.md`
+  (§Target type); a single-CpG finding is representable only through
+  `target_resolution = POSITION`, and the mark's own identity is carried in
+  a `normalization_note`. A dedicated target treatment (or an
+  epigenetic-mark qualifier on the target) would remove the forced fit.
+  Surfaced by Marques 2025. Status: candidate.
 
 ## 3. Conditional-activation rules that are not executable
 

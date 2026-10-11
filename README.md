@@ -3,6 +3,8 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22260686.svg)](https://doi.org/10.5281/zenodo.22260686)
 [![PyPI](https://img.shields.io/pypi/v/gem-mapping-studio.svg)](https://pypi.org/project/gem-mapping-studio/)
 
+Arxiv preprint: https://arxiv.org/html/2609.04509v1
+
 A conceptual framework for representing scientific and genetic evidence from
 the biomedical literature in a form suitable for variant interpretation,
 automated reasoning, and AI-ready clinical infrastructure.
