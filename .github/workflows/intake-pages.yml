@@ -6,7 +6,8 @@ name: Deploy intake screen
 
 on:
   push:
-    branches: [master]
+    # dev-v.3x is temporary, until the study tooling merges into master
+    branches: [master, dev-v.3x]
     paths:
       - "scripts/intake_screen/**"
       - "study/draw_log.csv"
