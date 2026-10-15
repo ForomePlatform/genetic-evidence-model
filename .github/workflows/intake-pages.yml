@@ -1,0 +1,43 @@
+# Deploys the intake screening page (scripts/intake_screen/) together with
+# the current synchronised draw log (study/draw_log.csv) to GitHub Pages.
+# Every push that changes the log therefore refreshes the page's state.
+# Enable in the repository settings: Pages -> Source -> GitHub Actions.
+name: Deploy intake screen
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "scripts/intake_screen/**"
+      - "study/draw_log.csv"
+      - ".github/workflows/intake-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp scripts/intake_screen/index.html _site/
+          cp scripts/intake_screen/draw_data.json _site/
+          cp study/draw_log.csv _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

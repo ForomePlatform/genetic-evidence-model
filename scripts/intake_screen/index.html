@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEM Intake Screen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one 760px column; a study instrument, scanned top to bottom:
+   notice, current candidate, screen form, pending rows, board, history. */
+:root {
+  --bg: #f6f5f1;
+  --panel: #ffffff;
+  --ink: #20292c;
+  --muted: #5d6b6e;
+  --line: #d9ddda;
+  --accent: #0e6a5e;
+  --accent-ink: #ffffff;
+  --pass: #2e7d43;
+  --fail: #b3362c;
+  --warn: #8a5f00;
+  --warn-bg: #fdf3d7;
+  --chip: #e9ece9;
+  --serif: "Source Serif 4", Georgia, serif;
+  --sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15191b; --panel: #1d2326; --ink: #e5e9e7; --muted: #9ba8a5;
+    --line: #343d3f; --accent: #53c2ae; --accent-ink: #0d1f1b;
+    --pass: #6fbf77; --fail: #ef7f72; --warn: #dfba55; --warn-bg: #2a2410;
+    --chip: #263030; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15191b; --panel: #1d2326; --ink: #e5e9e7; --muted: #9ba8a5;
+  --line: #343d3f; --accent: #53c2ae; --accent-ink: #0d1f1b;
+  --pass: #6fbf77; --fail: #ef7f72; --warn: #dfba55; --warn-bg: #2a2410;
+  --chip: #263030; color-scheme: dark;
+}
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--sans);
+  font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: env(safe-area-inset-top, 0px) 48px;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+header.top { padding: 28px 0 8px; border-bottom: 2px solid var(--ink); }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--serif); font-size: 32px; margin: 2px 0 6px;
+  text-wrap: balance; }
+.subline { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+.statusline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  font-size: 13px; color: var(--muted); padding: 10px 0; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted);
+  display: inline-block; flex: none; }
+.dot.ok { background: var(--pass); }
+.dot.bad { background: var(--fail); }
+section { margin-top: 24px; }
+h2 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 10px; font-weight: 700; }
+.card { background: var(--panel); border: 1px solid var(--line);
+  border-radius: 6px; padding: 18px; }
+.banner { border-radius: 6px; padding: 12px 14px; font-size: 14px;
+  margin-top: 16px; border: 1px solid var(--line); background: var(--panel); }
+.banner.warn { background: var(--warn-bg); border-color: var(--warn);
+  color: var(--ink); }
+.banner.bad { border-color: var(--fail); color: var(--fail); font-weight: 600; }
+.banner[hidden] { display: none; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { background: var(--chip); border-radius: 999px; padding: 2px 10px;
+  font-size: 12.5px; font-weight: 600; }
+.chip.warnc { background: var(--warn-bg); color: var(--warn); }
+.ptitle { font-family: var(--serif); font-size: 20px; line-height: 1.35;
+  margin: 0 0 8px; text-wrap: balance; }
+.ptitle a { color: var(--ink); text-decoration-color: var(--accent); }
+.meta { font-size: 14px; color: var(--muted); }
+.meta b { color: var(--ink); }
+.idrow { font-family: var(--mono); font-size: 13.5px; margin-top: 10px;
+  display: flex; gap: 14px; flex-wrap: wrap; }
+.idrow a { color: var(--accent); }
+fieldset { border: 1px solid var(--line); border-radius: 6px;
+  padding: 12px 14px; margin: 14px 0 0; min-width: 0; }
+legend { font-size: 13px; font-weight: 700; padding: 0 6px; }
+.gate { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0;
+  border-bottom: 1px dashed var(--line); flex-wrap: wrap; }
+.gate:last-child { border-bottom: 0; }
+.gate .q { flex: 1 1 320px; min-width: 0; font-size: 14.5px; }
+.gate .q small { color: var(--muted); display: block; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px;
+  overflow: hidden; }
+.seg label { padding: 4px 14px; font-size: 13.5px; cursor: pointer;
+  background: var(--panel); }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); }
+.seg label:has(input:checked) { background: var(--accent);
+  color: var(--accent-ink); font-weight: 600; }
+.formrow { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.formrow > label { display: flex; flex-direction: column; gap: 4px;
+  font-size: 13.5px; font-weight: 600; min-width: 0; }
+select, input[type=number], textarea {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+textarea { width: 100%; box-sizing: border-box; min-height: 72px; }
+.static { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+.actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;
+  align-items: center; }
+button { font: inherit; font-weight: 700; border-radius: 6px;
+  padding: 8px 18px; border: 1px solid var(--line); background: var(--panel);
+  color: var(--ink); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink);
+  border-color: var(--accent); }
+button.danger { background: var(--fail); color: #fff;
+  border-color: var(--fail); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.confirmbox { border: 1px solid var(--warn); background: var(--warn-bg);
+  border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 14px; }
+.ferr { color: var(--fail); font-size: 13.5px; margin-top: 8px;
+  font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid
+  var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--muted); }
+td.mono, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.scrollx { overflow-x: auto; }
+.res-pass { color: var(--pass); font-weight: 700; }
+.res-fail { color: var(--fail); font-weight: 700; }
+.pendtag { color: var(--warn); font-weight: 700; }
+.slotrow td:first-child { font-family: var(--mono); font-weight: 600; }
+#pendcsv { font-family: var(--mono); font-size: 12.5px; min-height: 90px; }
+footer { margin-top: 36px; font-size: 12.5px; color: var(--muted);
+  border-top: 1px solid var(--line); padding-top: 12px; }
+footer code { font-family: var(--mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">GEM evaluation study &middot; Corpus-2 typical stratum</div>
+    <h1>GEM Intake Screen</h1>
+    <p class="subline">Seed 0 &middot; eligible frame of <span id="nframe">&hellip;</span> papers &middot; citation snapshot 2026-10-15 &middot; procedure of <code>study/PAPERS.md</code> &sect;1.5</p>
+  </header>
+
+  <div class="statusline">
+    <span class="dot" id="dot"></span>
+    <span id="connmsg">Loading the draw data&hellip;</span>
+    <span id="progress"></span>
+  </div>
+
+  <div class="banner bad" id="fatal" hidden></div>
+  <div class="banner warn" id="pendwarn" hidden></div>
+  <div class="banner warn" id="phasewarn" hidden></div>
+
+  <section id="currentsec" hidden>
+    <h2>Awaiting intake</h2>
+    <div class="card" id="candcard"></div>
+  </section>
+
+  <section id="formsec" hidden>
+    <h2>Screen (protocol &sect;6.4)</h2>
+    <div class="card">
+      <p class="static" style="margin-top:0">Read the paper, then answer the four gates. Screen with <b>no AI assistance</b> (protocol &sect;8.1); ordinary literature databases are allowed. A fail must name the failed gate with evidence. Outcomes are final once recorded. Use one browser and one tab for screening.</p>
+
+      <fieldset>
+        <legend>Gates (criteria 1 to 4; all four must hold to pass)</legend>
+        <div class="gate"><div class="q">1. Primary research article in English.</div><span class="seg"><label><input type="radio" name="g1" value="yes" id="g1y"><span>Yes</span></label><label><input type="radio" name="g1" value="no" id="g1n"><span>No</span></label></span></div>
+        <div class="gate"><div class="q">2. Can be extracted into usable canonical text.<small>The full text opens and is machine-readable.</small></div><span class="seg"><label><input type="radio" name="g2" value="yes" id="g2y"><span>Yes</span></label><label><input type="radio" name="g2" value="no" id="g2n"><span>No</span></label></span></div>
+        <div class="gate"><div class="q">3. Contains at least two separate claims linking a genetic entity to a phenotype.</div><span class="seg"><label><input type="radio" name="g3" value="yes" id="g3y"><span>Yes</span></label><label><input type="radio" name="g3" value="no" id="g3n"><span>No</span></label></span></div>
+        <div class="gate"><div class="q">4. In scope, or deliberately adjacent to GEM&rsquo;s current scope.</div><span class="seg"><label><input type="radio" name="g4" value="yes" id="g4y"><span>Yes</span></label><label><input type="radio" name="g4" value="no" id="g4n"><span>No</span></label></span></div>
+      </fieldset>
+
+      <fieldset id="failbox" hidden>
+        <legend>Evidence for the failed gate(s)</legend>
+        <textarea id="evidence" placeholder="Quote or describe what fails, e.g. &ldquo;reports one GWAS locus only; no second genetic claim&rdquo;"></textarea>
+      </fieldset>
+
+      <fieldset id="passbox" hidden>
+        <legend>Recorded classifications (criteria 5 to 8)</legend>
+        <div class="formrow">
+          <label>5. Expected candidate-extension load
+            <select id="load"><option value="">choose&hellip;</option><option>low</option><option>medium</option><option>high</option></select>
+          </label>
+          <label>8. Unusually familiar to the model?
+            <select id="fam"><option value="">choose&hellip;</option><option value="unlikely">unlikely</option><option value="likely">likely</option></select>
+          </label>
+        </div>
+        <p class="static">6. Stratum: typical (drawn from the frame). 7. Model cutoff: after (the frame starts 2026-02-01, past the documented cutoff). Both are recorded automatically. No paper from the original six-paper corpus can occur in this frame.</p>
+        <div class="formrow"><label style="flex:1 1 100%">Note (optional)
+          <textarea id="pnote" style="min-height:48px" placeholder="Anything worth recording with the pass"></textarea></label></div>
+      </fieldset>
+
+      <div class="formrow">
+        <label>Screening time, minutes
+          <input type="number" id="minutes" min="1" max="999" step="1" style="width:110px" placeholder="e.g. 25">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="submitbtn" disabled>Answer the gates first</button>
+      </div>
+      <div class="confirmbox" id="confirmbox" hidden>
+        <span id="confirmmsg"></span>
+        <div class="actions" style="margin-top:8px">
+          <button id="confirmyes" class="danger">Confirm and record</button>
+          <button id="confirmno">Cancel</button>
+        </div>
+      </div>
+      <div class="ferr" id="formerr" hidden></div>
+    </div>
+  </section>
+
+  <section id="pendsec" hidden>
+    <h2>Outcomes awaiting synchronisation</h2>
+    <div class="card">
+      <p class="static" style="margin-top:0">These rows exist only in this browser. After each session, copy them and send them to the study lead, who appends them to <code>study/draw_log.csv</code>, validates and commits. They disappear from here once the synchronised log includes them.</p>
+      <textarea id="pendcsv" readonly></textarea>
+      <div class="actions">
+        <button class="primary" id="copypend">Copy pending rows</button>
+        <button id="undolast">Remove last outcome</button>
+        <span class="static" id="copymsg"></span>
+      </div>
+      <div class="confirmbox" id="undobox" hidden>
+        <span id="undomsg"></span>
+        <div class="actions" style="margin-top:8px">
+          <button id="undoyes" class="danger">Remove it</button>
+          <button id="undono">Keep it</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="boardsec" hidden>
+    <h2>Slot board</h2>
+    <div class="card scrollx"><table id="board"></table></div>
+  </section>
+
+  <section id="histsec" hidden>
+    <h2>Recorded outcomes</h2>
+    <div class="card scrollx"><table id="hist"></table></div>
+  </section>
+
+  <footer>
+    This page is a front end to the recorded procedure: the candidate order
+    is fixed by seed 0 and the frozen frame and cannot be reordered here.
+    The synchronised log is <code>study/draw_log.csv</code> in the study
+    repository, where <code>scripts/study_draw.py</code> revalidates every
+    row. Operating instructions: <code>docs/DRAW_SOP.md</code>.
+  </footer>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const LS_KEY = "gem-intake-overlay-v1";
+const LOG_COLS = ["date", "slot", "pmid", "result", "reasons", "minutes"];
+let DATA = null, baseRows = [], overlay = [], typical = 8;
+let frozen = "", pendingVerdict = null, undoArmed = false, lsBroken = false;
+
+const today = () => new Date().toISOString().slice(0, 10);
+const esc = s => String(s).replace(/[&<>"]/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MARKERS = ["<!-- draw-record:begin -->", "<!-- draw-record:end -->"];
+
+/* ---- CSV ---- */
+function parseCsv(text) {
+  const rows = []; let field = "", row = [], q = false;
+  const s = text.replace(/^﻿/, "");
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) {
+      if (c === '"') { if (s[i + 1] === '"') { field += '"'; i++; } else q = false; }
+      else field += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && s[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      if (row.length > 1 || row[0] !== "") rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  if (field !== "" || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+const csvField = v => /[",\n\r]/.test(String(v)) ?
+  `"${String(v).replace(/"/g, '""')}"` : String(v);
+const rowToCsv = r => LOG_COLS.map(c => csvField(r[c] == null ? "" : r[c])).join(",");
+
+/* ---- overlay persistence ---- */
+function loadOverlay() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter(r => r && typeof r === "object") : [];
+  } catch { lsBroken = true; return []; }
+}
+function saveOverlay() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(overlay)); lsBroken = false; }
+  catch { lsBroken = true; }
+}
+
+/* ---- procedure ---- */
+function paper(pmid) {
+  const p = DATA.papers[String(pmid)];
+  return p && { title: p[0], journal: p[1], group: p[2], cites: p[3],
+    earliest: p[4], doi: p[5], pmcid: p[6] };
+}
+function nextCand(slotName, decided) {
+  for (const [p, pi] of DATA.seq[slotName])
+    if (!decided.has(p)) return { pmid: p, phase: pi };
+  return null;
+}
+function replay(rows) {
+  const decided = new Map(), filled = {}, entries = [];
+  let slotIdx = 0;
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i], n = i + 1;
+    if (slotIdx >= DATA.slots.length)
+      return { error: `Outcome ${n}: all slots already filled.` };
+    const slot = DATA.slots[slotIdx];
+    const cand = nextCand(slot.name, decided);
+    if (!cand) return { error: `Outcome ${n}: frame exhausted for ${slot.name}.` };
+    const pmid = Number(r.pmid);
+    if (r.slot !== slot.name || pmid !== cand.pmid)
+      return { error: `Outcome ${n} (${esc(r.slot)}, PMID ${esc(r.pmid)})` +
+        ` does not match the procedure, which expects PMID ${cand.pmid}` +
+        ` for slot ${slot.name}. Recording is locked; contact the study lead.` };
+    if (r.result !== "pass" && r.result !== "fail")
+      return { error: `Outcome ${n}: invalid result.` };
+    if (r.result === "fail" && !String(r.reasons || "").trim())
+      return { error: `Outcome ${n}: fail without reasons.` };
+    decided.set(pmid, r.result);
+    entries.push({ ...r, pmid, phase: DATA.phases[slot.name][cand.phase],
+      pending: !!r.__pending });
+    if (r.result === "pass") { filled[slot.name] = pmid; slotIdx++; }
+  }
+  return { decided, filled, entries, slotIdx };
+}
+const allRows = () => baseRows.concat(
+  overlay.map(r => ({ ...r, __pending: true })));
+
+function fatal(msg) { const b = $("#fatal"); b.textContent = msg; b.hidden = false; }
+
+/* ---- rendering ---- */
+function render() {
+  const st = replay(allRows());
+  if (st.error) {
+    frozen = st.error; fatal(st.error);
+    $("#currentsec").hidden = true; $("#formsec").hidden = true;
+  } else { frozen = ""; $("#fatal").hidden = true; }
+  const { decided = new Map(), filled = {}, entries = [], slotIdx = 0 } = st;
+  $("#progress").textContent = `${Object.keys(filled).length} of ${typical}` +
+    ` slots filled; ${baseRows.length} synchronised, ${overlay.length} pending.`;
+
+  // pending-rows section
+  if (overlay.length) {
+    $("#pendsec").hidden = false;
+    $("#pendcsv").value = overlay.map(rowToCsv).join("\n");
+    $("#pendwarn").hidden = false;
+    $("#pendwarn").textContent = `${overlay.length} outcome` +
+      `${overlay.length === 1 ? "" : "s"} recorded in this browser only. ` +
+      `Copy the rows below and send them to the study lead after this ` +
+      `session. Do not clear this browser's site data before that.` +
+      (lsBroken ? " WARNING: this browser is not persisting data (private " +
+        "window?); copy the rows before closing the page." : "");
+  } else { $("#pendsec").hidden = true; $("#pendwarn").hidden = true; }
+
+  // slot board
+  let bh = "<tr><th>Slot</th><th>Group / stratum</th><th>Status</th></tr>";
+  DATA.slots.slice(0, Math.max(typical, slotIdx, DATA.baseSlots)).forEach((s, i) => {
+    let cell;
+    if (filled[s.name]) {
+      const p = paper(filled[s.name]);
+      cell = `<span class="res-pass">filled</span> &middot; PMID ` +
+        `<span class="mono">${filled[s.name]}</span> (${esc(p.journal)})`;
+    } else if (!frozen && i === slotIdx && i < typical) cell = "<b>screening now</b>";
+    else if (i < typical) cell = "queued";
+    else cell = "extension (not opened)";
+    bh += `<tr class="slotrow"><td>${s.name}</td><td>${s.group} / ${s.stratum}</td><td>${cell}</td></tr>`;
+  });
+  $("#board").innerHTML = bh; $("#boardsec").hidden = false;
+
+  // history
+  if (entries.length) {
+    let hh = "<tr><th>#</th><th>Date</th><th>Slot</th><th>PMID</th>" +
+      "<th>Result</th><th>Reasons</th><th>Min</th><th></th></tr>";
+    entries.slice().reverse().forEach((e, k) => {
+      hh += `<tr><td>${entries.length - k}</td><td class="mono">${esc(e.date)}</td>` +
+        `<td class="mono">${esc(e.slot)}</td><td class="mono">${e.pmid}</td>` +
+        `<td class="res-${e.result}">${e.result}</td>` +
+        `<td>${esc(e.reasons)}</td><td class="mono">${esc(e.minutes || "")}</td>` +
+        `<td>${e.pending ? '<span class="pendtag">pending</span>' : ""}</td></tr>`;
+    });
+    $("#hist").innerHTML = hh; $("#histsec").hidden = false;
+  } else $("#histsec").hidden = true;
+
+  if (frozen) return;
+
+  // current candidate
+  if (slotIdx >= typical) {
+    $("#currentsec").hidden = false; $("#formsec").hidden = true;
+    $("#phasewarn").hidden = true;
+    $("#candcard").innerHTML = `<p class="ptitle">The draw is complete for ` +
+      `${typical} typical papers.</p><p class="meta">Nothing further to ` +
+      `screen. The study lead takes it from here.</p>`;
+    return;
+  }
+  const slot = DATA.slots[slotIdx];
+  const cand = nextCand(slot.name, decided);
+  if (!cand) { fatal(`Frame exhausted for slot ${slot.name}.`); return; }
+  const p = paper(cand.pmid);
+  const phaseLabel = DATA.phases[slot.name][cand.phase];
+  $("#phasewarn").hidden = cand.phase === 0;
+  if (cand.phase > 0) $("#phasewarn").textContent =
+    `Fallback active for slot ${slot.name}: ${phaseLabel}. This is part of ` +
+    `the recorded design.`;
+  const doiRow = p.doi ? ` <a href="https://doi.org/${encodeURIComponent(p.doi)}" target="_blank" rel="noopener">publisher (DOI)</a>` : "";
+  $("#candcard").innerHTML =
+    `<div class="chips"><span class="chip">slot ${slot.name}</span>` +
+    `<span class="chip">group ${slot.group}</span>` +
+    `<span class="chip">stratum ${slot.stratum}</span>` +
+    `<span class="chip${cand.phase > 0 ? " warnc" : ""}">${esc(phaseLabel)}</span></div>` +
+    `<p class="ptitle"><a href="https://europepmc.org/article/MED/${cand.pmid}" target="_blank" rel="noopener">${esc(p.title)}</a></p>` +
+    `<p class="meta"><b>${esc(p.journal)}</b> &middot; earliest public date ` +
+    `${esc(p.earliest)} &middot; ${p.cites} citation${p.cites === 1 ? "" : "s"} at the 2026-10-15 snapshot</p>` +
+    `<div class="idrow"><span>PMID ${cand.pmid}</span>` +
+    `<a href="https://pubmed.ncbi.nlm.nih.gov/${cand.pmid}/" target="_blank" rel="noopener">PubMed</a>` +
+    `<a href="https://europepmc.org/article/MED/${cand.pmid}" target="_blank" rel="noopener">Europe PMC</a>${doiRow}</div>`;
+  $("#currentsec").hidden = false;
+  $("#formsec").hidden = false;
+  syncForm();
+}
+
+/* ---- form ---- */
+function gateVal(n) {
+  const el = document.querySelector(`input[name=g${n}]:checked`);
+  return el ? el.value : null;
+}
+function syncForm() {
+  const vals = [1, 2, 3, 4].map(gateVal);
+  const answered = vals.every(v => v);
+  const anyNo = vals.some(v => v === "no");
+  $("#failbox").hidden = !anyNo;
+  $("#passbox").hidden = !(answered && !anyNo);
+  const btn = $("#submitbtn");
+  if (!answered) { btn.disabled = true; btn.textContent = "Answer the gates first"; btn.classList.add("primary"); btn.classList.remove("danger"); }
+  else if (anyNo) { btn.disabled = false; btn.textContent = "Record FAIL"; btn.classList.remove("primary"); btn.classList.add("danger"); }
+  else { btn.disabled = false; btn.textContent = "Record PASS"; btn.classList.add("primary"); btn.classList.remove("danger"); }
+}
+function composeVerdict() {
+  const st = replay(allRows());
+  if (st.error || st.slotIdx >= typical) return null;
+  const slot = DATA.slots[st.slotIdx];
+  const cand = nextCand(slot.name, st.decided);
+  const vals = [1, 2, 3, 4].map(gateVal);
+  const anyNo = vals.some(v => v === "no");
+  const minutes = $("#minutes").value.trim();
+  const err = m => { const e = $("#formerr"); e.textContent = m; e.hidden = false; return null; };
+  $("#formerr").hidden = true;
+  if (!/^[0-9]+$/.test(minutes) || Number(minutes) < 1)
+    return err("Enter the screening time in whole minutes.");
+  let result, reasons;
+  if (anyNo) {
+    const failed = vals.map((v, i) => v === "no" ? i + 1 : 0).filter(Boolean);
+    const ev = $("#evidence").value.trim();
+    if (ev.length < 10) return err("Describe the evidence for the failed gate(s), at least a sentence.");
+    result = "fail";
+    reasons = `criterion ${failed.join(", ")}: ${ev}`;
+  } else {
+    const load = $("#load").value, fam = $("#fam").value;
+    if (!load) return err("Choose the expected extension load (criterion 5).");
+    if (!fam) return err("Answer the model-familiarity question (criterion 8).");
+    const note = $("#pnote").value.trim();
+    result = "pass";
+    reasons = `criteria 1-4 met; load: ${load}; familiarity: ${fam}` +
+      (note ? `; note: ${note}` : "");
+  }
+  if (MARKERS.some(m => reasons.includes(m)))
+    return err("The text must not contain the draw-record marker.");
+  return { date: today(), slot: slot.name, pmid: cand.pmid,
+    result, reasons, minutes };
+}
+function recordVerdict(v) {
+  $("#confirmbox").hidden = true;
+  overlay.push(v); saveOverlay();
+  ["#evidence", "#pnote", "#minutes"].forEach(s => $(s).value = "");
+  ["#load", "#fam"].forEach(s => $(s).value = "");
+  document.querySelectorAll("input[type=radio]").forEach(r => r.checked = false);
+  pendingVerdict = null;
+  render();
+}
+
+function wireForm() {
+  document.querySelectorAll("input[type=radio]").forEach(r =>
+    r.addEventListener("change", syncForm));
+  $("#submitbtn").addEventListener("click", () => {
+    const v = composeVerdict();
+    if (!v) return;
+    pendingVerdict = v;
+    const p = paper(v.pmid);
+    $("#confirmmsg").textContent = `Record ${v.result.toUpperCase()} for PMID ` +
+      `${v.pmid} (${p.journal}), slot ${v.slot}? Outcomes are final.`;
+    $("#confirmbox").hidden = false;
+  });
+  $("#confirmyes").addEventListener("click", () => {
+    if (pendingVerdict) recordVerdict(pendingVerdict);
+  });
+  $("#confirmno").addEventListener("click", () => {
+    pendingVerdict = null; $("#confirmbox").hidden = true;
+  });
+  $("#copypend").addEventListener("click", async () => {
+    const text = overlay.map(rowToCsv).join("\n") + "\n";
+    try { await navigator.clipboard.writeText(text);
+      $("#copymsg").textContent = "Copied.";
+    } catch {
+      $("#pendcsv").select();
+      $("#copymsg").textContent = "Copy failed; the rows are selected, press Ctrl/Cmd+C.";
+    }
+    setTimeout(() => $("#copymsg").textContent = "", 5000);
+  });
+  $("#undolast").addEventListener("click", () => {
+    if (!overlay.length) return;
+    const last = overlay[overlay.length - 1];
+    $("#undomsg").textContent = `Remove the last pending outcome (${last.result}` +
+      ` for PMID ${last.pmid}, slot ${last.slot})? Only do this on the study` +
+      ` lead's instruction; synchronised outcomes cannot be removed here.`;
+    $("#undobox").hidden = false;
+  });
+  $("#undoyes").addEventListener("click", () => {
+    overlay.pop(); saveOverlay(); $("#undobox").hidden = true; render();
+  });
+  $("#undono").addEventListener("click", () => { $("#undobox").hidden = true; });
+}
+
+/* ---- init ---- */
+async function init() {
+  wireForm();
+  const qp = new URLSearchParams(location.search).get("typical");
+  if (qp && ["8", "9", "10"].includes(qp)) typical = Number(qp);
+  try {
+    const resp = await fetch("draw_data.json", { cache: "no-store" });
+    if (!resp.ok) throw new Error(resp.status);
+    DATA = await resp.json();
+  } catch {
+    $("#dot").classList.add("bad");
+    $("#connmsg").textContent = "Draw data failed to load.";
+    fatal("The draw data (draw_data.json) could not be loaded. It must be served beside this page. Reload; if it persists, contact the study lead.");
+    return;
+  }
+  $("#nframe").textContent = Object.keys(DATA.papers).length;
+  try {
+    const resp = await fetch("draw_log.csv", { cache: "no-store" });
+    if (!resp.ok) throw new Error(resp.status);
+    const rows = parseCsv(await resp.text());
+    if (!rows.length || rows[0].join(",") !== LOG_COLS.join(","))
+      throw new Error("header");
+    baseRows = rows.slice(1).map(r =>
+      Object.fromEntries(LOG_COLS.map((c, i) => [c, r[i] == null ? "" : r[i]])));
+  } catch {
+    $("#dot").classList.add("bad");
+    $("#connmsg").textContent = "Synchronised log failed to load.";
+    fatal("The synchronised log (draw_log.csv) could not be loaded or has an unexpected header. It must be served beside this page. Contact the study lead.");
+    return;
+  }
+  overlay = loadOverlay();
+  // reconcile: drop pending rows the synchronised log now includes
+  overlay = overlay.filter(o => !baseRows.some(b =>
+    b.slot === o.slot && String(b.pmid) === String(o.pmid)));
+  // a conflicting overlay (would no longer replay) is discarded: the rows
+  // were copied out at recording time, and the synchronised log wins
+  if (replay(allRows()).error && !replay(baseRows).error) {
+    overlay = []; saveOverlay();
+    $("#pendwarn").hidden = false;
+    $("#pendwarn").textContent = "Pending outcomes stored in this browser " +
+      "conflicted with the synchronised log and were discarded. If they " +
+      "were never sent to the study lead, report it.";
+  } else saveOverlay();
+  $("#dot").classList.add("ok");
+  $("#connmsg").textContent = "Log loaded.";
+  render();
+}
+init();
+</script>
+</body>
+</html>

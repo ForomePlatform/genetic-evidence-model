@@ -113,9 +113,10 @@ The study lead is responsible for:
 
 ### 3.2 Human annotator
 
-The human annotator is trained in genetics and completes all manual
-annotation passes. The annotator also takes the curator role in the
-interactive AI-review sessions.
+The human annotator is trained in genetics, completes all manual
+annotation passes, and performs the intake screen for typical-stratum
+candidates (Section 6.4). The annotator also takes the curator role in
+the interactive AI-review sessions.
 
 ### 3.3 AI annotator and AI reviewer
 
@@ -243,6 +244,25 @@ The screen records whether the paper:
 8. is likely to be unusually familiar to the model because it is prominent,
    highly cited, or heavily curated.
 
+Items 1 to 4 are gates: a paper is rejected only on these, and a
+rejection must name the failed gate or gates and quote or describe the
+evidence. Items 5 to 8 are recorded classifications and are never
+grounds for rejection; in particular, the expected candidate-extension
+load (item 5) must not influence acceptance. For typical-stratum
+candidates, item 6 is fixed by the draw and item 7 is satisfied by the
+construction of the literature frame; both are recorded mechanically.
+
+For the typical stratum, the screen is performed by the human annotator
+with no AI assistance (Section 8.1), on candidates presented strictly in
+the recorded draw order (`study/PAPERS.md` Section 1.5): the annotator
+never chooses among candidates, only screens the one presented. Every
+outcome, pass or fail, with reasons and the screening time in minutes,
+is recorded in the draw log. Screening time counts as intake effort,
+never as H0 effort. The study lead may audit recorded outcomes at any
+time; an audit cannot reverse an outcome, and audit findings are
+recorded in `study/DEVIATIONS.md`. Stress-stratum candidates are
+screened by the study lead.
+
 No paper from the original six-paper corpus is eligible because those papers
 were used in annotator training and, for four papers, as AI exemplars.
 
@@ -293,8 +313,9 @@ Every study paper receives the following passes.
 
 ### 8.1 No-AI rule
 
-For H0, SR, WR, and RH, the human annotator must not use any LLM-based tool
-for reading, summarising, drafting, checking, searching, or editing.
+For the intake screen (Section 6.4) and for H0, SR, WR, and RH, the human
+annotator must not use any LLM-based tool for reading, summarising,
+drafting, checking, searching, or editing.
 
 Ordinary literature databases and reference resources are allowed. Their use
 must be recorded in the effort log.
