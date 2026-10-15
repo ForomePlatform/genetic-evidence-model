@@ -285,8 +285,8 @@ log records what the self-review changed relative to `h0`; the study lead
 compiles it from the differences between the two worksheets and anything
 the annotator reports. It records only the annotator's decisions and is
 compiled without AI assistance (§8.1). The study-level files named in the protocol
-(`study/RULINGS.md`, `study/PAPERS.md`, `study/AMENDMENTS.md`) sit at the
-top of `study/`.
+(`study/RULINGS.md`, `study/PAPERS.md`, `study/AMENDMENTS.md`), and the
+seal ledger `study/SEALS.md`, sit at the top of `study/`.
 
 ### Sealing
 
@@ -306,6 +306,12 @@ hashes. Concretely, for a pass:
 
 3. Tag the commit, for example `study-marques2025-h0`, putting the hash
    listing, the date, and the time in the tag message.
+4. Append the same record (timestamp, seal commit id, tag name, file
+   list with hashes, any notes) to `study/SEALS.md`, the append-only
+   seal ledger, and commit that as its own small commit. The ledger
+   exists because a commit cannot contain the hashes of its own
+   content; the annotated tag and the ledger both carry the record, and
+   the ledger is the copy a reader browsing the repository will find.
 
 A recorded hash can be verified later, on any platform, with
 `git hash-object <file>`; for a stronger digest alongside git's, record
