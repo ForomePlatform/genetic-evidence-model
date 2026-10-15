@@ -28,7 +28,8 @@ journal submission.
 │                   validators, PDF highlight/callout extraction (`forome.gem.*`)
 ├── figures/        Source files for figures used in the paper
 ├── docs/           Usage guides (ANNOTATION_GUIDE.md, REVIEW_GUIDE.md: running
-│                   the skills; STUDIO.md: the UMLS Mapping Studio)
+│                   the skills; WORKSHEET_SOP.md: annotation worksheet to
+│                   YAML; STUDIO.md: the UMLS Mapping Studio)
 ├── .github/        CI configuration validating annotations against the schema
 ├── CHANGELOG.md    What changed in each tagged release
 └── KNOWN_LIMITATIONS.md  What the model, schema, corpus, and tooling do not yet do
@@ -186,6 +187,14 @@ python3 -m forome.gem.extraction.extract_annotations paper.pdf out.json
 Two extractors are provided. `extract_annotations.py` uses PyMuPDF and is the
 recommended one: it reliably recovers the text under each highlight.
 `extract_annotations_pypdf.py` uses pypdf and is provided as a fallback.
+
+The same package also ships `gem-worksheet-to-yaml`, the deterministic
+converter from a completed annotation worksheet (a Google Sheets export)
+to a corpus annotation YAML. The step-by-step procedure, export, convert,
+validate, store, is **[`docs/WORKSHEET_SOP.md`](docs/WORKSHEET_SOP.md)**;
+install the converter with `pip install -e '.[xl]'`. The wrapper
+`scripts/study-convert.sh <paper-id> <pass>` applies the study layout's
+paths for you.
 
 Dependencies:
 

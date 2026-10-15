@@ -118,7 +118,21 @@ Do not export or convert the clean master worksheet. Only convert the completed 
 
 ## 3. Convert the worksheet to YAML
 
-From the repository root, run:
+Run:
+
+```shell
+scripts/study-convert.sh <paper-id> <pass>
+```
+
+For example:
+
+```shell
+scripts/study-convert.sh marques2025 h0
+```
+
+The script works from any directory, prints the command it expands to, and
+takes no other options; in particular it cannot pass `--force`. It is
+equivalent to running, from the repository root:
 
 ```shell
 gem-worksheet-to-yaml study/raw/<paper-id>/<pass>.xlsx \
@@ -126,17 +140,8 @@ gem-worksheet-to-yaml study/raw/<paper-id>/<pass>.xlsx \
     --effort study/processed/<paper-id>/<pass>/effort.csv
 ```
 
-For example:
-
-```shell
-gem-worksheet-to-yaml study/raw/marques2025/h0.xlsx \
-    study/processed/marques2025/h0/h0.yaml \
-    --effort study/processed/marques2025/h0/effort.csv
-```
-
-The equivalent module form is
-`python3 -m forome.gem.extraction.worksheet_to_yaml` with the same
-arguments. The converter creates `study/processed/<paper-id>/<pass>/` if
+(module form: `python3 -m forome.gem.extraction.worksheet_to_yaml`, same
+arguments). The converter creates `study/processed/<paper-id>/<pass>/` if
 it does not exist yet.
 
 Here `<pass>` is the pass name from the table in
