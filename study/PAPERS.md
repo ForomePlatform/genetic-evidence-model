@@ -533,8 +533,13 @@ against the frozen dated column, never against live citation counts.
 
 Screening is performed by the human annotator in the intake web page (operating instructions: `docs/DRAW_SOP.md`). Synchronised outcomes live in `study/draw_log.csv` and are revalidated by `scripts/study_draw.py` (seed 0, snapshot column `citedby_epmc_20261015`), which regenerates this block; do not edit it by hand.
 
-No draws recorded yet.
-Current slot: A1 (0 of 8 slots filled).
+| # | Date | Slot | Phase | PMID | Journal | Result | Reasons | Minutes |
+| ---: | --- | --- | --- | --- | --- | --- | --- | ---: |
+| 1 | 2026-10-15 | A1 | primary (WELL in group A) | 41703050 | Nat Genet | pass | criteria 1-4 met; load: medium; familiarity: unlikely | 20 |
+| 2 | 2026-10-15 | A2 | primary (FREE in group A) | 42477408 | Eur J Hum Genet | fail | criterion 3, 4: Lacks two distinct and viable evidence claims, article is primarily prevalence based and observational in its results | 25 |
+
+Slots filled: A1=41703050.
+Current slot: A2 (1 of 8 slots filled).
 
 <!-- draw-record:end -->
 
