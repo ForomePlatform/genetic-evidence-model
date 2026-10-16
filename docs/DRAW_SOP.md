@@ -19,15 +19,18 @@ Open the screening page at the address the study lead gives you. Use
 one browser and one tab for all screening, since unsent outcomes are
 held in that browser.
 
-1. The page shows one paper awaiting intake: title, journal, dates,
+1. Click **Next candidate** when you are ready to screen a paper in
+   one sitting; no paper is shown before that click. The page then
+   shows the one paper awaiting intake: title, journal, dates,
    citation count, and links to PubMed, Europe PMC and the publisher.
    Read the paper through those links. **No AI assistance** of any kind
    during screening (protocol Section 8.1); ordinary literature
    databases are allowed.
-2. Answer the four gates (criteria 1 to 4). All four must hold for a
-   pass. If any fails, describe the evidence; keep it factual and
-   anchored to the criterion. The failed criterion number is recorded
-   with it.
+2. Answer the four questions (criteria 1 to 4). All four must hold for
+   a pass; a single No is enough for a fail, and the remaining
+   questions may then be left blank. On a fail, describe the evidence;
+   keep it factual and anchored to the criterion. The failed criterion
+   number is recorded with it.
 3. On a pass, record the two classifications: expected
    candidate-extension load (criterion 5) and model familiarity
    (criterion 8). These never affect acceptance; they are recorded for
@@ -36,7 +39,10 @@ held in that browser.
    separate from annotation effort), then record the verdict and
    confirm. **Outcomes are final**; the "Remove last outcome" button is
    only for use on the study lead's explicit instruction, and only
-   works on outcomes not yet synchronised.
+   works on outcomes not yet synchronised. After recording, the page
+   confirms what was recorded; the next paper appears only when you
+   click **Next candidate** again (in the candidate panel, or under
+   the pending rows).
 5. After each session, copy the rows under "Outcomes awaiting
    synchronisation" and email them to the study lead. Until the study
    lead commits them, they exist only in your browser, so do not clear
@@ -75,9 +81,13 @@ The page is fully static: three files served from one directory,
 the current `study/draw_log.csv`.
 
 - GitHub Pages: the workflow `.github/workflows/intake-pages.yml`
-  assembles and deploys the three files on every push to `master` that
-  touches them. Enable it once in the repository settings (Pages,
-  Source: GitHub Actions). Note that a GitHub Pages site is public.
+  assembles and deploys the three files on every push to a listed
+  branch that touches them. Enable it once in the repository settings
+  (Pages, Source: GitHub Actions); deploying from a branch other than
+  the default also needs that branch allowed on the `github-pages`
+  environment (Settings, Environments, Deployment branches and tags).
+  Note that a GitHub Pages site is public. The study's deployment:
+  <https://foromeplatform.github.io/genetic-evidence-model/>.
 - Any other web server: copy the three files into a served directory,
   and re-copy `study/draw_log.csv` after every sync commit.
 

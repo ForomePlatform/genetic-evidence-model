@@ -165,10 +165,10 @@ footer code { font-family: var(--mono); font-size: 12px; }
   <section id="formsec" hidden>
     <h2>Screen (protocol &sect;6.4)</h2>
     <div class="card">
-      <p class="static" style="margin-top:0">Read the paper, then answer the four gates. Screen with <b>no AI assistance</b> (protocol &sect;8.1); ordinary literature databases are allowed. A fail must name the failed gate with evidence. Outcomes are final once recorded. Use one browser and one tab for screening.</p>
+      <p class="static" style="margin-top:0">Read the paper, then answer the four questions. Screen with <b>no AI assistance</b> (protocol &sect;8.1); ordinary literature databases are allowed. A fail must name the failed criterion with evidence. Outcomes are final once recorded. Use one browser and one tab for screening.</p>
 
       <fieldset>
-        <legend>Gates (criteria 1 to 4; all four must hold to pass)</legend>
+        <legend>Questions (criteria 1 to 4; all four must hold to pass)</legend>
         <div class="gate"><div class="q">1. Primary research article in English.</div><span class="seg"><label><input type="radio" name="g1" value="yes" id="g1y"><span>Yes</span></label><label><input type="radio" name="g1" value="no" id="g1n"><span>No</span></label></span></div>
         <div class="gate"><div class="q">2. Can be extracted into usable canonical text.<small>The full text opens and is machine-readable.</small></div><span class="seg"><label><input type="radio" name="g2" value="yes" id="g2y"><span>Yes</span></label><label><input type="radio" name="g2" value="no" id="g2n"><span>No</span></label></span></div>
         <div class="gate"><div class="q">3. Contains at least two separate claims linking a genetic entity to a phenotype.</div><span class="seg"><label><input type="radio" name="g3" value="yes" id="g3y"><span>Yes</span></label><label><input type="radio" name="g3" value="no" id="g3n"><span>No</span></label></span></div>
@@ -176,7 +176,7 @@ footer code { font-family: var(--mono); font-size: 12px; }
       </fieldset>
 
       <fieldset id="failbox" hidden>
-        <legend>Evidence for the failed gate(s)</legend>
+        <legend>Evidence for the failed criteria</legend>
         <textarea id="evidence" placeholder="Quote or describe what fails, e.g. &ldquo;reports one GWAS locus only; no second genetic claim&rdquo;"></textarea>
       </fieldset>
 
@@ -202,7 +202,7 @@ footer code { font-family: var(--mono); font-size: 12px; }
       </div>
 
       <div class="actions">
-        <button class="primary" id="submitbtn" disabled>Answer the gates first</button>
+        <button class="primary" id="submitbtn" disabled>Answer the questions first</button>
       </div>
       <div class="confirmbox" id="confirmbox" hidden>
         <span id="confirmmsg"></span>
@@ -224,6 +224,9 @@ footer code { font-family: var(--mono); font-size: 12px; }
         <button class="primary" id="copypend">Copy pending rows</button>
         <button id="undolast">Remove last outcome</button>
         <span class="static" id="copymsg"></span>
+      </div>
+      <div class="actions">
+        <button class="primary" id="nextpend" hidden>Next candidate</button>
       </div>
       <div class="confirmbox" id="undobox" hidden>
         <span id="undomsg"></span>
@@ -261,8 +264,11 @@ const LS_KEY = "gem-intake-overlay-v1";
 const LOG_COLS = ["date", "slot", "pmid", "result", "reasons", "minutes"];
 let DATA = null, baseRows = [], overlay = [], typical = 8;
 let frozen = "", pendingVerdict = null, undoArmed = false, lsBroken = false;
+let revealed = false, lastRecorded = null;
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => { const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` +
+    `-${String(d.getDate()).padStart(2, "0")}`; };
 const esc = s => String(s).replace(/[&<>"]/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const MARKERS = ["<!-- draw-record:begin -->", "<!-- draw-record:end -->"];
@@ -358,6 +364,7 @@ function render() {
   const { decided = new Map(), filled = {}, entries = [], slotIdx = 0 } = st;
   $("#progress").textContent = `${Object.keys(filled).length} of ${typical}` +
     ` slots filled; ${baseRows.length} synchronised, ${overlay.length} pending.`;
+  $("#nextpend").hidden = true;
 
   // pending-rows section
   if (overlay.length) {
@@ -404,10 +411,17 @@ function render() {
   if (frozen) return;
 
   // current candidate
+  const recNote = lastRecorded ?
+    `<p class="meta" style="margin-top:0">Recorded ` +
+    `<span class="res-${lastRecorded.result}">${lastRecorded.result}</span>` +
+    ` for PMID <span class="mono">${lastRecorded.pmid}</span>, slot ` +
+    `${lastRecorded.slot}. The row is held in this browser (pending list ` +
+    `below) until the study lead synchronises it.</p>` : "";
   if (slotIdx >= typical) {
     $("#currentsec").hidden = false; $("#formsec").hidden = true;
     $("#phasewarn").hidden = true;
-    $("#candcard").innerHTML = `<p class="ptitle">The draw is complete for ` +
+    $("#candcard").innerHTML = recNote +
+      `<p class="ptitle">The draw is complete for ` +
       `${typical} typical papers.</p><p class="meta">Nothing further to ` +
       `screen. The study lead takes it from here.</p>`;
     return;
@@ -415,6 +429,21 @@ function render() {
   const slot = DATA.slots[slotIdx];
   const cand = nextCand(slot.name, decided);
   if (!cand) { fatal(`Frame exhausted for slot ${slot.name}.`); return; }
+  $("#currentsec").hidden = false;
+  if (!revealed) {
+    $("#phasewarn").hidden = true;
+    $("#formsec").hidden = true;
+    $("#candcard").innerHTML = recNote +
+      `<p class="ptitle">Slot ${slot.name}: a candidate awaits screening.</p>` +
+      `<p class="meta">Group ${slot.group}, stratum ${slot.stratum}. The ` +
+      `paper is shown only after you click the button, so start when you ` +
+      `are ready to screen it in one sitting.</p>` +
+      `<div class="actions"><button class="primary" id="revealbtn">` +
+      `Next candidate</button></div>`;
+    $("#revealbtn").addEventListener("click", revealNext);
+    $("#nextpend").hidden = false;
+    return;
+  }
   const p = paper(cand.pmid);
   const phaseLabel = DATA.phases[slot.name][cand.phase];
   $("#phasewarn").hidden = cand.phase === 0;
@@ -450,9 +479,9 @@ function syncForm() {
   $("#failbox").hidden = !anyNo;
   $("#passbox").hidden = !(answered && !anyNo);
   const btn = $("#submitbtn");
-  if (!answered) { btn.disabled = true; btn.textContent = "Answer the gates first"; btn.classList.add("primary"); btn.classList.remove("danger"); }
-  else if (anyNo) { btn.disabled = false; btn.textContent = "Record FAIL"; btn.classList.remove("primary"); btn.classList.add("danger"); }
-  else { btn.disabled = false; btn.textContent = "Record PASS"; btn.classList.add("primary"); btn.classList.remove("danger"); }
+  if (anyNo) { btn.disabled = false; btn.textContent = "Record FAIL"; btn.classList.remove("primary"); btn.classList.add("danger"); }
+  else if (answered) { btn.disabled = false; btn.textContent = "Record PASS"; btn.classList.add("primary"); btn.classList.remove("danger"); }
+  else { btn.disabled = true; btn.textContent = "Answer the questions first"; btn.classList.add("primary"); btn.classList.remove("danger"); }
 }
 function composeVerdict() {
   const st = replay(allRows());
@@ -470,10 +499,12 @@ function composeVerdict() {
   if (anyNo) {
     const failed = vals.map((v, i) => v === "no" ? i + 1 : 0).filter(Boolean);
     const ev = $("#evidence").value.trim();
-    if (ev.length < 10) return err("Describe the evidence for the failed gate(s), at least a sentence.");
+    if (ev.length < 10) return err("Describe the evidence for the failed criteria, at least a sentence.");
     result = "fail";
     reasons = `criterion ${failed.join(", ")}: ${ev}`;
   } else {
+    if (!vals.every(v => v))
+      return err("Answer all four questions, or answer one with No to fail.");
     const load = $("#load").value, fam = $("#fam").value;
     if (!load) return err("Choose the expected extension load (criterion 5).");
     if (!fam) return err("Answer the model-familiarity question (criterion 8).");
@@ -494,7 +525,14 @@ function recordVerdict(v) {
   ["#load", "#fam"].forEach(s => $(s).value = "");
   document.querySelectorAll("input[type=radio]").forEach(r => r.checked = false);
   pendingVerdict = null;
+  revealed = false;
+  lastRecorded = { result: v.result, pmid: v.pmid, slot: v.slot };
   render();
+}
+function revealNext() {
+  revealed = true; lastRecorded = null;
+  render();
+  $("#currentsec").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function wireForm() {
@@ -534,8 +572,10 @@ function wireForm() {
     $("#undobox").hidden = false;
   });
   $("#undoyes").addEventListener("click", () => {
-    overlay.pop(); saveOverlay(); $("#undobox").hidden = true; render();
+    overlay.pop(); saveOverlay(); $("#undobox").hidden = true;
+    revealed = false; lastRecorded = null; render();
   });
+  $("#nextpend").addEventListener("click", revealNext);
   $("#undono").addEventListener("click", () => { $("#undobox").hidden = true; });
 }
 

@@ -244,9 +244,9 @@ The screen records whether the paper:
 8. is likely to be unusually familiar to the model because it is prominent,
    highly cited, or heavily curated.
 
-Items 1 to 4 are gates: a paper is rejected only on these, and a
-rejection must name the failed gate or gates and quote or describe the
-evidence. Items 5 to 8 are recorded classifications and are never
+Items 1 to 4 are gating criteria: a paper is rejected only on these,
+and a rejection must name the failed criterion or criteria and quote
+or describe the evidence. Items 5 to 8 are recorded classifications and are never
 grounds for rejection; in particular, the expected candidate-extension
 load (item 5) must not influence acceptance. For typical-stratum
 candidates, item 6 is fixed by the draw and item 7 is satisfied by the
