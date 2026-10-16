@@ -264,7 +264,7 @@ const LS_KEY = "gem-intake-overlay-v1";
 const LOG_COLS = ["date", "slot", "pmid", "result", "reasons", "minutes"];
 let DATA = null, baseRows = [], overlay = [], typical = 8;
 let frozen = "", pendingVerdict = null, undoArmed = false, lsBroken = false;
-let revealed = false, lastRecorded = null;
+let revealed = false, lastRecorded = null, discardNotice = "";
 
 const today = () => { const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` +
@@ -319,8 +319,10 @@ function paper(pmid) {
     earliest: p[4], doi: p[5], pmcid: p[6] };
 }
 function nextCand(slotName, decided) {
-  for (const [p, pi] of DATA.seq[slotName])
+  for (const [p0, pi] of DATA.seq[slotName]) {
+    const p = Number(p0);
     if (!decided.has(p)) return { pmid: p, phase: pi };
+  }
   return null;
 }
 function replay(rows) {
@@ -335,9 +337,9 @@ function replay(rows) {
     if (!cand) return { error: `Outcome ${n}: frame exhausted for ${slot.name}.` };
     const pmid = Number(r.pmid);
     if (r.slot !== slot.name || pmid !== cand.pmid)
-      return { error: `Outcome ${n} (${esc(r.slot)}, PMID ${esc(r.pmid)})` +
-        ` does not match the procedure, which expects PMID ${cand.pmid}` +
-        ` for slot ${slot.name}. Recording is locked; contact the study lead.` };
+      return { error: `Outcome ${n} (${r.slot}, PMID ${r.pmid}) does not` +
+        ` match the procedure for slot ${slot.name}. Recording is locked;` +
+        ` contact the study lead.` };
     if (r.result !== "pass" && r.result !== "fail")
       return { error: `Outcome ${n}: invalid result.` };
     if (r.result === "fail" && !String(r.reasons || "").trim())
@@ -365,19 +367,29 @@ function render() {
   $("#progress").textContent = `${Object.keys(filled).length} of ${typical}` +
     ` slots filled; ${baseRows.length} synchronised, ${overlay.length} pending.`;
   $("#nextpend").hidden = true;
+  // any re-render invalidates an open confirm or undo dialog: the state
+  // it was composed against may no longer be the current state
+  pendingVerdict = null;
+  $("#confirmbox").hidden = true; $("#undobox").hidden = true;
 
   // pending-rows section
   if (overlay.length) {
     $("#pendsec").hidden = false;
     $("#pendcsv").value = overlay.map(rowToCsv).join("\n");
     $("#pendwarn").hidden = false;
-    $("#pendwarn").textContent = `${overlay.length} outcome` +
+    $("#pendwarn").textContent = (discardNotice ? discardNotice + " " : "") +
+      `${overlay.length} outcome` +
       `${overlay.length === 1 ? "" : "s"} recorded in this browser only. ` +
       `Copy the rows below and send them to the study lead after this ` +
       `session. Do not clear this browser's site data before that.` +
       (lsBroken ? " WARNING: this browser is not persisting data (private " +
         "window?); copy the rows before closing the page." : "");
-  } else { $("#pendsec").hidden = true; $("#pendwarn").hidden = true; }
+  } else {
+    $("#pendsec").hidden = true;
+    if (discardNotice) {
+      $("#pendwarn").hidden = false; $("#pendwarn").textContent = discardNotice;
+    } else $("#pendwarn").hidden = true;
+  }
 
   // slot board
   let bh = "<tr><th>Slot</th><th>Group / stratum</th><th>Status</th></tr>";
@@ -390,7 +402,7 @@ function render() {
     } else if (!frozen && i === slotIdx && i < typical) cell = "<b>screening now</b>";
     else if (i < typical) cell = "queued";
     else cell = "extension (not opened)";
-    bh += `<tr class="slotrow"><td>${s.name}</td><td>${s.group} / ${s.stratum}</td><td>${cell}</td></tr>`;
+    bh += `<tr class="slotrow"><td>${esc(s.name)}</td><td>${esc(s.group)} / ${esc(s.stratum)}</td><td>${cell}</td></tr>`;
   });
   $("#board").innerHTML = bh; $("#boardsec").hidden = false;
 
@@ -414,8 +426,8 @@ function render() {
   const recNote = lastRecorded ?
     `<p class="meta" style="margin-top:0">Recorded ` +
     `<span class="res-${lastRecorded.result}">${lastRecorded.result}</span>` +
-    ` for PMID <span class="mono">${lastRecorded.pmid}</span>, slot ` +
-    `${lastRecorded.slot}. The row is held in this browser (pending list ` +
+    ` for PMID <span class="mono">${Number(lastRecorded.pmid)}</span>, slot ` +
+    `${esc(lastRecorded.slot)}. The row is held in this browser (pending list ` +
     `below) until the study lead synchronises it.</p>` : "";
   if (slotIdx >= typical) {
     $("#currentsec").hidden = false; $("#formsec").hidden = true;
@@ -428,14 +440,18 @@ function render() {
   }
   const slot = DATA.slots[slotIdx];
   const cand = nextCand(slot.name, decided);
-  if (!cand) { fatal(`Frame exhausted for slot ${slot.name}.`); return; }
+  if (!cand) {
+    fatal(`Frame exhausted for slot ${slot.name}.`);
+    $("#currentsec").hidden = true; $("#formsec").hidden = true;
+    return;
+  }
   $("#currentsec").hidden = false;
   if (!revealed) {
     $("#phasewarn").hidden = true;
     $("#formsec").hidden = true;
     $("#candcard").innerHTML = recNote +
-      `<p class="ptitle">Slot ${slot.name}: a candidate awaits screening.</p>` +
-      `<p class="meta">Group ${slot.group}, stratum ${slot.stratum}. The ` +
+      `<p class="ptitle">Slot ${esc(slot.name)}: a candidate awaits screening.</p>` +
+      `<p class="meta">Group ${esc(slot.group)}, stratum ${esc(slot.stratum)}. The ` +
       `paper is shown only after you click the button, so start when you ` +
       `are ready to screen it in one sitting.</p>` +
       `<div class="actions"><button class="primary" id="revealbtn">` +
@@ -452,13 +468,13 @@ function render() {
     `the recorded design.`;
   const doiRow = p.doi ? ` <a href="https://doi.org/${encodeURIComponent(p.doi)}" target="_blank" rel="noopener">publisher (DOI)</a>` : "";
   $("#candcard").innerHTML =
-    `<div class="chips"><span class="chip">slot ${slot.name}</span>` +
-    `<span class="chip">group ${slot.group}</span>` +
-    `<span class="chip">stratum ${slot.stratum}</span>` +
+    `<div class="chips"><span class="chip">slot ${esc(slot.name)}</span>` +
+    `<span class="chip">group ${esc(slot.group)}</span>` +
+    `<span class="chip">stratum ${esc(slot.stratum)}</span>` +
     `<span class="chip${cand.phase > 0 ? " warnc" : ""}">${esc(phaseLabel)}</span></div>` +
     `<p class="ptitle"><a href="https://europepmc.org/article/MED/${cand.pmid}" target="_blank" rel="noopener">${esc(p.title)}</a></p>` +
     `<p class="meta"><b>${esc(p.journal)}</b> &middot; earliest public date ` +
-    `${esc(p.earliest)} &middot; ${p.cites} citation${p.cites === 1 ? "" : "s"} at the 2026-10-15 snapshot</p>` +
+    `${esc(p.earliest)} &middot; ${Number(p.cites)} citation${Number(p.cites) === 1 ? "" : "s"} at the 2026-10-15 snapshot</p>` +
     `<div class="idrow"><span>PMID ${cand.pmid}</span>` +
     `<a href="https://pubmed.ncbi.nlm.nih.gov/${cand.pmid}/" target="_blank" rel="noopener">PubMed</a>` +
     `<a href="https://europepmc.org/article/MED/${cand.pmid}" target="_blank" rel="noopener">Europe PMC</a>${doiRow}</div>`;
@@ -488,13 +504,14 @@ function composeVerdict() {
   if (st.error || st.slotIdx >= typical) return null;
   const slot = DATA.slots[st.slotIdx];
   const cand = nextCand(slot.name, st.decided);
+  if (!cand) return null;
   const vals = [1, 2, 3, 4].map(gateVal);
   const anyNo = vals.some(v => v === "no");
   const minutes = $("#minutes").value.trim();
   const err = m => { const e = $("#formerr"); e.textContent = m; e.hidden = false; return null; };
   $("#formerr").hidden = true;
-  if (!/^[0-9]+$/.test(minutes) || Number(minutes) < 1)
-    return err("Enter the screening time in whole minutes.");
+  if (!/^[0-9]+$/.test(minutes) || Number(minutes) < 1 || Number(minutes) > 999)
+    return err("Enter the screening time in whole minutes (1 to 999).");
   let result, reasons;
   if (anyNo) {
     const failed = vals.map((v, i) => v === "no" ? i + 1 : 0).filter(Boolean);
@@ -516,15 +533,17 @@ function composeVerdict() {
   if (MARKERS.some(m => reasons.includes(m)))
     return err("The text must not contain the draw-record marker.");
   return { date: today(), slot: slot.name, pmid: cand.pmid,
-    result, reasons, minutes };
+    result, reasons, minutes: String(Number(minutes)) };
 }
-function recordVerdict(v) {
-  $("#confirmbox").hidden = true;
-  overlay.push(v); saveOverlay();
+function resetForm() {
   ["#evidence", "#pnote", "#minutes"].forEach(s => $(s).value = "");
   ["#load", "#fam"].forEach(s => $(s).value = "");
   document.querySelectorAll("input[type=radio]").forEach(r => r.checked = false);
-  pendingVerdict = null;
+  $("#formerr").hidden = true;
+}
+function recordVerdict(v) {
+  overlay.push(v); saveOverlay();
+  resetForm();
   revealed = false;
   lastRecorded = { result: v.result, pmid: v.pmid, slot: v.slot };
   render();
@@ -536,8 +555,17 @@ function revealNext() {
 }
 
 function wireForm() {
+  // any change to the form invalidates an open confirm prompt: the held
+  // verdict was composed from the answers as they were at submit time
+  const invalidateConfirm = () => {
+    pendingVerdict = null; $("#confirmbox").hidden = true;
+  };
   document.querySelectorAll("input[type=radio]").forEach(r =>
-    r.addEventListener("change", syncForm));
+    r.addEventListener("change", () => { invalidateConfirm(); syncForm(); }));
+  ["#evidence", "#minutes", "#pnote"].forEach(s =>
+    $(s).addEventListener("input", invalidateConfirm));
+  ["#load", "#fam"].forEach(s =>
+    $(s).addEventListener("change", invalidateConfirm));
   $("#submitbtn").addEventListener("click", () => {
     const v = composeVerdict();
     if (!v) return;
@@ -572,7 +600,9 @@ function wireForm() {
     $("#undobox").hidden = false;
   });
   $("#undoyes").addEventListener("click", () => {
-    overlay.pop(); saveOverlay(); $("#undobox").hidden = true;
+    if (!overlay.length) { $("#undobox").hidden = true; return; }
+    overlay.pop(); saveOverlay();
+    resetForm();
     revealed = false; lastRecorded = null; render();
   });
   $("#nextpend").addEventListener("click", revealNext);
@@ -617,10 +647,9 @@ async function init() {
   // were copied out at recording time, and the synchronised log wins
   if (replay(allRows()).error && !replay(baseRows).error) {
     overlay = []; saveOverlay();
-    $("#pendwarn").hidden = false;
-    $("#pendwarn").textContent = "Pending outcomes stored in this browser " +
-      "conflicted with the synchronised log and were discarded. If they " +
-      "were never sent to the study lead, report it.";
+    discardNotice = "Pending outcomes stored in this browser conflicted " +
+      "with the synchronised log and were discarded. If they were never " +
+      "sent to the study lead, report it.";
   } else saveOverlay();
   $("#dot").classList.add("ok");
   $("#connmsg").textContent = "Log loaded.";
