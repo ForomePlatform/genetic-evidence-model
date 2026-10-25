@@ -537,9 +537,14 @@ Screening is performed by the human annotator in the intake web page (operating 
 | ---: | --- | --- | --- | --- | --- | --- | --- | ---: |
 | 1 | 2026-10-15 | A1 | primary (WELL in group A) | 41703050 | Nat Genet | pass | criteria 1-4 met; load: medium; familiarity: unlikely | 20 |
 | 2 | 2026-10-15 | A2 | primary (FREE in group A) | 42477408 | Eur J Hum Genet | fail | criterion 3, 4: Lacks two distinct and viable evidence claims, article is primarily prevalence based and observational in its results | 25 |
+| 3 | 2026-10-16 | A2 | primary (FREE in group A) | 41831439 | Am J Hum Genet | fail | criterion 3: Weak connection of genetic entities to phenotypic claims | 20 |
+| 4 | 2026-10-24 | A2 | primary (FREE in group A) | 42576026 | Nat Genet | fail | criterion 3, 4: Increased focus on microbiota may be considered outside GEM scope; genetic claims are vague | 20 |
+| 5 | 2026-10-24 | A2 | primary (FREE in group A) | 41611518 | J Med Genet | fail | criterion 3: Lacks two distinct genetic claims linking to phenotype. | 15 |
+| 6 | 2026-10-24 | A2 | primary (FREE in group A) | 42497868 | Am J Hum Genet | pass | criteria 1-4 met; load: medium; familiarity: unlikely | 20 |
+| 7 | 2026-10-24 | B1 | primary (WELL in group B) | 42244182 | HGG Adv | pass | criteria 1-4 met; load: low; familiarity: unlikely | 15 |
 
-Slots filled: A1=41703050.
-Current slot: A2 (1 of 8 slots filled).
+Slots filled: A1=41703050, A2=42497868, B1=42244182.
+Current slot: B2 (3 of 8 slots filled).
 
 <!-- draw-record:end -->
 

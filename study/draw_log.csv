@@ -1,3 +1,8 @@
 date,slot,pmid,result,reasons,minutes
 2026-10-15,A1,41703050,pass,criteria 1-4 met; load: medium; familiarity: unlikely,20
 2026-10-15,A2,42477408,fail,"criterion 3, 4: Lacks two distinct and viable evidence claims, article is primarily prevalence based and observational in its results",25
+2026-10-16,A2,41831439,fail,criterion 3: Weak connection of genetic entities to phenotypic claims,20
+2026-10-24,A2,42576026,fail,"criterion 3, 4: Increased focus on microbiota may be considered outside GEM scope; genetic claims are vague",20
+2026-10-24,A2,41611518,fail,criterion 3: Lacks two distinct genetic claims linking to phenotype.,15
+2026-10-24,A2,42497868,pass,criteria 1-4 met; load: medium; familiarity: unlikely,20
+2026-10-24,B1,42244182,pass,criteria 1-4 met; load: low; familiarity: unlikely,15
