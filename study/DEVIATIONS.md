@@ -31,3 +31,33 @@ events affecting papers that remain in the study are carried into
      annotator. This includes differences between those drafts and the
      Stage-5 washout re-annotation of this paper, which will run under the
      notes: such differences are rule change, not annotator instability.
+
+## D-pre-2 (2026-10-24): Typical-stratum H0 may begin before the study tag
+
+- Decision by the study lead: the annotator may begin H0 on accepted
+  typical-stratum papers before the study tag is assembled, and may
+  interleave intake screening (§6.4) and annotation in any order. Papers
+  are annotated in the order in which they filled their slots
+  (`study/PAPERS.md` §1.9), starting with PMID 41703050.
+- §4 requires the tag before Stage 1 begins; Stage 1 already began pre-tag
+  with the marques2025 H0 (ledger entry S-1). At this date the following
+  §4 items are incomplete: the skill bundles and their hashes (item 2),
+  the AI model and execution settings (items 4 and 5), the extraction tool
+  and the canonical texts (items 6 and 7), the analysis code and the open
+  decision in `study/PAPERS.md` §3 item 4 (item 8), and `study/RULINGS.md`
+  (item 10). The study lead chose not to hold the annotator's work for
+  them.
+- Safeguards:
+  1. Each H0 runs under the schema, annotation protocol and worksheet
+     (version 2) committed when it starts. Any change to these before the
+     tag is recorded here, and disagreements attributable to it are coded
+     as rule change, not against the annotator (as in D-pre-1).
+  2. The canonical text of each study paper is extracted mechanically with
+     the tool fixed under item 6, and hashed, before the study lead reads
+     that paper's H0 output.
+  3. The remaining §4 items, including the AI materials and the analysis
+     code, are completed and tagged before Stage 3 begins; H0 content is
+     not used in completing them.
+  4. Intake outcomes recorded after the annotator's first typical-stratum
+     H0 began are identifiable from the draw-log dates and the worksheet
+     start dates, so the analysis can compare them with earlier outcomes.
