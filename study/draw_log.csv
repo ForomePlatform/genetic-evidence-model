@@ -6,3 +6,10 @@ date,slot,pmid,result,reasons,minutes
 2026-10-24,A2,41611518,fail,criterion 3: Lacks two distinct genetic claims linking to phenotype.,15
 2026-10-24,A2,42497868,pass,criteria 1-4 met; load: medium; familiarity: unlikely,20
 2026-10-24,B1,42244182,pass,criteria 1-4 met; load: low; familiarity: unlikely,15
+2026-10-27,B2,41691317,fail,"criterion 3, 4: Weak phenotypic connections, mainly population-based and screening-focused.",15
+2026-10-31,B2,41932932,pass,criteria 1-4 met; load: low; familiarity: unlikely; note: Retrospective case study nature may be of additional benefit to model.,20
+2026-10-31,C1,42174697,fail,"criterion 3: Specific genetic entity links are not specific enough, has high-level claims and exploratory nature",30
+2026-10-31,C1,41851882,fail,"criterion 3, 4: Primarily an exploratory model development analysis, bioinformatics, without distinct claims, out of scope.",20
+2026-10-31,C1,41510809,pass,criteria 1-4 met; load: low; familiarity: unlikely,20
+2026-10-31,D1,41761054,fail,"criterion 3, 4: Weak human-relevant phenotypic claims, animal-focused",20
+2026-10-31,D1,41862793,fail,"criterion 4: Plant focus, completely out of GEM current scope",10

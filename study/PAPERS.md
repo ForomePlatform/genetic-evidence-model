@@ -542,9 +542,16 @@ Screening is performed by the human annotator in the intake web page (operating 
 | 5 | 2026-10-24 | A2 | primary (FREE in group A) | 41611518 | J Med Genet | fail | criterion 3: Lacks two distinct genetic claims linking to phenotype. | 15 |
 | 6 | 2026-10-24 | A2 | primary (FREE in group A) | 42497868 | Am J Hum Genet | pass | criteria 1-4 met; load: medium; familiarity: unlikely | 20 |
 | 7 | 2026-10-24 | B1 | primary (WELL in group B) | 42244182 | HGG Adv | pass | criteria 1-4 met; load: low; familiarity: unlikely | 15 |
+| 8 | 2026-10-27 | B2 | primary (ZERO in group B) | 41691317 | Hum Genomics | fail | criterion 3, 4: Weak phenotypic connections, mainly population-based and screening-focused. | 15 |
+| 9 | 2026-10-31 | B2 | primary (ZERO in group B) | 41932932 | NPJ Genom Med | pass | criteria 1-4 met; load: low; familiarity: unlikely; note: Retrospective case study nature may be of additional benefit to model. | 20 |
+| 10 | 2026-10-31 | C1 | primary (WELL in group C) | 42174697 | Genome Biol | fail | criterion 3: Specific genetic entity links are not specific enough, has high-level claims and exploratory nature | 30 |
+| 11 | 2026-10-31 | C1 | primary (WELL in group C) | 41851882 | Genome Biol | fail | criterion 3, 4: Primarily an exploratory model development analysis, bioinformatics, without distinct claims, out of scope. | 20 |
+| 12 | 2026-10-31 | C1 | primary (WELL in group C) | 41510809 | Hum Mol Genet | pass | criteria 1-4 met; load: low; familiarity: unlikely | 20 |
+| 13 | 2026-10-31 | D1 | primary (ZERO in group D) | 41761054 | BMC Genomics | fail | criterion 3, 4: Weak human-relevant phenotypic claims, animal-focused | 20 |
+| 14 | 2026-10-31 | D1 | primary (ZERO in group D) | 41862793 | BMC Genomics | fail | criterion 4: Plant focus, completely out of GEM current scope | 10 |
 
-Slots filled: A1=41703050, A2=42497868, B1=42244182.
-Current slot: B2 (3 of 8 slots filled).
+Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809.
+Current slot: D1 (5 of 8 slots filled).
 
 <!-- draw-record:end -->
 
