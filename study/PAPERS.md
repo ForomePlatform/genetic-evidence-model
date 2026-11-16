@@ -549,6 +549,13 @@ Screening is performed by the human annotator in the intake web page (operating 
 | 12 | 2026-10-31 | C1 | primary (WELL in group C) | 41510809 | Hum Mol Genet | pass | criteria 1-4 met; load: low; familiarity: unlikely | 20 |
 | 13 | 2026-10-31 | D1 | primary (ZERO in group D) | 41761054 | BMC Genomics | fail | criterion 3, 4: Weak human-relevant phenotypic claims, animal-focused | 20 |
 | 14 | 2026-10-31 | D1 | primary (ZERO in group D) | 41862793 | BMC Genomics | fail | criterion 4: Plant focus, completely out of GEM current scope | 10 |
+| 15 | 2026-11-07 | D1 | primary (ZERO in group D) | 41787279 | BMC Genomics | fail | criterion 3, 4: exploratory analysis by nature, proof-of-concept lacking phenotypical claims | 15 |
+| 16 | 2026-11-07 | D1 | primary (ZERO in group D) | 41787257 | BMC Genomics | fail | criterion 3: No robust phenotypical effect claims | 15 |
+| 17 | 2026-11-08 | D1 | primary (ZERO in group D) | 41913099 | BMC Genomics | fail | criterion 4: Animal focus with weak human connections | 15 |
+| 18 | 2026-11-08 | D1 | primary (ZERO in group D) | 41735844 | BMC Genomics | fail | criterion 4: Protein-focus is out of scope | 15 |
+| 19 | 2026-11-08 | D1 | primary (ZERO in group D) | 41735841 | BMC Genomics | fail | criterion 3, 4: Completely out of GEM scope | 10 |
+| 20 | 2026-11-08 | D1 | primary (ZERO in group D) | 41963805 | BMC Genom Data | fail | criterion 3, 4: Unclear claims, a focus on freshwater microbes is outside of GEM scope | 10 |
+| 21 | 2026-11-08 | D1 | primary (ZERO in group D) | 41761082 | BMC Genomics | fail | criterion 4: Little to no connection to human genetics, out of scope | 15 |
 
 Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809.
 Current slot: D1 (5 of 8 slots filled).

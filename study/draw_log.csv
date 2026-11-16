@@ -13,3 +13,10 @@ date,slot,pmid,result,reasons,minutes
 2026-10-31,C1,41510809,pass,criteria 1-4 met; load: low; familiarity: unlikely,20
 2026-10-31,D1,41761054,fail,"criterion 3, 4: Weak human-relevant phenotypic claims, animal-focused",20
 2026-10-31,D1,41862793,fail,"criterion 4: Plant focus, completely out of GEM current scope",10
+2026-11-07,D1,41787279,fail,"criterion 3, 4: exploratory analysis by nature, proof-of-concept lacking phenotypical claims",15
+2026-11-07,D1,41787257,fail,criterion 3: No robust phenotypical effect claims,15
+2026-11-08,D1,41913099,fail,criterion 4: Animal focus with weak human connections,15
+2026-11-08,D1,41735844,fail,criterion 4: Protein-focus is out of scope,15
+2026-11-08,D1,41735841,fail,"criterion 3, 4: Completely out of GEM scope",10
+2026-11-08,D1,41963805,fail,"criterion 3, 4: Unclear claims, a focus on freshwater microbes is outside of GEM scope",10
+2026-11-08,D1,41761082,fail,"criterion 4: Little to no connection to human genetics, out of scope",15
