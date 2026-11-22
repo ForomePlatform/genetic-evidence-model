@@ -23,12 +23,14 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# Build and deploy are separate jobs because the artifacts API can lag a
+# fresh upload (deploy-pages saw "Found 0 artifact(s)" one second after a
+# successful upload, 2026-11-22): the job boundary gives the artifact time
+# to appear, and re-running only the failed deploy job cannot upload a
+# duplicate artifact, which a re-run of a combined job does.
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Assemble site
@@ -40,5 +42,15 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Let the uploaded artifact become visible
+        run: sleep 30
       - id: deployment
         uses: actions/deploy-pages@v4
