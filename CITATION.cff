@@ -14,6 +14,9 @@ identifiers:
     value: 10.5281/zenodo.22260686
     description: Concept DOI (resolves to the latest release)
   - type: doi
+    value: 10.5281/zenodo.22287968
+    description: Version DOI for v0.2.5, the release described in the manuscript
+  - type: doi
     value: 10.5281/zenodo.22260773
     description: Version DOI for v0.2.2
 abstract: >

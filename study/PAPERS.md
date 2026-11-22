@@ -556,6 +556,13 @@ Screening is performed by the human annotator in the intake web page (operating 
 | 19 | 2026-11-08 | D1 | primary (ZERO in group D) | 41735841 | BMC Genomics | fail | criterion 3, 4: Completely out of GEM scope | 10 |
 | 20 | 2026-11-08 | D1 | primary (ZERO in group D) | 41963805 | BMC Genom Data | fail | criterion 3, 4: Unclear claims, a focus on freshwater microbes is outside of GEM scope | 10 |
 | 21 | 2026-11-08 | D1 | primary (ZERO in group D) | 41761082 | BMC Genomics | fail | criterion 4: Little to no connection to human genetics, out of scope | 15 |
+| 22 | 2026-11-21 | D1 | primary (ZERO in group D) | 41942850 | BMC Genomics | fail | criterion 3, 4: Heavy focus on metabolomic products | 15 |
+| 23 | 2026-11-21 | D1 | primary (ZERO in group D) | 41721219 | BMC Genomics | fail | criterion 3, 4: Plant-focused with little to no human application | 10 |
+| 24 | 2026-11-21 | D1 | primary (ZERO in group D) | 41957565 | BMC Genomics | fail | criterion 4: prokaryotic focus | 15 |
+| 25 | 2026-11-21 | D1 | primary (ZERO in group D) | 41820849 | BMC Genomics | fail | criterion 4: Plant-focused, out of scope | 15 |
+| 26 | 2026-11-21 | D1 | primary (ZERO in group D) | 41688904 | BMC Genomics | fail | criterion 3, 4: Weak phenotypical claims, weak human connections, out of scope. | 15 |
+| 27 | 2026-11-21 | D1 | primary (ZERO in group D) | 41904411 | BMC Genomics | fail | criterion 4: not relevant to humans | 15 |
+| 28 | 2026-11-21 | D1 | primary (ZERO in group D) | 41761069 | BMC Genomics | fail | criterion 4: focused on pelagic ostracods | 15 |
 
 Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809.
 Current slot: D1 (5 of 8 slots filled).
