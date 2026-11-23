@@ -27,3 +27,4 @@ date,slot,pmid,result,reasons,minutes
 2026-11-21,D1,41688904,fail,"criterion 3, 4: Weak phenotypical claims, weak human connections, out of scope.",15
 2026-11-21,D1,41904411,fail,criterion 4: not relevant to humans,15
 2026-11-21,D1,41761069,fail,criterion 4: focused on pelagic ostracods,15
+2026-11-22,D1,41864892,fail,"criterion 3, 4: No phenotypical claims",10

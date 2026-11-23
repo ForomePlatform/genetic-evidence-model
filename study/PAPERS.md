@@ -563,6 +563,7 @@ Screening is performed by the human annotator in the intake web page (operating 
 | 26 | 2026-11-21 | D1 | primary (ZERO in group D) | 41688904 | BMC Genomics | fail | criterion 3, 4: Weak phenotypical claims, weak human connections, out of scope. | 15 |
 | 27 | 2026-11-21 | D1 | primary (ZERO in group D) | 41904411 | BMC Genomics | fail | criterion 4: not relevant to humans | 15 |
 | 28 | 2026-11-21 | D1 | primary (ZERO in group D) | 41761069 | BMC Genomics | fail | criterion 4: focused on pelagic ostracods | 15 |
+| 29 | 2026-11-22 | D1 | primary (ZERO in group D) | 41864892 | BMC Genomics | fail | criterion 3, 4: No phenotypical claims | 10 |
 
 Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809.
 Current slot: D1 (5 of 8 slots filled).
