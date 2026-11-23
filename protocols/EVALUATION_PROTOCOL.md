@@ -252,6 +252,15 @@ load (item 5) must not influence acceptance. For typical-stratum
 candidates, item 6 is fixed by the draw and item 7 is satisfied by the
 construction of the literature frame; both are recorded mechanically.
 
+Criterion 4, non-human evidence (clarification recorded by the study
+lead on 2026-11-23, pre-tag; `study/DEVIATIONS.md` D-pre-3): non-human
+genetic evidence is eligible when the genetic-entity-to-phenotype
+claims have a clear, substantiated connection to human biology or
+health. This includes relevant comparative or experimental organism
+research and pathogen genetics bearing on human infection, virulence,
+or antimicrobial resistance. Generic statements of potential human
+relevance are insufficient.
+
 For the typical stratum, the screen is performed by the human annotator
 with no AI assistance (Section 8.1), on candidates presented strictly in
 the recorded draw order (`study/PAPERS.md` Section 1.5): the annotator

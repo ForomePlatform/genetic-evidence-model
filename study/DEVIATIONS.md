@@ -61,3 +61,27 @@ events affecting papers that remain in the study are carried into
   4. Intake outcomes recorded after the annotator's first typical-stratum
      H0 began are identifiable from the draw-log dates and the worksheet
      start dates, so the analysis can compare them with earlier outcomes.
+
+## D-pre-3 (2026-11-23): Clarification of intake criterion 4 for non-human evidence
+
+- The study lead adopted the following clarification of the §6.4
+  criterion-4 scope judgement: "Non-human genetic evidence is eligible
+  when the genetic-entity-to-phenotype claims have a clear, substantiated
+  connection to human biology or health. This includes relevant
+  comparative or experimental organism research and pathogen genetics
+  bearing on human infection, virulence, or antimicrobial resistance.
+  Generic statements of potential human relevance are insufficient."
+- Applied pre-tag on 2026-11-23 as a documentation note under §6.4 in
+  `protocols/EVALUATION_PROTOCOL.md` and as a sub-note on question 4 of
+  the intake screening page (`scripts/intake_screen/index.html`); the
+  frame, candidate order and draw procedure (`draw_data.json`,
+  `scripts/study_draw.py`) are unchanged.
+- The clarification restates the judgement as applied rather than
+  changing it. All 29 outcomes recorded before this date (5 passes, 24
+  fails) were reviewed: the 5 passed papers are human-subject studies,
+  and no rejected paper was pathogen genetics bearing on human
+  infection, virulence or antimicrobial resistance, so no recorded
+  outcome turns on the clarified text. Intake outcomes are final (§6.4)
+  and stand as recorded; outcomes from this date run under the
+  clarified text and are identifiable from the draw-log dates (as in
+  D-pre-2, safeguard 4).
