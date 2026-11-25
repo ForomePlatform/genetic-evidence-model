@@ -28,3 +28,8 @@ date,slot,pmid,result,reasons,minutes
 2026-11-21,D1,41904411,fail,criterion 4: not relevant to humans,15
 2026-11-21,D1,41761069,fail,criterion 4: focused on pelagic ostracods,15
 2026-11-22,D1,41864892,fail,"criterion 3, 4: No phenotypical claims",10
+2026-11-23,D1,41652567,pass,"criteria 1-4 met; load: high; familiarity: unlikely; note: As discussed with Study Lead, adheres to protocol 6.4, as revised 11/23",30
+2026-11-23,E1,41781614,fail,"criterion 3, 4: No claims to human biology or health",20
+2026-11-23,E1,41701827,pass,criteria 1-4 met; load: high; familiarity: unlikely,20
+2026-11-23,F1,42384922,fail,"criterion 3, 4: No claims, out of scope, proof of concept/exploratory study.",10
+2026-11-23,F1,41918135,pass,criteria 1-4 met; load: high; familiarity: unlikely,20

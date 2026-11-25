@@ -564,9 +564,14 @@ Screening is performed by the human annotator in the intake web page (operating 
 | 27 | 2026-11-21 | D1 | primary (ZERO in group D) | 41904411 | BMC Genomics | fail | criterion 4: not relevant to humans | 15 |
 | 28 | 2026-11-21 | D1 | primary (ZERO in group D) | 41761069 | BMC Genomics | fail | criterion 4: focused on pelagic ostracods | 15 |
 | 29 | 2026-11-22 | D1 | primary (ZERO in group D) | 41864892 | BMC Genomics | fail | criterion 3, 4: No phenotypical claims | 10 |
+| 30 | 2026-11-23 | D1 | primary (ZERO in group D) | 41652567 | BMC Genomics | pass | criteria 1-4 met; load: high; familiarity: unlikely; note: As discussed with Study Lead, adheres to protocol 6.4, as revised 11/23 | 30 |
+| 31 | 2026-11-23 | E1 | primary (WELL in group E) | 41781614 | Nature | fail | criterion 3, 4: No claims to human biology or health | 20 |
+| 32 | 2026-11-23 | E1 | primary (WELL in group E) | 41701827 | Proc Natl Acad Sci U S A | pass | criteria 1-4 met; load: high; familiarity: unlikely | 20 |
+| 33 | 2026-11-23 | F1 | primary (FREE in group F) | 42384922 | Bioinformatics | fail | criterion 3, 4: No claims, out of scope, proof of concept/exploratory study. | 10 |
+| 34 | 2026-11-23 | F1 | primary (FREE in group F) | 41918135 | Genome Med | pass | criteria 1-4 met; load: high; familiarity: unlikely | 20 |
 
-Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809.
-Current slot: D1 (5 of 8 slots filled).
+Slots filled: A1=41703050, A2=42497868, B1=42244182, B2=41932932, C1=41510809, D1=41652567, E1=41701827, F1=41918135.
+The draw is complete for 8 typical papers.
 
 <!-- draw-record:end -->
 
